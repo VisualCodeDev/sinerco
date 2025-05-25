@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -50,6 +51,9 @@ class DailyReportController extends Controller
         $report->mscfd = $validatedData['mscfd'];
         $report->save();
 
+        // if ($report->speed > 0) {
+        //     WhatsAppService::sendMessage('085921774621', 'Speed Input at ' . $report->date . ' is ' . $report->speed);
+        // }
         return back();
     }
 
