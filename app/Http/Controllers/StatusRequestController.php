@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageNotification;
 use App\Models\AdminNotification;
 use App\Models\StatusRequest;
 use DB;
@@ -30,6 +31,13 @@ class StatusRequestController extends Controller
             'requestType' => 'required|string',
         ]);
 
+        // event(new MessageNotification([
+        //     'date' => '2025-05-25',
+        //     'time' => '10:00',
+        //     'requestType' => 'Test',
+        //     'status' => 'Pending',
+        //     'id' => 1,
+        // ]));
         try {
             $status = new StatusRequest();
             $status->date = $val['date'];
@@ -55,7 +63,8 @@ class StatusRequestController extends Controller
                 'id' => $status->requestId,
             ];
 
-            session()->push('message', $message);
+            event(new MessageNotification($message));
+            // session()->push('message', $message);
             // session()->forget('message');
             return redirect('/request');
         } catch (\Exception $e) {
@@ -85,7 +94,7 @@ class StatusRequestController extends Controller
                 $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->status = $request->status;
                 $notification->save();
-                
+
                 $messages = session('message');
                 if (is_array($messages)) {
                     $filteredMessages = array_filter($messages, function ($msg) use ($request) {

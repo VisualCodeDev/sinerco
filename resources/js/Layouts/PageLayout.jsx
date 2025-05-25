@@ -1,3 +1,5 @@
+import NotificationListener from "@/Components/NotificationListener";
+import echo from "@/echo";
 import { RequestModal } from "@/Pages/Request";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
@@ -12,15 +14,33 @@ const PageLayout = ({ children }) => {
     //         setMessages(flash.message);
     //     }
     // }, [flash])
+    const fetchNotifications = async () => {
+        const response = await axios.get("/api/notifications");
+        setMessages(response.data);
+    };
+    // useEffect(() => {
+    // const fetchNotifications = async () => {
+    //     const response = await axios.get("/api/notifications");
+    //     setMessages(response.data);
+    // };
+    //     console.log(messages);
+    //     fetchNotifications();
+    // }, []);
 
     useEffect(() => {
-        const fetchNotifications = async () => {
-            const response = await axios.get("/api/notifications");
-            setMessages(response.data);
-        };
-        console.log(messages);
         fetchNotifications();
+        const channel = echo.channel("message-channel");
+        channel.listen(".message-event", (e) => {
+            setMessages((prevMessages) => [e.message, ...prevMessages]);
+        });
+
+        return () => {
+            echo.leave("message-channel");
+        };
     }, []);
+    useEffect(() => {
+        console.log(messages);
+    }, [messages]);
 
     // useEffect(() => {
     //     if (messages.length > 0) {
@@ -32,6 +52,7 @@ const PageLayout = ({ children }) => {
     // }, [messages]);
     return (
         <div className="relative">
+            <NotificationListener />
             <div className="fixed top-0 right-0 z-[100] m-5 overflow-auto h-screen pointer-events-none">
                 {Array.isArray(messages) &&
                     messages
