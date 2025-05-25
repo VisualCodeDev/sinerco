@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('timeStart');
             $table->string('timeEnd')->nullable();
             $table->string('requestType');
-            $table->string('action');
-            $table->string('remark');
+            $table->string('action')->nullable();;
+            $table->string('remark')->nullable();;
             $table->string('status');
         });
     }

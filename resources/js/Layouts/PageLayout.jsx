@@ -1,8 +1,10 @@
+import Request from "@/Pages/Request";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 
 const PageLayout = ({ children }) => {
     const { flash } = usePage().props;
+    const [showModal, setShowModal] = useState(false);
     // const [messages, setMessages] = useState(flash.message || []);
     const [messages, setMessages] = useState([]);
     // useEffect(() =>{
@@ -28,7 +30,6 @@ const PageLayout = ({ children }) => {
     //         return () => clearTimeout(timer);
     //     }
     // }, [messages]);
-
     return (
         <div className="relative">
             <div className="fixed top-0 right-0 z-[100] m-5 overflow-auto h-screen pointer-events-none">
@@ -58,6 +59,15 @@ const PageLayout = ({ children }) => {
                                 </p>
                             </div>
                         ))}
+            </div>
+            <div className="fixed bottom-0 right-0 z-[100] m-5">
+                <button onClick={() => setShowModal(true)}>
+                    Report SD/STDBY
+                </button>
+                <Request
+                    handleCloseModal={() => setShowModal(false)}
+                    showModal={showModal}
+                />
             </div>
             {children}
         </div>

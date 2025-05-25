@@ -1,4 +1,5 @@
 import Card from "@/Components/Card";
+import Modal from "@/Components/Modal";
 import PageLayout from "@/Layouts/PageLayout";
 import { useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
@@ -16,8 +17,6 @@ export default function Welcome({ data }) {
     useEffect(() => {
         setStatus(flash.status);
     }, [flash.status]);
-
-    console.log(status)
 
     useEffect(() => {
         if (status) {
@@ -76,8 +75,8 @@ export default function Welcome({ data }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data != ''
-                                    ? data.map((item, index) => (
+                                {data != ""
+                                    ? data?.map((item, index) => (
                                           <tr key={index}>
                                               <td>{index + 1}</td>
                                               <td>{item.date}</td>
@@ -110,12 +109,16 @@ export default function Welcome({ data }) {
                     </div>
                 </Card.Body>
             </Card>
-            {isModal && <Modal data={selectedItem} setModal={setModal} />}
+            <EditItem
+                data={selectedItem}
+                setModal={setModal}
+                isModal={isModal}
+            />
         </PageLayout>
     );
 }
 
-const Modal = ({ data, setModal }) => {
+const EditItem = ({ data, setModal, isModal }) => {
     const {
         data: formData,
         setData,
@@ -137,18 +140,21 @@ const Modal = ({ data, setModal }) => {
         post("/request/update", formData);
         setModal(false);
     };
-
+    console.log(isModal)
     return (
         <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Card>
-                <Card.Header>Edit Request</Card.Header>
-                <Card.Body>
+            <Modal
+                title="Edit Request"
+                handleCloseModal={() => setModal(false)}
+                showModal={isModal}
+            >
+                <Modal.Body>
                     <div className="grid grid-cols-2 gap-5 w-[600px]">
                         <div>
                             <p>Date</p>
                         </div>
                         <div>
-                            <p>{data.date}</p>
+                            <p>{data?.date}</p>
                         </div>
 
                         <div>
@@ -166,7 +172,7 @@ const Modal = ({ data, setModal }) => {
                             <p>Time Start</p>
                         </div>
                         <div>
-                            <p>{data.timeStart}</p>
+                            <p>{data?.timeStart}</p>
                         </div>
 
                         <div className="flex items-center">
@@ -187,7 +193,7 @@ const Modal = ({ data, setModal }) => {
                         </div>
                         <div>
                             <select
-                                value={formData?.status || data.status || ""}
+                                value={formData?.status || data?.status || ""}
                                 onChange={(e) =>
                                     handleChange(["status"], e.target.value)
                                 }
@@ -198,14 +204,13 @@ const Modal = ({ data, setModal }) => {
                             </select>
                         </div>
                     </div>
-                </Card.Body>
-                <Card.Footer>
-                    <div className="flex justify-between">
-                        <button onClick={() => setModal(false)}>Cancel</button>
+                </Modal.Body>
+                <Modal.Footer>
+                    <div className="flex items-center justify-end">
                         <button onClick={() => handleSave()}>Save</button>
                     </div>
-                </Card.Footer>
-            </Card>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

@@ -2,6 +2,7 @@ import React from "react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
+import dayjs from "dayjs";
 
 export const cellItem = [
     {
@@ -465,4 +466,12 @@ export const getAvg = (data) => {
     }, {});
 
     return averages;
+};
+
+export const getCurrDateTime = () => {
+    const now = dayjs();
+
+    const date = now.format("YYYY-MM-DD");
+    const time = now.format("HH:mm");
+    return { date, time };
 };

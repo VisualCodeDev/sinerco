@@ -20,6 +20,7 @@
     },
     "dependencies": {
         "@tailwindcss/vite": "^4.0.6",
+        "dayjs": "^1.11.13",
         "exceljs": "^4.4.0",
         "file-saver": "^2.0.5",
         "react": "^19.0.0",
