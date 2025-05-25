@@ -16,7 +16,12 @@ export default {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
             textColor: {
-                'success': '#5cb85c'
+                'success': '#5cb85c',
+            },
+            colors: {
+                'primary': '#273e8f',
+                'secondary': '#34b98c',
+
             }
         },
     },
