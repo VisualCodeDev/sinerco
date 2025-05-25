@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Models\AdminNotification;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -26,9 +27,20 @@ use Inertia\Inertia;
 //     return Inertia::render('Dashboard');
 // });
 
+Route::get('/', [AuthenticatedSessionController::class, 'create'])
+    ->middleware('guest')
+    ->name('login');
+
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('guest');
+
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
+
 Route::controller(DailyReportController::class)->group(function () {
     Route::post('/daily/add', 'setReport');
-    Route::get('/dashboard', 'getReport')->name('dashboard');
+    Route::get('/dashboard', 'getReport')->name('dashboard')->middleware('auth');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
@@ -37,9 +49,10 @@ Route::controller(StatusRequestController::class)->group(function () {
     Route::post('/request/update', 'updateRequest');
 });
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-});
+// Route::get('/', function () {
+//     return Inertia::render('Welcome');
+// });
+
 Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
 });
