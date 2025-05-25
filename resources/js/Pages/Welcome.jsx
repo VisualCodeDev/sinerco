@@ -37,7 +37,7 @@ export default function Welcome({ data }) {
                 <a href="/request">Request</a>
             </div>
 
-            <Card>
+            {/* <Card>
                 <Card.Header>Request List</Card.Header>
                 <Card.Body className="relative">
                     <div className="flex text-center">
@@ -113,7 +113,7 @@ export default function Welcome({ data }) {
                 data={selectedItem}
                 setModal={setModal}
                 isModal={isModal}
-            />
+            /> */}
         </PageLayout>
     );
 }

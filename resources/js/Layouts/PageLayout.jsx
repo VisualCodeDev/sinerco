@@ -1,4 +1,4 @@
-import Request from "@/Pages/Request";
+import { RequestModal } from "@/Pages/Request";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 
@@ -64,7 +64,7 @@ const PageLayout = ({ children }) => {
                 <button onClick={() => setShowModal(true)}>
                     Report SD/STDBY
                 </button>
-                <Request
+                <RequestModal
                     handleCloseModal={() => setShowModal(false)}
                     showModal={showModal}
                 />

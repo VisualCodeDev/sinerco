@@ -26,19 +26,21 @@ use Inertia\Inertia;
 //     return Inertia::render('Dashboard');
 // });
 
-Route::controller(DailyReportController::class)->group(function() {
+Route::controller(DailyReportController::class)->group(function () {
     Route::post('/daily/add', 'setReport');
     Route::get('/dashboard', 'getReport')->name('dashboard');
 });
 
-Route::controller(StatusRequestController::class)->group(function() {
-    Route::get('/request', 'index')->name('req');
+Route::controller(StatusRequestController::class)->group(function () {
+    Route::get('/request', 'getRequest')->name('req');
     Route::post('/request/post', 'setRequest');
     Route::post('/request/update', 'updateRequest');
-    Route::get('/', 'getRequest');
 });
 
-Route::controller(AdminNotificationController::class)->group(function() {
+Route::get('/', function () {
+    return Inertia::render('Welcome');
+});
+Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
 });
 
@@ -48,4 +50,4 @@ Route::controller(AdminNotificationController::class)->group(function() {
 //     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 // });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

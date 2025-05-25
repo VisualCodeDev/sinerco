@@ -16,7 +16,7 @@ class StatusRequestController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Request');
+        return Inertia::render('Welcome');
     }
 
     /**
@@ -65,7 +65,7 @@ class StatusRequestController extends Controller
     public function getRequest()
     {
         $status = StatusRequest::all();
-        return Inertia::render('Welcome', ['data' => $status]);
+        return Inertia::render('Request', ['data' => $status]);
     }
 
     public function updateRequest(Request $request)
