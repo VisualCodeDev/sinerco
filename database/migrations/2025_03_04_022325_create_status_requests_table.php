@@ -17,10 +17,10 @@ return new class extends Migration
             $table->string('requestId')->unique();
             $table->date('date');
             $table->string('timeStart');
-            $table->string('timeEnd')->nullable();
+            $table->string('timeEnd')->default('');
             $table->string('requestType');
-            $table->string('action')->nullable();;
-            $table->string('remark')->nullable();;
+            $table->string('action')->default('');
+            $table->string('remark')->default('');
             $table->string('status');
         });
     }

@@ -71,18 +71,18 @@ class StatusRequestController extends Controller
     public function updateRequest(Request $request)
     {
         $request->validate([
-            'id' => 'required|string',
+            'requestId' => 'required|string',
             'status' => 'required|string',
             'timeEnd' => 'nullable|string',
         ]);
-        $status = StatusRequest::where('requestId', $request->id)->first();
+        $status = StatusRequest::where('requestId', $request->requestId)->first();
         if ($status) {
             $status->status = $request->status;
             $status->timeEnd = $request->timeEnd;
             $status->save();
 
             if ($status->status === "Done") {
-                $notification = AdminNotification::where('requestId', $request->id)->first();
+                $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->status = $request->status;
                 $notification->save();
                 

@@ -78,6 +78,24 @@ export const cellItem = [
     },
 ];
 
+export const requestType = [
+    {
+        name: "Stand By",
+        value: "stdby",
+    },
+    {
+        name: "Shut Down",
+        value: "sd",
+    },
+];
+
+export const getRequestTypeName = (value) => {
+    if (!value) return "";
+
+    const found = requestType.find((item) => item.value === value);
+    return found ? found.name : value;
+};
+
 export const TimeInput = ({
     onChange,
     min = 0,
@@ -475,3 +493,49 @@ export const getCurrDateTime = () => {
     const time = now.format("HH:mm");
     return { date, time };
 };
+
+export const requestStatus = [
+    {
+        name: "Pending",
+        value: "Pending",
+    },
+    {
+        name: "On Going",
+        value: "Ongoing",
+    },
+    { name: "Done", value: "Done" },
+];
+
+export const editRequestItems = [
+    {
+        name: "Date",
+        value: "date",
+        type: "text",
+        isInput: false,
+    },
+    {
+        name: "Request",
+        value: "requestType",
+        type: "text",
+        isInput: false,
+    },
+    {
+        name: "Time Start",
+        value: "timeStart",
+        type: "time",
+        isInput: true,
+    },
+    {
+        name: "Time End",
+        value: "timeEnd",
+        type: "time",
+        isInput: true,
+    },
+    {
+        name: "Status",
+        value: "status",
+        type: "option",
+        options: requestStatus,
+        isInput: true,
+    },
+];

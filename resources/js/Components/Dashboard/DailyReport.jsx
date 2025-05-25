@@ -6,7 +6,7 @@ import {
     getAvg,
     getDateLists,
     getDDMMYYDate,
-} from "./dashboard-util";
+} from "../utils/dashboard-util";
 import Card from "../Card";
 
 const DailyReport = ({ formData }) => {

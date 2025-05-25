@@ -1,6 +1,6 @@
 import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
-import { cellItem } from "@/Components/Dashboard/dashboard-util";
+import { cellItem } from "@/Components/utils/dashboard-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
 import { Head } from "@inertiajs/react";

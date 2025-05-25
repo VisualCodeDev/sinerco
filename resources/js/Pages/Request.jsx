@@ -1,5 +1,11 @@
 import Card from "@/Components/Card";
-import { getCurrDateTime } from "@/Components/Dashboard/dashboard-util";
+import {
+    editRequestItems,
+    getCurrDateTime,
+    getRequestTypeName,
+    requestStatus,
+    requestType,
+} from "@/Components/utils/dashboard-util";
 import Modal from "@/Components/Modal";
 import PageLayout from "@/Layouts/PageLayout";
 import { useForm } from "@inertiajs/react";
@@ -59,10 +65,9 @@ const Request = ({ data }) => {
                                               <td>{index + 1}</td>
                                               <td>{item.date}</td>
                                               <td>
-                                                  {item?.requestType === "stdby"
-                                                      ? "STAND BY"
-                                                      : item?.requestType ===
-                                                            "sd" && "SHUT DOWN"}
+                                                  {getRequestTypeName(
+                                                      item?.requestType
+                                                  )}
                                               </td>
                                               <td>
                                                   {item.timeStart || item.time}
@@ -88,7 +93,7 @@ const Request = ({ data }) => {
                 </Card.Body>
             </Card>
             <EditItem
-                data={selectedItem}
+                selectedItem={selectedItem}
                 setModal={setModal}
                 isModal={isModal}
             />
@@ -96,18 +101,24 @@ const Request = ({ data }) => {
     );
 };
 
-const EditItem = ({ data, setModal, isModal }) => {
+const EditItem = ({ selectedItem, setModal, isModal }) => {
     const {
         data: formData,
         setData,
         post,
     } = useForm({
-        id: data?.requestId || "",
-        timeEnd: data?.timeEnd || "",
-        status: data?.status || "",
+        ...selectedItem,
     });
 
-    const handleChange = ([field], value) => {
+    useEffect(() => {
+        if (selectedItem) {
+            setData({
+                ...selectedItem,
+            });
+        }
+    }, [selectedItem]);
+
+    const handleChange = (field, value) => {
         setData((prevData) => ({
             ...prevData,
             [field]: value,
@@ -119,76 +130,124 @@ const EditItem = ({ data, setModal, isModal }) => {
         setModal(false);
     };
     return (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Modal
-                title="Edit Request"
-                handleCloseModal={() => setModal(false)}
-                showModal={isModal}
-            >
-                <Modal.Body>
-                    <div className="grid grid-cols-2 gap-5 w-[600px]">
-                        <div>
-                            <p>Date</p>
-                        </div>
-                        <div>
-                            <p>{data?.date}</p>
-                        </div>
-
-                        <div>
-                            <p>Request</p>
-                        </div>
-                        <div>
-                            <p>
-                                {data?.requestType === "stdby"
-                                    ? "STAND BY"
-                                    : data?.requestType === "sd" && "SHUT DOWN"}
-                            </p>
-                        </div>
-
-                        <div>
-                            <p>Time Start</p>
-                        </div>
-                        <div>
-                            <p>{data?.timeStart}</p>
-                        </div>
-
-                        <div className="flex items-center">
-                            <p>Time End</p>
-                        </div>
-                        <div>
-                            <input
-                                type="time"
-                                value={formData?.timeEnd || ""}
-                                onChange={(e) =>
-                                    handleChange(["timeEnd"], e.target.value)
-                                }
-                            />
-                        </div>
-
-                        <div className="flex items-center">
-                            <p>Status</p>
-                        </div>
-                        <div>
-                            <select
-                                value={formData?.status || data?.status || ""}
-                                onChange={(e) =>
-                                    handleChange(["status"], e.target.value)
-                                }
-                            >
-                                <option value={"Pending"}>Pending</option>
-                                <option value={"Ongoing"}>On going</option>
-                                <option value={"Done"}>Done</option>
-                            </select>
-                        </div>
+        <Modal
+            title="Edit Request"
+            handleCloseModal={() => setModal(false)}
+            showModal={isModal}
+            size="md"
+        >
+            <Modal.Body>
+                <div className="grid grid-cols-2 gap-5">
+                    {editRequestItems.map((item, index) => {
+                        const itemInputType = item?.isInput && item?.type;
+                        return (
+                            <>
+                                <div key={index}>{item?.name}</div>
+                                {!itemInputType ? (
+                                    <div>
+                                        {getRequestTypeName(
+                                            formData[item?.value]
+                                        )}
+                                    </div>
+                                ) : itemInputType && item?.type != "option" ? (
+                                    <input
+                                        type={itemInputType}
+                                        value={formData[item?.value]}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                item?.value,
+                                                e.target.value
+                                            )
+                                        }
+                                    />
+                                ) : (
+                                    <select
+                                        value={formData[item?.value]}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                item?.value,
+                                                e.target.value
+                                            )
+                                        }
+                                    >
+                                        {item?.options &&
+                                            item?.options?.map((item) => (
+                                                <option value={item?.value}>
+                                                    {item?.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                )}
+                            </>
+                        );
+                    })}
+                    {/* <div>
+                        <p>Date</p>
                     </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <div className="flex items-center justify-end">
-                        <button onClick={() => handleSave()}>Save</button>
+                    <div>
+                        <p>{formData?.date}</p>
                     </div>
-                </Modal.Footer>
-            </Modal>
-        </div>
+
+                    <div>
+                        <p>Request</p>
+                    </div>
+                    <div>
+                        <p>
+                            {formData?.requestType === "stdby"
+                                ? "STAND BY"
+                                : formData?.requestType === "sd" && "SHUT DOWN"}
+                        </p>
+                    </div>
+
+                    <div>
+                        <p>Time Start</p>
+                    </div>
+                    <div>
+                        <input
+                            type="time"
+                            value={formData?.timeStart}
+                            onChange={(e) =>
+                                handleChange(["timeStart"], e.target.value)
+                            }
+                        />
+                    </div>
+
+                    <div className="flex items-center">
+                        <p>Time End</p>
+                    </div>
+                    <div>
+                        <input
+                            type="time"
+                            value={formData?.timeEnd || ""}
+                            onChange={(e) =>
+                                handleChange(["timeEnd"], e.target.value)
+                            }
+                        />
+                    </div>
+
+                    <div className="flex items-center">
+                        <p>Status</p>
+                    </div>
+                    <div>
+                        <select
+                            value={formData?.status}
+                            onChange={(e) =>
+                                handleChange(["status"], e.target.value)
+                            }
+                        >
+                            <option value={"Pending"}>Pending</option>
+                            <option value={"Ongoing"}>On going</option>
+                            <option value={"Done"}>Done</option>
+                        </select>
+                    </div> */}
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex items-center justify-end">
+                    <button onClick={() => handleSave()}>Save</button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 
@@ -223,7 +282,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                 time: dataDateTime.time,
             }));
         }
-        console.log(data);
     }, [showModal]);
     return (
         <Modal
@@ -244,8 +302,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             }
                         >
                             <option>Choose</option>
-                            <option value={"stdby"}>Stand By</option>
-                            <option value={"sd"}>Shut Down</option>
+                            {requestType?.map((item) => (
+                                <option value={item?.value}>{item?.name}</option>
+                            ))}
                         </select>
                     </div>
                     <div>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Card from "../Card";
-import { cellItem, DateInput, TimeInput } from "./dashboard-util";
+import { cellItem, DateInput, TimeInput } from "../utils/dashboard-util";
 import { router, usePage } from "@inertiajs/react";
 
 const DailyReportForm = () => {
