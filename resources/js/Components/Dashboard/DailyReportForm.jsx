@@ -12,20 +12,26 @@ import tColumns from "../utils/DailyReport/columns";
 const DailyReportForm = () => {
     const [data, setData] = useState({});
     const [status, setStatus] = useState();
+    const [loading, setLoading] = useState(false);
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            setLoading(true);
             const resp = await axios.post("/daily/add", data);
+            console.log(loading)
             if (resp.status === 200 || resp.status === 302) {
                 console.log(status);
                 setData({});
                 window.location.href = "/dashboard";
+                setLoading(false);
             } else {
                 setStatus("failed");
+                setLoading(false);
             }
         } catch (err) {
             console.error("Error creating report:", err);
             setStatus("error");
+            setLoading(false);
         }
     };
 
@@ -52,7 +58,13 @@ const DailyReportForm = () => {
         });
     }, []);
     return (
-        <div className="flex flex-col justify-center items-start w-screen bg-white p-10">
+        <div className="flex flex-col justify-center items-start w-full bg-white p-10">
+            {loading && (
+                <div className="flex justify-center items-center fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen z-[200] text-5xl">
+                    <div className="bg-black/50 w-full h-full absolute top-0 left-0 backdrop-blur-sm z-[20] "/>
+                    <h1 className="relative z-[30] text-white">SAVING...</h1>
+                </div>
+            )}
             <div
                 className={`sticky top-0 left-0 ${
                     status === "success"
@@ -67,7 +79,7 @@ const DailyReportForm = () => {
                 ) : (
                     (status === "failed" || status === "error") && (
                         <div className="text-white">
-                            <p>Fail to Submit</p>
+                            <p>Failed to Submit</p>
                         </div>
                     )
                 )}
@@ -84,7 +96,7 @@ const DailyReportForm = () => {
                             {typeof col.Cell === "function"
                                 ? col.Cell(
                                       {
-                                          item: data[col?.name],
+                                          item: data,
                                           header: col.header,
                                           name: col.name,
                                           subheader: col?.subheader || [],

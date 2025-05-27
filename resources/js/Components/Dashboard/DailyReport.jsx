@@ -27,13 +27,17 @@ const DailyReport = ({ formData }) => {
         if (formData) {
             if (selectedDate) {
                 const selectedDateItems = Object.entries(formData)
-                    .filter(([key, value]) => {
-                        // const date = new Date(value.date);
-                        // const formattedDate = getDDMMYYDate(date);
-                        // return formattedDate === selectedDate;
-                        return value.date === selectedDate;
-                    })
-                    .map(([key, value]) => value);
+                    .filter(([key, value]) => value.date === selectedDate)
+                    .map(([_, value]) => value)
+                    .sort((a, b) => {
+                        const toMinutes = (timeStr) => {
+                            const [hour, minute] = timeStr
+                                .split(":")
+                                .map(Number);
+                            return hour * 60 + minute;
+                        };
+                        return toMinutes(a.time) - toMinutes(b.time);
+                    });
 
                 setCurrData(selectedDateItems);
             }
@@ -41,7 +45,7 @@ const DailyReport = ({ formData }) => {
     }, [selectedDate]);
 
     return (
-        <div className="bg-white flex flex-col p-10 overflow-scroll h-full">
+        <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
             <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">
                 <div className="flex gap-2 items-center">
                     <th>Date:</th>
@@ -63,7 +67,7 @@ const DailyReport = ({ formData }) => {
                 </div>
                 <button onClick={() => setClick(true)}>Export</button>
             </div>
-            <table className="table-container table">
+            {/* <table className="table-container table">
                 <thead>
                     <tr>
                         {cellItem &&
@@ -169,7 +173,119 @@ const DailyReport = ({ formData }) => {
                         </tr>
                     )}
                 </tbody>
-            </table>
+            </table> */}
+            <div className="overflow-x-auto w-full">
+                <table className="min-w-[900px] w-full table-auto border-collapse">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            {cellItem?.map((item, index) => (
+                                <th
+                                    key={index}
+                                    className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                    rowSpan={!item.subheader ? 2 : undefined}
+                                    colSpan={item.subheader?.length}
+                                >
+                                    {item.header}
+                                </th>
+                            ))}
+                        </tr>
+                        <tr>
+                            {cellItem?.map((item) =>
+                                item.subheader?.map((sub, index) => (
+                                    <th
+                                        key={index}
+                                        className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                    >
+                                        {sub.sub}
+                                    </th>
+                                ))
+                            )}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currData &&
+                            Object.entries(currData).map(([key, value]) => (
+                                <tr
+                                    key={key}
+                                    className="odd:bg-white even:bg-gray-50"
+                                >
+                                    <td className="px-4 py-2 border">
+                                        {value.time}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.sourcePress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.suctionPress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.dischargePress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.speed}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.manifoldPress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.oilPress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.oilDiff}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.runningHours}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.voltage}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.waterTemp}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.befCooler}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.aftCooler}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.staticPress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.diffPress}
+                                    </td>
+                                    <td className="px-4 py-2 border">
+                                        {value.mscfd}
+                                    </td>
+                                </tr>
+                            ))}
+                        {averages && (
+                            <tr className="bg-slate-100 sticky bottom-0 left-0 z-10">
+                                <th className="px-4 py-2 border">Average</th>
+                                {Object.keys(averages).map((field, index) =>
+                                    [
+                                        "time",
+                                        "created_at",
+                                        "updated_at",
+                                        "date",
+                                        "approval1",
+                                        "approval2",
+                                        "id",
+                                    ].includes(field) ? null : (
+                                        <th
+                                            key={index}
+                                            className="px-4 py-2 border"
+                                        >
+                                            {averages[field]}
+                                        </th>
+                                    )
+                                )}
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
             {isClicked && (
                 <ExportModal
                     list={prevDateList}

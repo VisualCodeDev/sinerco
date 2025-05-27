@@ -1,4 +1,5 @@
-import NotificationListener from "@/Components/NotificationListener";
+import Heading from "@/Components/AdminPage/Heading";
+import { getRequestTypeName } from "@/Components/utils/dashboard-util";
 import echo from "@/echo";
 import { RequestModal } from "@/Pages/Request";
 import { usePage } from "@inertiajs/react";
@@ -51,47 +52,56 @@ const PageLayout = ({ children }) => {
     //     }
     // }, [messages]);
     return (
-        <div className="relative">
-            <NotificationListener />
-            <div className="fixed top-0 right-0 z-[100] m-5 overflow-auto h-screen pointer-events-none">
-                {Array.isArray(messages) &&
-                    messages
-                        .filter((message) => message.status === "Pending")
-                        .map((message, index) => (
-                            <div
-                                key={index}
-                                className="bg-gray-100 border-2 rounded-lg px-7 py-4 shadow-md mb-2"
-                            >
-                                <p>
-                                    There is a{" "}
-                                    <strong>
-                                        {message?.requestType === "stdby"
-                                            ? "STAND BY"
-                                            : message?.requestType === "sd" &&
-                                              "SHUT DOWN"}
-                                    </strong>{" "}
-                                    request:
-                                </p>
-                                <p>
-                                    Date: <strong>{message?.date}</strong>
-                                </p>
-                                <p>
-                                    Time Start: <strong>{message.time}</strong>
-                                </p>
-                            </div>
-                        ))}
+        <Heading>
+            <div className="relative">
+                <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[100] m-0 overflow-auto">
+                    {Array.isArray(messages) &&
+                        messages
+                            .filter((message) => message.status === "Pending")
+                            .map((message, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-gray-100 border-2 rounded-lg px-7 py-4 shadow-md mb-2"
+                                >
+                                    <p>
+                                        There is a{" "}
+                                        <strong>
+                                            {getRequestTypeName(
+                                                message.requestType
+                                            )}
+                                        </strong>{" "}
+                                        request:
+                                    </p>
+                                    <p>
+                                        Date: <strong>{message?.date}</strong>
+                                    </p>
+                                    <p>
+                                        Time Start:{" "}
+                                        <strong>{message.time}</strong>
+                                    </p>
+                                    <button>
+                                        <a
+                                            href={`/dashboard/request#${message.id}`}
+                                            className="text-blue-500 hover:underline"
+                                        >
+                                            View Request
+                                        </a>
+                                    </button>
+                                </div>
+                            ))}
+                </div>
+                <div className="fixed bottom-0 right-0 z-[100] m-5">
+                    <button onClick={() => setShowModal(true)}>
+                        Report SD/STDBY
+                    </button>
+                    <RequestModal
+                        handleCloseModal={() => setShowModal(false)}
+                        showModal={showModal}
+                    />
+                </div>
+                {children}
             </div>
-            <div className="fixed bottom-0 right-0 z-[100] m-5">
-                <button onClick={() => setShowModal(true)}>
-                    Report SD/STDBY
-                </button>
-                <RequestModal
-                    handleCloseModal={() => setShowModal(false)}
-                    showModal={showModal}
-                />
-            </div>
-            {children}
-        </div>
+        </Heading>
     );
 };
 

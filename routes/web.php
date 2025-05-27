@@ -44,9 +44,9 @@ Route::controller(DailyReportController::class)->group(function () {
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
-    Route::get('/request', 'getRequest')->name('req');
-    Route::post('/request/post', 'setRequest');
-    Route::post('/request/update', 'updateRequest');
+    Route::get('/dashboard/request', 'getRequest')->name('req');
+    Route::post('/dashboard/request/post', 'setRequest');
+    Route::post('/dashboard/request/update', 'updateRequest');
 });
 
 // Route::get('/', function () {

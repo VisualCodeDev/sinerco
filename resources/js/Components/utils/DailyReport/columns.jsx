@@ -16,7 +16,7 @@ const columns = (handleChange) => {
                             id={name}
                             className="w-full"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)
                             }
@@ -37,7 +37,7 @@ const columns = (handleChange) => {
                         <TimeInput
                             id={name}
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)
                             }
@@ -60,7 +60,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -88,7 +88,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -116,7 +116,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -144,7 +144,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -172,7 +172,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -200,7 +200,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -228,7 +228,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -256,7 +256,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -284,7 +284,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -312,7 +312,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -354,10 +354,10 @@ const columns = (handleChange) => {
                                         </label>
                                         <input
                                             required
-                                            id={name}
+                                            id={sub.name}
                                             type="number"
-                                            name={name}
-                                            value={item || ""}
+                                            name={sub.name}
+                                            value={item[sub.name] || ""}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],
@@ -389,7 +389,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -417,7 +417,7 @@ const columns = (handleChange) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
@@ -443,7 +443,6 @@ const columns = (handleChange) => {
                         </label>
                         <div className="flex gap-4">
                             {subheader?.map((sub, index) => {
-                                console.log("sub", sub);
                                 return (
                                     <div className="flex flex-col w-full">
                                         <label className="text-sm">
@@ -451,10 +450,10 @@ const columns = (handleChange) => {
                                         </label>
                                         <input
                                             required
-                                            id={name}
+                                            id={sub.name}
                                             type="number"
-                                            name={name}
-                                            value={item || ""}
+                                            name={sub.name}
+                                            value={item[sub.name] || ""}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],

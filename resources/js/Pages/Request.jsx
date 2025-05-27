@@ -61,7 +61,7 @@ const Request = ({ data }) => {
                             <tbody>
                                 {data != ""
                                     ? data?.map((item, index) => (
-                                          <tr key={index}>
+                                          <tr key={index} id={item?.id}>
                                               <td>{index + 1}</td>
                                               <td>{item.date}</td>
                                               <td>
@@ -125,8 +125,8 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
         }));
     };
     const handleSave = async () => {
-        // await axios.post("/request/update", formData);
-        post("/request/update", formData);
+        // await axios.post("/dashboard/request/update", formData);
+        post("/dashboard/request/update", formData);
         setModal(false);
     };
     return (
@@ -262,7 +262,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        post("/request/post", data);
+        post("/dashboard/request/post", data);
         setData({});
     };
 

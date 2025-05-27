@@ -66,7 +66,7 @@ class StatusRequestController extends Controller
             event(new MessageNotification($message));
             // session()->push('message', $message);
             // session()->forget('message');
-            return redirect('/request');
+            return back();
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
