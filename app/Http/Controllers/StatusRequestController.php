@@ -87,7 +87,10 @@ class StatusRequestController extends Controller
         $status = StatusRequest::where('requestId', $request->requestId)->first();
         if ($status) {
             $status->status = $request->status;
-            $status->timeEnd = $request->timeEnd;
+            if ($request->timeEnd) {
+                $status->timeEnd = $request->timeEnd;
+
+            }
             $status->save();
 
             if ($status->status === "Done") {

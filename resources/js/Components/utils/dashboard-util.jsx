@@ -107,7 +107,7 @@ export const TimeInput = ({
     const options = [];
     for (let i = 1; i <= 23; i++) {
         options.push(
-            <option key={i} value={i+ ":00"}>
+            <option key={i} value={i + ":00"}>
                 {i}:00
             </option>
         );
@@ -550,6 +550,18 @@ export const editRequestItems = [
         value: "status",
         type: "option",
         options: requestStatus,
+        isInput: true,
+    },
+    {
+        name: "Remarks",
+        value: "remarks",
+        type: "text",
+        isInput: true,
+    },
+    {
+        name: "Action",
+        value: "action",
+        type: "text",
         isInput: true,
     },
 ];

@@ -119,13 +119,32 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
     }, [selectedItem]);
 
     const handleChange = (field, value) => {
-        setData((prevData) => ({
-            ...prevData,
-            [field]: value,
-        }));
+        setData((prevData) => {
+            const updatedData = { ...prevData, [field]: value };
+
+            if (
+                field === "status" &&
+                value != "Done" &&
+                prevData.timeEnd != ""
+            ) {
+                updatedData.timeEnd = "";
+            } else if (
+                field === "status" &&
+                value === "Done" &&
+                prevData.timeEnd === ""
+            ) {
+                updatedData.timeEnd = getCurrDateTime().time;
+            }
+
+            return updatedData;
+        });
     };
+
     const handleSave = async () => {
         // await axios.post("/dashboard/request/update", formData);
+        if (formData?.timeEnd === "" && formData?.status === "Done") {
+            return alert("Please fill in the time end");
+        }
         post("/dashboard/request/update", formData);
         setModal(false);
     };
@@ -181,65 +200,6 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
                             </>
                         );
                     })}
-                    {/* <div>
-                        <p>Date</p>
-                    </div>
-                    <div>
-                        <p>{formData?.date}</p>
-                    </div>
-
-                    <div>
-                        <p>Request</p>
-                    </div>
-                    <div>
-                        <p>
-                            {formData?.requestType === "stdby"
-                                ? "STAND BY"
-                                : formData?.requestType === "sd" && "SHUT DOWN"}
-                        </p>
-                    </div>
-
-                    <div>
-                        <p>Time Start</p>
-                    </div>
-                    <div>
-                        <input
-                            type="time"
-                            value={formData?.timeStart}
-                            onChange={(e) =>
-                                handleChange(["timeStart"], e.target.value)
-                            }
-                        />
-                    </div>
-
-                    <div className="flex items-center">
-                        <p>Time End</p>
-                    </div>
-                    <div>
-                        <input
-                            type="time"
-                            value={formData?.timeEnd || ""}
-                            onChange={(e) =>
-                                handleChange(["timeEnd"], e.target.value)
-                            }
-                        />
-                    </div>
-
-                    <div className="flex items-center">
-                        <p>Status</p>
-                    </div>
-                    <div>
-                        <select
-                            value={formData?.status}
-                            onChange={(e) =>
-                                handleChange(["status"], e.target.value)
-                            }
-                        >
-                            <option value={"Pending"}>Pending</option>
-                            <option value={"Ongoing"}>On going</option>
-                            <option value={"Done"}>Done</option>
-                        </select>
-                    </div> */}
                 </div>
             </Modal.Body>
             <Modal.Footer>
@@ -303,7 +263,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                         >
                             <option>Choose</option>
                             {requestType?.map((item) => (
-                                <option value={item?.value}>{item?.name}</option>
+                                <option value={item?.value}>
+                                    {item?.name}
+                                </option>
                             ))}
                         </select>
                     </div>
