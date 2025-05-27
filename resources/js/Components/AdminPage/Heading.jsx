@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { FaHome, FaTh, FaUser, FaLock } from "react-icons/fa";
+import { FaHome, FaTh, FaUser, FaLock, FaAddressBook } from "react-icons/fa";
 
 const menuItems = [
-    { icon: <FaHome />, label: "Dashboard", href: "/dashboard/daily" },
-    { icon: <FaTh />, label: "Request List", href: "/dashboard/request" },
+    { icon: <FaHome />, label: "Home", href: "/" },
+    { icon: <FaAddressBook />, label: "Daily Form", href: "/daily" },
+    { icon: <FaTh />, label: "Request List", href: "/request" },
     { icon: <FaUser />, label: "Profile" },
     { icon: <FaLock />, label: "Security" },
 ];

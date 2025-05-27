@@ -11,31 +11,30 @@ const Toast = ({ message, onClose }) => {
     // }, []);
 
     return (
-        <div className="bg-white border border-gray-300 shadow-lg rounded-md px-6 py-4 mb-4 w-80 animate-slideIn">
+        <div className={`${message.requestType === 'stdby' ? 'bg-warning/80' : 'bg-danger/80'} border shadow-lg rounded-md px-6 py-4 mb-2 animate-slideIn`}>
             <p>
-                There is a{" "}
                 <strong>{getRequestTypeName(message.requestType)}</strong>{" "}
-                request:
+                Request Available {" "}
+                <a
+                    href={`/dashboard/request#${message.id}`}
+                    className="text-blue-500 hover:underline font-bold text-xs"
+                >
+                    (View Request)
+                </a>
             </p>
-            <p>
+            {/* <p>
                 Date: <strong>{message?.date}</strong>
             </p>
             <p>
                 Time Start: <strong>{message.time}</strong>
-            </p>
-            <a
-                href={`/dashboard/request#${message.id}`}
-                className="text-blue-500 hover:underline"
-            >
-                View Request
-            </a>
+            </p> */}
         </div>
     );
 };
 
 const ToastContainer = ({ messages, removeMessage }) => {
     return (
-        <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[1000]">
+        <div className="fixed top-5 right-5 z-[1000]">
             {messages
                 .filter((msg) => msg.status === "Pending")
                 .map((message, index) => (

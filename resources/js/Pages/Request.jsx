@@ -46,7 +46,7 @@ const Request = ({ data }) => {
                                 )}
                             </div>
                         )}
-                        <table className="w-1/2">
+                        <table className="w-full">
                             <thead>
                                 <tr>
                                     <th>No.</th>
@@ -55,6 +55,8 @@ const Request = ({ data }) => {
                                     <th>Start</th>
                                     <th>End</th>
                                     <th>Status</th>
+                                    <th>Remarks</th>
+                                    <th>Action</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -63,17 +65,19 @@ const Request = ({ data }) => {
                                     ? data?.map((item, index) => (
                                           <tr key={index} id={item?.id}>
                                               <td>{index + 1}</td>
-                                              <td>{item.date}</td>
+                                              <td>{item?.date}</td>
                                               <td>
                                                   {getRequestTypeName(
                                                       item?.requestType
                                                   )}
                                               </td>
                                               <td>
-                                                  {item.timeStart || item.time}
+                                                  {item?.timeStart || item?.time}
                                               </td>
-                                              <td>{item.timeEnd || "-"}</td>
-                                              <td>{item.status}</td>
+                                              <td>{item?.timeEnd || "-"}</td>
+                                              <td>{item?.status}</td>
+                                              <td>{item?.remarks}</td>
+                                              <td>{item?.action}</td>
                                               <td>
                                                   <button
                                                       className="bg-gray-100 px-3 py-1 border-2"
@@ -145,7 +149,7 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
         if (formData?.timeEnd === "" && formData?.status === "Done") {
             return alert("Please fill in the time end");
         }
-        post("/dashboard/request/update", formData);
+        post(route('request.update'), formData);
         setModal(false);
     };
     return (
@@ -222,7 +226,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        post("/dashboard/request/post", data);
+        post(route('request.post'), data);
+        handleCloseModal()
         setData({});
     };
 

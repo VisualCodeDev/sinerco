@@ -27,9 +27,13 @@ use Inertia\Inertia;
 //     return Inertia::render('Dashboard');
 // });
 
-Route::get('/', [AuthenticatedSessionController::class, 'create'])
-    ->middleware('guest')
-    ->name('login');
+// Route::get('/', [AuthenticatedSessionController::class, 'create'])
+//     ->middleware('guest')
+//     ->name('login');
+
+Route::get('/', function () {
+    return Inertia::render('Welcome');
+});
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -39,19 +43,19 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::controller(DailyReportController::class)->group(function () {
-    Route::post('/dashboard/daily/add', 'setReport')->name('daily.add')->middleware('auth');
-    Route::get('/dashboard/daily', 'getReport')->name('dashboard')->middleware('auth');
+    Route::post('/daily/add', 'setReport')->name('daily.add')->middleware('auth');
+    Route::get('/daily', 'getReport')->name('dashboard')->middleware('auth');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
-    Route::get('/dashboard/request', 'getRequest')->name('req');
-    Route::post('/dashboard/request/post', 'setRequest');
-    Route::post('/dashboard/request/update', 'updateRequest');
+    Route::get('/request', 'getRequest')->name('request')->middleware('auth');
+    Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
+    Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Welcome');
-});
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Welcome');
+// });
 
 Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');

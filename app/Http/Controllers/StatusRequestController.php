@@ -15,11 +15,6 @@ class StatusRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        return Inertia::render('Welcome');
-    }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -89,7 +84,9 @@ class StatusRequestController extends Controller
             $status->status = $request->status;
             if ($request->timeEnd) {
                 $status->timeEnd = $request->timeEnd;
-
+            }
+            else {
+                $status->timeEnd = null;
             }
             $status->save();
 
@@ -97,14 +94,6 @@ class StatusRequestController extends Controller
                 $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->status = $request->status;
                 $notification->save();
-
-                $messages = session('message');
-                if (is_array($messages)) {
-                    $filteredMessages = array_filter($messages, function ($msg) use ($request) {
-                        return $msg['id'] !== $request->id;
-                    });
-                    session(['message' => array_values($filteredMessages)]);
-                }
             }
             return back()->with('status', 'success');
         }

@@ -45,7 +45,7 @@ const PageLayout = ({ children }) => {
         fetchNotifications()
         const interval = setInterval(() => {
             fetchNotifications();
-        }, 3000);
+        }, 10000);
         return () => clearInterval(interval);
     }, []);
     return (

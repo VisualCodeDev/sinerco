@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('requestId')->unique();
             $table->date('date');
             $table->string('timeStart');
-            $table->string('timeEnd')->default('');
+            $table->string('timeEnd')->default('')->nullable();
             $table->string('requestType');
             $table->string('action')->default('');
             $table->string('remark')->default('');

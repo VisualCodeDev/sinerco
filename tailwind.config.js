@@ -21,6 +21,8 @@ export default {
             colors: {
                 primary: "#273e8f",
                 secondary: "#34b98c",
+                warning: "#f0ad4e",
+                danger: "#d9534f",
             },
             keyframes: {
                 slideIn: {
