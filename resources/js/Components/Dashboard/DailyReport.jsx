@@ -41,8 +41,8 @@ const DailyReport = ({ formData }) => {
     }, [selectedDate]);
 
     return (
-        <div className="flex flex-col gap-3 relative overflow-scroll h-full">
-            <div className="flex gap-3 sticky top-0 left-0 bg-white pb-2 w-full z-10">
+        <div className="bg-white flex flex-col p-10 overflow-scroll h-full">
+            <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">
                 <div className="flex gap-2 items-center">
                     <th>Date:</th>
                     <input

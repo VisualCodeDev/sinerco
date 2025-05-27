@@ -13,7 +13,7 @@ const DailyReportForm = () => {
             if (resp.status === 200 || resp.status === 302) {
                 console.log(status);
                 setData({});
-                window.location.href = '/dashboard';
+                window.location.href = "/dashboard";
             } else {
                 setStatus("failed");
             }
@@ -31,10 +31,8 @@ const DailyReportForm = () => {
     };
 
     return (
-        <Card form>
-            <Card.Header headerSticky className="relative">
-                Form Daily Report
-            </Card.Header>
+        <div className="flex flex-col justify-center items-start w-screen bg-white p-10">
+            <p>Hello</p>
             <div
                 className={`sticky top-0 left-0 ${
                     status === "success"
@@ -55,7 +53,7 @@ const DailyReportForm = () => {
                 )}
             </div>
             <form onSubmit={handleSubmit} method="POST">
-                <Card.Body className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2">
                     <div className="flex flex-col">
                         <label htmlFor="time" className="font-bold text-lg">
                             Tanggal
@@ -71,49 +69,103 @@ const DailyReportForm = () => {
                         />
                     </div>
                     {cellItem &&
-                        cellItem.map((item) => (
-                            <div className="flex flex-col" key={item.name}>
-                                <label
-                                    htmlFor={item.header}
-                                    className="text-lg font-bold"
-                                >
-                                    {item.header}
-                                </label>
-                                {item.header.toLowerCase() === "time" ? (
-                                    <TimeInput
-                                        id={item.header}
-                                        className="w-full"
-                                        name={item.name}
-                                        value={data[item.name] || ""}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                [e.target.name],
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                ) : (
-                                    <>
-                                        {item.subheader ? (
-                                            <div className="flex flex-wrap gap-2">
-                                                {item.subheader.map(
-                                                    (subItem) => (
-                                                        <div
-                                                            key={subItem.name}
-                                                            className="flex flex-col"
-                                                        >
-                                                            <label>
-                                                                {subItem.sub}
-                                                            </label>
+                        [...Array(Math.ceil(cellItem.length / 2))].map(
+                            (_, rowIndex) => (
+                                <div key={rowIndex} className="flex gap-4 mb-4">
+                                    {cellItem
+                                        .slice(rowIndex * 2, rowIndex * 2 + 2)
+                                        .map((item) => (
+                                            <div
+                                                className="flex flex-col w-1/2"
+                                                key={item.name}
+                                            >
+                                                <label
+                                                    htmlFor={item.header}
+                                                    className="text-lg font-bold mb-1"
+                                                >
+                                                    {item.header}
+                                                </label>
+
+                                                {item.header.toLowerCase() ===
+                                                "time" ? (
+                                                    <TimeInput
+                                                        id={item.header}
+                                                        className="w-full"
+                                                        name={item.name}
+                                                        value={
+                                                            data[item.name] ||
+                                                            ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                [e.target.name],
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        {item.subheader ? (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {item.subheader.map(
+                                                                    (
+                                                                        subItem
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                subItem.name
+                                                                            }
+                                                                            className="flex flex-col w-full"
+                                                                        >
+                                                                            <label className="text-sm">
+                                                                                {
+                                                                                    subItem.sub
+                                                                                }
+                                                                            </label>
+                                                                            <input
+                                                                                required
+                                                                                type="number"
+                                                                                name={
+                                                                                    subItem.name
+                                                                                }
+                                                                                value={
+                                                                                    data[
+                                                                                        subItem
+                                                                                            .name
+                                                                                    ] ||
+                                                                                    ""
+                                                                                }
+                                                                                onChange={(
+                                                                                    e
+                                                                                ) =>
+                                                                                    handleChange(
+                                                                                        [
+                                                                                            e
+                                                                                                .target
+                                                                                                .name,
+                                                                                        ],
+                                                                                        parseFloat(
+                                                                                            e
+                                                                                                .target
+                                                                                                .value
+                                                                                        )
+                                                                                    )
+                                                                                }
+                                                                                placeholder="00.0"
+                                                                                className="border px-2 py-1 rounded"
+                                                                            />
+                                                                        </div>
+                                                                    )
+                                                                )}
+                                                            </div>
+                                                        ) : (
                                                             <input
                                                                 required
                                                                 type="number"
-                                                                name={
-                                                                    subItem.name
-                                                                }
+                                                                name={item.name}
                                                                 value={
                                                                     data[
-                                                                        subItem
+                                                                        item
                                                                             .name
                                                                     ] || ""
                                                                 }
@@ -132,40 +184,24 @@ const DailyReportForm = () => {
                                                                     )
                                                                 }
                                                                 placeholder="00.0"
+                                                                className="border px-2 py-1 rounded"
                                                             />
-                                                        </div>
-                                                    )
+                                                        )}
+                                                    </>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <input
-                                                required
-                                                type="number"
-                                                name={item.name}
-                                                value={data[item.name] || ""}
-                                                onChange={(e) =>
-                                                    handleChange(
-                                                        [e.target.name],
-                                                        parseFloat(
-                                                            e.target.value
-                                                        )
-                                                    )
-                                                }
-                                                placeholder="00.0"
-                                            />
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        ))}
-                </Card.Body>
-                <Card.Footer>
+                                        ))}
+                                </div>
+                            )
+                        )}
+                </div>
+                <div>
                     <button type="submit" className="font-bold w-full h-full">
                         Simpan
                     </button>
-                </Card.Footer>
+                </div>
             </form>
-        </Card>
+        </div>
     );
 };
 
