@@ -31,7 +31,7 @@ export default function Welcome({ data }) {
     return (
         <PageLayout>
             <div className="">
-                <a href="/dashboard">Dashboard</a>
+                <a href="/dashboard/daily">Daily</a>
             </div>
             <div>
                 <a href="/dashboard/request">Request</a>

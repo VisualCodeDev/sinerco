@@ -51,9 +51,9 @@ class DailyReportController extends Controller
         $report->mscfd = $validatedData['mscfd'];
         $report->save();
 
-        if ($report->speed > 0) {
-            WhatsAppService::sendMessage('082113837546, 081359113349', 'Speed Input at ' . $report->date . ' is ' . $report->speed);
-        }
+        // if ($report->speed > 0) {
+        //     WhatsAppService::sendMessage('082113837546, 081359113349', 'Speed Input at ' . $report->date . ' is ' . $report->speed);
+        // }
         return back();
     }
 
@@ -70,7 +70,7 @@ class DailyReportController extends Controller
             ]);
         });
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('Daily', [
             'data' => $data
         ]);
 

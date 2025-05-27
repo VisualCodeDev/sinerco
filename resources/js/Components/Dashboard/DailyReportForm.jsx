@@ -17,7 +17,7 @@ const DailyReportForm = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const resp = await axios.post("/daily/add", data);
+            const resp = await axios.post(route('daily.add'), data);
             console.log(loading)
             if (resp.status === 200 || resp.status === 302) {
                 console.log(status);

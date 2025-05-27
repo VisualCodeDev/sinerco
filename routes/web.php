@@ -39,8 +39,8 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::controller(DailyReportController::class)->group(function () {
-    Route::post('/daily/add', 'setReport');
-    Route::get('/dashboard', 'getReport')->name('dashboard')->middleware('auth');
+    Route::post('/dashboard/daily/add', 'setReport')->name('daily.add')->middleware('auth');
+    Route::get('/dashboard/daily', 'getReport')->name('dashboard')->middleware('auth');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
@@ -49,9 +49,9 @@ Route::controller(StatusRequestController::class)->group(function () {
     Route::post('/dashboard/request/update', 'updateRequest');
 });
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome');
-// });
+Route::get('/dashboard', function () {
+    return Inertia::render('Welcome');
+});
 
 Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
