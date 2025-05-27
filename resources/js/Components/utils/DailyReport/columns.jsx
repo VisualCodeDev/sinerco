@@ -1,0 +1,479 @@
+import { DateInput, TimeInput } from "../dashboard-util";
+
+const columns = (handleChange) => {
+    const colItem = [
+        {
+            name: "date",
+            header: "Date",
+            gridCols: 2,
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <DateInput
+                            id={name}
+                            className="w-full"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange([e.target.name], e.target.value)
+                            }
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "time",
+            header: "Time",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <TimeInput
+                            id={name}
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange([e.target.name], e.target.value)
+                            }
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "sourcePress",
+            header: "Source Press.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "suctionPress",
+            header: "Suction Press.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "dischargePress",
+            header: "Discharge Press.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "speed",
+            header: "Speed",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "manifoldPress",
+            header: "Manifold Press.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "oilPress",
+            header: "Oil Press.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "oilDiff",
+            header: "Oil Diff.",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "runningHours",
+            header: "Running Hours",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "voltage",
+            header: "Voltage",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "waterTemp",
+            header: "Water Temp",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "dischargeTemp",
+            header: "Discharge Temp",
+            subheader: [
+                {
+                    name: "befCooler",
+                    sub: "Bef. Cooler",
+                },
+                {
+                    name: "aftCooler",
+                    sub: "Aft. Cooler",
+                },
+            ],
+            Cell: ({ item, header, name, subheader }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <div className="flex gap-4">
+                            {subheader?.map((sub, index) => {
+                                return (
+                                    <div className="flex flex-col w-full">
+                                        <label className="text-sm">
+                                            {sub?.sub}
+                                        </label>
+                                        <input
+                                            required
+                                            id={name}
+                                            type="number"
+                                            name={name}
+                                            value={item || ""}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    [e.target.name],
+                                                    parseFloat(e.target.value)
+                                                )
+                                            }
+                                            placeholder="00.0"
+                                            className="border px-2 py-1 rounded"
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            name: "staticPress",
+            header: "Static Press. Reading",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "diffPress",
+            header: "Diff. Press. Reading",
+            Cell: ({ item, header, name }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <input
+                            required
+                            id={name}
+                            type="number"
+                            name={name}
+                            value={item || ""}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    parseFloat(e.target.value)
+                                )
+                            }
+                            placeholder="00.0"
+                            className="border px-2 py-1 rounded"
+                        />
+                    </div>
+                );
+            },
+        },
+        {
+            name: "flowRate",
+            header: "Flowrate",
+            subheader: [{ name: "mscfd", sub: "MSCFD" }],
+             Cell: ({ item, header, name, subheader }) => {
+                return (
+                    <div className="flex flex-col">
+                        <label htmlFor={name} className="font-bold text-lg">
+                            {header}
+                        </label>
+                        <div className="flex gap-4">
+                            {subheader?.map((sub, index) => {
+                                console.log("sub", sub);
+                                return (
+                                    <div className="flex flex-col w-full">
+                                        <label className="text-sm">
+                                            {sub?.sub}
+                                        </label>
+                                        <input
+                                            required
+                                            id={name}
+                                            type="number"
+                                            name={name}
+                                            value={item || ""}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    [e.target.name],
+                                                    parseFloat(e.target.value)
+                                                )
+                                            }
+                                            placeholder="00.0"
+                                            className="border px-2 py-1 rounded"
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                );
+            },
+        },
+    ];
+
+    return colItem;
+};
+export default columns;

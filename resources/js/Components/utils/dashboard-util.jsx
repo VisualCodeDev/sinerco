@@ -98,23 +98,37 @@ export const getRequestTypeName = (value) => {
 
 export const TimeInput = ({
     onChange,
+    name = "time",
     min = 0,
     max = 23,
     placeholder = "Enter time",
     value,
 }) => {
+    const options = [];
+    for (let i = 1; i <= 23; i++) {
+        options.push(
+            <option key={i} value={i+ ":00"}>
+                {i}:00
+            </option>
+        );
+    }
     return (
-        <input
-            value={value}
-            required
-            name="time"
-            type="time"
-            onChange={onChange}
-            min={min}
-            max={max}
-            placeholder={placeholder}
-            className="border rounded p-2"
-        />
+        <>
+            <select value={value} onChange={onChange} name={name}>
+                {options}
+            </select>
+            {/* <input
+                value={value}
+                required
+                name="time"
+                type="time"
+                onChange={onChange}
+                min={min}
+                max={max}
+                placeholder={placeholder}
+                className="border rounded p-2"
+            /> */}
+        </>
     );
 };
 
@@ -491,7 +505,7 @@ export const getCurrDateTime = () => {
 
     const date = now.format("YYYY-MM-DD");
     const time = now.format("HH:mm");
-    return { date, time };
+    return { date, time, now };
 };
 
 export const requestStatus = [

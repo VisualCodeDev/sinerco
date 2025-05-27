@@ -19,7 +19,15 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'password' => Hash::make('admin_sinerco'),
-            ]
+            ],
+        );
+        User::updateOrCreate(
+            ['email' => 'rama@sinerco.com'],
+            [
+                'name' => 'Rama',
+                'password' => Hash::make('admin12345'),
+                'role' => 'admin',
+            ],
         );
     }
 }
