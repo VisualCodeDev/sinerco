@@ -33,6 +33,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+        $roles = $user->roles()->pluck('role')->toArray();
+        session(['user_roles' => $roles]);
         return redirect()->route('dashboard');
     }
 
