@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('timeEnd')->default('')->nullable();
             $table->string('requestType');
             $table->string('action')->default('');
-            $table->string('remark')->default('');
+            $table->string('remarks')->default('');
             $table->string('status');
         });
     }

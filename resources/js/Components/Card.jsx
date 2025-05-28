@@ -16,7 +16,7 @@ const Card = (props) => {
 Card.Header = (props) => {
     return (
         <div
-            className={`bg-slate-200 w-full p-5 ${
+            className={`${props.className && props.className} w-full p-5 ${
                 props.headerSticky && "sticky top-0 left-0"
             }`}
         >

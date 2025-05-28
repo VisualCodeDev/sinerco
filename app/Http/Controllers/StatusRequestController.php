@@ -23,6 +23,7 @@ class StatusRequestController extends Controller
             'date' => 'required|string',
             'time' => 'required|string',
             'requestType' => 'required|string',
+            'remarks' => 'required|string',
         ]);
 
         try {
@@ -30,6 +31,7 @@ class StatusRequestController extends Controller
             $status->date = $val['date'];
             $status->timeStart = $val['time'];
             $status->requestType = $val['requestType'];
+            $status->remarks = $val['remarks'];
             $status->status = 'Pending';
             $isComplete = $status->save();
             // if ($isComplete) {
@@ -79,7 +81,7 @@ class StatusRequestController extends Controller
             }
             $status->save();
 
-            if ($status->status === "Done") {
+            if ($status->status === "End") {
                 $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->status = $request->status;
                 $notification->save();

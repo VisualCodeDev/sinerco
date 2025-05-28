@@ -48,12 +48,13 @@ const PageLayout = ({ children }) => {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
+
     return (
         <Heading>
             <div className="relative">
                  <ToastContainer messages={messages}/>
-                <div className="fixed bottom-0 right-0 z-[100] m-5">
-                    <button onClick={() => setShowModal(true)}>
+                <div className="fixed bottom-0 right-0 z-[100] m-12">
+                    <button onClick={() => setShowModal(true)} className="bg-secondary text-white px-4 py-2 text-lg rounded-md shadow">
                         Report SD/STDBY
                     </button>
                     <RequestModal

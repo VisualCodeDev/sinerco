@@ -73,7 +73,7 @@ const columns = () => {
                         href={route("daily") + url}
                         className="bg-primary text-white px-3 py-2 rounded-md text-sm"
                     >
-                        Input Daily
+                        Daily Form
                     </a>
                 );
             },

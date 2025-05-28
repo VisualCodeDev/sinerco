@@ -96,6 +96,13 @@ export const getRequestTypeName = (value) => {
     return found ? found.name : value;
 };
 
+export const getRequestStatus = (value) => {
+    if (!value) return "";
+    
+    const found = requestStatus.find((item) => item.value === value);
+    return found ? found : value;
+};
+
 export const TimeInput = ({
     onChange,
     name = "time",
@@ -500,6 +507,11 @@ export const getAvg = (data) => {
     return averages;
 };
 
+export const getFormattedDate = (value, format = "DD MMM YYYY") => {
+    console.log(value)
+    return dayjs(value).format(format);
+};
+
 export const getCurrDateTime = () => {
     const now = dayjs();
 
@@ -512,12 +524,14 @@ export const requestStatus = [
     {
         name: "Pending",
         value: "Pending",
+        color: "#d9534f",
     },
     {
         name: "On Going",
         value: "Ongoing",
+        color: "#f0ad4e",
     },
-    { name: "Done", value: "Done" },
+    { name: "End", value: "End", color: "#5cb85c" },
 ];
 
 export const editRequestItems = [

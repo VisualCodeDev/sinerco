@@ -2,6 +2,8 @@ import Card from "@/Components/Card";
 import {
     editRequestItems,
     getCurrDateTime,
+    getFormattedDate,
+    getRequestStatus,
     getRequestTypeName,
     requestStatus,
     requestType,
@@ -22,7 +24,9 @@ const Request = ({ data }) => {
     return (
         <PageLayout>
             <Card>
-                <Card.Header>Request List</Card.Header>
+                <Card.Header className="bg-primary text-white">
+                    Request List
+                </Card.Header>
                 <Card.Body className="relative">
                     <div className="flex text-center">
                         {status && (
@@ -62,34 +66,58 @@ const Request = ({ data }) => {
                             </thead>
                             <tbody>
                                 {data != ""
-                                    ? data?.map((item, index) => (
-                                          <tr key={index} id={item?.id}>
-                                              <td>{index + 1}</td>
-                                              <td>{item?.date}</td>
-                                              <td>
-                                                  {getRequestTypeName(
-                                                      item?.requestType
+                                    ? data?.map((item, index) => {
+                                          const status = getRequestStatus(
+                                              item?.status
+                                          );
+                                          return (
+                                              <tr key={index} id={item?.id}>
+                                                  <td>{index + 1}</td>
+                                                  <td>
+                                                      {getFormattedDate(
+                                                          item?.date
+                                                      )}
+                                                  </td>
+                                                  <td>
+                                                      {getRequestTypeName(
+                                                          item?.requestType
+                                                      )}
+                                                  </td>
+                                                  <td>
+                                                      {item?.timeStart ||
+                                                          item?.time}
+                                                  </td>
+                                                  <td>
+                                                      {item?.timeEnd || "-"}
+                                                  </td>
+                                                  {status && (
+                                                      <td
+                                                          className="font-bold"
+                                                          style={{
+                                                              color: status?.color,
+                                                          }}
+                                                      >
+                                                          {status?.name ===
+                                                          "End"
+                                                              ? "Online"
+                                                              : status?.name}
+                                                      </td>
                                                   )}
-                                              </td>
-                                              <td>
-                                                  {item?.timeStart || item?.time}
-                                              </td>
-                                              <td>{item?.timeEnd || "-"}</td>
-                                              <td>{item?.status}</td>
-                                              <td>{item?.remarks}</td>
-                                              <td>{item?.action}</td>
-                                              <td>
-                                                  <button
-                                                      className="bg-gray-100 px-3 py-1 border-2"
-                                                      onClick={() =>
-                                                          handleSelect(item)
-                                                      }
-                                                  >
-                                                      Edit Item
-                                                  </button>
-                                              </td>
-                                          </tr>
-                                      ))
+                                                  <td>{item?.remarks}</td>
+                                                  <td>{item?.action}</td>
+                                                  <td>
+                                                      <button
+                                                          className="bg-gray-100 px-3 py-1 border-2"
+                                                          onClick={() =>
+                                                              handleSelect(item)
+                                                          }
+                                                      >
+                                                          Edit Item
+                                                      </button>
+                                                  </td>
+                                              </tr>
+                                          );
+                                      })
                                     : "No Request"}
                             </tbody>
                         </table>
@@ -128,13 +156,13 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
 
             if (
                 field === "status" &&
-                value != "Done" &&
+                value != "End" &&
                 prevData.timeEnd != ""
             ) {
                 updatedData.timeEnd = "";
             } else if (
                 field === "status" &&
-                value === "Done" &&
+                value === "End" &&
                 prevData.timeEnd === ""
             ) {
                 updatedData.timeEnd = getCurrDateTime().time;
@@ -146,10 +174,10 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
 
     const handleSave = async () => {
         // await axios.post("/dashboard/request/update", formData);
-        if (formData?.timeEnd === "" && formData?.status === "Done") {
+        if (formData?.timeEnd === "" && formData?.status === "End") {
             return alert("Please fill in the time end");
         }
-        post(route('request.update'), formData);
+        post(route("request.update"), formData);
         setModal(false);
     };
     return (
@@ -162,15 +190,19 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
             <Modal.Body>
                 <div className="grid grid-cols-2 gap-5">
                     {editRequestItems.map((item, index) => {
-                        const itemInputType = item?.isInput && item?.type;
+                        const itemInputType = item?.isInput
+                            ? item?.type
+                            : false;
                         return (
                             <>
                                 <div key={index}>{item?.name}</div>
                                 {!itemInputType ? (
                                     <div>
-                                        {getRequestTypeName(
-                                            formData[item?.value]
-                                        )}
+                                        {item?.name === "Date"
+                                            ? getFormattedDate(formData[item?.value])
+                                            : getRequestTypeName(
+                                                  formData[item?.value]
+                                              )}
                                     </div>
                                 ) : itemInputType && item?.type != "option" ? (
                                     <input
@@ -226,9 +258,14 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        post(route('request.post'), data);
-        handleCloseModal()
-        setData({});
+        try {
+            post(route("request.post"), data);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            handleCloseModal();
+            setData({});
+        }
     };
 
     const handleChange = ([field], value) => {
@@ -260,6 +297,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                     <div>
                         <label htmlFor="request">Request: </label>
                         <select
+                            required
                             id="request"
                             value={data.requestType || ""}
                             onChange={(e) =>
@@ -277,6 +315,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                     <div>
                         <label htmlFor="date">Date: </label>
                         <input
+                            required
                             id="date"
                             name="date"
                             type="date"
@@ -289,10 +328,24 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                     <div>
                         <label htmlFor="time">Time: </label>
                         <input
+                            required
                             id="time"
                             name="time"
                             type="time"
                             value={data.time || ""}
+                            onChange={(e) =>
+                                handleChange([e.target.name], e.target.value)
+                            }
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="time">Remarks: </label>
+                        <input
+                            required
+                            id="remarks"
+                            name="remarks"
+                            type="text"
+                            value={data.remarks || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)
                             }
