@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -32,7 +33,7 @@ use Inertia\Inertia;
 //     ->name('login');
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    return Inertia::render('Home');
 })->name('dashboard');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
@@ -43,14 +44,20 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::controller(DailyReportController::class)->group(function () {
+    Route::get('/daily-list', 'dailyList')->name('daily.list')->middleware('auth');
     Route::post('/daily/add', 'setReport')->name('daily.add')->middleware('auth');
-    Route::get('/daily', 'getReport')->name('daily')->middleware('auth');
+    Route::get('/daily', 'index')->name('daily')->middleware('auth');
+    Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
+});
+
+Route::controller(DataUnitController::class)->group(function () {
+    Route::get('/api/get-unit-area-location', 'getUnitAreaLocation')->name('getUnitAreaLocation');
 });
 
 // Route::get('/dashboard', function () {

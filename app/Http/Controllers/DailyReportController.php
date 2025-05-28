@@ -9,6 +9,9 @@ use Inertia\Inertia;
 
 class DailyReportController extends Controller
 {
+    public function dailyList() {
+        return Inertia::render('Daily/DailyList');
+    }
     public function setReport(Request $request)
     {
         $validatedData = $request->validate([
@@ -58,7 +61,7 @@ class DailyReportController extends Controller
     }
 
 
-    public function getReport()
+    public function index()
     {
         $data = DailyReport::all()->map(function ($item) {
             return collect($item)->except([
@@ -70,9 +73,25 @@ class DailyReportController extends Controller
             ]);
         });
 
-        return Inertia::render('Daily', [
+        return Inertia::render('Daily/Daily', [
             'data' => $data
         ]);
 
     }
+    public function getReport()
+    {
+        $data = DailyReport::all() // Ambil semua data dari tabel daily_reports
+            ->map(function ($item) {
+                return collect($item)->except([
+                    "created_at",
+                    "updated_at",
+                    "approval1",
+                    "approval2",
+                    "id"
+                ]);
+            });
+        return response()->json($data);
+    }
+
 }
+

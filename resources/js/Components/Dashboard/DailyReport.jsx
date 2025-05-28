@@ -43,7 +43,11 @@ const DailyReport = ({ formData }) => {
             }
         }
     }, [selectedDate]);
-
+    useEffect(() => {
+        if (formData) {
+            setCurrData(formData);
+        }
+    }, [formData]);
     return (
         <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
             <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">

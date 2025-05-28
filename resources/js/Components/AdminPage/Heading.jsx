@@ -3,7 +3,7 @@ import { FaHome, FaTh, FaUser, FaLock, FaAddressBook } from "react-icons/fa";
 
 const menuItems = [
     { icon: <FaHome />, label: "Home", href: "/" },
-    { icon: <FaAddressBook />, label: "Daily Form", href: route("daily") },
+    { icon: <FaAddressBook />, label: "Unit List", href: route("daily.list") },
     { icon: <FaTh />, label: "Request List", href: route("request") },
     { icon: <FaUser />, label: "Profile" },
     { icon: <FaLock />, label: "Security" },
@@ -50,6 +50,7 @@ const Heading = ({ children }) => {
                     <div className="h-8">
                         <img
                             src="/logo_horizontal.webp"
+                            loading="lazy"
                             alt="Logo Sinerco"
                             className="h-full object-contain"
                         />

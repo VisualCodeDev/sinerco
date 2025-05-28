@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            UserDataUnitSeeder::class,
+            DataUnitSeeder::class,
+            UnitAreaLocationSeeder::class
         ]);
 
         // User::factory()->create([

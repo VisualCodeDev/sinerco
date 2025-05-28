@@ -22,7 +22,7 @@ const DailyReportForm = () => {
             if (resp.status === 200 || resp.status === 302) {
                 console.log(status);
                 setData({});
-                window.location.href = "/dashboard";
+                window.location.href = route('daily');
                 setLoading(false);
             } else {
                 setStatus("failed");
@@ -35,7 +35,6 @@ const DailyReportForm = () => {
         }
     };
 
-    console.log("Data:", data);
     const handleChange = ([field], value) => {
         setData((prevData) => ({
             ...prevData,
@@ -43,6 +42,7 @@ const DailyReportForm = () => {
         }));
     };
     const columns = tColumns(handleChange);
+
     useEffect(() => {
         setData((prevData) => {
             const dateTime = getCurrDateTime();
@@ -57,6 +57,7 @@ const DailyReportForm = () => {
             return newData;
         });
     }, []);
+    
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white p-10">
             {loading && (

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
+    <link rel="preload" as="image" href="/logo_horizontal.webp">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -22,7 +22,7 @@
         });
 
         var channel = pusher.subscribe('message-channel');
-      
+
     </script>
     @routes
     @viteReactRefresh
