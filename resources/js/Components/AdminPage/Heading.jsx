@@ -3,8 +3,8 @@ import { FaHome, FaTh, FaUser, FaLock, FaAddressBook } from "react-icons/fa";
 
 const menuItems = [
     { icon: <FaHome />, label: "Home", href: "/" },
-    { icon: <FaAddressBook />, label: "Daily Form", href: "/daily" },
-    { icon: <FaTh />, label: "Request List", href: "/request" },
+    { icon: <FaAddressBook />, label: "Daily Form", href: route("daily") },
+    { icon: <FaTh />, label: "Request List", href: route("request") },
     { icon: <FaUser />, label: "Profile" },
     { icon: <FaLock />, label: "Security" },
 ];

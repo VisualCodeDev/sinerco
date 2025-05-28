@@ -31,10 +31,10 @@ export default function Welcome({ data }) {
     return (
         <PageLayout>
             <div className="">
-                <a href="/dashboard/daily">Daily</a>
+                <a href={route("daily")}>Daily</a>
             </div>
             <div>
-                <a href="/dashboard/request">Request</a>
+                <a href={route("request")}>Request</a>
             </div>
         </PageLayout>
     );

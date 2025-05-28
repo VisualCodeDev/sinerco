@@ -33,7 +33,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
-});
+})->name('dashboard');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -44,7 +44,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 Route::controller(DailyReportController::class)->group(function () {
     Route::post('/daily/add', 'setReport')->name('daily.add')->middleware('auth');
-    Route::get('/daily', 'getReport')->name('dashboard')->middleware('auth');
+    Route::get('/daily', 'getReport')->name('daily')->middleware('auth');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
