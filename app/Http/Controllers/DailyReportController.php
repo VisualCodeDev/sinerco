@@ -73,16 +73,17 @@ class DailyReportController extends Controller
                 "id"
             ]);
         });
-
-        return Inertia::render('Daily/Daily', [
-            'data' => $data,
-            'unitData' => [
-                'area' => $area,
-                'location' => $location,
-                'unit' => $unit
-            ]
-        ]);
-
+        if ($area && $location && $unit) {
+            return Inertia::render('Daily/Daily', [
+                'data' => $data,
+                'unitData' => [
+                    'area' => $area,
+                    'location' => $location,
+                    'unit' => $unit
+                ]
+            ]);
+        }
+        return redirect()->route('dashboard');
     }
     public function getReport()
     {
