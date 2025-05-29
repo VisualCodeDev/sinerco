@@ -72,7 +72,7 @@ class StatusRequestController extends Controller
                 $notification->status = $request->status;
                 $notification->save();
             } else {
-                $notification = new AdminNotification();
+                $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->requestId = $status->requestId;
                 $notification->date = $status->startDate;
                 $notification->time = $status->startTime;
