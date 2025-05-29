@@ -16,7 +16,7 @@ const Toast = ({ message, onClose }) => {
                 <strong>{getRequestTypeName(message.requestType)}</strong>{" "}
                 Request Available {" "}
                 <a
-                    href={`/dashboard/request#${message.id}`}
+                    href={route('request') + '#' + message.id}
                     className="text-blue-500 hover:underline font-bold text-xs"
                 >
                     (View Request)
