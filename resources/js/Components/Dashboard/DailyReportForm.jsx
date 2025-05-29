@@ -11,6 +11,7 @@ import {
 import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
 import Modal from "../Modal";
+import { FaAngleDown } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
     const { unitData } = props;
@@ -167,10 +168,31 @@ const DailyReportForm = (props) => {
 const SettingModal = (props) => {
     const { isModal, handleCloseModal, handleConfirmSettings } = props;
     const [formData, setFormData] = useState({});
-
-    const handleChange = (field, value) => {
-        setFormData({ ...formData, [field]: value });
+    const [decimalActive, setDecimalActive] = useState(false);
+    const [minMaxActive, setMinMaxActive] = useState(false);
+    const handleChange = (settingType, field, value) => {
+        if (settingType === "decimalSetting") {
+            setFormData({
+                ...formData,
+                [settingType]: {
+                    ...formData[settingType],
+                    [field]: value,
+                },
+            });
+        } else if (settingType === "minMaxSetting") {
+            setFormData((prev) => ({
+                ...prev,
+                [settingType]: {
+                    ...prev[settingType],
+                    [field]: {
+                        ...prev[settingType]?.[field],
+                        ...value,
+                    },
+                },
+            }));
+        }
     };
+
     const handleSave = () => {
         let formattedDecimal = {};
         for (const key in formData) {
@@ -192,21 +214,115 @@ const SettingModal = (props) => {
         >
             <Modal.Body>
                 <div className="flex flex-col gap-2">
-                    {formItems.map((item) => (
-                        <div className="flex justify-between items-center">
-                            <p>{item.header}</p>
-                            <input
-                                type="number"
-                                step={1}
-                                min={0}
-                                placeholder="? dibelakang koma"
-                                onChange={(e) =>
-                                    handleChange(item?.name, e.target.value)
-                                }
-                                value={formData?.item?.name}
-                            />
+                    <div>
+                        <div>
+                            <div
+                                className="border-b-2 py-2 text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                onClick={() => setDecimalActive(!decimalActive)}
+                            >
+                                <p>Decimal Settings</p>
+                                <FaAngleDown className="font-light" />
+                            </div>
+                            {decimalActive && (
+                                <div className="p-3 pt-1 flex flex-col gap-2">
+                                    {formItems
+                                        .filter((item) => item.name !== "time")
+                                        .map((item) => (
+                                            <div className="flex justify-between items-center">
+                                                <p>{item.header}</p>
+                                                <input
+                                                    type="number"
+                                                    step={1}
+                                                    min={0}
+                                                    placeholder="? dibelakang koma"
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            "decimalSetting",
+                                                            item?.name,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={
+                                                        formData
+                                                            ?.decimalSetting?.[
+                                                            item.name
+                                                        ] || ""
+                                                    }
+                                                />
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
                         </div>
-                    ))}
+                        <div>
+                            <div
+                                className="border-b-2 py-2 text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                onClick={() => setMinMaxActive(!minMaxActive)}
+                            >
+                                <p>MinMax Settings</p>
+                                <FaAngleDown className="font-light" />
+                            </div>
+                            {minMaxActive && (
+                                <div className="p-3 pt-1 flex flex-col gap-2">
+                                    {formItems
+                                        .filter((item) => item.name !== "time")
+                                        .map((item) => (
+                                            <div className="flex justify-between items-center">
+                                                <p>{item.header}</p>
+                                                <div className="flex gap-1">
+                                                    <input
+                                                        type="number"
+                                                        step={1}
+                                                        min={0}
+                                                        placeholder="min."
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "minMaxSetting",
+                                                                item?.name,
+                                                                {
+                                                                    min: e
+                                                                        .target
+                                                                        .value,
+                                                                }
+                                                            )
+                                                        }
+                                                        value={
+                                                            formData
+                                                                ?.minMaxSetting?.[
+                                                                item.name
+                                                            ]?.min || ""
+                                                        }
+                                                    />
+                                                    <input
+                                                        type="number"
+                                                        step={1}
+                                                        min={0}
+                                                        placeholder="max."
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "minMaxSetting",
+                                                                item?.name,
+                                                                {
+                                                                    max: e
+                                                                        .target
+                                                                        .value,
+                                                                }
+                                                            )
+                                                        }
+                                                        value={
+                                                            formData
+                                                                ?.minMaxSetting?.[
+                                                                item.name
+                                                            ]?.max || ""
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </Modal.Body>
             <Modal.Footer>

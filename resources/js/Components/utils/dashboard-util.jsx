@@ -508,7 +508,6 @@ export const getAvg = (data) => {
 };
 
 export const getFormattedDate = (value, format = "DD MMM YYYY") => {
-    console.log(value);
     return dayjs(value).format(format);
 };
 
