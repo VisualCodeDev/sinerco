@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('requestId')->unique();
-            $table->date('date');
-            $table->string('timeStart');
-            $table->string('timeEnd')->default('')->nullable();
+            $table->date('startDate');
+            $table->string('startTime');
+            $table->date('endDate')->nullable();
+            $table->string('endTime')->default('')->nullable();
             $table->string('requestType');
             $table->string('action')->default('');
             $table->string('remarks')->default('');

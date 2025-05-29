@@ -1,5 +1,6 @@
 import Card from "@/Components/Card";
 import {
+    DateTimeInput,
     editRequestItems,
     getCurrDateTime,
     getFormattedDate,
@@ -29,35 +30,15 @@ const Request = ({ data }) => {
                 </Card.Header>
                 <Card.Body className="relative">
                     <div className="flex text-center">
-                        {status && (
-                            <div
-                                className={`${
-                                    status == "success"
-                                        ? "bg-green-300"
-                                        : status == "failed" && "bg-red-300"
-                                } absolute top-0 left-1/2 -translate-x-1/2 px-5 py-2`}
-                            >
-                                {status === "success" ? (
-                                    <div className="text-black">
-                                        Request has been Updated
-                                    </div>
-                                ) : (
-                                    status === "failed" && (
-                                        <div className="text-white">
-                                            Request Failed
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        )}
                         <table className="w-full">
                             <thead>
                                 <tr>
                                     <th>No.</th>
-                                    <th>Date</th>
+                                    <th>Start Date</th>
+                                    <th>Start Time</th>
                                     <th>Request</th>
-                                    <th>Start</th>
-                                    <th>End</th>
+                                    <th>End Date</th>
+                                    <th>End Time</th>
                                     <th>Status</th>
                                     <th>Remarks</th>
                                     <th>Action</th>
@@ -75,20 +56,22 @@ const Request = ({ data }) => {
                                                   <td>{index + 1}</td>
                                                   <td>
                                                       {getFormattedDate(
-                                                          item?.date
+                                                          item?.startDate
                                                       )}
                                                   </td>
+                                                  <td>{item?.startTime}</td>
                                                   <td>
                                                       {getRequestTypeName(
                                                           item?.requestType
                                                       )}
                                                   </td>
                                                   <td>
-                                                      {item?.timeStart ||
-                                                          item?.time}
+                                                      {getFormattedDate(
+                                                          item?.endDate
+                                                      ) || "-"}
                                                   </td>
                                                   <td>
-                                                      {item?.timeEnd || "-"}
+                                                      {item?.endTime || "-"}
                                                   </td>
                                                   {status && (
                                                       <td
@@ -149,23 +132,23 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
             });
         }
     }, [selectedItem]);
-
     const handleChange = (field, value) => {
+        console.log(field, value);
         setData((prevData) => {
             const updatedData = { ...prevData, [field]: value };
-
-            if (
-                field === "status" &&
-                value != "End" &&
-                prevData.timeEnd != ""
-            ) {
-                updatedData.timeEnd = "";
-            } else if (
-                field === "status" &&
-                value === "End" &&
-                prevData.timeEnd === ""
-            ) {
-                updatedData.timeEnd = getCurrDateTime().time;
+            if (field === "status") {
+                if (value !== "End" && prevData.endTime && prevData.endDate) {
+                    updatedData.endTime = "";
+                    updatedData.endDate = "";
+                } else if (
+                    value === "End" &&
+                    !prevData.endTime &&
+                    !prevData.endDate
+                ) {
+                    const currDateTime = getCurrDateTime();
+                    updatedData.endTime = currDateTime.time;
+                    updatedData.endDate = currDateTime.date;
+                }
             }
 
             return updatedData;
@@ -174,9 +157,15 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
 
     const handleSave = async () => {
         // await axios.post("/dashboard/request/update", formData);
-        if (formData?.timeEnd === "" && formData?.status === "End") {
-            return alert("Please fill in the time end");
+        if (
+            formData?.status === "End" &&
+            (!formData?.endDate ||
+                !formData?.endTime ||
+                formData?.action === "")
+        ) {
+            return alert("Please fill all the fields");
         }
+
         post(route("request.update"), formData);
         setModal(false);
     };
@@ -188,23 +177,28 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
             size="md"
         >
             <Modal.Body>
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-2 gap-5 items-center">
                     {editRequestItems.map((item, index) => {
                         const itemInputType = item?.isInput
                             ? item?.type
                             : false;
+
                         return (
                             <>
                                 <div key={index}>{item?.name}</div>
                                 {!itemInputType ? (
                                     <div>
-                                        {item?.name === "Date"
-                                            ? getFormattedDate(formData[item?.value])
+                                        {item?.name === "Start Date Time"
+                                            ? getFormattedDate(
+                                                  formData[item?.value]
+                                              )
                                             : getRequestTypeName(
                                                   formData[item?.value]
                                               )}
                                     </div>
-                                ) : itemInputType && item?.type != "option" ? (
+                                ) : itemInputType &&
+                                  item?.type != "option" &&
+                                  item?.type != "dateTime" ? (
                                     <input
                                         type={itemInputType}
                                         value={formData[item?.value]}
@@ -214,6 +208,18 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
                                                 e.target.value
                                             )
                                         }
+                                    />
+                                ) : item?.type === "dateTime" ? (
+                                    <DateTimeInput
+                                        value={{
+                                            date: formData[item?.value?.date],
+                                            time: formData[item?.value?.time],
+                                        }}
+                                        name={{
+                                            date: item?.value?.date,
+                                            time: item?.value?.time,
+                                        }}
+                                        handleChange={handleChange}
                                     />
                                 ) : (
                                     <select
@@ -252,14 +258,29 @@ export default Request;
 export const RequestModal = ({ handleCloseModal, showModal }) => {
     const { data, setData, post } = useForm({
         requestType: "",
-        date: "",
-        time: "",
+        startDate: "",
+        startTime: "",
     });
-
+    const [errors, setErrors] = useState({});
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const newErrors = {};
+
+        if (
+            !requestType.some((item) => item.value === data?.requestType) ||
+            !data?.requestType
+        ) {
+            newErrors.requestType = "Please choose a valid request type";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         try {
             post(route("request.post"), data);
+            setErrors({});
         } catch (error) {
             console.log(error);
         } finally {
@@ -280,11 +301,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             const dataDateTime = getCurrDateTime();
             setData((prevData) => ({
                 ...prevData,
-                date: dataDateTime.date,
-                time: dataDateTime.time,
+                startDate: dataDateTime.date,
+                startTime: dataDateTime.time,
             }));
         }
     }, [showModal]);
+
     return (
         <Modal
             title="Report SD/STDBY"
@@ -292,29 +314,56 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             handleCloseModal={handleCloseModal}
             showModal={showModal}
         >
-            <Modal.Body>
-                <form onSubmit={handleSubmit} method="POST">
-                    <div>
+            <form
+                onSubmit={handleSubmit}
+                method="POST"
+                className="flex flex-col gap-2"
+            >
+                <Modal.Body>
+                    <div className="flex justify-between items-center">
                         <label htmlFor="request">Request: </label>
-                        <select
-                            required
-                            id="request"
-                            value={data.requestType || ""}
-                            onChange={(e) =>
-                                handleChange(["requestType"], e.target.value)
-                            }
-                        >
-                            <option>Choose</option>
-                            {requestType?.map((item) => (
-                                <option value={item?.value}>
-                                    {item?.name}
+                        <div>
+                            <select
+                                required
+                                id="request"
+                                value={data.requestType || ""}
+                                onChange={(e) =>
+                                    handleChange(
+                                        ["requestType"],
+                                        e.target.value
+                                    )
+                                }
+                            >
+                                <option value={null}>
+                                    -- Select Request Type --
                                 </option>
-                            ))}
-                        </select>
+                                {requestType?.map((item) => (
+                                    <option value={item?.value}>
+                                        {item?.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.requestType && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.requestType}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    <div>
-                        <label htmlFor="date">Date: </label>
-                        <input
+                    <div className="flex justify-between items-center">
+                        <label htmlFor="date">Date Time: </label>
+                        <DateTimeInput
+                            value={{
+                                date: data?.startDate,
+                                time: data?.startTime,
+                            }}
+                            name={{
+                                date: "startDate",
+                                time: "startTime",
+                            }}
+                            handleChange={handleChange}
+                        />
+                        {/* <input
                             required
                             id="date"
                             name="date"
@@ -323,9 +372,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)
                             }
-                        />
+                        /> */}
                     </div>
-                    <div>
+                    {/* <div className="flex justify-between items-center">
                         <label htmlFor="time">Time: </label>
                         <input
                             required
@@ -337,8 +386,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                 handleChange([e.target.name], e.target.value)
                             }
                         />
-                    </div>
-                    <div>
+                    </div> */}
+                    <div className="flex justify-between items-center">
                         <label htmlFor="time">Remarks: </label>
                         <input
                             required
@@ -351,9 +400,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             }
                         />
                     </div>
+                </Modal.Body>
+                <Modal.Footer>
                     <button type="submit">Submit</button>
-                </form>
-            </Modal.Body>
+                </Modal.Footer>
+            </form>
         </Modal>
     );
 };

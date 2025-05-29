@@ -20,37 +20,20 @@ class StatusRequestController extends Controller
     public function setRequest(Request $request)
     {
         $val = $request->validate([
-            'date' => 'required|string',
-            'time' => 'required|string',
+            'startDate' => 'required|string',
+            'startTime' => 'required|string',
             'requestType' => 'required|string',
             'remarks' => 'required|string',
         ]);
 
         try {
             $status = new StatusRequest();
-            $status->date = $val['date'];
-            $status->timeStart = $val['time'];
+            $status->startDate = $val['startDate'];
+            $status->startTime = $val['startTime'];
             $status->requestType = $val['requestType'];
             $status->remarks = $val['remarks'];
             $status->status = 'Pending';
-            $isComplete = $status->save();
-            // if ($isComplete) {
-            //     $notification = new AdminNotification();
-            //     $notification->requestId = $status->requestId;
-            //     $notification->date = $status->date;
-            //     $notification->time = $status->timeStart;
-            //     $notification->requestType = $status->requestType;
-            //     $notification->status = $status->status;
-            //     $notification->save();
-            // }
-
-            $message = [
-                'date' => $val['date'],
-                'time' => $val['time'],
-                'requestType' => $val['requestType'],
-                'status' => 'Pending',
-                'id' => $status->requestId,
-            ];
+            $status->save();
 
             return back();
         } catch (\Exception $e) {
@@ -68,24 +51,36 @@ class StatusRequestController extends Controller
         $request->validate([
             'requestId' => 'required|string',
             'status' => 'required|string',
-            'timeEnd' => 'nullable|string',
+            'endTime' => 'nullable|string',
+            'endDate' => 'nullable|string',
+            'action' => 'nullable|string',
         ]);
         $status = StatusRequest::where('requestId', $request->requestId)->first();
         if ($status) {
             $status->status = $request->status;
-            if ($request->timeEnd) {
-                $status->timeEnd = $request->timeEnd;
+            if ($request->endTime && $request->endDate) {
+                $status->endTime = $request->endTime;
+                $status->endDate = $request->endDate;
+                $status->action = $request->action;
+            } else {
+                $status->endTime = null;
+                $status->endDate = null;
+                $status->action = '';
             }
-            else {
-                $status->timeEnd = null;
-            }
-            $status->save();
-
             if ($status->status === "End") {
                 $notification = AdminNotification::where('requestId', $request->requestId)->first();
                 $notification->status = $request->status;
                 $notification->save();
+            } else {
+                $notification = new AdminNotification();
+                $notification->requestId = $status->requestId;
+                $notification->date = $status->startDate;
+                $notification->time = $status->startTime;
+                $notification->requestType = $status->requestType;
+                $notification->status = $status->status;
+                $notification->save();
             }
+            $status->save();
             return back()->with('status', 'success');
         }
 

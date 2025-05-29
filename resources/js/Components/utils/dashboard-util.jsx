@@ -103,6 +103,25 @@ export const getRequestStatus = (value) => {
     return found ? found : value;
 };
 
+export const DateTimeInput = ({ value, name, handleChange }) => {
+    return (
+        <div className="flex items-center">
+            <input
+                type="date"
+                name={name?.date}
+                value={value?.date}
+                onChange={(e) => handleChange([e.target.name], e.target.value)}
+            />
+            <input
+                type="time"
+                name={name?.time}
+                value={value?.time}
+                onChange={(e) => handleChange([e.target.name], e.target.value)}
+            />
+        </div>
+    );
+};
+
 export const TimeInput = ({
     onChange,
     name = "time",
@@ -508,6 +527,7 @@ export const getAvg = (data) => {
 };
 
 export const getFormattedDate = (value, format = "DD MMM YYYY") => {
+    if(!value) return;
     return dayjs(value).format(format);
 };
 
@@ -535,10 +555,10 @@ export const requestStatus = [
 
 export const editRequestItems = [
     {
-        name: "Date",
-        value: "date",
-        type: "text",
-        isInput: false,
+        name: "Start Date Time",
+        value: { date: "startDate", time: "startTime" },
+        type: "dateTime",
+        isInput: true,
     },
     {
         name: "Request",
@@ -546,18 +566,24 @@ export const editRequestItems = [
         type: "text",
         isInput: false,
     },
+    // {
+    //     name: "Start Time",
+    //     value: "startTime",
+    //     type: "time",
+    //     isInput: true,
+    // },
     {
-        name: "Time Start",
-        value: "timeStart",
-        type: "time",
+        name: "End Date Time",
+        value: { date: "endDate", time: "endTime" },
+        type: "dateTime",
         isInput: true,
     },
-    {
-        name: "Time End",
-        value: "timeEnd",
-        type: "time",
-        isInput: true,
-    },
+    // {
+    //     name: "End Time",
+    //     value: "endTime",
+    //     type: "time",
+    //     isInput: true,
+    // },
     {
         name: "Status",
         value: "status",

@@ -21,8 +21,8 @@ class StatusRequest extends Model
         static::created(function ($statusRequest) {
             AdminNotification::create([
                 'requestId' => $statusRequest->requestId,
-                'date' => $statusRequest->date,
-                'time' => $statusRequest->timeStart,
+                'date' => $statusRequest->startDate,
+                'time' => $statusRequest->startTime,
                 'requestType' => $statusRequest->requestType,
                 'status' => $statusRequest->status,
             ]);

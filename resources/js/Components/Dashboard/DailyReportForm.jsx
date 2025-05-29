@@ -32,9 +32,8 @@ const DailyReportForm = (props) => {
             setSaving(true);
             const resp = await axios.post(route("daily.add"), data);
             if (resp.status === 200 || resp.status === 302) {
-                console.log(status);
                 setData({});
-                route("daily", { area: area, location: location, unit: unit });
+                route("daily", unitData);
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
