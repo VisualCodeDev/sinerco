@@ -76,7 +76,11 @@ class DailyReportController extends Controller
 
         return Inertia::render('Daily/Daily', [
             'data' => $data,
-            'selectedUnit' => request()->all()
+            'unitData' => [
+                'area' => $area,
+                'location' => $location,
+                'unit' => $unit
+            ]
         ]);
 
     }

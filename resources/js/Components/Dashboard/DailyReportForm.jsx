@@ -5,6 +5,8 @@ import {
     DateInput,
     getCurrDateTime,
     TimeInput,
+    toCapitalizeFirstLetter,
+    getFormattedDate,
 } from "../utils/dashboard-util";
 import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
@@ -13,33 +15,39 @@ import Modal from "../Modal";
 const DailyReportForm = (props) => {
     const { unitData } = props;
     const [data, setData] = useState({});
-    const [isModal, setModal] = useState(false);
+    const [isSettingModal, setSettingModal] = useState(false);
+    const [isConfirmationModal, setConfirmationModal] = useState(false);
     const [settings, setSettings] = useState();
     const [status, setStatus] = useState();
     const [saving, setSaving] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setConfirmationModal(true);
+    };
+
+    const handleSetReport = async (e) => {
         try {
             setSaving(true);
             const resp = await axios.post(route("daily.add"), data);
-            console.log(loading);
             if (resp.status === 200 || resp.status === 302) {
                 console.log(status);
                 setData({});
-                window.location.href = route("daily");
+                route("daily", { area: area, location: location, unit: unit });
+                setConfirmationModal(false);
                 setSaving(false);
             } else {
                 setStatus("failed");
+                setConfirmationModal(false);
                 setSaving(false);
             }
         } catch (err) {
             console.error("Error creating report:", err);
             setStatus("error");
+            setConfirmationModal(false);
             setSaving(false);
         }
     };
-
     const handleChange = ([field], value) => {
         setData((prevData) => ({
             ...prevData,
@@ -106,7 +114,7 @@ const DailyReportForm = (props) => {
                         <div>
                             <button
                                 className="bg-primary text-white px-6 py-2 rounded-md"
-                                onClick={() => setModal(true)}
+                                onClick={() => setSettingModal(true)}
                             >
                                 Setting
                             </button>
@@ -114,12 +122,12 @@ const DailyReportForm = (props) => {
                     </div>
                     <SettingModal
                         handleConfirmSettings={handleConfirmSettings}
-                        isModal={isModal}
-                        handleCloseModal={() => setModal(false)}
+                        isModal={isSettingModal}
+                        handleCloseModal={() => setSettingModal(false)}
                     />
                 </>
             )}
-            <form onSubmit={handleSubmit} method="POST">
+            <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-4 mb-4 items-center">
                     {formList.map((item) => (
                         <div
@@ -142,10 +150,15 @@ const DailyReportForm = (props) => {
                     ))}
                 </div>
                 <div>
-                    <button type="submit" className="font-bold w-full h-full">
-                        Simpan
-                    </button>
+                    <button className="font-bold w-full h-full">Simpan</button>
                 </div>
+                <ConfirmationModal
+                    formData={data}
+                    unitData={unitData}
+                    isModal={isConfirmationModal}
+                    handleCloseModal={() => setConfirmationModal(false)}
+                    handleSubmit={handleSetReport}
+                />
             </form>
         </div>
     );
@@ -168,7 +181,6 @@ const SettingModal = (props) => {
                 [key]: maxDecimal,
             };
         }
-        console.log(formattedDecimal);
         // handleConfirmSettings(formData);
     };
     return (
@@ -199,6 +211,46 @@ const SettingModal = (props) => {
             </Modal.Body>
             <Modal.Footer>
                 <button onClick={handleSave}>Simpan</button>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
+const ConfirmationModal = (props) => {
+    const { isModal, handleCloseModal, handleSubmit, formData, unitData } =
+        props;
+    return (
+        <Modal
+            title="Are You Sure?"
+            handleCloseModal={handleCloseModal}
+            showModal={isModal}
+            size={"md"}
+        >
+            <Modal.Body>
+                <div>
+                    {unitData &&
+                        Object.entries(unitData).map(([key, value]) => (
+                            <div className="flex justify-between">
+                                <p>{toCapitalizeFirstLetter(key)} </p>
+                                <p>{value}</p>
+                            </div>
+                        ))}
+
+                    {formData &&
+                        Object.entries(formData).map(([key, value]) => (
+                            <div className="flex justify-between">
+                                <p>{toCapitalizeFirstLetter(key)} </p>
+                                <p>
+                                    {key === "date"
+                                        ? getFormattedDate(value)
+                                        : value}
+                                </p>
+                            </div>
+                        ))}
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <button onClick={handleSubmit}>Submit</button>
             </Modal.Footer>
         </Modal>
     );

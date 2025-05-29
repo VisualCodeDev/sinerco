@@ -6,10 +6,8 @@ import PageLayout from "@/Layouts/PageLayout";
 import { Head, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
-export default function Dashboard({ data }) {
-    const [formData, setFormData] = useState();
+export default function Dashboard({ data, unitData }) {
     const [activeTab, setActiveTab] = useState("form");
-
     return (
         <PageLayout>
             <div className="flex h-screen">
@@ -41,11 +39,11 @@ export default function Dashboard({ data }) {
                     {/* TABS CONTENT */}
                     <div className="flex-1 border-t-2 border-t-primary">
                         {activeTab === "form" && (
-                            <DailyReportForm />
+                            <DailyReportForm unitData={unitData} />
                         )}
 
                         {activeTab === "report" && (
-                            <DailyReport formData={data} />
+                            <DailyReport formData={data} unitData={unitData} />
                         )}
                     </div>
                 </div>

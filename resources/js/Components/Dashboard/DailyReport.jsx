@@ -24,32 +24,32 @@ const DailyReport = (props) => {
         const newSelectedDate = e.target.value;
         setSelectedDate(newSelectedDate);
     };
-
+    const sortedObjectByTime = (obj) => {
+        const sortedItemByTime = Object.entries(formData)
+            .filter(([, value]) => value.date === selectedDate)
+            .map(([, value]) => value)
+            .sort((a, b) => {
+                const hourA = parseInt(a.time.split(":")[0]);
+                const hourB = parseInt(b.time.split(":")[0]);
+                return hourA - hourB;
+            });
+        return sortedItemByTime;
+    };
     useEffect(() => {
         if (formData) {
             if (selectedDate) {
-                const selectedDateItems = Object.entries(formData)
-                    .filter(([key, value]) => value.date === selectedDate)
-                    .map(([_, value]) => value)
-                    .sort((a, b) => {
-                        const toMinutes = (timeStr) => {
-                            const [hour, minute] = timeStr
-                                .split(":")
-                                .map(Number);
-                            return hour * 60 + minute;
-                        };
-                        return toMinutes(a.time) - toMinutes(b.time);
-                    });
-
-                setCurrData(selectedDateItems);
+                const sortedData = sortedObjectByTime(formData);
+                setCurrData(sortedData);
             }
         }
     }, [selectedDate]);
     useEffect(() => {
         if (formData) {
-            setCurrData(formData);
+            const sortedData = sortedObjectByTime(formData);
+            setCurrData(sortedData);
         }
     }, [formData]);
+
     return (
         <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
             {unitData && (
@@ -80,113 +80,6 @@ const DailyReport = (props) => {
                 </div>
                 <button onClick={() => setClick(true)}>Export</button>
             </div>
-            {/* <table className="table-container table">
-                <thead>
-                    <tr>
-                        {formItems &&
-                            formItems.map((item, index) => (
-                                <th
-                                    key={index}
-                                    className="table-content"
-                                    rowSpan={!item.subheader ? 2 : undefined}
-                                    colSpan={item.subheader?.length}
-                                >
-                                    {item.header}
-                                </th>
-                            ))}
-                    </tr>
-                    <tr>
-                        {formItems &&
-                            formItems.map((item) =>
-                                item.subheader?.map((sub, index) => (
-                                    <th key={index} className="table-content">
-                                        {sub.sub}
-                                    </th>
-                                ))
-                            )}
-                    </tr>
-                </thead>
-                <tbody>
-                    {currData &&
-                        Object.entries(currData).map(([key, value]) => (
-                            <>
-                                <tr key={key}>
-                                    <td className="table-content">
-                                        {value.time}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.sourcePress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.suctionPress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.dischargePress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.speed}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.manifoldPress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.oilPress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.oilDiff}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.runningHours}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.voltage}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.waterTemp}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.befCooler}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.aftCooler}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.staticPress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.diffPress}
-                                    </td>
-                                    <td className="table-content">
-                                        {value.mscfd}
-                                    </td>
-                                </tr>
-                            </>
-                        ))}
-                    {averages && (
-                        <tr className="bg-slate-100 sticky bottom-0 left-0">
-                            <th className="table-content">Average</th>
-                            {Object.keys(averages).map((field, index) => (
-                                <>
-                                    {field === "time" ||
-                                    field === "created_at" ||
-                                    field === "updated_at" ||
-                                    field === "date" ||
-                                    field === "approval1" ||
-                                    field === "approval2" ||
-                                    field === "id" ? null : (
-                                        <th
-                                            className="table-content"
-                                            key={index}
-                                        >
-                                            {averages[field]}
-                                        </th>
-                                    )}
-                                </>
-                            ))}
-                        </tr>
-                    )}
-                </tbody>
-            </table> */}
             <div className="overflow-x-auto w-full">
                 <table className="min-w-[900px] w-full table-auto border-collapse">
                     <thead className="bg-gray-100">

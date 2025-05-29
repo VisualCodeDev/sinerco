@@ -61,16 +61,14 @@ const columns = () => {
             cellClassName: "text-center",
             width: "20%",
             Cell: ({ area, location, unit }) => {
-                const url =
-                    "/" +
-                    area +
-                    "/" +
-                    location +
-                    "/" +
-                    unit?.unit;
+                const url = "/" + area + "/" + location + "/" + unit?.unit;
                 return (
                     <a
-                        href={route("daily") + url}
+                        href={route("daily", {
+                            area: area,
+                            location: location,
+                            unit: unit?.unit,
+                        })}
                         className="bg-primary text-white px-3 py-2 rounded-md text-sm"
                     >
                         Daily Form
