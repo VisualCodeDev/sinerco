@@ -4,7 +4,7 @@ import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
 import dayjs from "dayjs";
 
-export const cellItem = [
+export const formItems = [
     {
         name: "time",
         header: "Time",
@@ -98,7 +98,7 @@ export const getRequestTypeName = (value) => {
 
 export const getRequestStatus = (value) => {
     if (!value) return "";
-    
+
     const found = requestStatus.find((item) => item.value === value);
     return found ? found : value;
 };
@@ -187,10 +187,10 @@ export const generateExcel = (fileName, formData, checkedItems) => {
             let mergeInfo = [];
             let colIndex = 1;
 
-            cellItem.forEach((item) => {
+            formItems.forEach((item) => {
                 if (item.subheader) {
                     headerRow1.push(item.header);
-                    if (colIndex < cellItem.length) headerRow1.push("");
+                    if (colIndex < formItems.length) headerRow1.push("");
                     mergeInfo.push({
                         start: colIndex,
                         end: colIndex + item.subheader.length - 1,
@@ -324,7 +324,7 @@ export const exportToExcel = (
         const formattedDate = getDDMMYYDate(new Date(date));
         const tableHTML = generateTableHTML(
             formattedDate,
-            cellItem,
+            formItems,
             data,
             averages
         );
@@ -350,7 +350,7 @@ export const exportToExcel = (
     saveAs(data, fileName);
 };
 
-export const generateTableHTML = (date, cellItem, currData, averages) => {
+export const generateTableHTML = (date, formItems, currData, averages) => {
     let tableHTML = `
         <table class="table-container table">
             <thead>
@@ -360,8 +360,8 @@ export const generateTableHTML = (date, cellItem, currData, averages) => {
                 </tr>
                 <tr>
                     ${
-                        cellItem &&
-                        cellItem
+                        formItems &&
+                        formItems
                             .map(
                                 (item) =>
                                     `<th ${
@@ -375,8 +375,8 @@ export const generateTableHTML = (date, cellItem, currData, averages) => {
                 </tr>
                 <tr>
                     ${
-                        cellItem &&
-                        cellItem
+                        formItems &&
+                        formItems
                             .map((item) =>
                                 item.subheader
                                     ? item.subheader
@@ -508,7 +508,7 @@ export const getAvg = (data) => {
 };
 
 export const getFormattedDate = (value, format = "DD MMM YYYY") => {
-    console.log(value)
+    console.log(value);
     return dayjs(value).format(format);
 };
 

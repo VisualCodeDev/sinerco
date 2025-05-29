@@ -15,8 +15,8 @@ const Modal = (props) => {
     return (
         <>
             {showModal && (
-                <div className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] bg-white flex flex-col`}>
-                    <div className="bg-slate-200 w-full p-5 sticky top-0 left-0 flex justify-between">
+                <div className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] flex flex-col z-[200] rounded-md overflow-hidden`}>
+                    <div className="bg-primary text-white w-full p-5 sticky top-0 left-0 flex justify-between">
                         <div className="w-full">
                             <h2 className="text-xl font-bold">{title}</h2>
                         </div>
@@ -37,7 +37,7 @@ Modal.Body = (props) => {
 
 Modal.Footer = (props) => {
     return (
-        <div className="bg-slate-100 p-5 sticky bottom-0 left-0 w-full">
+        <div className="bg-primary text-white p-5 sticky bottom-0 left-0 w-full">
             {props.children}
         </div>
     );

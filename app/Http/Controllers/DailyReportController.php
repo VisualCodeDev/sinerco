@@ -9,7 +9,8 @@ use Inertia\Inertia;
 
 class DailyReportController extends Controller
 {
-    public function dailyList() {
+    public function dailyList()
+    {
         return Inertia::render('Daily/DailyList');
     }
     public function setReport(Request $request)
@@ -61,7 +62,7 @@ class DailyReportController extends Controller
     }
 
 
-    public function index()
+    public function index($area, $location, $unit)
     {
         $data = DailyReport::all()->map(function ($item) {
             return collect($item)->except([
@@ -74,7 +75,8 @@ class DailyReportController extends Controller
         });
 
         return Inertia::render('Daily/Daily', [
-            'data' => $data
+            'data' => $data,
+            'selectedUnit' => request()->all()
         ]);
 
     }

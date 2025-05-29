@@ -62,11 +62,11 @@ const columns = () => {
             width: "20%",
             Cell: ({ area, location, unit }) => {
                 const url =
-                    "?area=" +
+                    "/" +
                     area +
-                    "&location=" +
+                    "/" +
                     location +
-                    "&unit=" +
+                    "/" +
                     unit?.unit;
                 return (
                     <a

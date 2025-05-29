@@ -1,10 +1,9 @@
 import Heading from "@/Components/AdminPage/Heading";
 import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
-import { cellItem } from "@/Components/utils/dashboard-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
-import { Head } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import { useState } from "react";
 
 export default function Dashboard({ data }) {
@@ -41,7 +40,9 @@ export default function Dashboard({ data }) {
 
                     {/* TABS CONTENT */}
                     <div className="flex-1 border-t-2 border-t-primary">
-                        {activeTab === "form" && <DailyReportForm />}
+                        {activeTab === "form" && (
+                            <DailyReportForm />
+                        )}
 
                         {activeTab === "report" && (
                             <DailyReport formData={data} />

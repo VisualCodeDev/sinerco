@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-    cellItem,
+    formItems,
     exportToExcel,
     generateExcel,
     getAvg,
@@ -9,7 +9,9 @@ import {
 } from "../utils/dashboard-util";
 import Card from "../Card";
 
-const DailyReport = ({ formData }) => {
+const DailyReport = (props) => {
+    const { formData, unitData } = props;
+
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
@@ -50,6 +52,13 @@ const DailyReport = ({ formData }) => {
     }, [formData]);
     return (
         <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
+            {unitData && (
+                <div className="text-center w-full">
+                    <p className="text-2xl font-bold">{unitData.unit}</p>
+                    <p className="text-sm">{unitData.area}</p>
+                    <p className="text-sm">{unitData.location}</p>
+                </div>
+            )}
             <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">
                 <div className="flex gap-2 items-center">
                     <th>Date:</th>
@@ -74,8 +83,8 @@ const DailyReport = ({ formData }) => {
             {/* <table className="table-container table">
                 <thead>
                     <tr>
-                        {cellItem &&
-                            cellItem.map((item, index) => (
+                        {formItems &&
+                            formItems.map((item, index) => (
                                 <th
                                     key={index}
                                     className="table-content"
@@ -87,8 +96,8 @@ const DailyReport = ({ formData }) => {
                             ))}
                     </tr>
                     <tr>
-                        {cellItem &&
-                            cellItem.map((item) =>
+                        {formItems &&
+                            formItems.map((item) =>
                                 item.subheader?.map((sub, index) => (
                                     <th key={index} className="table-content">
                                         {sub.sub}
@@ -182,7 +191,7 @@ const DailyReport = ({ formData }) => {
                 <table className="min-w-[900px] w-full table-auto border-collapse">
                     <thead className="bg-gray-100">
                         <tr>
-                            {cellItem?.map((item, index) => (
+                            {formItems?.map((item, index) => (
                                 <th
                                     key={index}
                                     className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
@@ -194,7 +203,7 @@ const DailyReport = ({ formData }) => {
                             ))}
                         </tr>
                         <tr>
-                            {cellItem?.map((item) =>
+                            {formItems?.map((item) =>
                                 item.subheader?.map((sub, index) => (
                                     <th
                                         key={index}

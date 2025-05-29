@@ -1,6 +1,6 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const columns = (handleChange) => {
+const list = (handleChange) => {
     const colItem = [
         {
             name: "date",
@@ -475,4 +475,4 @@ const columns = (handleChange) => {
 
     return colItem;
 };
-export default columns;
+export default list;
