@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('unit_area_locations', function (Blueprint $table) {
             $table->id();
+            $table->string('unitAreaLocationId', 50)->unique();
             $table->string('unitId', 50);
             $table->string('userId', 50);
             $table->string('area');

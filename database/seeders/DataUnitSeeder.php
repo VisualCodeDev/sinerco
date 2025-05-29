@@ -53,7 +53,7 @@ class DataUnitSeeder extends Seeder
             DataUnit::updateOrCreate(
                 ['unit' => $unit],
                 [
-                    'unitId' => (string) Str::uuid(),
+                    'unitId' => (string) Str::uuid7(),
                 ]
             );
         }

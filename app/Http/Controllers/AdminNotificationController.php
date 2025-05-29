@@ -12,7 +12,7 @@ class AdminNotificationController extends Controller
      */
     public function getNotifications()
     {
-        return response()->json(AdminNotification::all());
+        return response()->json(AdminNotification::where('status', '!=', 'End')->get());
     }
     public function index()
     {

@@ -185,7 +185,7 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
 
                         return (
                             <>
-                                <div key={index}>{item?.name}</div>
+                                <div>{item?.name}</div>
                                 {!itemInputType ? (
                                     <div>
                                         {item?.name === "Start Date Time"
@@ -222,22 +222,27 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
                                         handleChange={handleChange}
                                     />
                                 ) : (
-                                    <select
-                                        value={formData[item?.value]}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                item?.value,
-                                                e.target.value
-                                            )
-                                        }
-                                    >
-                                        {item?.options &&
-                                            item?.options?.map((item) => (
-                                                <option value={item?.value}>
-                                                    {item?.name}
-                                                </option>
-                                            ))}
-                                    </select>
+                                    <div key={index}>
+                                        <select
+                                            value={formData[item?.value]}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    item?.value,
+                                                    e.target.value
+                                                )
+                                            }
+                                        >
+                                            {item?.options &&
+                                                item?.options?.map((item) => (
+                                                    <option
+                                                        value={item?.value}
+                                                        key={index}
+                                                    >
+                                                        {item?.name}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
                                 )}
                             </>
                         );
@@ -337,8 +342,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                 <option value={null}>
                                     -- Select Request Type --
                                 </option>
-                                {requestType?.map((item) => (
-                                    <option value={item?.value}>
+                                {requestType?.map((item, index) => (
+                                    <option value={item?.value} key={index}>
                                         {item?.name}
                                     </option>
                                 ))}

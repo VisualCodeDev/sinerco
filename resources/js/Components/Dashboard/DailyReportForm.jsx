@@ -15,6 +15,7 @@ import { FaAngleDown } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
     const { unitData } = props;
+
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -30,10 +31,13 @@ const DailyReportForm = (props) => {
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
-            const resp = await axios.post(route("daily.add"), data);
+            const resp = await axios.post(
+                route("daily.add", unitData?.unitAreaLocationId),
+                data
+            );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
-                route("daily", unitData);
+                route("daily", unitData?.unitAreaLocationId);
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
@@ -106,7 +110,7 @@ const DailyReportForm = (props) => {
                     <div className="text-center w-full flex flex-col gap-2">
                         <div>
                             <p className="text-2xl font-bold">
-                                {unitData.unit}
+                                {unitData.unit?.unit}
                             </p>
                             <p className="text-sm">{unitData.area}</p>
                             <p className="text-sm">{unitData.location}</p>
@@ -154,7 +158,11 @@ const DailyReportForm = (props) => {
                 </div>
                 <ConfirmationModal
                     formData={data}
-                    unitData={unitData}
+                    unitData={{
+                        area: unitData?.area,
+                        location: unitData?.location,
+                        unit: unitData?.unit?.unit,
+                    }}
                     isModal={isConfirmationModal}
                     handleCloseModal={() => setConfirmationModal(false)}
                     handleSubmit={handleSetReport}
@@ -204,6 +212,15 @@ const SettingModal = (props) => {
         }
         // handleConfirmSettings(formData);
     };
+    const options = [];
+    for (let i = 1; i <= 10; i++) {
+        options.push(
+            <option key={i} value={i}>
+                {i}
+            </option>
+        );
+    }
+
     return (
         <Modal
             title={"Setting"}
@@ -228,8 +245,30 @@ const SettingModal = (props) => {
                                         .filter((item) => item.name !== "time")
                                         .map((item) => (
                                             <div className="flex justify-between items-center">
-                                                <p>{item.header}</p>
-                                                <input
+                                                <p className="w-1/2">
+                                                    {item.header}
+                                                </p>
+                                                <select
+                                                    className="w-1/2"
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            "decimalSetting",
+                                                            item?.name,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={
+                                                        formData
+                                                            ?.decimalSetting?.[
+                                                            item.name
+                                                        ] || ""
+                                                    }
+                                                >
+                                                    {options.map((item) => (
+                                                        <>{item}</>
+                                                    ))}
+                                                </select>
+                                                {/* <input
                                                     type="number"
                                                     step={1}
                                                     min={0}
@@ -247,7 +286,7 @@ const SettingModal = (props) => {
                                                             item.name
                                                         ] || ""
                                                     }
-                                                />
+                                                /> */}
                                             </div>
                                         ))}
                                 </div>
@@ -272,7 +311,6 @@ const SettingModal = (props) => {
                                                     <input
                                                         type="number"
                                                         step={1}
-                                                        min={0}
                                                         placeholder="min."
                                                         onChange={(e) =>
                                                             handleChange(
@@ -295,7 +333,6 @@ const SettingModal = (props) => {
                                                     <input
                                                         type="number"
                                                         step={1}
-                                                        min={0}
                                                         placeholder="max."
                                                         onChange={(e) =>
                                                             handleChange(
@@ -344,12 +381,14 @@ const ConfirmationModal = (props) => {
             <Modal.Body>
                 <div>
                     {unitData &&
-                        Object.entries(unitData).map(([key, value]) => (
-                            <div className="flex justify-between">
-                                <p>{toCapitalizeFirstLetter(key)} </p>
-                                <p>{value}</p>
-                            </div>
-                        ))}
+                        Object.entries(unitData)
+                            .filter(([key]) => key !== "UnitAreaLocationId")
+                            .map(([key, value]) => (
+                                <div className="flex justify-between">
+                                    <p>{toCapitalizeFirstLetter(key)} </p>
+                                    <p>{value?.unit || value}</p>
+                                </div>
+                            ))}
 
                     {formData &&
                         Object.entries(formData).map(([key, value]) => (

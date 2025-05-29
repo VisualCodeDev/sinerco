@@ -3,16 +3,16 @@ import { DateInput, TimeInput } from "../dashboard-util";
 const columns = () => {
     const colItem = [
         {
-            name: "id",
+            name: "index",
             header: "No.",
-            headerClassName: "text-center",
+            headerClassName: "text-center bg-primary text-white",
             cellClassName: "text-center",
-            sortable: true,
+            sortable: false,
             width: "3%",
-            Cell: ({ index, id }) => {
+            Cell: ({ index }) => {
                 return (
                     <>
-                        <div>{id}</div>
+                        <div>{index + 1}</div>
                     </>
                 );
             },
@@ -20,6 +20,7 @@ const columns = () => {
         {
             name: "user",
             header: "User",
+            headerClassName: "bg-primary text-white",
             sortable: true,
             width: "17%",
             Cell: ({ user }) => {
@@ -29,6 +30,7 @@ const columns = () => {
         {
             name: "area",
             header: "Area",
+            headerClassName: "bg-primary text-white",
             sortable: true,
             width: "20%",
             Cell: ({ area }) => {
@@ -38,6 +40,7 @@ const columns = () => {
         {
             name: "unit",
             header: "Unit",
+            headerClassName: "bg-primary text-white",
             sortable: true,
             width: "20%",
             Cell: ({ unit }) => {
@@ -47,6 +50,7 @@ const columns = () => {
         {
             name: "location",
             header: "Location",
+            headerClassName: "bg-primary text-white",
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
@@ -55,19 +59,15 @@ const columns = () => {
         },
         {
             name: "dailyForm",
-            header: "",
+            headerClassName: "bg-primary text-white text-center justify-center",
             sortable: false,
-            headerClassName: "text-center justify-center",
             cellClassName: "text-center",
             width: "20%",
-            Cell: ({ area, location, unit }) => {
-                const url = "/" + area + "/" + location + "/" + unit?.unit;
+            Cell: ({ unitAreaLocationId }) => {
                 return (
                     <a
                         href={route("daily", {
-                            area: area,
-                            location: location,
-                            unit: unit?.unit,
+                            unitAreaLocationId,
                         })}
                         className="bg-primary text-white px-3 py-2 rounded-md text-sm"
                     >

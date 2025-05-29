@@ -6,6 +6,7 @@ use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\UserUnitController;
 use App\Models\AdminNotification;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -45,11 +46,12 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 Route::controller(DailyReportController::class)->group(function () {
     Route::get('/daily-list', 'dailyList')->name('daily.list')->middleware('auth');
-    Route::post('/daily/add', 'setReport')->name('daily.add')->middleware('auth');
+    Route::post('/daily/{unitAreaLocationId}/add', 'setReport')->name('daily.add')->middleware('auth');
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
-    Route::get('/daily/{area}/{location}/{unit}', 'index')->name('daily')->middleware('auth');
+    Route::get('/daily/{unitAreaLocationId}', 'index')->name('daily')->middleware('auth');
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
+
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
@@ -59,6 +61,11 @@ Route::controller(StatusRequestController::class)->group(function () {
 
 Route::controller(DataUnitController::class)->group(function () {
     Route::get('/api/get-unit-area-location', 'getUnitAreaLocation')->name('getUnitAreaLocation');
+});
+
+Route::controller(UserUnitController::class)->group(function () {
+    Route::get('/user-list', 'index')->name('user.list');
+    Route::get('/user/{userId}', 'userDetail')->name('user.detail');
 });
 
 // Route::get('/dashboard', function () {

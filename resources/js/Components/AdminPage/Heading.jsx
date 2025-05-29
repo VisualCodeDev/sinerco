@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { FaHome, FaTh, FaUser, FaLock, FaAddressBook } from "react-icons/fa";
+import { FaHome, FaTh, FaUser, FaLock, FaAddressBook, FaList } from "react-icons/fa";
 
 const menuItems = [
     { icon: <FaHome />, label: "Home", href: "/" },
-    { icon: <FaAddressBook />, label: "Unit List", href: route("daily.list") },
+    { icon: <FaAddressBook />, label: "User List", href: route("user.list") },
+    { icon: <FaList />, label: "All Unit List", href: route("daily.list") },
     { icon: <FaTh />, label: "Request List", href: route("request") },
     { icon: <FaUser />, label: "Profile" },
     { icon: <FaLock />, label: "Security" },
@@ -44,7 +45,7 @@ const Heading = ({ children }) => {
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col w-full">
+            <div className="flex-1 flex flex-col w-full relative">
                 {/* Top Header */}
                 <div className="bg-white flex items-center justify-between px-6 py-4 shadow sticky top-0 z-10">
                     <div className="h-8">
