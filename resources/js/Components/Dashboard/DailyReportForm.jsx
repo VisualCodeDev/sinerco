@@ -14,7 +14,7 @@ import Modal from "../Modal";
 import { FaAngleDown } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
-    const { unitData } = props;
+    const { unitData, formData } = props;
 
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
@@ -27,7 +27,6 @@ const DailyReportForm = (props) => {
         e.preventDefault();
         setConfirmationModal(true);
     };
-
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
@@ -58,7 +57,7 @@ const DailyReportForm = (props) => {
             [field]: value,
         }));
     };
-    const formList = list(handleChange);
+    const formList = list({ handleChange: handleChange, formData: formData });
 
     const handleConfirmSettings = (value) => {
         setSettings({ ...value });
@@ -116,12 +115,12 @@ const DailyReportForm = (props) => {
                             <p className="text-sm">{unitData.location}</p>
                         </div>
                         <div>
-                            <button
+                            {/* <button
                                 className="bg-primary text-white px-6 py-2 rounded-md"
                                 onClick={() => setSettingModal(true)}
                             >
                                 Setting
-                            </button>
+                            </button> */}
                         </div>
                     </div>
                     <SettingModal
@@ -172,11 +171,24 @@ const DailyReportForm = (props) => {
     );
 };
 
-const SettingModal = (props) => {
-    const { isModal, handleCloseModal, handleConfirmSettings } = props;
+export const SettingModal = (props) => {
+    const { isModal, handleCloseModal, handleConfirmSettings, data } = props;
     const [formData, setFormData] = useState({});
     const [decimalActive, setDecimalActive] = useState(false);
     const [minMaxActive, setMinMaxActive] = useState(false);
+
+    useEffect(() => {
+        if (data) return;
+        let defaultDecimalSetting = {};
+        formItems
+            .filter((item) => item.name !== "time")
+            .map((item) => {
+                defaultDecimalSetting = {
+                    ...defaultDecimalSetting,
+                    [item?.name]: item?.default?.decimalSetting,
+                };
+            });
+    }, []);
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -213,7 +225,7 @@ const SettingModal = (props) => {
         // handleConfirmSettings(formData);
     };
     const options = [];
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 0; i <= 10; i++) {
         options.push(
             <option key={i} value={i}>
                 {i}

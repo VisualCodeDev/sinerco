@@ -17,10 +17,10 @@ class UserUnitController extends Controller
 
     public function userDetail($userId)
     {
-        $userData = UnitAreaLocation::where('userId', $userId)->with('user', 'unit')->get();
-
-        if ($userData) {
-            return Inertia::render('User/UserDetail', ['data' => $userData]);
+        $data = UnitAreaLocation::where('userId', $userId)->with('user', 'unit')->get();
+        $userData = $data->first()?->user;
+        if ($data) {
+            return Inertia::render('User/UserDetail', ['data' => $data, 'userData' => $userData]);
         }
     }
 

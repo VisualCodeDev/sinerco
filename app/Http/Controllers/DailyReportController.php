@@ -12,7 +12,8 @@ class DailyReportController extends Controller
 {
     public function dailyList()
     {
-        return Inertia::render('Daily/DailyList');
+        $data = UnitAreaLocation::with(['unit', 'user'])->get();
+        return Inertia::render('Daily/DailyList', ['data' => $data]);
     }
     public function setReport(Request $request, $unitAreaLocationId)
     {

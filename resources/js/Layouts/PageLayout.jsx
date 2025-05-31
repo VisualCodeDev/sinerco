@@ -10,9 +10,14 @@ const PageLayout = ({ children }) => {
     const [showModal, setShowModal] = useState(false);
     const [messages, setMessages] = useState([]);
     const fetchNotifications = async () => {
-        const response = await axios.get("/api/notifications");
-        setMessages(response.data);
+        try {
+            const response = await axios.get("/api/notifications");
+            setMessages(response.data);
+        } catch (err) {
+            console.error("Failed to fetch notifications:", err);
+        }
     };
+
     useEffect(() => {
         fetchNotifications();
         const interval = setInterval(() => {

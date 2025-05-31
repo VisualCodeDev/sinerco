@@ -11,46 +11,90 @@ export const formItems = [
     },
     {
         name: "sourcePress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Source Press.",
     },
     {
         name: "suctionPress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Suction Press.",
     },
     {
         name: "dischargePress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Discharge Press.",
     },
     {
         name: "speed",
+        default: {
+            decimalSetting: "0",
+            minMaxSetting: "",
+        },
         header: "Speed",
     },
     {
         name: "manifoldPress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Manifold Press.",
     },
     {
         name: "oilPress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Oil Press.",
     },
     {
         name: "oilDiff",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Oil Diff.",
     },
     {
         name: "runningHours",
+        default: {
+            decimalSetting: "0",
+            minMaxSetting: "",
+        },
         header: "Running Hours",
     },
     {
         name: "voltage",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Voltage",
     },
     {
         name: "waterTemp",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Water Temp",
     },
     {
         name: "dischargeTemp",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Discharge Temp",
         subheader: [
             {
@@ -65,14 +109,26 @@ export const formItems = [
     },
     {
         name: "staticPress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Static Press. Reading",
     },
     {
         name: "diffPress",
+        default: {
+            decimalSetting: "1",
+            minMaxSetting: "",
+        },
         header: "Diff. Press. Reading",
     },
     {
         name: "flowRate",
+        default: {
+            decimalSetting: "6",
+            minMaxSetting: "",
+        },
         header: "Flowrate",
         subheader: [{ name: "mscfd", sub: "MSCFD" }],
     },
@@ -123,6 +179,8 @@ export const DateTimeInput = ({ value, name, handleChange }) => {
 };
 
 export const TimeInput = ({
+    formData,
+    item,
     onChange,
     name = "time",
     min = 0,
@@ -131,12 +189,21 @@ export const TimeInput = ({
     value,
 }) => {
     const options = [];
-    for (let i = 1; i <= 23; i++) {
-        options.push(
-            <option key={i} value={i + ":00"}>
-                {i}:00
-            </option>
-        );
+    const filledFormTime =
+        formData
+            ?.filter((data) => item?.date === data?.date)
+            .map((data) => parseInt(data?.time.split(":")[0])) ?? [];
+
+    let initTime = 1;
+    let maxTime = 23;
+    for (let i = initTime; i <= maxTime; i++) {
+        if (!filledFormTime.includes(i)) {
+            options.push(
+                <option key={i} value={`${i}:00`}>
+                    {i}:00
+                </option>
+            );
+        }
     }
     return (
         <>
@@ -527,7 +594,7 @@ export const getAvg = (data) => {
 };
 
 export const getFormattedDate = (value, format = "DD MMM YYYY") => {
-    if(!value) return;
+    if (!value) return;
     return dayjs(value).format(format);
 };
 

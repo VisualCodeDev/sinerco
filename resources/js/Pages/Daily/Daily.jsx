@@ -39,7 +39,7 @@ export default function Dashboard({ data, unitData }) {
                     {/* TABS CONTENT */}
                     <div className="flex-1 border-t-2 border-t-primary">
                         {activeTab === "form" && (
-                            <DailyReportForm unitData={unitData} />
+                            <DailyReportForm unitData={unitData} formData={data}/>
                         )}
 
                         {activeTab === "report" && (

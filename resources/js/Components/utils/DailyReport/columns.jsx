@@ -1,6 +1,6 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const list = (handleChange) => {
+const list = ({handleChange, formData}) => {
     const colItem = [
         {
             name: "date",
@@ -35,6 +35,8 @@ const list = (handleChange) => {
                             {header}
                         </label>
                         <TimeInput
+                            formData={formData}
+                            item={item}
                             id={name}
                             name={name}
                             value={item[name] || ""}
@@ -435,7 +437,7 @@ const list = (handleChange) => {
             name: "flowRate",
             header: "Flowrate",
             subheader: [{ name: "mscfd", sub: "MSCFD" }],
-             Cell: ({ item, header, name, subheader }) => {
+            Cell: ({ item, header, name, subheader }) => {
                 return (
                     <div className="flex flex-col">
                         <label htmlFor={name} className="font-bold text-lg">
