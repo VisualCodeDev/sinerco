@@ -207,7 +207,7 @@ export const TimeInput = ({
     }
     return (
         <>
-            <select value={value} onChange={onChange} name={name}>
+            <select className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]" value={value} onChange={onChange} name={name}>
                 {options}
             </select>
             {/* <input
@@ -234,7 +234,7 @@ export const DateInput = ({ onChange, placeholder = "Enter Date", value }) => {
             type="date"
             onChange={onChange}
             placeholder={placeholder}
-            className="border rounded p-2"
+            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
         />
     );
 };

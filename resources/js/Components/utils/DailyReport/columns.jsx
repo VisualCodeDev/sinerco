@@ -9,12 +9,12 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <DateInput
                             id={name}
-                            className="w-full"
+                            className="w-full bg-[#F4F5F9]"
                             name={name}
                             value={item[name] || ""}
                             onChange={(e) =>
@@ -31,7 +31,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <TimeInput
@@ -54,7 +54,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -70,7 +70,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -82,7 +82,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -98,7 +98,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -110,7 +110,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -126,7 +126,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -138,7 +138,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -154,7 +154,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -166,7 +166,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -182,7 +182,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -194,7 +194,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -210,7 +210,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -222,7 +222,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -238,7 +238,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -250,7 +250,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -266,7 +266,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -278,7 +278,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -294,7 +294,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -306,7 +306,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -322,7 +322,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -344,7 +344,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name, subheader }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <div className="flex gap-4">
@@ -367,7 +367,7 @@ const list = ({handleChange, formData}) => {
                                                 )
                                             }
                                             placeholder="00.0"
-                                            className="border px-2 py-1 rounded"
+                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                                         />
                                     </div>
                                 );
@@ -383,7 +383,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -399,7 +399,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -411,7 +411,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <input
@@ -427,7 +427,7 @@ const list = ({handleChange, formData}) => {
                                 )
                             }
                             placeholder="00.0"
-                            className="border px-2 py-1 rounded"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
                 );
@@ -440,7 +440,7 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name, subheader }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-bold text-lg">
+                        <label htmlFor={name} className="font-medium text-md mb-1.5">
                             {header}
                         </label>
                         <div className="flex gap-4">
@@ -463,7 +463,7 @@ const list = ({handleChange, formData}) => {
                                                 )
                                             }
                                             placeholder="00.0"
-                                            className="border px-2 py-1 rounded"
+                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                                         />
                                     </div>
                                 );

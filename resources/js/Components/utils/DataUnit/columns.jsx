@@ -3,8 +3,8 @@ import { DateInput, TimeInput } from "../dashboard-util";
 const columns = () => {
     const colItem = [
         {
-            name: "index",
-            header: "No.",
+            name: "id",
+            header: "NO.",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "text-center",
             sortable: false,
@@ -69,7 +69,7 @@ const columns = () => {
                         href={route("daily", {
                             unitAreaLocationId,
                         })}
-                        className="bg-primary text-white px-3 py-2 rounded-md text-sm"
+                        className="bg-white border-2 border-primary/50 hover:border-none text-primary px-3 py-2 rounded-full text-sm hover:bg-primary/10"
                     >
                         Daily Form
                     </a>
