@@ -1,5 +1,3 @@
-import { DateInput, TimeInput } from "../dashboard-util";
-
 const columns = () => {
     const colItem = [
         {

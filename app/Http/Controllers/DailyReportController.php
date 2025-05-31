@@ -12,7 +12,15 @@ class DailyReportController extends Controller
 {
     public function dailyList()
     {
-        $data = UnitAreaLocation::with(['unit', 'user'])->get();
+        $data = UnitAreaLocation::with([
+            'unit' => function ($q) {
+                $q->select(['unitId', 'unit']);
+            },
+            'user' => function ($q) {
+                $q->select(['userId', 'user']);
+            }
+        ])->get()->makeHidden(['created_at', 'updated_at']);
+
         return Inertia::render('Daily/DailyList', ['data' => $data]);
     }
     public function setReport(Request $request, $unitAreaLocationId)

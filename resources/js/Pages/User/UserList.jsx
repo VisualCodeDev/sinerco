@@ -5,7 +5,6 @@ import { router } from "@inertiajs/react";
 import React from "react";
 
 const UserList = ({ data }) => {
-    console.log(data);
     const columns = tColumns();
     const onRowClick = (items) => {
         console.log(items);
@@ -18,6 +17,7 @@ const UserList = ({ data }) => {
                     columns={columns}
                     data={data}
                     onRowClick={onRowClick}
+                    title={"List of User"}
                 />
             </div>
         </PageLayout>
