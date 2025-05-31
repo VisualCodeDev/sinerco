@@ -14,6 +14,9 @@ export default {
         extend: {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
+                roboto: ['Roboto', 'sans-serif'],
+                lato:['Lato', 'sans-serif'],
+                manrope:['Manrope', 'sans-serif'],
             },
             textColor: {
                 success: "#5cb85c",

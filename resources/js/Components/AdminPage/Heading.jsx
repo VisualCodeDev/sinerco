@@ -61,7 +61,7 @@ const Heading = ({ children }) => {
                 </div>
 
                 {/* Page Content */}
-                <main className="py-10 px-20 overflow-y-auto bg-primary/5">
+                <main className="py-10 px-10 overflow-y-auto bg-[#f5f7f9]">
                     {children}
                 </main>
             </div>

@@ -4,7 +4,7 @@ const columns = () => {
     const colItem = [
         {
             name: "id",
-            header: "No.",
+            header: "NO.",
             headerClassName: "text-center",
             cellClassName: "text-center",
             sortable: true,
@@ -69,7 +69,7 @@ const columns = () => {
                             location: location,
                             unit: unit?.unit,
                         })}
-                        className="bg-primary text-white px-3 py-2 rounded-md text-sm"
+                        className="bg-white border-2 border-primary/50 hover:border-none text-primary px-3 py-2 rounded-full text-sm hover:bg-primary/10"
                     >
                         Daily Form
                     </a>

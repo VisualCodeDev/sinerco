@@ -11,7 +11,7 @@ import {
 import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
 import Modal from "../Modal";
-import { FaAngleDown } from "react-icons/fa";
+import { FaAngleDown, FaCog } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
     const { unitData } = props;
@@ -112,13 +112,16 @@ const DailyReportForm = (props) => {
                             <p className="text-sm">{unitData.area}</p>
                             <p className="text-sm">{unitData.location}</p>
                         </div>
-                        <div>
-                            <button
-                                className="bg-primary text-white px-6 py-2 rounded-md"
-                                onClick={() => setSettingModal(true)}
-                            >
-                                Setting
-                            </button>
+                        <div className="flex justify-center items-center ">
+                            <div className="w-1/7 flex justify-center items-center bg-primary text-white px-6 py-2 rounded-md gap-2 hover:bg-white hover:border-primary hover:border-2 hover:text-primary">
+                                <FaCog />
+                                <button
+                                    className=""
+                                    onClick={() => setSettingModal(true)}
+                                >
+                                    Setting
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <SettingModal
@@ -128,39 +131,43 @@ const DailyReportForm = (props) => {
                     />
                 </>
             )}
-            <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-2 gap-4 mb-4 items-center">
-                    {formList.map((item) => (
-                        <div
-                            key={item.header}
-                            style={{
-                                gridColumn: "span " + item.gridCols,
-                            }}
-                        >
-                            {typeof item.Cell === "function"
-                                ? item.Cell(
-                                      {
-                                          item: data,
-                                          header: item.header,
-                                          name: item.name,
-                                          subheader: item?.subheader || [],
-                                      } || ""
-                                  )
-                                : item.Cell}
-                        </div>
-                    ))}
-                </div>
-                <div>
-                    <button className="font-bold w-full h-full">Simpan</button>
-                </div>
-                <ConfirmationModal
-                    formData={data}
-                    unitData={unitData}
-                    isModal={isConfirmationModal}
-                    handleCloseModal={() => setConfirmationModal(false)}
-                    handleSubmit={handleSetReport}
-                />
-            </form>
+            <div className="w-full mt-10 px-32 text-[#3A3541]">
+                <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-8 mb-4 items-center">
+                        {formList.map((item) => (
+                            <div
+                                key={item.header}
+                                style={{
+                                    gridColumn: "span " + item.gridCols,
+                                }}
+                            >
+                                {typeof item.Cell === "function"
+                                    ? item.Cell(
+                                          {
+                                              item: data,
+                                              header: item.header,
+                                              name: item.name,
+                                              subheader: item?.subheader || [],
+                                          } || ""
+                                      )
+                                    : item.Cell}
+                            </div>
+                        ))}
+                    </div>
+                    <div>
+                        <button className="font-bold w-full h-full">
+                            Simpan
+                        </button>
+                    </div>
+                    <ConfirmationModal
+                        formData={data}
+                        unitData={unitData}
+                        isModal={isConfirmationModal}
+                        handleCloseModal={() => setConfirmationModal(false)}
+                        handleSubmit={handleSetReport}
+                    />
+                </form>
+            </div>
         </div>
     );
 };
