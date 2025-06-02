@@ -1,6 +1,6 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const list = ({handleChange, formData}) => {
+const list = ({ handleChange, formData, reportSettings }) => {
     const colItem = [
         {
             name: "date",
@@ -9,8 +9,11 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
                         </label>
                         <DateInput
                             id={name}
@@ -31,8 +34,11 @@ const list = ({handleChange, formData}) => {
             Cell: ({ item, header, name }) => {
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
                         </label>
                         <TimeInput
                             formData={formData}
@@ -52,24 +58,42 @@ const list = ({handleChange, formData}) => {
             name: "sourcePress",
             header: "Source Press.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min || null,
+                    max: reportSettings?.minMaxSetting[name]?.max || null,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -80,24 +104,48 @@ const list = ({handleChange, formData}) => {
             name: "suctionPress",
             header: "Suction Press.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -108,24 +156,48 @@ const list = ({handleChange, formData}) => {
             name: "dischargePress",
             header: "Discharge Press.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -136,24 +208,48 @@ const list = ({handleChange, formData}) => {
             name: "speed",
             header: "Speed",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -164,24 +260,48 @@ const list = ({handleChange, formData}) => {
             name: "manifoldPress",
             header: "Manifold Press.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -192,24 +312,48 @@ const list = ({handleChange, formData}) => {
             name: "oilPress",
             header: "Oil Press.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -220,24 +364,48 @@ const list = ({handleChange, formData}) => {
             name: "oilDiff",
             header: "Oil Diff.",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -248,24 +416,48 @@ const list = ({handleChange, formData}) => {
             name: "runningHours",
             header: "Running Hours",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -276,24 +468,48 @@ const list = ({handleChange, formData}) => {
             name: "voltage",
             header: "Voltage",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -304,24 +520,48 @@ const list = ({handleChange, formData}) => {
             name: "waterTemp",
             header: "Water Temp",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -342,10 +582,25 @@ const list = ({handleChange, formData}) => {
                 },
             ],
             Cell: ({ item, header, name, subheader }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1 ;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <div className="flex gap-4">
                             {subheader?.map((sub, index) => {
@@ -360,13 +615,14 @@ const list = ({handleChange, formData}) => {
                                             type="number"
                                             name={sub.name}
                                             value={item[sub.name] || ""}
+                                            step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],
                                                     parseFloat(e.target.value)
                                                 )
                                             }
-                                            placeholder="00.0"
+                                            placeholder={decimalSetting}
                                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                                         />
                                     </div>
@@ -381,24 +637,48 @@ const list = ({handleChange, formData}) => {
             name: "staticPress",
             header: "Static Press. Reading",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={
+                                1 /
+                                Math.pow(
+                                    10,
+                                    reportSettings?.decimalSetting[name]
+                                )
+                            }
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -409,24 +689,42 @@ const list = ({handleChange, formData}) => {
             name: "diffPress",
             header: "Diff. Press. Reading",
             Cell: ({ item, header, name }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <input
                             required
+                            min={minMaxSetting.min}
+                            max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
                             value={item[name] || ""}
+                            step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
                                     parseFloat(e.target.value)
                                 )
                             }
-                            placeholder="00.0"
+                            placeholder={decimalSetting}
                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                         />
                     </div>
@@ -438,10 +736,25 @@ const list = ({handleChange, formData}) => {
             header: "Flowrate",
             subheader: [{ name: "mscfd", sub: "MSCFD" }],
             Cell: ({ item, header, name, subheader }) => {
+                const decimalSetting =
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting[name]?.min,
+                    max: reportSettings?.minMaxSetting[name]?.max,
+                };
                 return (
                     <div className="flex flex-col">
-                        <label htmlFor={name} className="font-medium text-md mb-1.5">
-                            {header}
+                        <label
+                            htmlFor={name}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            {header}{" "}
+                            <div className="text-xs">
+                                {minMaxSetting?.min != null &&
+                                    `min: ${minMaxSetting.min}`}{" "}
+                                {minMaxSetting?.max != null &&
+                                    `max: ${minMaxSetting.max}`}
+                            </div>
                         </label>
                         <div className="flex gap-4">
                             {subheader?.map((sub, index) => {
@@ -456,13 +769,14 @@ const list = ({handleChange, formData}) => {
                                             type="number"
                                             name={sub.name}
                                             value={item[sub.name] || ""}
+                                            step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],
                                                     parseFloat(e.target.value)
                                                 )
                                             }
-                                            placeholder="00.0"
+                                            placeholder={decimalSetting}
                                             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
                                         />
                                     </div>

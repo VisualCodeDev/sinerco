@@ -30,7 +30,7 @@ class UserDataUnitSeeder extends Seeder
         foreach ($users as $user) {
             UserDataUnit::updateOrCreate(
                 ['user' => $user],
-                ['userId' => (string) Str::uuid7()]
+                ['userDataUnitId' => (string) Str::uuid7()]
             );
         }
     }

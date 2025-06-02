@@ -15,7 +15,7 @@ class UnitAreaLocationSeeder extends Seeder
      */
     public function run(): void
     {
-        $userData = UserDataUnit::select('userId', 'user')->get()->toArray();
+        $userData = UserDataUnit::select('userDataUnitId', 'user')->get()->toArray();
         $unitData = DataUnit::select('unitId', 'unit')->get()->toArray();
         foreach ($userData as $user) {
             foreach ($unitData as $unit) {
@@ -26,7 +26,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'ZULU Juct. Platform',
                                 'area' => 'ZULU',
@@ -38,7 +38,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Tambun - Cluster F',
                                 'area' => 'Tambun',
@@ -48,7 +48,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Tambun - Cluster U',
                                 'area' => 'Tambun',
@@ -58,7 +58,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Tambun - Cluster F',
                                 'area' => 'Tambun',
@@ -68,7 +68,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Tambun - Cluster G',
                                 'area' => 'Tambun',
@@ -80,7 +80,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. JAS',
                                 'area' => 'Jati Asri',
@@ -90,7 +90,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Cilamaya Utara',
                                 'area' => 'Cilamaya',
@@ -104,7 +104,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Sindang',
                                 'area' => 'Sindang',
@@ -118,7 +118,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'M-12',
                                 'area' => 'Tarakan',
@@ -130,7 +130,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'Langkap FSt.',
                                 'area' => 'Rimau',
@@ -144,7 +144,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. Site B',
                                 'area' => 'Anggana',
@@ -154,7 +154,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. NKL',
                                 'area' => 'Anggana',
@@ -164,7 +164,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'NKL - 1026',
                                 'area' => 'Anggana',
@@ -176,7 +176,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'BNG - 049',
                                 'area' => 'Adera',
@@ -188,7 +188,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'KRG-12',
                                 'area' => 'Limau',
@@ -198,7 +198,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'KRG-25',
                                 'area' => 'Limau',
@@ -208,7 +208,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'TMB',
                                 'area' => 'Limau',
@@ -220,7 +220,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'Panduk-2',
                                 'area' => 'Kampar',
@@ -232,7 +232,7 @@ class UnitAreaLocationSeeder extends Seeder
                         UnitAreaLocation::create(
                             [
                                 'unitAreaLocationId' => Str::uuid7(),
-                                'userId' => $user['userId'],
+                                'userDataUnitId' => $user['userDataUnitId'],
                                 'unitId' => $unit['unitId'],
                                 'location' => 'SP. GNK',
                                 'area' => 'GNK',

@@ -10,15 +10,14 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('operator_alocations', function (Blueprint $table) {
+        Schema::create('daily_report_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('userId');
-            $table->string('userDataUnitId', 50);
+            $table->string('userDataUnitId', 50)->unique();
+            $table->json('decimalSetting');
+            $table->json('minMaxSetting');
             $table->timestamps();
 
-            $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('userDataUnitId')->references('userDataUnitId')->on('user_data_units')->onDelete('cascade');
-
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('operator_alocations');
+        Schema::dropIfExists('daily_report_settings');
     }
 };

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\UserAlocationController;
 use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\UserUnitController;
 use App\Models\AdminNotification;
+use App\Models\DailyReportSettings;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -54,6 +56,12 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
+Route::controller(DailyReportSettingsController::class)->group(function () {
+    Route::post('/user-unit-detail/{userId}/report-setting', 'setSetting')->name('daily.setting')->middleware('auth');
+});
+
+
+
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
@@ -67,7 +75,7 @@ Route::controller(DataUnitController::class)->group(function () {
 
 Route::controller(UserUnitController::class)->group(function () {
     Route::get('/user-unit-list', 'index')->name('unit.list');
-    Route::get('/user/{userId}', 'userDetail')->name('user.detail');
+    Route::get('/user-unit-detail/{userId}', 'userDetail')->name('user.detail');
 });
 
 // Route::controller(UserAlocationController::class)->group(function () {

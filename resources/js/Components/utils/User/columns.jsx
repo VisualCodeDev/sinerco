@@ -10,7 +10,7 @@ const columns = () => {
             Cell: (items) => {
                 return (
                     <>
-                        <div>{items?.userId}</div>
+                        <div>{items?.userDataUnitId}</div>
                     </>
                 );
             },

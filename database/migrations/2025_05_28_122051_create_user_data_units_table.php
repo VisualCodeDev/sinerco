@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_data_units', function (Blueprint $table) {
             $table->id();
-            $table->string('userId', 50)->unique(); 
+            $table->string('userDataUnitId', 50)->unique(); 
             $table->string('user')->unique();
             $table->timestamps();
         });

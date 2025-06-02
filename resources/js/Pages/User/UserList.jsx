@@ -8,7 +8,7 @@ const UserList = ({ data }) => {
     const columns = tColumns();
     const onRowClick = (items) => {
         console.log(items);
-        router.visit(route("user.detail", { userId: items.userId }));
+        router.visit(route("user.detail", { userId: items.userDataUnitId }));
     };
     return (
         <PageLayout>

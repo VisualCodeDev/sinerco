@@ -17,8 +17,8 @@ class UserUnitController extends Controller
 
     public function userDetail($userId)
     {
-        $data = UnitAreaLocation::where('userId', $userId)->with('user', 'unit')->get();
-        $userData = $data->first()?->user;
+        $data = UnitAreaLocation::where('userDataUnitId', $userId)->with('user', 'unit', 'dailyReportSetting')->get();
+        $userData = $data->first()->dailyReportSetting;
         if ($data) {
             return Inertia::render('User/UserDetail', ['data' => $data, 'userData' => $userData]);
         }
