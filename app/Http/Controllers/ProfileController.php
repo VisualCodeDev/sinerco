@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\UnitAreaLocation;
+use App\Models\User;
+use App\Models\UserAlocation;
+use App\Models\UserDataUnit;
+use App\Models\UserPermission;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +18,26 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    public function userList()
+    {
+        $technicianData = User::where('role', 'technician')->get();
+        $operatorData = User::where('role', 'operator')->get();
+        return Inertia::render('Setting/UserAllocation', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
+    }
+    public function index($userId)
+    {
+        $userData = User::where('id', $userId)->first();
+        $permissionData = UserAlocation::where('userId', $userId)->first();
+        $unitAreaData = [];
+        if ($userData->role == 'technician') {
+            $unitAreaData = UnitAreaLocation::with(['unit', 'user'])->get();
+        }
+        if ($userData->role == 'operator') {
+            $unitAreaData = UserDataUnit::all();
+        }
+        ;
+        return Inertia::render('Profile/Profile', ['data' => $userData, 'permissionData' => $permissionData, 'unitAreaData' => $unitAreaData]);
+    }
     /**
      * Display the user's profile form.
      */

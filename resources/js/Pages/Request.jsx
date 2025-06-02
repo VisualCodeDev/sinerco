@@ -42,6 +42,7 @@ const Request = ({ data }) => {
                                     <th>Status</th>
                                     <th>Remarks</th>
                                     <th>Action</th>
+                                    <th>Seen Status</th>
                                     <th></th>
                                 </tr>
                             </thead>

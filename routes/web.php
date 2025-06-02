@@ -6,6 +6,8 @@ use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\UserAlocationController;
+use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\UserUnitController;
 use App\Models\AdminNotification;
 use Illuminate\Foundation\Application;
@@ -64,8 +66,17 @@ Route::controller(DataUnitController::class)->group(function () {
 });
 
 Route::controller(UserUnitController::class)->group(function () {
-    Route::get('/user-list', 'index')->name('user.list');
+    Route::get('/user-unit-list', 'index')->name('unit.list');
     Route::get('/user/{userId}', 'userDetail')->name('user.detail');
+});
+
+// Route::controller(UserAlocationController::class)->group(function () {
+//     Route::get('/setting/user-alocation', 'index')->name('alocation.setting')->middleware('auth');
+// });
+
+Route::controller(ProfileController::class)->group(function () {
+    Route::get('/user-list', 'userList')->name('alocation.setting')->middleware('auth');
+    Route::get('/profile/{userId}', 'index')->name('profile')->middleware('auth');
 });
 
 // Route::get('/dashboard', function () {

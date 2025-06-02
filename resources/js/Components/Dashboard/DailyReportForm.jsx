@@ -164,10 +164,10 @@ const DailyReportForm = (props) => {
                     <ConfirmationModal
                         formData={data}
                         unitData={{
-                        area: unitData?.area,
-                        location: unitData?.location,
-                        unit: unitData?.unit?.unit,
-                    }}
+                            area: unitData?.area,
+                            location: unitData?.location,
+                            unit: unitData?.unit?.unit,
+                        }}
                         isModal={isConfirmationModal}
                         handleCloseModal={() => setConfirmationModal(false)}
                         handleSubmit={handleSetReport}
@@ -187,15 +187,31 @@ export const SettingModal = (props) => {
     useEffect(() => {
         if (data) return;
         let defaultDecimalSetting = {};
+        let defaultMinMaxSetting = {};
         formItems
             .filter((item) => item.name !== "time")
             .map((item) => {
-                defaultDecimalSetting = {
-                    ...defaultDecimalSetting,
-                    [item?.name]: item?.default?.decimalSetting,
-                };
+                if (item?.default?.decimalSetting) {
+                    defaultDecimalSetting = {
+                        ...defaultDecimalSetting,
+                        [item?.name]: item?.default?.decimalSetting,
+                    };
+                }
+                if (item?.default?.minSetting || item?.default?.maxSetting)
+                    defaultMinMaxSetting = {
+                        ...defaultMinMaxSetting,
+                        [item?.name]: {
+                            min: item?.default?.minSetting,
+                            max: item?.default?.maxSetting,
+                        },
+                    };
             });
+        setFormData({
+            decimalSetting: { ...defaultDecimalSetting },
+            minMaxSetting: { ...defaultMinMaxSetting },
+        });
     }, []);
+
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -218,6 +234,7 @@ export const SettingModal = (props) => {
             }));
         }
     };
+    console.log(data, formData);
 
     const handleSave = () => {
         let formattedDecimal = {};
@@ -239,7 +256,6 @@ export const SettingModal = (props) => {
             </option>
         );
     }
-
     return (
         <Modal
             title={"Setting"}

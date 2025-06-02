@@ -13,7 +13,6 @@ export const formItems = [
         name: "sourcePress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
         },
         header: "Source Press.",
     },
@@ -21,7 +20,8 @@ export const formItems = [
         name: "suctionPress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: -9,
+            maxSetting: 60,
         },
         header: "Suction Press.",
     },
@@ -29,7 +29,8 @@ export const formItems = [
         name: "dischargePress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: 0,
+            maxSetting: 400,
         },
         header: "Discharge Press.",
     },
@@ -37,7 +38,8 @@ export const formItems = [
         name: "speed",
         default: {
             decimalSetting: "0",
-            minMaxSetting: "",
+            minSetting: 1500,
+            maxSetting: 2200,
         },
         header: "Speed",
     },
@@ -45,7 +47,8 @@ export const formItems = [
         name: "manifoldPress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: -6,
+            maxSetting: -2,
         },
         header: "Manifold Press.",
     },
@@ -53,7 +56,8 @@ export const formItems = [
         name: "oilPress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: 30,
+            maxSetting: 70,
         },
         header: "Oil Press.",
     },
@@ -61,7 +65,6 @@ export const formItems = [
         name: "oilDiff",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
         },
         header: "Oil Diff.",
     },
@@ -69,7 +72,6 @@ export const formItems = [
         name: "runningHours",
         default: {
             decimalSetting: "0",
-            minMaxSetting: "",
         },
         header: "Running Hours",
     },
@@ -77,7 +79,8 @@ export const formItems = [
         name: "voltage",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: 27,
+            maxSetting: 28,
         },
         header: "Voltage",
     },
@@ -85,25 +88,30 @@ export const formItems = [
         name: "waterTemp",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
+            minSetting: -194,
         },
         header: "Water Temp",
     },
     {
         name: "dischargeTemp",
-        default: {
-            decimalSetting: "1",
-            minMaxSetting: "",
-        },
+
         header: "Discharge Temp",
         subheader: [
             {
                 name: "befCooler",
                 sub: "Bef. Cooler",
+                default: {
+                    minSetting: 350,
+                    decimalSetting: "1",
+                },
             },
             {
                 name: "aftCooler",
                 sub: "Aft. Cooler",
+                default: {
+                    minSetting: 120,
+                    decimalSetting: "1",
+                },
             },
         ],
     },
@@ -111,7 +119,6 @@ export const formItems = [
         name: "staticPress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
         },
         header: "Static Press. Reading",
     },
@@ -119,7 +126,6 @@ export const formItems = [
         name: "diffPress",
         default: {
             decimalSetting: "1",
-            minMaxSetting: "",
         },
         header: "Diff. Press. Reading",
     },
@@ -127,7 +133,6 @@ export const formItems = [
         name: "flowRate",
         default: {
             decimalSetting: "6",
-            minMaxSetting: "",
         },
         header: "Flowrate",
         subheader: [{ name: "mscfd", sub: "MSCFD" }],
@@ -207,7 +212,12 @@ export const TimeInput = ({
     }
     return (
         <>
-            <select className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]" value={value} onChange={onChange} name={name}>
+            <select
+                className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                value={value}
+                onChange={onChange}
+                name={name}
+            >
                 {options}
             </select>
             {/* <input
