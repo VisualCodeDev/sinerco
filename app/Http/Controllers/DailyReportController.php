@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DailyReport;
 use App\Models\UnitAreaLocation;
 use App\Services\WhatsAppService;
+use Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 

@@ -15,7 +15,7 @@ import { FaAngleDown, FaCog } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
     const { unitData, formData } = props;
-    console.log("unitData", unitData);
+    console
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -234,6 +234,7 @@ export const SettingModal = (props) => {
             }));
         }
     };
+    console.log(data, formData);
 
     const handleSave = () => {
         let formattedDecimal = {};

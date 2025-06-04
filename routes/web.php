@@ -55,6 +55,10 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
+Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
+    return Auth::user();
+})->name('auth.user');
+
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
@@ -72,7 +76,7 @@ Route::controller(ClientController::class)->group(function () {
 });
 
 Route::controller(UserAllocationController::class)->group(function () {
-    Route::get('/setting/user-alocation', 'index')->name('alocation.setting')->middleware('auth');
+    Route::get('/setting/user-alocation', 'index')->name('allocation.setting')->middleware('auth');
     Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation')->middleware('auth');
     Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add')->middleware('auth');
     Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove')->middleware('auth');
