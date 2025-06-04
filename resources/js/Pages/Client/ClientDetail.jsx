@@ -6,7 +6,7 @@ import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
 import { FaAngleDown } from "react-icons/fa";
 
-const UserDetail = ({ data, userData }) => {
+const ClientDetail = ({ data, userData }) => {
     const columns = tColumns();
     const [isSettingModal, setSettingModal] = useState(false);
     console.log(userData);

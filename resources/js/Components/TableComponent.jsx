@@ -10,8 +10,12 @@ import {
 
 const TableComponent = (props) => {
     const {
+        submitPlaceholder,
+        height,
+        isForm = false,
         columns,
         data,
+        handleSubmit,
         sortableData,
         onRowClick,
         title,
@@ -79,15 +83,8 @@ const TableComponent = (props) => {
                             <FaRegBuilding size={28} />
                         </div>
                         <div className="flex-row justify-center items-center ml-4">
-                            <p className="font-bold text-2xl">
-                                {title} ({data?.length})
-                            </p>
-                            {subtitle && (
-                                <p className="text-sm font-[#0F111C]">
-                                    Choose a unit to import your daily form
-                                    into.
-                                </p>
-                            )}
+                            <p className="font-bold text-2xl">{title}</p>
+                            {subtitle && <p className="text-sm">{subtitle}</p>}
                         </div>
                     </div>
                 )}
@@ -113,53 +110,56 @@ const TableComponent = (props) => {
                     )}
                 </div>
             </div>
-            <div className="flex-col">
-                <div className="">
-                    <table className="table-auto w-full relative rounded-3xl">
-                        <thead className="bg-[#f5f7f9] sticky top-0 left-0">
-                            <tr className="text-[#0F111C] font-semibold bg-primary">
-                                {columns.map((col, index) => (
-                                    <th
-                                        key={index}
-                                        className={
-                                            `px-8 py-3 text-sm font-medium text-left cursor-pointer uppercase` +
-                                            (col.headerClassName || "")
-                                        }
-                                        onClick={() => handleSort(col.name)}
-                                    >
-                                        <div className="flex items-center">
-                                            {col.header}
-                                            {col.sortable &&
-                                                (sortConfig.key === col.name ? (
-                                                    <span className="ml-1 text-xs">
-                                                        {sortConfig.direction ===
-                                                        "asc" ? (
-                                                            <FaSortUp />
-                                                        ) : (
-                                                            <FaSortDown />
-                                                        )}
-                                                    </span>
-                                                ) : (
-                                                    <span className="ml-1 text-xs">
-                                                        <FaSort />
-                                                    </span>
-                                                ))}
-                                        </div>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData?.map((item, rowIndex) => (
+            <div
+                className="flex-col "
+                style={{ maxHeight: height || "auto", overflow: "auto" }}
+            >
+                <table className="table-auto w-full relative rounded-3xl">
+                    <thead className="bg-[#f5f7f9] sticky top-0 left-0">
+                        <tr className="text-[#0F111C] font-semibold bg-primary">
+                            {columns.map((col, index) => (
+                                <th
+                                    key={index}
+                                    className={
+                                        `px-8 py-3 text-sm font-medium text-left cursor-pointer uppercase` +
+                                        (col.headerClassName || "")
+                                    }
+                                    onClick={() => handleSort(col.name)}
+                                >
+                                    <div className="flex items-center">
+                                        {typeof col?.Header === "function"
+                                            ? col?.Header(filteredData)
+                                            : col?.header}
+                                        {col.sortable &&
+                                            (sortConfig.key === col.name ? (
+                                                <span className="ml-1 text-xs">
+                                                    {sortConfig.direction ===
+                                                    "asc" ? (
+                                                        <FaSortUp />
+                                                    ) : (
+                                                        <FaSortDown />
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="ml-1 text-xs">
+                                                    <FaSort />
+                                                </span>
+                                            ))}
+                                    </div>
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredData.length > 0 ? (
+                            filteredData?.map((item, rowIndex) => (
                                 <tr
                                     key={rowIndex}
                                     className={
                                         "border-b " + onRowClick &&
                                         `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                     }
-                                    onClick={
-                                        () => onRowClick(item)
-                                    }
+                                    onClick={() => onRowClick(item)}
                                 >
                                     {columns.map((col, colIndex) => (
                                         <td
@@ -180,82 +180,37 @@ const TableComponent = (props) => {
                                         </td>
                                     ))}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan={columns.length}
+                                    className="text-center text-gray-500 py-6"
+                                >
+                                    No data available.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
+            {isForm && (
+                <div className="sticky bottom-0 left-0 bg-primary w-full text-white">
+                    <tr>
+                        <th colSpan={columns.length}>
+                            <div className="px-8 py-3 text-sm font-medium text-left">
+                                <button
+                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100"
+                                    onClick={handleSubmit}
+                                >
+                                    {submitPlaceholder ? submitPlaceholder : 'Submit'}
+                                </button>
+                            </div>
+                        </th>
+                    </tr>
+                </div>
+            )}
         </div>
-        // <table className="table-auto bg-white w-full">
-        //     <thead className="sticky -top-11 left-0 border-b bg-white">
-        //         <tr>
-        //             {columns.map((col, index) => (
-        //                 <th
-        //                     key={index}
-        //                     className={
-        //                         `px-6 py-4 text-lg font-semibold text-left cursor-pointer ` +
-        //                         (col.headerClassName || "")
-        //                     }
-        //                     onClick={() => handleSort(col.name)}
-        //                 >
-        //                     <div
-        //                         className={
-        //                             `flex items-center ` +
-        //                             (col.headerClassName || "")
-        //                         }
-        //                     >
-        //                         {col.header}
-        //                         {col.sortable &&
-        //                             (sortConfig.key === col.name ? (
-        //                                 <span className="ml-1 text-xs">
-        //                                     {sortConfig.direction === "asc" ? (
-        //                                         <FaSortUp />
-        //                                     ) : (
-        //                                         <FaSortDown />
-        //                                     )}
-        //                                 </span>
-        //                             ) : (
-        //                                 <span className="ml-1 text-xs">
-        //                                     <FaSort />
-        //                                 </span>
-        //                             ))}
-        //                     </div>
-        //                 </th>
-        //             ))}
-        //         </tr>
-        //     </thead>
-        //     <tbody>
-        //         {sortedData.map((item, rowIndex) => (
-        //             <tr
-        //                 key={rowIndex}
-        //                 className={
-        //                     onRowClick &&
-        //                     `transition duration-100 hover:bg-gray-100 cursor-pointer`
-        //                 }
-        //                 onClick={() => onRowClick(item)}
-        //             >
-        //                 {columns.map((col, colIndex) => (
-        //                     <td
-        //                         key={colIndex}
-        //                         className={`px-4 py-3 text-sm ${
-        //                             col.cellClassName || ""
-        //                         }`}
-        //                         style={{
-        //                             width: col?.width,
-        //                         }}
-        //                     >
-        //                         {typeof col.Cell === "function"
-        //                             ? col.Cell({
-        //                                   ...item,
-        //                                   index: rowIndex,
-        //                               })
-        //                             : col.Cell}
-        //                     </td>
-        //                 ))}
-        //             </tr>
-        //         ))}
-        //     </tbody>
-        // </table>
     );
 };
 

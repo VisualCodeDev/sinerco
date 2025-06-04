@@ -43,7 +43,7 @@ class StatusRequestController extends Controller
     public function getRequest()
     {
         $status = StatusRequest::all();
-        return Inertia::render('Request', ['data' => $status]);
+        return Inertia::render('Request/Request', ['data' => $status]);
     }
 
     public function updateRequest(Request $request)

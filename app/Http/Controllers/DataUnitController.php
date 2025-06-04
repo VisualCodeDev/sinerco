@@ -13,7 +13,7 @@ class DataUnitController extends Controller
      */
     public function getUnitAreaLocation()
     {
-        $data = UnitAreaLocation::with(['unit', 'user'])->get();
+        $data = UnitAreaLocation::with(['unit', 'client'])->get();
         return response()->json($data);
     }
 

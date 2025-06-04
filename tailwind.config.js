@@ -14,14 +14,12 @@ export default {
         extend: {
             fontFamily: {
                 sans: ["Figtree", ...defaultTheme.fontFamily.sans],
-                roboto: ['Roboto', 'sans-serif'],
-                lato:['Lato', 'sans-serif'],
-                manrope:['Manrope', 'sans-serif'],
-            },
-            textColor: {
-                success: "#5cb85c",
+                roboto: ["Roboto", "sans-serif"],
+                lato: ["Lato", "sans-serif"],
+                manrope: ["Manrope", "sans-serif"],
             },
             colors: {
+                success: "#5cb85c",
                 primary: "#273e8f",
                 secondary: "#34b98c",
                 warning: "#f0ad4e",

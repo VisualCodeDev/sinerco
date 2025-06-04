@@ -25,8 +25,8 @@ class UnitAreaLocation extends Model
         return $this->belongsTo(DataUnit::class, 'unitId', 'unitId');
     }
 
-    public function user()
+    public function client()
     {
-        return $this->belongsTo(UserDataUnit::class, 'userDataUnitId', 'userDataUnitId');
+        return $this->belongsTo(Client::class, 'clientId', 'clientId');
     }
 }

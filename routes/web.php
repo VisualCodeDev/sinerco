@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\AdminNotificationController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\UserAlocationController;
+use App\Http\Controllers\UserAllocationController;
 use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\UserUnitController;
 use App\Models\AdminNotification;
@@ -56,6 +57,10 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
+Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
+    return Auth::user();
+})->name('auth.user');
+
 Route::controller(DailyReportSettingsController::class)->group(function () {
     Route::post('/user-unit-detail/{userId}/report-setting', 'setSetting')->name('daily.setting')->middleware('auth');
 });
@@ -73,18 +78,16 @@ Route::controller(DataUnitController::class)->group(function () {
     Route::get('/api/get-unit-area-location', 'getUnitAreaLocation')->name('getUnitAreaLocation');
 });
 
-Route::controller(UserUnitController::class)->group(function () {
-    Route::get('/user-unit-list', 'index')->name('unit.list');
-    Route::get('/user-unit-detail/{userId}', 'userDetail')->name('user.detail');
+Route::controller(ClientController::class)->group(function () {
+    Route::get('/client-list', 'index')->name('client.list');
+    Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
 });
 
-// Route::controller(UserAlocationController::class)->group(function () {
-//     Route::get('/setting/user-alocation', 'index')->name('alocation.setting')->middleware('auth');
-// });
-
-Route::controller(ProfileController::class)->group(function () {
-    Route::get('/user-list', 'userList')->name('alocation.setting')->middleware('auth');
-    Route::get('/profile/{userId}', 'index')->name('profile')->middleware('auth');
+Route::controller(UserAllocationController::class)->group(function () {
+    Route::get('/setting/user-alocation', 'index')->name('allocation.setting')->middleware('auth');
+    Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation')->middleware('auth');
+    Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add')->middleware('auth');
+    Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove')->middleware('auth');
 });
 
 // Route::get('/dashboard', function () {

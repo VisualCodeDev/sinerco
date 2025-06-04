@@ -7,35 +7,64 @@ const Profile = ({ data, permissionData, unitAreaData }) => {
     const [formData, setFormData] = useState({
         selectedRows: [],
     });
-    const [unitArea, setUnitArea] = useState([]);
-    const [userDataUnit, setUserDataUnit] = useState(null);
+    const [unitArea, setUnitArea] = useState(unitAreaData || []);
+    const [client, setClient] = useState(null);
 
-    const columns = tColumns("checkbox", { ...formData });
+    const allIds = unitArea?.map((item) => item.unitAreaLocationId.toString());
+
     useEffect(() => {
-        if (data?.role === "technician") {
-            const uniqueUsersMap = new Map();
+        // if (data?.role === "technician") {
+        const uniqueClientsMap = new Map();
 
-            unitAreaData?.forEach((item) => {
-                const user = item.user;
-                if (!uniqueUsersMap.has(user.userId)) {
-                    uniqueUsersMap.set(user.userId, user);
-                }
-            });
+        unitAreaData?.forEach((item) => {
+            const client = item.client;
+            if (!uniqueClientsMap.has(client?.clientId)) {
+                uniqueClientsMap.set(client?.clientId, client);
+            }
+        });
 
-            const uniqueUsers = Array.from(uniqueUsersMap.values());
+        const uniqueClients = Array.from(uniqueClientsMap.values());
 
-            setUserDataUnit(uniqueUsers);
-        } else {
-            setUserDataUnit(unitAreaData);
-        }
+        setClient(uniqueClients);
+        // } else {
+        //     setClient(unitAreaData);
+        // }
     }, []);
 
-    const handleSelect = (field, value) => {
+    const handleSelect = (value) => {
         const itemData = unitAreaData.filter((item) => {
-            return item?.userId === value;
+            return item?.clientId === value;
         });
-        setUnitArea(itemData);
-        // setFormData({ ...formData, [field]: value });
+        if (itemData.length === 0) {
+            setUnitArea(unitAreaData);
+        } else {
+            setUnitArea(itemData);
+        } // setFormData({ ...formData, [field]: value });
+    };
+
+    const handleSelectAll = () => {
+        const currentIds = unitArea.map((item) =>
+            item.unitAreaLocationId.toString()
+        );
+        const selected = formData.selectedRows || [];
+
+        const isAllSelected = currentIds.every((id) => selected.includes(id));
+
+        let updated;
+
+        if (isAllSelected) {
+            updated = selected.filter((id) => !currentIds.includes(id));
+        } else {
+            updated = [...selected];
+
+            currentIds.forEach((id) => {
+                if (!updated.includes(id)) {
+                    updated.push(id);
+                }
+            });
+        }
+
+        setFormData({ ...formData, selectedRows: updated });
     };
 
     const handleCheckItem = (value) => {
@@ -59,36 +88,35 @@ const Profile = ({ data, permissionData, unitAreaData }) => {
     };
 
     const handleSubmit = () => {
-        if (formData.selectedRows) {
+        if (formData?.selectedRows) {
         }
     };
-    if (!userDataUnit || !data) {
-        return <div>LOADING..</div>;
-    }
+    const columns = tColumns(
+        "checkbox",
+        { ...formData },
+        { ...unitArea },
+        handleSelectAll
+    );
 
     return (
         <PageLayout>
             <div>{data?.name}</div>
             <div>{data?.role}</div>
-            <select
-                onChange={(e) => handleSelect("userDataUnitId", e.target.value)}
-            >
+            <select onChange={(e) => handleSelect(e.target.value)}>
                 <option value={null}>---Select Branch Unit---</option>
-                {userDataUnit.map((item, index) => {
+                {client?.map((item, index) => {
                     return (
-                        <option key={index} value={item?.userId}>
-                            {item?.user}
+                        <option key={index} value={item?.clientId}>
+                            {item?.name}
                         </option>
                     );
                 })}
             </select>
-            {data?.role === "technician" && (
-                <TableComponent
-                    columns={columns}
-                    data={unitArea}
-                    onRowClick={handleCheckItem}
-                />
-            )}
+            <TableComponent
+                columns={columns}
+                data={unitArea}
+                onRowClick={handleCheckItem}
+            />
 
             <button onClick={handleSubmit}>Submit</button>
         </PageLayout>

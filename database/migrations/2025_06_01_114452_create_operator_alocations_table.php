@@ -13,11 +13,11 @@ return new class extends Migration {
         Schema::create('operator_alocations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userId');
-            $table->string('userDataUnitId', 50);
+            $table->string('unitAreaLocationId', 50);
             $table->timestamps();
 
             $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('userDataUnitId')->references('userDataUnitId')->on('user_data_units')->onDelete('cascade');
+            $table->foreign('unitAreaLocationId')->references('unitAreaLocationId')->on('unit_area_locations')->onDelete('cascade');
 
         });
     }

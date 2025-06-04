@@ -1,13 +1,40 @@
 import React, { useState } from "react";
-import { FaHome, FaTh, FaUser, FaLock, FaAddressBook, FaList } from "react-icons/fa";
+import {
+    FaHome,
+    FaTh,
+    FaUser,
+    FaLock,
+    FaAddressBook,
+    FaList,
+} from "react-icons/fa";
 
 const menuItems = [
     { icon: <FaHome />, label: "Home", href: "/" },
-    { icon: <FaAddressBook />, label: "User Unit List", href: route("unit.list") },
-    { icon: <FaList />, label: "All Unit List", href: route("daily.list") },
+    {
+        icon: <FaAddressBook />,
+        label: "Client List",
+        href: route("client.list"),
+    },
+    { icon: <FaList />, label: "Unit List", href: route("daily.list") },
     { icon: <FaTh />, label: "Request List", href: route("request") },
-    { icon: <FaUser />, label: "Alocation Settings", href: route("alocation.setting") },
+    {
+        icon: <FaUser />,
+        label: "Allocation Settings",
+        href: route("allocation.setting"),
+    },
     { icon: <FaLock />, label: "Security" },
+    {
+        icon: <FaLock />,
+        label: "Logout",
+        onClick: async () => {
+            try {
+                await axios.post(route("logout"));
+                window.location.href = "/"; // redirect ke halaman utama
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        },
+    },
 ];
 
 const Heading = ({ children }) => {
@@ -31,6 +58,7 @@ const Heading = ({ children }) => {
                                 href={item.href}
                                 key={index}
                                 className="flex items-center gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                onClick={item.onClick ? item.onClick : undefined}
                             >
                                 <div className="text-xl">{item.icon}</div>
                                 {expanded && (

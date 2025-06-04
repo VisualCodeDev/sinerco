@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use App\Models\UserDataUnit;
+use App\Models\Client;
 use Illuminate\Database\Seeder;
 use Str;
 
-class UserDataUnitSeeder extends Seeder
+class ClientSeeder extends Seeder
 {
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        $users = [
+        $clients = [
             'PHE ONWJ',
             'PEP Tambun',
             'PEP Subang',
@@ -27,10 +27,10 @@ class UserDataUnitSeeder extends Seeder
             'PEP Prabumulih',
         ];
 
-        foreach ($users as $user) {
-            UserDataUnit::updateOrCreate(
-                ['user' => $user],
-                ['userDataUnitId' => (string) Str::uuid7()]
+        foreach ($clients as $client) {
+            Client::updateOrCreate(
+                ['name' => $client],
+                ['clientId' => (string) Str::uuid7()]
             );
         }
     }
