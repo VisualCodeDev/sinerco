@@ -4,11 +4,10 @@ import PageLayout from "@/Layouts/PageLayout";
 import { router } from "@inertiajs/react";
 import React from "react";
 
-const UserList = ({ data }) => {
+const ClientList = ({ data }) => {
     const columns = tColumns();
     const onRowClick = (items) => {
-        console.log(items);
-        router.visit(route("user.detail", { userId: items.userId }));
+        router.visit(route("client.detail", { clientId: items.clientId }));
     };
     return (
         <PageLayout>
@@ -17,11 +16,11 @@ const UserList = ({ data }) => {
                     columns={columns}
                     data={data}
                     onRowClick={onRowClick}
-                    title={"List of User"}
+                    title={"List of Clients"}
                 />
             </div>
         </PageLayout>
     );
 };
 
-export default UserList;
+export default ClientList;

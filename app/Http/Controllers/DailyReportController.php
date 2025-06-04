@@ -16,8 +16,8 @@ class DailyReportController extends Controller
             'unit' => function ($q) {
                 $q->select(['unitId', 'unit']);
             },
-            'user' => function ($q) {
-                $q->select(['userId', 'user']);
+            'client' => function ($q) {
+                $q->select(['clientId', 'name']);
             }
         ])->get()->makeHidden(['created_at', 'updated_at']);
 
@@ -87,7 +87,7 @@ class DailyReportController extends Controller
             ]);
         });
         if ($unitAreaLocationId) {
-            $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['user', 'unit'])->first();
+            $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['client', 'unit'])->first();
             return Inertia::render('Daily/Daily', [
                 'data' => $data,
                 'unitData' => $unitData,

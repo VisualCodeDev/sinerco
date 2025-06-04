@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('user_alocations', function (Blueprint $table) {
+        Schema::create('user_allocations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userId');
             $table->string('unitAreaLocationId', 50);
@@ -18,6 +18,7 @@ return new class extends Migration {
 
             $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('unitAreaLocationId')->references('unitAreaLocationId')->on('unit_area_locations')->onDelete('cascade');
+            $table->unique(['userId', 'unitAreaLocationId'], 'user_unit_unique');
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_alocations');
+        Schema::dropIfExists('user_allocations');
     }
 };

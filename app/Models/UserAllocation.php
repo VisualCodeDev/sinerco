@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserAlocation extends Model
+class UserAllocation extends Model
 {
     public function user()
     {
@@ -15,4 +15,8 @@ class UserAlocation extends Model
     {
         return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId');
     }
+    protected $fillable = [
+        'userId',
+        'unitAreaLocationId',
+    ];
 }

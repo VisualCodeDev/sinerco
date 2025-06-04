@@ -9,7 +9,7 @@ const UserAllocation = ({ operatorData, technicianData }) => {
     const opColumn = columns("operator");
 
     const onRowClick = (item) => {
-        router.visit(route("profile", item?.id));
+        router.visit(route("allocation", item?.id));
     };
     return (
         <PageLayout>

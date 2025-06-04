@@ -4,7 +4,7 @@ import tColumns from "@/Components/utils/DataUnit/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useState } from "react";
 
-const UserDetail = ({ data, userData }) => {
+const ClientDetail = ({ data, userData }) => {
     const columns = tColumns();
     const [isSettingModal, setSettingModal] = useState(false);
 
@@ -29,4 +29,4 @@ const UserDetail = ({ data, userData }) => {
     );
 };
 
-export default UserDetail;
+export default ClientDetail;

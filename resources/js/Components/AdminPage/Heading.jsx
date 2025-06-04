@@ -3,7 +3,7 @@ import { FaHome, FaTh, FaUser, FaLock, FaAddressBook, FaList } from "react-icons
 
 const menuItems = [
     { icon: <FaHome />, label: "Home", href: "/" },
-    { icon: <FaAddressBook />, label: "User Unit List", href: route("unit.list") },
+    { icon: <FaAddressBook />, label: "Client List", href: route("client.list") },
     { icon: <FaList />, label: "All Unit List", href: route("daily.list") },
     { icon: <FaTh />, label: "Request List", href: route("request") },
     { icon: <FaUser />, label: "Alocation Settings", href: route("alocation.setting") },

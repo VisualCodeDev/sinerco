@@ -10,7 +10,7 @@ const columns = () => {
             Cell: (items) => {
                 return (
                     <>
-                        <div>{items?.userId}</div>
+                        <div>{items?.clientId}</div>
                     </>
                 );
             },
@@ -25,7 +25,7 @@ const columns = () => {
             Cell: (items) => {
                 return (
                     <>
-                        <div>{items?.user}</div>
+                        <div>{items?.name}</div>
                     </>
                 );
             },

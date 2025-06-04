@@ -6,7 +6,7 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\UnitAreaLocation;
 use App\Models\User;
 use App\Models\UserAlocation;
-use App\Models\UserDataUnit;
+use App\Models\Client;
 use App\Models\UserPermission;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -29,12 +29,10 @@ class ProfileController extends Controller
         $userData = User::where('id', $userId)->first();
         $permissionData = UserAlocation::where('userId', $userId)->first();
         $unitAreaData = [];
-        if ($userData->role == 'technician') {
-            $unitAreaData = UnitAreaLocation::with(['unit', 'user'])->get();
-        }
-        if ($userData->role == 'operator') {
-            $unitAreaData = UserDataUnit::all();
-        }
+        $unitAreaData = UnitAreaLocation::with(['unit', 'client'])->get();
+        // if ($userData->role == 'operator') {
+        //     $unitAreaData = Client::all();
+        // }
         ;
         return Inertia::render('Profile/Profile', ['data' => $userData, 'permissionData' => $permissionData, 'unitAreaData' => $unitAreaData]);
     }

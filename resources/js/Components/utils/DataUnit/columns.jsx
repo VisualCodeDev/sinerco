@@ -1,4 +1,4 @@
-const columns = (type, formData) => {
+const columns = (type, formData, unitAreaData, handleSelectAll) => {
     const colItem = [
         {
             name: "id",
@@ -16,13 +16,13 @@ const columns = (type, formData) => {
             },
         },
         {
-            name: "user",
-            header: "User",
+            name: "client",
+            header: "Client",
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "17%",
-            Cell: ({ user }) => {
-                return <div className="flex flex-col">{user?.user}</div>;
+            Cell: ({ client }) => {
+                return <div className="flex flex-col">{client?.name}</div>;
             },
         },
         {
@@ -98,8 +98,8 @@ const columns = (type, formData) => {
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "17%",
-            Cell: ({ user }) => {
-                return <div className="flex flex-col">{user?.user}</div>;
+            Cell: ({ client }) => {
+                return <div className="flex flex-col">{client?.name}</div>;
             },
         },
         {
@@ -134,6 +134,20 @@ const columns = (type, formData) => {
         },
         {
             name: "checkbox",
+            Header: (data) => {
+                return (
+                    <div
+                        className="text-center w-full"
+                        onClick={() => handleSelectAll(data)}
+                        checked={
+                            formData?.selectedRows?.length ===
+                            unitAreaData?.length
+                        }
+                    >
+                        Select All
+                    </div>
+                );
+            },
             headerClassName: "bg-primary text-white text-center justify-center",
             sortable: false,
             cellClassName: "text-center",
@@ -142,7 +156,12 @@ const columns = (type, formData) => {
                 return (
                     <input
                         type="checkbox"
-                        checked={formData?.selectedRows?.includes(unitAreaLocationId.toString())}
+                        checked={formData?.selectedRows?.includes(
+                            unitAreaLocationId.toString()
+                        )}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                        }}
                     />
                 );
             },

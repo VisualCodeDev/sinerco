@@ -1,7 +1,6 @@
 import Heading from "@/Components/AdminPage/Heading";
-import { ToastContainer } from "@/Components/Toast";
-import { getRequestTypeName } from "@/Components/utils/dashboard-util";
-import { RequestModal } from "@/Pages/Request";
+import { RequestModal } from "@/Components/RequestComponents/RequestModal";
+import { NotificationContainer } from "@/Components/Toast/Notification";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 
@@ -29,7 +28,7 @@ const PageLayout = ({ children }) => {
     return (
         <Heading>
             <div className="relative">
-                <ToastContainer messages={messages} />
+                <NotificationContainer messages={messages} />
                 <div className="fixed bottom-0 right-0 z-[100] m-12">
                     <button
                         onClick={() => setShowModal(true)}
