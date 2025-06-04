@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class DailyReportSettings extends Model
 {
     protected $fillable = [
-        'userDataUnitId',
+        'clientId',
         'decimalSetting',
         'minMaxSetting',
     ];

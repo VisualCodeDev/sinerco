@@ -10,8 +10,9 @@ class DailyReportSettingsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function setSetting(Request $request, $userId)
+    public function setSetting(Request $request, $clientId)
     {
+
         $rules = [
             'decimalSetting' => 'required|array',
             'minMaxSetting' => 'required|array',
@@ -28,13 +29,18 @@ class DailyReportSettingsController extends Controller
 
         $validated = $request->validate($rules);
         if ($validated) {
-            DailyReportSettings::updateOrCreate(
-                ['userDataUnitId' => $userId],
+            $send = DailyReportSettings::updateOrCreate(
+                ['clientId' => $clientId],
                 [
                     'decimalSetting' => $validated['decimalSetting'],
                     'minMaxSetting' => $validated['minMaxSetting'],
                 ]
             );
+            if ($send) {
+                return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
+            } else {
+                return response()->json(['text' => 'Failed to update settings', 'type' => 'error'], 500);
+            }
         }
     }
 

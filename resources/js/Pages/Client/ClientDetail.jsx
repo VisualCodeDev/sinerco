@@ -1,15 +1,18 @@
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
+import { useToast } from "@/Components/Toast/ToastProvider";
 import { formItems } from "@/Components/utils/dashboard-util";
 import tColumns from "@/Components/utils/DataUnit/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
 import { FaAngleDown } from "react-icons/fa";
 
-const ClientDetail = ({ data, userData }) => {
+const ClientDetail = ({ data, unitData }) => {
     const columns = tColumns();
+    const clientData = unitData?.client || {};
+    const dailyReportSettingData = unitData?.daily_report_setting || {};
+    console.log(dailyReportSettingData, data);
     const [isSettingModal, setSettingModal] = useState(false);
-    console.log(userData);
     const handleConfirmSettings = () => {};
     return (
         <PageLayout>
@@ -23,7 +26,7 @@ const ClientDetail = ({ data, userData }) => {
             </div>
             <TableComponent columns={columns} data={data} />
             <SettingModal
-                data={userData}
+                data={dailyReportSettingData}
                 isModal={isSettingModal}
                 handleCloseModal={() => setSettingModal(false)}
                 handleConfirmSettings={handleConfirmSettings}
@@ -38,6 +41,7 @@ const SettingModal = (props) => {
     const [decimalActive, setDecimalActive] = useState(false);
     const [minMaxActive, setMinMaxActive] = useState(false);
     const [saving, setSaving] = useState(false);
+    const { addToast } = useToast();
 
     useEffect(() => {
         let defaultDecimalSetting = {};
@@ -87,25 +91,21 @@ const SettingModal = (props) => {
             }));
         }
     };
-    console.log(data, formData);
-
     const handleSave = async () => {
         let formattedDecimal = {};
         try {
             setSaving(true);
             const resp = await axios.post(
-                route("daily.setting", { userId: data?.userDataUnitId }),
+                route("daily.setting", { clientId: data?.clientId }),
                 formData
             );
-            // if (resp.status === 200 || resp.status === 302) {
-            //     setData({});
-            //     setConfirmationModal(false);
-            //     setSaving(false);
-            // } else {
-            //     setStatus("failed");
-            //     setConfirmationModal(false);
-            //     setSaving(false);
-            // }
+            if (resp.status === 200 || resp.status === 302) {
+                addToast(resp.data);
+                setSaving(false);
+            } else {
+                setStatus("failed");
+                setSaving(false);
+            }
         } catch (err) {
             console.error("Error creating report:", err);
             setSaving(false);
@@ -274,4 +274,4 @@ const SettingModal = (props) => {
         </Modal>
     );
 };
-export default UserDetail;
+export default ClientDetail;

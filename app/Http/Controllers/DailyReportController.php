@@ -88,7 +88,7 @@ class DailyReportController extends Controller
             ]);
         });
         if ($unitAreaLocationId) {
-            $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['client', 'unit'])->first();
+            $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting'])->first();
             return Inertia::render('Daily/Daily', [
                 'data' => $data,
                 'unitData' => $unitData,

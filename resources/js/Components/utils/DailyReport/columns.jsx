@@ -80,8 +80,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -126,8 +126,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -178,8 +178,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -230,8 +230,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -282,8 +282,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -334,8 +334,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -386,8 +386,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -438,8 +438,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -490,8 +490,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -542,8 +542,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -659,8 +659,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}
@@ -711,8 +711,8 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         </label>
                         <input
                             required
-                            min={minMaxSetting.min}
-                            max={minMaxSetting.max}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
                             id={name}
                             type="number"
                             name={name}

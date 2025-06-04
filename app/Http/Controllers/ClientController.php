@@ -19,8 +19,9 @@ class ClientController extends Controller
     {
         $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit')->get();
         $clientData = $data->first()?->client;
+        $unitData = UnitAreaLocation::where('clientId', $clientId)->with(['client', 'unit', 'dailyReportSetting'])->first();
         if ($data) {
-            return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData]);
+            return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
         }
     }
 

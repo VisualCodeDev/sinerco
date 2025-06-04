@@ -9,15 +9,15 @@ class UnitAreaLocation extends Model
     protected $fillable = [
         'unitAreaLocationId',
         'unitId',
-        'userDataUnitId',
+        'clientId',
         'area',
         'location',
     ];
 
     public function dailyReportSetting()
     {
-        return $this->belongsTo(DailyReportSettings::class, 'userDataUnitId', 'userDataUnitId')
-            ->select('userDataUnitId', 'minMaxSetting', 'decimalSetting');
+        return $this->belongsTo(DailyReportSettings::class, 'clientId', 'clientId')
+            ->select('clientId', 'minMaxSetting', 'decimalSetting');
     }
 
     public function unit()
