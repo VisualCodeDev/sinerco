@@ -128,7 +128,7 @@ const TableComponent = (props) => {
                                 >
                                     <div className="flex items-center">
                                         {typeof col?.Header === "function"
-                                            ? col?.Header(data)
+                                            ? col?.Header(filteredData)
                                             : col?.header}
                                         {col.sortable &&
                                             (sortConfig.key === col.name ? (
@@ -203,9 +203,7 @@ const TableComponent = (props) => {
                                     className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100"
                                     onClick={handleSubmit}
                                 >
-                                    {submitPlaceholder
-                                        ? submitPlaceholder
-                                        : "Submit"}
+                                    {submitPlaceholder ? submitPlaceholder : 'Submit'}
                                 </button>
                             </div>
                         </th>

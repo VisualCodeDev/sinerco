@@ -221,7 +221,7 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
                 })}
             </select> */}
             <TabGroup>
-                <TabList className={"flex space-x-1 p-2 "}>
+                <TabList className={"flex space-x-1"}>
                     <Tab
                         className="hover:underline aria-selected:bg-primary py-2 px-4 aria-selected:text-white rounded-t-2xl"
                         onClick={() => setFormData({ selectedRows: [] })}
@@ -236,7 +236,7 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
                     </Tab>
                 </TabList>
 
-                <TabPanels>
+                <TabPanels className={'p-5 bg-white border shadow-md'}>
                     <TabPanel>
                         <TableComponent
                             title={"Permitted"}
