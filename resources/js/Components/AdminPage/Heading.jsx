@@ -22,7 +22,6 @@ const menuItems = [
         label: "Allocation Settings",
         href: route("allocation.setting"),
     },
-    { icon: <FaLock />, label: "Security" },
     {
         icon: <FaLock />,
         label: "Logout",
