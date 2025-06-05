@@ -45,4 +45,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function unitAreaLocations()
+    {
+        return $this->belongsToMany(
+            UnitAreaLocation::class,
+            'user_allocations',         // Pivot table
+            'userId',                   // foreign key on pivot to User
+            'unitAreaLocationId',       // foreign key on pivot to UnitAreaLocation
+            'id',                       // local key on User (primary key)
+            'unitAreaLocationId'        // local key on UnitAreaLocation
+        );
+    }
 }

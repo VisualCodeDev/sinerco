@@ -6,7 +6,7 @@ const DailyList = ({ data }) => {
     if (!data) {
         return <div>WAITING...</div>;
     }
-
+    console.log(data)
     return (
         <PageLayout>
             <UnitTable data={data} />

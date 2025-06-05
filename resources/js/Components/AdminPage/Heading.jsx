@@ -29,7 +29,7 @@ const menuItems = [
         onClick: async () => {
             try {
                 await axios.post(route("logout"));
-                window.location.href = "/"; // redirect ke halaman utama
+                window.location.href = "/login";
             } catch (error) {
                 console.error("Logout failed:", error);
             }
