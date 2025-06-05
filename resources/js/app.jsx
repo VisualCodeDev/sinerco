@@ -6,12 +6,16 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { ToastProvider } from "@/Components/Toast/ToastProvider"; // <-- import your ToastProvider
 import axios from "axios";
-import { AuthProvider } from "./Components/Auth/AuthProvider";
 
 const appName = import.meta.env.VITE_APP_NAME || "Laravel";
-axios.defaults.headers.common["X-CSRF-TOKEN"] = document.querySelector(
-    'meta[name="csrf-token"]'
-).content;
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+if (csrfToken) {
+    axios.defaults.headers.common["X-CSRF-TOKEN"] = csrfToken;
+} else {
+    console.error("CSRF token not found in meta tag.");
+}
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
@@ -23,21 +27,17 @@ createInertiaApp({
         if (import.meta.env.SSR) {
             hydrateRoot(
                 el,
-                <AuthProvider>
-                    <ToastProvider>
-                        <App {...props} />
-                    </ToastProvider>
-                </AuthProvider>
+                <ToastProvider>
+                    <App {...props} />
+                </ToastProvider>
             );
             return;
         }
 
         createRoot(el).render(
-            <AuthProvider>
-                <ToastProvider>
-                    <App {...props} />
-                </ToastProvider>
-            </AuthProvider>
+            <ToastProvider>
+                <App {...props} />
+            </ToastProvider>
         );
     },
     progress: {

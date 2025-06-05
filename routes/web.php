@@ -80,12 +80,14 @@ Route::controller(ClientController::class)->group(function () {
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
 });
 
-Route::controller(UserAllocationController::class)->group(function () {
-    Route::get('/setting/user-alocation', 'index')->name('allocation.setting')->middleware('auth');
-    Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation')->middleware('auth');
-    Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add')->middleware('auth');
-    Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove')->middleware('auth');
-});
+Route::controller(UserAllocationController::class)
+    ->middleware(['auth', 'roles:super_admin'])
+    ->group(function () {
+        Route::get('/setting/user-allocation', 'index')->name('allocation.setting');
+        Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation');
+        Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add');
+        Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove');
+    });
 
 // Route::get('/dashboard', function () {
 //     return Inertia::render('Welcome');

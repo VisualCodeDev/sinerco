@@ -7,37 +7,42 @@ import {
     FaAddressBook,
     FaList,
 } from "react-icons/fa";
-
-const menuItems = [
-    { icon: <FaHome />, label: "Home", href: "/" },
-    {
-        icon: <FaAddressBook />,
-        label: "Client List",
-        href: route("client.list"),
-    },
-    { icon: <FaList />, label: "Unit List", href: route("daily.list") },
-    { icon: <FaTh />, label: "Request List", href: route("request") },
-    {
-        icon: <FaUser />,
-        label: "Allocation Settings",
-        href: route("allocation.setting"),
-    },
-    {
-        icon: <FaLock />,
-        label: "Logout",
-        onClick: async () => {
-            try {
-                await axios.post(route("logout"));
-                window.location.href = "/login";
-            } catch (error) {
-                console.error("Logout failed:", error);
-            }
-        },
-    },
-];
+import { useAuth } from "../Auth/AuthProvider";
 
 const Heading = ({ children }) => {
     const [expanded, setExpanded] = useState(false);
+    const { user } = useAuth();
+    if (!user) return <div>Loading...</div>; 
+
+    console.log(user?.role === "super_admin", user);
+    const menuItems = [
+        { icon: <FaHome />, label: "Home", href: "/" },
+        {
+            icon: <FaAddressBook />,
+            label: "Client List",
+            href: route("client.list"),
+        },
+        { icon: <FaList />, label: "Unit List", href: route("daily.list") },
+        { icon: <FaTh />, label: "Request List", href: route("request") },
+        {
+            condition: user?.role === "super_admin",
+            icon: <FaUser />,
+            label: "Allocation Settings",
+            href: route("allocation.setting"),
+        },
+        {
+            icon: <FaLock />,
+            label: "Logout",
+            onClick: async () => {
+                try {
+                    await axios.post(route("logout"));
+                    window.location.href = "/login";
+                } catch (error) {
+                    console.error("Logout failed:", error);
+                }
+            },
+        },
+    ];
 
     return (
         <div className="flex h-screen overflow-hidden w-screen">
@@ -52,21 +57,25 @@ const Heading = ({ children }) => {
                 <div className="flex flex-col items-center py-4 space-y-4">
                     <img src="/logo_only.webp" alt="Logo" className="h-8" />
                     <div className="w-full mt-4">
-                        {menuItems.map((item, index) => (
-                            <a
-                                href={item.href}
-                                key={index}
-                                className="flex items-center gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-                                onClick={item.onClick ? item.onClick : undefined}
-                            >
-                                <div className="text-xl">{item.icon}</div>
-                                {expanded && (
-                                    <span className="text-sm text-gray-700">
-                                        {item.label}
-                                    </span>
-                                )}
-                            </a>
-                        ))}
+                        {menuItems.map((item, index) =>
+                            item?.condition === false ? null : (
+                                <a
+                                    href={item.href}
+                                    key={index}
+                                    className="flex items-center gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                    onClick={
+                                        item.onClick ? item.onClick : undefined
+                                    }
+                                >
+                                    <div className="text-xl">{item.icon}</div>
+                                    {expanded && (
+                                        <span className="text-sm text-gray-700">
+                                            {item.label}
+                                        </span>
+                                    )}
+                                </a>
+                            )
+                        )}
                     </div>
                 </div>
             </div>
