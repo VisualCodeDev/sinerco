@@ -192,17 +192,19 @@ export const TimeInput = ({
     max = 23,
     placeholder = "Enter time",
     value,
+    disabled = false,
 }) => {
     const options = [];
     const filledFormTime =
-        formData
-            ?.filter((data) => item?.date === data?.date)
-            .map((data) => parseInt(data?.time.split(":")[0])) ?? [];
-
+        (Array.isArray(formData) &&
+            formData
+                ?.filter((data) => item?.date === data?.date)
+                .map((data) => parseInt(data?.time.split(":")[0]))) ||
+        [];
     let initTime = 1;
     let maxTime = 23;
     for (let i = initTime; i <= maxTime; i++) {
-        if (!filledFormTime.includes(i)) {
+        if (!filledFormTime?.includes(i)) {
             options.push(
                 <option key={i} value={`${i}:00`}>
                     {i}:00
@@ -210,6 +212,7 @@ export const TimeInput = ({
             );
         }
     }
+
     return (
         <>
             <select
@@ -217,6 +220,7 @@ export const TimeInput = ({
                 value={value}
                 onChange={onChange}
                 name={name}
+                disabled={disabled}
             >
                 {options}
             </select>
@@ -235,7 +239,7 @@ export const TimeInput = ({
     );
 };
 
-export const DateInput = ({ onChange, placeholder = "Enter Date", value }) => {
+export const DateInput = ({ onChange, placeholder = "Enter Date", value, disabled=false }) => {
     return (
         <input
             required
@@ -245,6 +249,7 @@ export const DateInput = ({ onChange, placeholder = "Enter Date", value }) => {
             onChange={onChange}
             placeholder={placeholder}
             className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+            disabled={disabled}
         />
     );
 };

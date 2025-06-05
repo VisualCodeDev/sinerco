@@ -72,10 +72,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -118,10 +120,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -170,10 +174,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -222,10 +228,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -274,10 +282,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -326,10 +336,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -378,10 +390,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -430,10 +444,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -482,10 +498,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -534,10 +552,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -583,29 +603,31 @@ const list = ({ handleChange, formData, reportSettings }) => {
             ],
             Cell: ({ item, header, name, subheader }) => {
                 const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1 ;
+                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
                 const minMaxSetting = {
                     min: reportSettings?.minMaxSetting[name]?.min,
                     max: reportSettings?.minMaxSetting[name]?.max,
                 };
                 return (
-                    <div className="flex flex-col">
+                    <div className="flex flex-col flew-wrap">
                         <label
                             htmlFor={name}
                             className="font-medium text-md mb-1.5"
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <div className="flex gap-4">
                             {subheader?.map((sub, index) => {
                                 return (
-                                    <div className="flex flex-col w-full">
+                                    <div className="flex flex-col w-1/2">
                                         <label className="text-sm">
                                             {sub?.sub}
                                         </label>
@@ -651,10 +673,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -703,10 +727,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <input
@@ -750,10 +776,12 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         >
                             {header}{" "}
                             <div className="text-xs">
-                                {minMaxSetting?.min != null &&
-                                    `min: ${minMaxSetting.min}`}{" "}
-                                {minMaxSetting?.max != null &&
-                                    `max: ${minMaxSetting.max}`}
+                                {minMaxSetting?.min != null
+                                    ? `min: ${minMaxSetting.min}`
+                                    : "min: -"}{" | "}
+                                {minMaxSetting?.max != null
+                                    ? `max: ${minMaxSetting.max}`
+                                    : "max: -"}
                             </div>
                         </label>
                         <div className="flex gap-4">

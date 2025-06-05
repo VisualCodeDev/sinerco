@@ -1,5 +1,5 @@
 import Heading from "@/Components/AdminPage/Heading";
-import { useAuth } from "@/Components/Auth/AuthProvider";
+import { useAuth } from "@/Components/Auth/auth";
 import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";

@@ -15,7 +15,7 @@ import { FaAngleDown, FaCog } from "react-icons/fa";
 
 const DailyReportForm = (props) => {
     const { unitData, formData } = props;
-    console.log("unitData", unitData);
+    console.log('formData', formData);
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -117,17 +117,6 @@ const DailyReportForm = (props) => {
                             </p>
                             <p className="text-sm">{unitData.area}</p>
                             <p className="text-sm">{unitData.location}</p>
-                        </div>
-                        <div className="flex justify-center items-center ">
-                            <div className="w-1/7 flex justify-center items-center bg-primary text-white px-6 py-2 rounded-md gap-2 hover:bg-white hover:border-primary hover:border-2 hover:text-primary">
-                                <FaCog />
-                                <button
-                                    className=""
-                                    onClick={() => setSettingModal(true)}
-                                >
-                                    Setting
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </>

@@ -1,4 +1,5 @@
 import Heading from "@/Components/AdminPage/Heading";
+import { AuthGuard } from "@/Components/Auth/auth";
 import { RequestModal } from "@/Components/RequestComponents/RequestModal";
 import { NotificationContainer } from "@/Components/Toast/Notification";
 import { usePage } from "@inertiajs/react";
@@ -27,22 +28,24 @@ const PageLayout = ({ children }) => {
 
     return (
         <Heading>
-            <div className="relative">
-                <NotificationContainer messages={messages} />
-                <div className="fixed bottom-0 right-0 z-[100] m-12">
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="bg-secondary text-white px-4 py-2 text-lg rounded-md shadow"
-                    >
-                        Report SD/STDBY
-                    </button>
-                    <RequestModal
-                        handleCloseModal={() => setShowModal(false)}
-                        showModal={showModal}
-                    />
+            <AuthGuard>
+                <div className="relative">
+                    <NotificationContainer messages={messages} />
+                    <div className="fixed bottom-0 right-0 z-[100] m-12">
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="bg-secondary text-white px-4 py-2 text-lg rounded-md shadow"
+                        >
+                            Report SD/STDBY
+                        </button>
+                        <RequestModal
+                            handleCloseModal={() => setShowModal(false)}
+                            showModal={showModal}
+                        />
+                    </div>
+                    {children}
                 </div>
-                {children}
-            </div>
+            </AuthGuard>
         </Heading>
     );
 };

@@ -97,7 +97,6 @@ class DailyReportController extends Controller
                 "updated_at",
                 "approval1",
                 "approval2",
-                "id",
                 "unitAreaLocationId"
             ]);
         });

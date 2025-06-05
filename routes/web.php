@@ -61,8 +61,8 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
     return Auth::user();
 })->name('auth.user');
 
-Route::controller(DailyReportSettingsController::class)->group(function () {
-    Route::post('/client/{clientId}/report-setting', 'setSetting')->name('daily.setting')->middleware('auth');
+Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::post('/client/{clientId}/report-setting', 'setSetting')->name('daily.setting');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
@@ -75,7 +75,7 @@ Route::controller(DataUnitController::class)->group(function () {
     Route::get('/api/get-unit-area-location', 'getUnitAreaLocation')->name('getUnitAreaLocation');
 });
 
-Route::controller(ClientController::class)->group(function () {
+Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/client-list', 'index')->name('client.list');
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
 });

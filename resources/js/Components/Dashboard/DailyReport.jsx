@@ -6,17 +6,29 @@ import {
     getAvg,
     getDateLists,
     getDDMMYYDate,
+    getFormattedDate,
+    DateInput,
+    TimeInput,
 } from "../utils/dashboard-util";
 import Card from "../Card";
+import { useAuth } from "../Auth/auth";
+import { FaPen } from "react-icons/fa";
+import Modal from "../Modal";
+import DailyReportForm from "./DailyReportForm";
+import list from "../utils/DailyReport/columns";
 
 const DailyReport = (props) => {
     const { formData, unitData } = props;
-
+    const { user } = useAuth();
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
     );
     const [isClicked, setClick] = useState(false);
+    const [isEditModal, setEditModal] = useState(false);
+    const [selectedData, setSelectedData] = useState(null);
+    const [dataAll, setData] = useState(formData);
+
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
@@ -25,7 +37,7 @@ const DailyReport = (props) => {
         setSelectedDate(newSelectedDate);
     };
     const sortedObjectByTime = (obj) => {
-        const sortedItemByTime = Object.entries(formData)
+        const sortedItemByTime = Object.entries(dataAll)
             .filter(([, value]) => value.date === selectedDate)
             .map(([, value]) => value)
             .sort((a, b) => {
@@ -36,19 +48,25 @@ const DailyReport = (props) => {
         return sortedItemByTime;
     };
     useEffect(() => {
-        if (formData) {
+        if (dataAll) {
             if (selectedDate) {
-                const sortedData = sortedObjectByTime(formData);
+                const sortedData = sortedObjectByTime(dataAll);
                 setCurrData(sortedData);
             }
         }
     }, [selectedDate]);
     useEffect(() => {
-        if (formData) {
-            const sortedData = sortedObjectByTime(formData);
+        if (dataAll) {
+            const sortedData = sortedObjectByTime(dataAll);
             setCurrData(sortedData);
         }
-    }, [formData]);
+    }, [dataAll]);
+
+    const handleEdit = (key) => {
+        const data = dataAll[key];
+        setEditModal(true);
+        setSelectedData(data);
+    };
     return (
         <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
             {unitData && (
@@ -97,6 +115,14 @@ const DailyReport = (props) => {
                                     {item.header}
                                 </th>
                             ))}
+                            {user?.role === "super_admin" && (
+                                <th
+                                    rowSpan={2}
+                                    className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                >
+                                    Edit
+                                </th>
+                            )}
                         </tr>
                         <tr>
                             {formItems?.map((item) =>
@@ -166,6 +192,14 @@ const DailyReport = (props) => {
                                     <td className="px-4 py-2 border">
                                         {value.mscfd}
                                     </td>
+                                    {user?.role === "super_admin" && (
+                                        <td
+                                            className="flex justify-center items-center px-4 py-2 border cursor-pointer"
+                                            onClick={() => handleEdit(key)}
+                                        >
+                                            <FaPen />
+                                        </td>
+                                    )}
                                 </tr>
                             ))}
                         {averages && (
@@ -189,6 +223,9 @@ const DailyReport = (props) => {
                                         </th>
                                     )
                                 )}
+                                {user?.role === "super_admin" && (
+                                    <th className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"></th>
+                                )}
                             </tr>
                         )}
                     </tbody>
@@ -200,8 +237,19 @@ const DailyReport = (props) => {
                     list={prevDateList}
                     setClick={setClick}
                     // data={currData}
-                    data={formData}
+                    data={dataAll}
                     averages={averages}
+                />
+            )}
+            {isEditModal && (
+                <EditModal
+                    setClick={setEditModal}
+                    setEditModal={setEditModal}
+                    isEditModal={isEditModal}
+                    formData={selectedData}
+                    setData={setData}
+                    unitData={unitData}
+                    data={dataAll}
                 />
             )}
         </div>
@@ -289,6 +337,115 @@ const ExportModal = (props) => {
                 </Card.Footer>
             </Card>
         </div>
+    );
+};
+
+const EditModal = (props) => {
+    const { setEditModal, isEditModal, data, formData, unitData, setData } =
+        props;
+    const [formDataState, setFormDataState] = useState(formData);
+    const handleChange = ([field], value) => {
+        setFormDataState({ ...formDataState, [field]: value });
+    };
+    const formList = list({
+        handleChange: handleChange,
+        formData: formDataState,
+        reportSettings: unitData?.daily_report_setting,
+    });
+    const handleSubmit = () => {
+        if (formDataState) {
+            const updatedItems = data.map((item) =>
+                item.id === formDataState.id
+                    ? { ...item, ...formDataState }
+                    : item
+            );
+            console.log(updatedItems)
+            setData(updatedItems);
+        }
+    };
+    return (
+        <Modal
+            title="Edit Report"
+            handleCloseModal={() => setEditModal(false)}
+            showModal={isEditModal}
+        >
+            <Modal.Body>
+                <form>
+                    <div className="flex flex-col mb-4">
+                        <label
+                            htmlFor={"date"}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            Date
+                        </label>
+                        <DateInput
+                            disabled
+                            id={"date"}
+                            className="w-full bg-[#F4F5F9]"
+                            name={"date"}
+                            value={formDataState?.date || ""}
+                            onChange={(e) =>
+                                handleChange([e.target.name], e.target.value)
+                            }
+                        />
+                    </div>
+                    <div className="flex flex-col mb-4">
+                        <label
+                            htmlFor={"time"}
+                            className="font-medium text-md mb-1.5"
+                        >
+                            Time
+                        </label>
+                        <TimeInput
+                            formData={formData}
+                            disabled
+                            id={"time"}
+                            name={"time"}
+                            value={formDataState?.time || ""}
+                            onChange={(e) =>
+                                handleChange([e.target.name], e.target.value)
+                            }
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-8 mb-4 items-end">
+                        {formList
+                            .filter(
+                                (item) =>
+                                    item?.name !== "time" &&
+                                    item?.name !== "date"
+                            )
+                            .map((item) => (
+                                <div
+                                    key={item.header}
+                                    style={{
+                                        gridColumn: "span " + item.gridCols,
+                                    }}
+                                >
+                                    {typeof item.Cell === "function"
+                                        ? item.Cell(
+                                              {
+                                                  item: formDataState,
+                                                  header: item.header,
+                                                  name: item.name,
+                                                  subheader:
+                                                      item?.subheader || [],
+                                              } || ""
+                                          )
+                                        : item.Cell}
+                                </div>
+                            ))}
+                    </div>
+                </form>
+            </Modal.Body>
+            <Modal.Footer>
+                <button
+                    className="bg-primary text-white font-bold w-full h-full"
+                    onClick={handleSubmit}
+                >
+                    Simpan
+                </button>
+            </Modal.Footer>
+        </Modal>
     );
 };
 

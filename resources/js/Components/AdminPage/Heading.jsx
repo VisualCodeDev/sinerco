@@ -7,17 +7,18 @@ import {
     FaAddressBook,
     FaList,
 } from "react-icons/fa";
-import { useAuth } from "../Auth/AuthProvider";
+import { useAuth } from "../Auth/auth";
 
 const Heading = ({ children }) => {
     const [expanded, setExpanded] = useState(false);
-    const { user } = useAuth();
-    if (!user) return <div>Loading...</div>; 
+    const { user, loading } = useAuth();
+    if (loading) return <div>Loading...</div>;
 
     console.log(user?.role === "super_admin", user);
     const menuItems = [
         { icon: <FaHome />, label: "Home", href: "/" },
         {
+            condition: user?.role === "super_admin",
             icon: <FaAddressBook />,
             label: "Client List",
             href: route("client.list"),
@@ -31,6 +32,7 @@ const Heading = ({ children }) => {
             href: route("allocation.setting"),
         },
         {
+            condition: user,
             icon: <FaLock />,
             label: "Logout",
             onClick: async () => {
@@ -58,7 +60,8 @@ const Heading = ({ children }) => {
                     <img src="/logo_only.webp" alt="Logo" className="h-8" />
                     <div className="w-full mt-4">
                         {menuItems.map((item, index) =>
-                            item?.condition === false ? null : (
+                            item?.condition === false ||
+                            item?.condition === null ? null : (
                                 <a
                                     href={item.href}
                                     key={index}
