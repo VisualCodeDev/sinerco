@@ -50,6 +50,8 @@ const Heading = ({ children }) => {
                     window.location.href = "/login";
                 } catch (error) {
                     console.error("Logout failed:", error);
+                } finally {
+                    window.location.href = "/login";
                 }
             },
         },

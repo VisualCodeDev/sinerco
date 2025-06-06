@@ -19,7 +19,7 @@ class DataUnitController extends Controller
         if ($user->role == 'technician' || $user->role == 'operator') {
             $data = $user->unitAreaLocations()->with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit']);
+                    $q->select(['unitId', 'unit', 'status']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
@@ -28,7 +28,7 @@ class DataUnitController extends Controller
         } else {
             $data = UnitAreaLocation::with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit']);
+                    $q->select(['unitId', 'unit', 'status']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);

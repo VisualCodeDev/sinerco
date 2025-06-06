@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 export default function Home() {
     const [data, setData] = useState(null);
     const [total, setTotal] = useState(0);
-
     const fetchData = async () => {
         const response = await axios.get(route("getUnitStatus"));
         if (response.data) {
