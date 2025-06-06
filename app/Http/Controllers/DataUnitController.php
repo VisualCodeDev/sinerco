@@ -57,7 +57,9 @@ class DataUnitController extends Controller
      */
     public function getUnitStatus()
     {
-        $data = DataUnit::all();
+        $data = $this->getPermittedUnit()->map(function ($item) {
+            return $item->unit;
+        });
         return response()->json($data);
     }
 
