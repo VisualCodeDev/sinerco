@@ -14,7 +14,7 @@ export const ToastProvider = ({ children }) => {
 
         setTimeout(() => {
             setMessages((prev) => (prev?.id === id ? null : prev));
-        }, 3000);
+        }, 5000);
     };
 
     return (

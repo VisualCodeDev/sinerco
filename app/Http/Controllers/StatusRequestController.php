@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdminNotification;
+use App\Models\DataUnit;
 use App\Models\StatusRequest;
 use DB;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class StatusRequestController extends Controller
     public function setRequest(Request $request)
     {
         $val = $request->validate([
+            'unitId' => 'required|string',
             'startDate' => 'required|string',
             'startTime' => 'required|string',
             'requestType' => 'required|string',
@@ -27,12 +29,15 @@ class StatusRequestController extends Controller
         ]);
 
         try {
+            $user = auth()->user();
             $status = new StatusRequest();
+            $status->unitId = $val['unitId'];
             $status->startDate = $val['startDate'];
             $status->startTime = $val['startTime'];
             $status->requestType = $val['requestType'];
             $status->remarks = $val['remarks'];
             $status->status = 'Pending';
+            $status->requestedBy = $user->id;
             $status->save();
 
             return back();
@@ -42,7 +47,7 @@ class StatusRequestController extends Controller
     }
     public function getRequest()
     {
-        $status = StatusRequest::all();
+        $status = StatusRequest::with(['unit', 'user'])->orderBy('created_at', 'desc')->get();
         return Inertia::render('Request/Request', ['data' => $status]);
     }
 
@@ -53,38 +58,47 @@ class StatusRequestController extends Controller
             'status' => 'required|string',
             'endTime' => 'nullable|string',
             'endDate' => 'nullable|string',
-            'action' => 'nullable|string',
         ]);
-        $status = StatusRequest::where('requestId', $request->requestId)->first();
-        if ($status) {
-            $status->status = $request->status;
-            if ($request->endTime && $request->endDate) {
-                $status->endTime = $request->endTime;
-                $status->endDate = $request->endDate;
-                $status->action = $request->action;
-            } else {
-                $status->endTime = null;
-                $status->endDate = null;
-                $status->action = '';
-            }
-            if ($status->status === "End") {
-                $notification = AdminNotification::where('requestId', $request->requestId)->first();
-                $notification->status = $request->status;
-                $notification->save();
-            } else {
-                $notification = AdminNotification::where('requestId', $request->requestId)->first();
-                $notification->requestId = $status->requestId;
-                $notification->date = $status->startDate;
-                $notification->time = $status->startTime;
-                $notification->requestType = $status->requestType;
-                $notification->status = $status->status;
-                $notification->save();
-            }
-            $status->save();
-            return back()->with('status', 'success');
+        $status = StatusRequest::with('unit')->where('requestId', $request->requestId)->first();
+
+        if (!$status) {
+            return back()->with('status', 'Request not found.');
         }
 
-        return back()->with('status', 'failed');
+        // Update status and end time
+        $status->status = $request->status;
+        $status->endTime = $request->endTime ?? null;
+        $status->endDate = $request->endDate ?? null;
+
+        // Handle unit status updates if the relationship is loaded
+        if ($status->unit) {
+            $newUnitStatus = match ($status->status) {
+                'Ongoing' => $status->requestType,
+                'End' => 'online',
+                default => null,
+            };
+
+            if ($newUnitStatus) {
+                $status->unit->update(['status' => $newUnitStatus]);
+            }
+        }
+
+        // Handle notification
+        $notification = AdminNotification::firstOrNew(['requestId' => $status->requestId]);
+        $notification->date = $status->startDate;
+        $notification->time = $status->startTime;
+        $notification->requestType = $status->requestType;
+        $notification->status = $status->status;
+        $notification->save();
+
+        // Save status
+        $status->save();
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Request Saved',
+        ]);
+
     }
 
     /**

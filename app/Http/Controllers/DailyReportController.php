@@ -11,7 +11,7 @@ use Inertia\Inertia;
 
 class DailyReportController extends Controller
 {
-    public function dailyList()
+    public function unitList()
     {
         $user = Auth::user();
         // dd($user->role);

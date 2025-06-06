@@ -6,6 +6,8 @@ import {
     FaLock,
     FaAddressBook,
     FaList,
+    FaSignInAlt,
+    FaSignOutAlt,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 
@@ -14,7 +16,6 @@ const Heading = ({ children }) => {
     const { user, loading } = useAuth();
     if (loading) return <div>Loading...</div>;
 
-    console.log(user?.role === "super_admin", user);
     const menuItems = [
         { icon: <FaHome />, label: "Home", href: "/" },
         {
@@ -32,8 +33,16 @@ const Heading = ({ children }) => {
             href: route("allocation.setting"),
         },
         {
+            condition: !user,
+            icon: <FaSignInAlt />,
+            label: "Login",
+            onClick: async () => {
+                window.location.href = "/login";
+            },
+        },
+        {
             condition: user,
-            icon: <FaLock />,
+            icon: <FaSignOutAlt />,
             label: "Logout",
             onClick: async () => {
                 try {

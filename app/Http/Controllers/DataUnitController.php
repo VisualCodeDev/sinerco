@@ -5,24 +5,60 @@ namespace App\Http\Controllers;
 use App\Models\DataUnit;
 use App\Models\UnitAreaLocation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DataUnitController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function getUnitAreaLocation()
+    private function getPermittedUnit()
     {
-        $data = UnitAreaLocation::with(['unit', 'client'])->get();
+        $user = Auth::user();
+        if ($user->role == 'technician' || $user->role == 'operator') {
+            $data = $user->unitAreaLocations()->with([
+                'unit' => function ($q) {
+                    $q->select(['unitId', 'unit']);
+                },
+                'client' => function ($q) {
+                    $q->select(['clientId', 'name']);
+                }
+            ])->get()->makeHidden(['created_at', 'updated_at']);
+        } else {
+            $data = UnitAreaLocation::with([
+                'unit' => function ($q) {
+                    $q->select(['unitId', 'unit']);
+                },
+                'client' => function ($q) {
+                    $q->select(['clientId', 'name']);
+                }
+            ])->get()->makeHidden(['created_at', 'updated_at']);
+        }
+        return $data;
+    }
+    public function unitList()
+    {
+        $data = $this->getPermittedUnit();
+
+        return Inertia::render('Daily/DailyList', ['data' => $data]);
+    }
+    public function getUnit()
+    {
+        $data = $this->getPermittedUnit()->map(function ($item) {
+            return $item->unit;
+        });
+
         return response()->json($data);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function getUnitStatus()
     {
-        //
+        $data = DataUnit::all();
+        return response()->json($data);
     }
 
     /**

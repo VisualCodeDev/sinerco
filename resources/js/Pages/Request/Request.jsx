@@ -11,111 +11,51 @@ import Modal from "@/Components/Modal";
 import PageLayout from "@/Layouts/PageLayout";
 import { useForm } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
+import tColumns from "@/Components/utils/Request/columns";
+import TableComponent from "@/Components/TableComponent";
+import SavingView from "@/Components/SavingView";
+import { useToast } from "@/Components/Toast/ToastProvider";
 
 const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
     const [selectedItem, setItem] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [allData, setAllData] = useState(data);
     const handleSelect = (itemData) => {
         setModal(true);
         setItem(itemData);
     };
-
+    const columns = tColumns(handleSelect);
     return (
         <PageLayout>
-            <Card>
-                <Card.Header className="bg-primary text-white">
-                    Request List
-                </Card.Header>
-                <Card.Body className="relative">
-                    <div className="flex text-center">
-                        <table className="w-full">
-                            <thead>
-                                <tr>
-                                    <th>No.</th>
-                                    <th>Start Date</th>
-                                    <th>Start Time</th>
-                                    <th>Request</th>
-                                    <th>End Date</th>
-                                    <th>End Time</th>
-                                    <th>Status</th>
-                                    <th>Remarks</th>
-                                    <th>Action</th>
-                                    <th>Seen Status</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {data != ""
-                                    ? data?.map((item, index) => {
-                                          const status = getRequestStatus(
-                                              item?.status
-                                          );
-                                          return (
-                                              <tr key={index} id={item?.id}>
-                                                  <td>{index + 1}</td>
-                                                  <td>
-                                                      {getFormattedDate(
-                                                          item?.startDate
-                                                      )}
-                                                  </td>
-                                                  <td>{item?.startTime}</td>
-                                                  <td>
-                                                      {getRequestTypeName(
-                                                          item?.requestType
-                                                      )}
-                                                  </td>
-                                                  <td>
-                                                      {getFormattedDate(
-                                                          item?.endDate
-                                                      ) || "-"}
-                                                  </td>
-                                                  <td>
-                                                      {item?.endTime || "-"}
-                                                  </td>
-                                                  {status && (
-                                                      <td
-                                                          className="font-bold"
-                                                          style={{
-                                                              color: status?.color,
-                                                          }}
-                                                      >
-                                                          {status?.name ===
-                                                          "End"
-                                                              ? "Online"
-                                                              : status?.name}
-                                                      </td>
-                                                  )}
-                                                  <td>{item?.remarks}</td>
-                                                  <td>{item?.action}</td>
-                                                  <td>
-                                                      <button
-                                                          className="bg-gray-100 px-3 py-1 border-2"
-                                                          onClick={() =>
-                                                              handleSelect(item)
-                                                          }
-                                                      >
-                                                          Edit Item
-                                                      </button>
-                                                  </td>
-                                              </tr>
-                                          );
-                                      })
-                                    : "No Request"}
-                            </tbody>
-                        </table>
-                    </div>
-                </Card.Body>
-            </Card>
+            <TableComponent
+                title="Request List"
+                subtitle="Click on the row to edit the request"
+                columns={columns}
+                data={allData}
+                onRowClick={handleSelect}
+            />
             <EditItem
                 selectedItem={selectedItem}
                 setModal={setModal}
                 isModal={isModal}
+                setSaving={setSaving}
+                allData={allData}
+                setAllData={setAllData}
             />
+            {saving && <SavingView />}
         </PageLayout>
     );
 };
 
-const EditItem = ({ selectedItem, setModal, isModal }) => {
+const EditItem = ({
+    selectedItem,
+    setModal,
+    isModal,
+    setSaving,
+    allData,
+    setAllData,
+}) => {
     const {
         data: formData,
         setData,
@@ -123,6 +63,7 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
     } = useForm({
         ...selectedItem,
     });
+    const { addToast } = useToast();
 
     useEffect(() => {
         if (selectedItem) {
@@ -131,8 +72,8 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
             });
         }
     }, [selectedItem]);
+
     const handleChange = (field, value) => {
-        console.log(field, value);
         setData((prevData) => {
             const updatedData = { ...prevData, [field]: value };
             if (field === "status") {
@@ -155,18 +96,40 @@ const EditItem = ({ selectedItem, setModal, isModal }) => {
     };
 
     const handleSave = async () => {
-        // await axios.post("/dashboard/request/update", formData);
         if (
             formData?.status === "End" &&
-            (!formData?.endDate ||
-                !formData?.endTime ||
-                formData?.action === "")
+            (!formData?.endDate || !formData?.endTime)
         ) {
             return alert("Please fill all the fields");
         }
+        try {
+            setSaving(true);
 
-        post(route("request.update"), formData);
-        setModal(false);
+            const resp = await axios.post(route("request.update"), formData, {
+                headers: { Accept: "application/json" },
+            });
+
+            if (resp.status === 200 || resp.status === 302) {
+                setModal(false);
+            }
+
+            addToast(resp.data);
+        } catch (error) {
+            console.error("Failed to update request:", error);
+            addToast({
+                type: "error",
+                text: "Something went wrong while saving.",
+            });
+        } finally {
+            const newData = allData.map((item) => {
+                if (item.requestId === formData.requestId) {
+                    return { ...item, ...formData };
+                }
+                return item;
+            });
+            setAllData(newData);
+            setSaving(false);
+        }
     };
     return (
         <Modal

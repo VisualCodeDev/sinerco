@@ -239,7 +239,12 @@ export const TimeInput = ({
     );
 };
 
-export const DateInput = ({ onChange, placeholder = "Enter Date", value, disabled=false }) => {
+export const DateInput = ({
+    onChange,
+    placeholder = "Enter Date",
+    value,
+    disabled = false,
+}) => {
     return (
         <input
             required
@@ -648,24 +653,14 @@ export const editRequestItems = [
         type: "text",
         isInput: false,
     },
-    // {
-    //     name: "Start Time",
-    //     value: "startTime",
-    //     type: "time",
-    //     isInput: true,
-    // },
+
     {
         name: "End Date Time",
         value: { date: "endDate", time: "endTime" },
         type: "dateTime",
         isInput: true,
     },
-    // {
-    //     name: "End Time",
-    //     value: "endTime",
-    //     type: "time",
-    //     isInput: true,
-    // },
+
     {
         name: "Status",
         value: "status",
@@ -676,12 +671,6 @@ export const editRequestItems = [
     {
         name: "Remarks",
         value: "remarks",
-        type: "text",
-        isInput: true,
-    },
-    {
-        name: "Action",
-        value: "action",
         type: "text",
         isInput: true,
     },

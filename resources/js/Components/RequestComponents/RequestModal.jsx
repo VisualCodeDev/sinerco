@@ -11,6 +11,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         startTime: "",
     });
     const [errors, setErrors] = useState({});
+    const [unitData, setUnitData] = useState([]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
@@ -45,6 +46,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         }));
     };
 
+    const fetchDataUnit = async () => {
+        const response = await axios.get(route("getUnitAreaLocation"));
+        setUnitData(response.data);
+    };
+    fetchDataUnit();
+
     useEffect(() => {
         if (showModal) {
             const dataDateTime = getCurrDateTime();
@@ -53,6 +60,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                 startDate: dataDateTime.date,
                 startTime: dataDateTime.time,
             }));
+            fetchDataUnit();
         }
     }, [showModal]);
 
@@ -69,6 +77,31 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                 className="flex flex-col gap-2"
             >
                 <Modal.Body>
+                    <div className="flex justify-between items-center">
+                        <label htmlFor="unit">Unit: </label>
+                        <div>
+                            <select
+                                required
+                                id="unit"
+                                value={data.unitId || ""}
+                                onChange={(e) =>
+                                    handleChange(["unitId"], e.target.value)
+                                }
+                            >
+                                <option value={null}>-- Select Unit --</option>
+                                {unitData?.map((item, index) => (
+                                    <option value={item?.unitId} key={index}>
+                                        {item?.unit}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.requestType && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.requestType}
+                                </p>
+                            )}
+                        </div>
+                    </div>
                     <div className="flex justify-between items-center">
                         <label htmlFor="request">Request: </label>
                         <div>

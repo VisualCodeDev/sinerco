@@ -11,9 +11,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('data_units', function (Blueprint $table) {
-            $table->id();
-            $table->string('unitId', 50)->unique();
+            $table->string('unitId', 50)->unique()->primary();
             $table->string('unit');
+            $table->enum('status', ['stdby', 'sd', 'online'])->default('online');
+
             $table->timestamps();
         });
     }

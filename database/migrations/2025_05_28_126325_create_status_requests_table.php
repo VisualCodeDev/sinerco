@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -15,6 +14,8 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->string('requestId')->unique();
+            $table->unsignedBigInteger('requestedBy');
+            $table->string('unitId', 50);
             $table->date('startDate');
             $table->string('startTime');
             $table->date('endDate')->nullable();
@@ -23,6 +24,10 @@ return new class extends Migration
             $table->string('action')->default('');
             $table->string('remarks')->default('');
             $table->string('status');
+
+            $table->unique(['unitId', 'startDate', 'startTime']);
+            $table->foreign('unitId')->references('unitId')->on('data_units')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign('requestedBy')->references('id')->on('users')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
 

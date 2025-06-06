@@ -29,6 +29,19 @@ class StatusRequest extends Model
         });
     }
 
+    public function unit()
+    {
+        return $this->belongsTo(DataUnit::class, 'unitId', 'unitId')
+            ->select('unitId', 'status', 'unit');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'requestedBy', 'id')
+            ->select('id', 'name');
+
+    }
+
     protected $protected = [
         'date',
         'requestType',

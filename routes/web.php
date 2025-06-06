@@ -40,7 +40,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Home');
-})->name('dashboard');
+})->name('dashboard')->middleware('auth');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -50,7 +50,6 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::controller(DailyReportController::class)->group(function () {
-    Route::get('/unit-list', 'dailyList')->name('daily.list')->middleware('auth');
     Route::post('/unit/daily/{unitAreaLocationId}/add', 'setReport')->name('daily.add')->middleware('auth');
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
     Route::get('/unit/daily/{unitAreaLocationId}', 'index')->name('daily')->middleware('auth');
@@ -71,8 +70,10 @@ Route::controller(StatusRequestController::class)->group(function () {
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
 });
 
-Route::controller(DataUnitController::class)->group(function () {
-    Route::get('/api/get-unit-area-location', 'getUnitAreaLocation')->name('getUnitAreaLocation');
+Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
+    Route::get('/unit-list', 'unitList')->name('daily.list');
+    Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
+    Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
 });
 
 Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
