@@ -50,7 +50,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const response = await axios.get(route("getUnitAreaLocation"));
         setUnitData(response.data);
     };
-    fetchDataUnit();
 
     useEffect(() => {
         if (showModal) {
