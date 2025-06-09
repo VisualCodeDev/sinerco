@@ -5,8 +5,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-    <link rel="preload" as="image" href="/logo_horizontal.webp">
+    <title inertia>{{ config('app.name', 'Sinerco') }}</title>
+    <link rel="preload" as="image" href="/logo_sinerco.webp">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

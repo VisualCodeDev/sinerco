@@ -94,9 +94,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     </option>
                                 ))}
                             </select>
-                            {errors.requestType && (
+                            {errors.unit && (
                                 <p className="text-red-500 text-sm mt-1">
-                                    {errors.requestType}
+                                    {errors.unit}
                                 </p>
                             )}
                         </div>
