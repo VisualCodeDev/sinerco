@@ -27,6 +27,7 @@ const ClientDetail = ({ data, unitData }) => {
             <TableComponent columns={columns} data={data} />
             <SettingModal
                 data={dailyReportSettingData}
+                clientData={clientData}
                 isModal={isSettingModal}
                 handleCloseModal={() => setSettingModal(false)}
                 handleConfirmSettings={handleConfirmSettings}
@@ -36,7 +37,7 @@ const ClientDetail = ({ data, unitData }) => {
 };
 
 const SettingModal = (props) => {
-    const { isModal, handleCloseModal, handleConfirmSettings, data } = props;
+    const { isModal, handleCloseModal, handleConfirmSettings, data, clientData } = props;
     const [formData, setFormData] = useState({});
     const [decimalActive, setDecimalActive] = useState(false);
     const [minMaxActive, setMinMaxActive] = useState(false);
@@ -92,11 +93,12 @@ const SettingModal = (props) => {
         }
     };
     const handleSave = async () => {
+        console.log(data)
         let formattedDecimal = {};
         try {
             setSaving(true);
             const resp = await axios.post(
-                route("daily.setting", { clientId: data?.clientId }),
+                route("daily.setting", { clientId: clientData?.clientId }),
                 formData
             );
             if (resp.status === 200 || resp.status === 302) {

@@ -55,6 +55,7 @@ class UserSeeder extends Seeder
                 'name' => 'Budi Kentaki',
                 'password' => Hash::make('teknisi12345'),
                 'role' => 'technician',
+                'whatsAppNum' => '085921774621',
             ],
         );
         User::updateOrCreate(
@@ -73,7 +74,7 @@ class UserSeeder extends Seeder
                 'role' => 'guest',
             ],
         );
-         User::updateOrCreate(
+        User::updateOrCreate(
             ['email' => 'general.manager@sinerco.co.id'],
             [
                 'name' => 'General Manager',
@@ -94,6 +95,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Jono Santoso',
                 'password' => Hash::make('direksi12345'),
+                'whatsAppNum' => '081281995158',
                 'role' => 'technician',
             ],
         );

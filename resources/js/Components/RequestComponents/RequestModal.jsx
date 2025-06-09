@@ -3,6 +3,7 @@ import Modal from "../Modal";
 import { DateTimeInput, getCurrDateTime } from "../utils/dashboard-util";
 import { useForm } from "@inertiajs/react";
 import { requestStatus, requestType } from "@/Components/utils/dashboard-util";
+import { useToast } from "../Toast/ToastProvider";
 
 export const RequestModal = ({ handleCloseModal, showModal }) => {
     const { data, setData, post } = useForm({
@@ -12,6 +13,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     });
     const [errors, setErrors] = useState({});
     const [unitData, setUnitData] = useState([]);
+    const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
@@ -29,7 +31,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         }
 
         try {
-            post(route("request.post"), data);
+            const resp = await axios.post(route("request.post"), data);
+            if (resp.data.type) {
+                addToast(resp?.data);
+            }
             setErrors({});
         } catch (error) {
             console.log(error);
@@ -62,7 +67,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             fetchDataUnit();
         }
     }, [showModal]);
-
+    console.log("data", data);
     return (
         <Modal
             title="Report SD/STDBY"
@@ -82,15 +87,18 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             <select
                                 required
                                 id="unit"
-                                value={data.unitId || ""}
+                                value={data?.unitId || ""}
                                 onChange={(e) =>
                                     handleChange(["unitId"], e.target.value)
                                 }
                             >
                                 <option value={null}>-- Select Unit --</option>
                                 {unitData?.map((item, index) => (
-                                    <option value={item?.unitId} key={index}>
-                                        {item?.unit}
+                                    <option
+                                        value={item?.unit?.unitId}
+                                        key={index}
+                                    >
+                                        {item?.unit?.unit}
                                     </option>
                                 ))}
                             </select>

@@ -12,10 +12,10 @@ import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
 import Modal from "../Modal";
 import { FaAngleDown, FaCog } from "react-icons/fa";
+import SavingView from "../SavingView";
 
 const DailyReportForm = (props) => {
     const { unitData, formData } = props;
-    console.log('formData', formData);
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -51,10 +51,27 @@ const DailyReportForm = (props) => {
             setSaving(false);
         }
     };
-    const handleChange = ([field], value) => {
+    const handleChange = ([field], value, minMaxSetting) => {
+        let warn = "";
+        if (minMaxSetting) {
+            if (minMaxSetting.min && value < minMaxSetting.min) {
+                warn = `Value for ${field} is ${value} (less than ${minMaxSetting.min})`;
+            }
+            if (minMaxSetting.max && value > minMaxSetting.max) {
+                warn = `Value for ${field} is ${value} (greater than ${minMaxSetting.max})`;
+            }
+        }
+        if (field === "date" || field === "time") {
+            console.log("date or time changed", field, value);
+            setData({
+                ...data,
+                [field]: value
+            });
+            return;
+        }
         setData((prevData) => ({
             ...prevData,
-            [field]: value,
+            [field]: { value, warn },
         }));
     };
     const formList = list({
@@ -63,14 +80,13 @@ const DailyReportForm = (props) => {
         reportSettings: unitData?.daily_report_setting,
     });
 
-    const handleConfirmSettings = (value) => {
-        setSettings({ ...value });
-    };
+    console.log("formData", data);
     useEffect(() => {
         setData((prevData) => {
             const dateTime = getCurrDateTime();
             const now = dateTime.now;
             const time = now.format("HH") + ":00";
+            console.log(time)
             const date = dateTime.date;
             const newData = {
                 ...prevData,
@@ -83,12 +99,7 @@ const DailyReportForm = (props) => {
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white p-10">
-            {saving && (
-                <div className="flex justify-center items-center fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-screen h-screen z-[200] text-5xl">
-                    <div className="bg-black/50 w-full h-full absolute top-0 left-0 backdrop-blur-sm z-[20] " />
-                    <h1 className="relative z-[30] text-white">SAVING...</h1>
-                </div>
-            )}
+            {saving && <SavingView />}
             <div
                 className={`sticky top-0 left-0 ${
                     status === "success"
@@ -189,13 +200,13 @@ const ConfirmationModal = (props) => {
                             ))}
 
                     {formData &&
-                        Object.entries(formData).map(([key, value]) => (
+                        Object.entries(formData).map(([key, item]) => (
                             <div className="flex justify-between">
                                 <p>{toCapitalizeFirstLetter(key)} </p>
                                 <p>
                                     {key === "date"
-                                        ? getFormattedDate(value)
-                                        : value}
+                                        ? getFormattedDate(item?.value)
+                                        : item?.value}
                                 </p>
                             </div>
                         ))}

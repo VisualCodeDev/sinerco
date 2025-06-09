@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AdminNotification;
 use App\Models\DataUnit;
 use App\Models\StatusRequest;
+use App\Models\UserAllocation;
+use App\Services\WhatsAppService;
 use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,6 +31,21 @@ class StatusRequestController extends Controller
         ]);
 
         try {
+            $technicians = UserAllocation::with(['user', 'unitArea'])
+                ->whereHas('unitArea', function ($query) use ($val) {
+                    $query->where('unitId', $val['unitId']);
+                })
+                ->get();
+
+            $unitData = DataUnit::where('unitId', $val['unitId'])->first();
+            $numbers = $technicians
+                ->filter(fn($tech) => !empty($tech->user->whatsAppNum))
+                ->map(fn($tech) => $tech->user->whatsAppNum)
+                ->implode(',');
+
+            if (!empty($numbers)) {
+                WhatsAppService::sendMessage($numbers, "TEST: A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['startDate']}\nStart Time: {$val['startTime']}\nRequest Type: {$val['requestType']}\nRemarks: {$val['remarks']}");
+            }
             $user = auth()->user();
             $status = new StatusRequest();
             $status->unitId = $val['unitId'];
@@ -40,9 +57,9 @@ class StatusRequestController extends Controller
             $status->requestedBy = $user->id;
             $status->save();
 
-            return back();
+            return response()->json(['type' => 'success', 'text' => 'Request created successfully.'], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['type' => 'error', 'text' => $e->getMessage()], 500);
         }
     }
     public function getRequest()

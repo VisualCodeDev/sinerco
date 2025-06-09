@@ -8,7 +8,7 @@ class UserAllocation extends Model
 {
     public function user()
     {
-        return $this->belongsTo(DataUnit::class, 'userId', 'userId');
+        return $this->belongsTo(User::class, 'userId', 'id');
     }
 
     public function unitArea()

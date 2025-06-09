@@ -45,9 +45,7 @@ class DataUnitController extends Controller
     }
     public function getUnit()
     {
-        $data = $this->getPermittedUnit()->map(function ($item) {
-            return $item->unit;
-        });
+        $data = $this->getPermittedUnit();
 
         return response()->json($data);
     }
