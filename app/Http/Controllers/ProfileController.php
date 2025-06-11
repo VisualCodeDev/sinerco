@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\UnitAreaLocation;
 use App\Models\User;
+use App\Models\UserAllocation;
 use App\Models\UserAlocation;
 use App\Models\Client;
 use App\Models\UserPermission;
@@ -27,7 +28,7 @@ class ProfileController extends Controller
     public function index($userId)
     {
         $userData = User::where('id', $userId)->first();
-        $permissionData = UserAlocation::where('userId', $userId)->first();
+        $permissionData = UserAllocation::where('userId', $userId)->first();
         $unitAreaData = [];
         $unitAreaData = UnitAreaLocation::with(['unit', 'client'])->get();
         // if ($userData->role == 'operator') {
