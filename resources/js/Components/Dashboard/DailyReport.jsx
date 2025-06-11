@@ -359,7 +359,6 @@ const EditModal = (props) => {
                     ? { ...item, ...formDataState }
                     : item
             );
-            console.log(updatedItems)
             setData(updatedItems);
         }
     };

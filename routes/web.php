@@ -98,8 +98,8 @@ Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
 });
 
-Route::controller(ProfileController::class)->middleware('auth')->group(function () {
-        Route::post('/profile/{userId}/', 'index')->name('profile');
+Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
+        Route::get('/profile/{userId}/', 'index')->name('profile');
     // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

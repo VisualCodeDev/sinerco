@@ -103,7 +103,7 @@ const TableComponent = (props) => {
                         </div>
                     </div>
                     {addNewItem && (
-                        <div className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary">
+                        <div className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all">
                             <FaPlus />
                             <a className="">Add New Unit</a>
                         </div>
@@ -200,7 +200,7 @@ const TableComponent = (props) => {
                         <th colSpan={columns.length}>
                             <div className="px-8 py-3 text-sm font-medium text-left">
                                 <button
-                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100"
+                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                     onClick={handleSubmit}
                                 >
                                     {submitPlaceholder ? submitPlaceholder : 'Submit'}

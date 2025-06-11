@@ -13,7 +13,7 @@ class DataUnitController extends Controller
     /**
      * Display a listing of the resource.
      */
-    private function getPermittedUnit()
+    public static function getPermittedUnit()
     {
         $user = Auth::user();
         if ($user->role == 'technician' || $user->role == 'operator') {

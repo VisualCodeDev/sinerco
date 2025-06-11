@@ -33,6 +33,12 @@ const Heading = ({ children }) => {
             href: route("allocation.setting"),
         },
         {
+            condition: user?.role === "super_admin" || user?.role === "technician",
+            icon: <FaUser />,
+            label: "Profile Settings",
+            href: route("profile", { id: user.id }),
+        },
+        {
             condition: !user,
             icon: <FaSignInAlt />,
             label: "Login",

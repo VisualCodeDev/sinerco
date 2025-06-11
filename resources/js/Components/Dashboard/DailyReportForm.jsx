@@ -62,7 +62,6 @@ const DailyReportForm = (props) => {
             }
         }
         if (field === "date" || field === "time") {
-            console.log("date or time changed", field, value);
             setData({
                 ...data,
                 [field]: value
@@ -80,13 +79,11 @@ const DailyReportForm = (props) => {
         reportSettings: unitData?.daily_report_setting,
     });
 
-    console.log("formData", data);
     useEffect(() => {
         setData((prevData) => {
             const dateTime = getCurrDateTime();
             const now = dateTime.now;
             const time = now.format("HH") + ":00";
-            console.log(time)
             const date = dateTime.date;
             const newData = {
                 ...prevData,

@@ -67,7 +67,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             fetchDataUnit();
         }
     }, [showModal]);
-    console.log("data", data);
     return (
         <Modal
             title="Report SD/STDBY"

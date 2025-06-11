@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\UserAllocation;
 use App\Models\UserAlocation;
 use App\Models\Client;
+use App\Models\StatusRequest;
 use App\Models\UserPermission;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
@@ -28,14 +29,22 @@ class ProfileController extends Controller
     public function index($userId)
     {
         $userData = User::where('id', $userId)->first();
-        $permissionData = UserAllocation::where('userId', $userId)->first();
-        $unitAreaData = [];
-        $unitAreaData = UnitAreaLocation::with(['unit', 'client'])->get();
+        $permissionData = DataUnitController::getPermittedUnit(); // returns an array
+
+        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+
+        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit')->get();
+        $requestList = collect($requestList)
+            ->filter(fn($item) => $item->status !== 'End')
+            ->values()
+            ->toArray();
+        ;
+
+
         // if ($userData->role == 'operator') {
         //     $unitAreaData = Client::all();
         // }
-        ;
-        return Inertia::render('Profile/Profile', ['data' => $userData, 'permissionData' => $permissionData, 'unitAreaData' => $unitAreaData]);
+        return Inertia::render('Profile/Profile', ['data' => $userData, 'permissionData' => $permissionData, 'requestList' => $requestList]);
     }
     /**
      * Display the user's profile form.

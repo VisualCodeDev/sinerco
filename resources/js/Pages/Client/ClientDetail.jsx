@@ -11,7 +11,6 @@ const ClientDetail = ({ data, unitData }) => {
     const columns = tColumns();
     const clientData = unitData?.client || {};
     const dailyReportSettingData = unitData?.daily_report_setting || {};
-    console.log(dailyReportSettingData, data);
     const [isSettingModal, setSettingModal] = useState(false);
     const handleConfirmSettings = () => {};
     return (
@@ -93,7 +92,6 @@ const SettingModal = (props) => {
         }
     };
     const handleSave = async () => {
-        console.log(data)
         let formattedDecimal = {};
         try {
             setSaving(true);

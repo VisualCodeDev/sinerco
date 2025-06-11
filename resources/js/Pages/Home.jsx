@@ -16,7 +16,6 @@ export default function Home() {
             let online = 0;
             let down = 0;
             let standby = 0;
-            console.log(response.data);
             response.data.reduce((acc, curr) => {
                 const status = curr.status;
                 if (status === "online") {
