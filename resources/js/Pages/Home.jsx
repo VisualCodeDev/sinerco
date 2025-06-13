@@ -64,7 +64,7 @@ export default function Home() {
     return (
         <PageLayout>
             {/* <UnitTable /> */}
-            <div className="flex items-center">
+            <div className="flex flex-col md:flex-row items-center">
                 <div className="mt-10 flex justify-center">
                     <iframe
                         src="https://www.google.com/maps/d/u/0/embed?mid=1sLcUWsWeoXzlWSPIA8jsQB8X62MSK80&ehbc=2E312F&noprof=1"

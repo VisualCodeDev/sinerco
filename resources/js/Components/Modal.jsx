@@ -1,4 +1,6 @@
 import React from "react";
+import { useEffect, useState } from "react";
+
 
 const Modal = (props) => {
     const {
@@ -10,7 +12,7 @@ const Modal = (props) => {
         showModal,
     } = props;
 
-    let selectedSize = size === 'xl' ? 'w-2/3' : size === 'lg' ? 'w-1/2' : size === 'md' && 'w-1/3'
+    let selectedSize = size === 'xl' ? 'w-2/3' : size === 'sm' ? 'w-[80%]' : size === 'md' && 'w-1/3'
     
     return (
         <>
@@ -18,7 +20,7 @@ const Modal = (props) => {
                 <div className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] flex flex-col z-[200] rounded-md overflow-hidden`}>
                     <div className="bg-primary text-white w-full p-5 sticky top-0 left-0 flex justify-between">
                         <div className="w-full">
-                            <h2 className="text-xl font-bold">{title}</h2>
+                            <h2 className="text-base md:text-xl font-bold">{title}</h2>
                         </div>
                         <div className="text-xl font-bold w-fit text-end">
                             <span onClick={handleCloseModal} className="cursor-pointer">🞩</span>

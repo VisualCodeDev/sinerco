@@ -71,7 +71,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     return (
         <Modal
             title="Report SD/STDBY"
-            size="md"
+            size="sm"
             handleCloseModal={handleCloseModal}
             showModal={showModal}
         >
@@ -81,10 +81,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                 className="flex flex-col gap-2"
             >
                 <Modal.Body>
-                    <div className="flex justify-between items-center">
-                        <label htmlFor="unit">Unit: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
+                        <label className="mb-1" htmlFor="unit">Unit: </label>
                         <div>
                             <select
+                                className="text-xs"
                                 required
                                 id="unit"
                                 value={data?.unitId || ""}
@@ -109,10 +110,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             )}
                         </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                        <label htmlFor="request">Request: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base  mb-4" >
+                        <label className="mb-1" htmlFor="request">Request: </label>
                         <div>
                             <select
+                                className="text-xs"
                                 required
                                 id="request"
                                 value={data.requestType || ""}
@@ -139,8 +141,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             )}
                         </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                        <label htmlFor="date">Date Time: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4" >
+                        <label className="mb-1" htmlFor="date">Date Time: </label>
                         <DateTimeInput
                             value={{
                                 date: data?.startDate,
@@ -163,7 +165,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             }
                         /> */}
                     </div>
-                    {/* <div className="flex justify-between items-center">
+                    {/* <div className="flex justify-between items-center"text-sm md:text-base >
                         <label htmlFor="time">Time: </label>
                         <input
                             required
@@ -176,9 +178,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             }
                         />
                     </div> */}
-                    <div className="flex justify-between items-center">
-                        <label htmlFor="time">Remarks: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base">
+                        <label className="mb-1" htmlFor="time">Remarks: </label>
                         <input
+                            className="text-xs"
                             required
                             id="remarks"
                             name="remarks"
