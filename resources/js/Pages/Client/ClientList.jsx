@@ -11,7 +11,7 @@ const ClientList = ({ data }) => {
     };
     return (
         <PageLayout>
-            <div className="w-2/3">
+            <div className="w-full md:w-2/3 text-sm md:text-base">
                 <TableComponent
                     columns={columns}
                     data={data}

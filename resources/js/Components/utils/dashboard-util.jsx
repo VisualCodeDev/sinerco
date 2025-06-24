@@ -168,12 +168,14 @@ export const DateTimeInput = ({ value, name, handleChange }) => {
     return (
         <div className="flex items-center">
             <input
+                className="text-sm md:text-base"
                 type="date"
                 name={name?.date}
                 value={value?.date}
                 onChange={(e) => handleChange([e.target.name], e.target.value)}
             />
             <input
+                className="text-sm md:text-base"
                 type="time"
                 name={name?.time}
                 value={value?.time}

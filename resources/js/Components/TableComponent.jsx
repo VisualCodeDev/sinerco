@@ -75,27 +75,27 @@ const TableComponent = (props) => {
     });
 
     return (
-        <div className="bg-white flex-col rounded-3xl border shadow-lg overflow-hidden">
-            <div className="flex justify-between px-6 py-6 border-b">
+        <div className="bg-white flex-col rounded-none md:rounded-3xl border shadow-none md:shadow-lg overflow-hidden">
+            <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
                 {title && (
-                    <div className="flex justify-center items-center">
-                        <div className="bg-[#e8edfc] text-primary p-2.5 rounded-md">
-                            <FaRegBuilding size={28} />
+                    <div className="flex md:justify-center items-center">
+                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-2.5 rounded-md">
+                            <FaRegBuilding className="text-2xl md:text-3xl" />
                         </div>
-                        <div className="flex-row justify-center items-center ml-4">
-                            <p className="font-bold text-2xl">{title}</p>
-                            {subtitle && <p className="text-sm">{subtitle}</p>}
+                        <div className="flex-row justify-center items-center ml-2 md:ml-4">
+                            <p className="font-bold text-base md:text-2xl">{title}</p>
+                            {subtitle && <p className="text-xs md:text-sm">{subtitle}</p>}
                         </div>
                     </div>
                 )}
 
-                <div className="flex justify-center items-center gap-4">
-                    <div className="flex justify-end">
-                        <div className="flex gap-2 justify-end items-center m-4 bg-white border-2 text-primary rounded-md px-4 py-2">
+                <div className="flex justify-start d:justify-center items-center gap-4">
+                    <div className="flex md:justify-end">
+                        <div className="flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2">
                             <FaSearch />
                             <input
                                 type="text"
-                                className="border-none p-0"
+                                className="border-none p-0 text-sm md:text-base"
                                 placeholder="Search..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -114,14 +114,14 @@ const TableComponent = (props) => {
                 className="flex-col "
                 style={{ maxHeight: height || "auto", overflow: "auto" }}
             >
-                <table className="table-auto w-full relative rounded-3xl">
+                <table className="table-auto w-full relative rounded-3xl overflow-x-scroll">
                     <thead className="bg-[#f5f7f9] sticky top-0 left-0">
                         <tr className="text-[#0F111C] font-semibold bg-primary">
                             {columns.map((col, index) => (
                                 <th
                                     key={index}
                                     className={
-                                        `px-8 py-3 text-sm font-medium text-left cursor-pointer uppercase` +
+                                        `px-6 py-3 md:px-8 text-sm font-medium text-left cursor-pointer uppercase` +
                                         (col.headerClassName || "")
                                     }
                                     onClick={() => handleSort(col.name)}
@@ -164,7 +164,7 @@ const TableComponent = (props) => {
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
-                                            className={`text-[#0F111C] px-8 py-6 text-sm font-semibold ${
+                                            className={`text-[#0F111C] px-6 py-3 md:px-8 md:py-6 text-xs md:text-sm font-semibold ${
                                                 col.cellClassName || ""
                                             }`}
                                             style={{
