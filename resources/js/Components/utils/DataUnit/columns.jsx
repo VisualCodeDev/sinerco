@@ -1,3 +1,5 @@
+import { getRequestTypeName, toCapitalizeFirstLetter } from "../dashboard-util";
+
 const columns = (type, formData, unitAreaData, handleSelectAll) => {
     const colItem = [
         {
@@ -30,7 +32,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Area",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "20%",
+            width: "15%",
             Cell: ({ area }) => {
                 return <div className="flex flex-col">{area}</div>;
             },
@@ -40,7 +42,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Unit",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "20%",
+            width: "15%",
             Cell: ({ unit }) => {
                 return <div className="flex flex-col">{unit?.unit}</div>;
             },
@@ -53,6 +55,16 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             width: "20%",
             Cell: ({ location }) => {
                 return <div className="flex flex-col">{location}</div>;
+            },
+        },
+        {
+            name: "status",
+            header: "Status",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "10%",
+            Cell: ({ unit }) => {
+                return <div className="flex flex-col">{toCapitalizeFirstLetter(getRequestTypeName(unit?.status))}</div>;
             },
         },
         {

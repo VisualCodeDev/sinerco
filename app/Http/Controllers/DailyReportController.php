@@ -46,21 +46,21 @@ class DailyReportController extends Controller
             $validatedData = $request->validate([
                 'date' => 'required|string',
                 'time' => 'required|string',
-                'sourcePress.value' => 'required|numeric',
-                'suctionPress.value' => 'required|numeric',
-                'dischargePress.value' => 'required|numeric',
-                'speed.value' => 'required|numeric',
-                'manifoldPress.value' => 'required|numeric',
-                'oilPress.value' => 'required|numeric',
-                'oilDiff.value' => 'required|numeric',
-                'runningHours.value' => 'required|numeric',
-                'voltage.value' => 'required|numeric',
-                'waterTemp.value' => 'required|numeric',
-                'befCooler.value' => 'required|numeric',
-                'aftCooler.value' => 'required|numeric',
-                'staticPress.value' => 'required|numeric',
-                'diffPress.value' => 'required|numeric',
-                'mscfd.value' => 'required|numeric',
+                'sourcePress' => 'required|numeric',
+                'suctionPress' => 'required|numeric',
+                'dischargePress' => 'required|numeric',
+                'speed' => 'required|numeric',
+                'manifoldPress' => 'required|numeric',
+                'oilPress' => 'required|numeric',
+                'oilDiff' => 'required|numeric',
+                'runningHours' => 'required|numeric',
+                'voltage' => 'required|numeric',
+                'waterTemp' => 'required|numeric',
+                'befCooler' => 'required|numeric',
+                'aftCooler' => 'required|numeric',
+                'staticPress' => 'required|numeric',
+                'diffPress' => 'required|numeric',
+                'mscfd' => 'required|numeric',
             ]);
             if ($validatedData) {
                 $data = collect($validatedData)
@@ -72,17 +72,17 @@ class DailyReportController extends Controller
                     ->toArray();
                 $originalInput = $request->all();
 
-                $warnings = collect($originalInput)->filter(function ($item) {
-                    return is_array($item) && isset($item['warn']) && $item['warn'];
+                $warnings = collect($originalInput['warn'] ?? [])->filter(function ($message) {
+                    return !empty($message);
                 });
-
                 if ($warnings->isNotEmpty()) {
                     $unit = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->first()->load('unit');
                     $warningMessage = "⚠️ Input Warning Detected on \nDate: {$data['date']},\n📍Unit: {$unit->unit->unit}:\n";
-                    foreach ($warnings as $field => $value) {
-                        $warningMessage .= "- " . ucfirst($field) . ": " . $value['warn'] . "\n";
+
+                    foreach ($warnings as $field => $message) {
+                        $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
                     }
-                    $technicians = UserAllocation::with('user') // tetap butuh load relasi 'user'
+                    $technicians = UserAllocation::with('user')
                         ->where('unitAreaLocationId', $unitAreaLocationId)
                         ->get()
                         ->filter(fn($allocation) => $allocation->user?->role === 'technician');

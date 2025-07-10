@@ -6,8 +6,6 @@ const Modal = (props) => {
     const {
         size,
         title,
-        form = false,
-        headerSticky = false,
         handleCloseModal,
         showModal,
     } = props;

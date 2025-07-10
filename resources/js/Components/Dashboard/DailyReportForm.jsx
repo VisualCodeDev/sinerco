@@ -13,8 +13,10 @@ import list from "../utils/DailyReport/columns";
 import Modal from "../Modal";
 import { FaAngleDown, FaCog } from "react-icons/fa";
 import SavingView from "../SavingView";
+import { useAuth } from "../Auth/auth";
 
 const DailyReportForm = (props) => {
+    const { user } = useAuth();
     const { unitData, formData } = props;
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
@@ -64,19 +66,22 @@ const DailyReportForm = (props) => {
         if (field === "date" || field === "time") {
             setData({
                 ...data,
-                [field]: value
+                [field]: value,
             });
             return;
         }
         setData((prevData) => ({
             ...prevData,
-            [field]: { value, warn },
+            [field]: value,
+            warn: { ...prevData.warn, [field]: warn },
         }));
     };
+
     const formList = list({
         handleChange: handleChange,
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
+        role: user.role,
     });
 
     useEffect(() => {
@@ -197,16 +202,18 @@ const ConfirmationModal = (props) => {
                             ))}
 
                     {formData &&
-                        Object.entries(formData).map(([key, item]) => (
-                            <div className="flex justify-between">
-                                <p>{toCapitalizeFirstLetter(key)} </p>
-                                <p>
-                                    {key === "date"
-                                        ? getFormattedDate(item?.value)
-                                        : item?.value}
-                                </p>
-                            </div>
-                        ))}
+                        Object.entries(formData)
+                            .filter(([key, item]) => key != "warn")
+                            .map(([key, item]) => (
+                                <div className="flex justify-between">
+                                    <p>{toCapitalizeFirstLetter(key)} </p>
+                                    <p>
+                                        {key === "date"
+                                            ? getFormattedDate(item)
+                                            : item}
+                                    </p>
+                                </div>
+                            ))}
                 </div>
             </Modal.Body>
             <Modal.Footer>

@@ -1,14 +1,28 @@
 import { useEffect, useState } from "react";
 import { getRequestTypeName } from "../utils/dashboard-util";
 
-const Notification = ({ message, onClose }) => {
+const Notification = ({ message }) => {
+    const [animate, setAnimate] = useState("slideIn");
+    const [visible, setVisible] = useState(true);
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setAnimate("slideOut");
+            setTimeout(() => setVisible(false), 400);
+        }, 3000);
+        return () => clearTimeout(timeout);
+    }, []);
+
+    if (!visible) return null;
+
     return (
         <div
             className={`${
                 message.requestType === "stdby"
                     ? "bg-warning/80"
                     : message.requestType === "sd" && "bg-danger/80"
-            } border shadow-lg rounded-md px-6 py-4 mb-2 animate-slideIn`}
+            } border shadow-lg rounded-md px-6 py-4 mb-2 transition-all
+            ${animate === "slideIn" ? "animate-slideIn" : "animate-slideOut"}`}
         >
             <p>
                 <strong>{getRequestTypeName(message.requestType)}</strong>{" "}
@@ -21,12 +35,6 @@ const Notification = ({ message, onClose }) => {
                     (View Request)
                 </a>
             </p>
-            {/* <p>
-                Date: <strong>{message?.date}</strong>
-            </p>
-            <p>
-                Time Start: <strong>{message.time}</strong>
-            </p> */}
         </div>
     );
 };

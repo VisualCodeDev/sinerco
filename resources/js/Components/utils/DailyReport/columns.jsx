@@ -1,6 +1,6 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const list = ({ handleChange, formData, reportSettings }) => {
+const list = ({ handleChange, formData, reportSettings, role }) => {
     const colItem = [
         {
             name: "date",
@@ -43,9 +43,10 @@ const list = ({ handleChange, formData, reportSettings }) => {
                         <TimeInput
                             formData={formData}
                             item={item}
+                            role={role}
                             id={name}
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)
                             }
@@ -87,7 +88,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
@@ -136,7 +137,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -191,7 +192,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -246,7 +247,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -301,7 +302,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -356,7 +357,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -411,7 +412,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -466,7 +467,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -521,7 +522,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -576,7 +577,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -646,7 +647,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                                             id={sub.name}
                                             type="number"
                                             name={sub.name}
-                                            value={item[sub.name]?.value || ""}
+                                            value={item[sub.name] || ""}
                                             step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(
@@ -699,7 +700,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={
                                 1 /
                                 Math.pow(
@@ -754,7 +755,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                             id={name}
                             type="number"
                             name={name}
-                            value={item[name]?.value || ""}
+                            value={item[name] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
@@ -809,7 +810,7 @@ const list = ({ handleChange, formData, reportSettings }) => {
                                             id={sub.name}
                                             type="number"
                                             name={sub.name}
-                                            value={item[sub.name]?.value || ""}
+                                            value={item[sub.name] || ""}
                                             step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(

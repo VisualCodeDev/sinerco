@@ -14,7 +14,7 @@ import TableComponent from "../TableComponent";
 const UnitTable = (props) => {
     const { data } = props;
     let columns = tColumns();
-
+console.log(data)
     return (
         <TableComponent data={data} columns={columns} title={"List of Unit"} />
     );

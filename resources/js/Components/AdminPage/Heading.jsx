@@ -8,6 +8,7 @@ import {
     FaList,
     FaSignInAlt,
     FaSignOutAlt,
+    FaBell,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 
@@ -103,7 +104,7 @@ const Heading = ({ children }) => {
             {/* Main Area */}
             <div className="flex-1 flex flex-col w-full relative">
                 {/* Top Header */}
-                <div className="bg-white flex items-center justify-between px-6 py-4 shadow sticky top-0 z-10">
+                <div className="bg-white flex items-center justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10">
                     <div className="h-8">
                         <img
                             src="/logo_horizontal.webp"
@@ -112,8 +113,8 @@ const Heading = ({ children }) => {
                             className="h-full object-contain"
                         />
                     </div>
-                    <p className="text-gray-700 text-lg font-medium">
-                        Hello Admin!
+                    <p className="text-gray-700 text-xl font-medium">
+                        <FaBell/>
                     </p>
                 </div>
 

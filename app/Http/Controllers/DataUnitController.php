@@ -37,11 +37,24 @@ class DataUnitController extends Controller
         }
         return $data;
     }
-    public function unitList()
+    public function unitList(Request $request)
     {
-        $data = $this->getPermittedUnit();
+        $status = $request->query('status');
 
-        return Inertia::render('Daily/DailyList', ['data' => $data]);
+        $units = self::getPermittedUnit();
+
+        if ($status) {
+            $units = $units->filter(function ($item) use ($status) {
+                return optional($item->unit)->status === $status;
+            });
+        }
+
+        return Inertia::render('Daily/DailyList', [
+            'data' => $units->values(), // reset index
+            'filters' => [
+                'status' => $status,
+            ],
+        ]);
     }
     public function getUnit()
     {

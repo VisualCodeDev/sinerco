@@ -28,28 +28,6 @@ export default function Dashboard({ data, unitData }) {
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
                     <div className="flex">
-                        {user?.role === "technician" && (
-                            <div
-                                className={`flex justify-center items-center px-4 py-2" ${
-                                    activeTab === "form"
-                                        ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
-                                        : "text-gray-500"
-                                }`}
-                            >
-                                <FaRegFileAlt className="mr-2" />
-                                <button
-                                    className={`py-2 font-semibold ${
-                                        activeTab === "form"
-                                            ? ""
-                                            : "text-gray-500"
-                                    }`}
-                                    onClick={() => setActiveTab("form")}
-                                >
-                                    Fill Report
-                                </button>
-                            </div>
-                        )}
-
                         <div
                             className={`flex justify-center items-center px-4 py-2" ${
                                 activeTab === "report"
@@ -67,6 +45,23 @@ export default function Dashboard({ data, unitData }) {
                                 onClick={() => setActiveTab("report")}
                             >
                                 Daily Report
+                            </button>
+                        </div>
+                        <div
+                            className={`flex justify-center items-center px-4 py-2" ${
+                                activeTab === "form"
+                                    ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
+                                    : "text-gray-500"
+                            }`}
+                        >
+                            <FaRegFileAlt className="mr-2" />
+                            <button
+                                className={`py-2 font-semibold ${
+                                    activeTab === "form" ? "" : "text-gray-500"
+                                }`}
+                                onClick={() => setActiveTab("form")}
+                            >
+                                Fill Report
                             </button>
                         </div>
                     </div>

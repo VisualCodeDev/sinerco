@@ -63,14 +63,7 @@ export default function Home() {
     return (
         <PageLayout>
             {/* <UnitTable /> */}
-            <div className="flex flex-col md:flex-row items-center">
-                <div className="mt-10 flex justify-center">
-                    <iframe
-                        src="https://www.google.com/maps/d/u/0/embed?mid=1sLcUWsWeoXzlWSPIA8jsQB8X62MSK80&ehbc=2E312F&noprof=1"
-                        width="640"
-                        height="480"
-                    ></iframe>
-                </div>
+            <div className="flex flex-col lg:items-center justify-center md:items-start">
                 <div className="flex justify-evenly w-[60%]">
                     <PieChart
                         stroke={20}
@@ -90,6 +83,13 @@ export default function Home() {
                         data={data?.down ? data.down : []}
                         totalData={total}
                     />
+                </div>
+                <div className="mt-10 flex justify-center">
+                    <iframe
+                        src="https://www.google.com/maps/d/u/0/embed?mid=1sLcUWsWeoXzlWSPIA8jsQB8X62MSK80&ehbc=2E312F&noprof=1"
+                        width="640"
+                        height="480"
+                    ></iframe>
                 </div>
             </div>
             {/* {data ? <DailyReport formData={data} /> : <p>Loading data...</p>} */}

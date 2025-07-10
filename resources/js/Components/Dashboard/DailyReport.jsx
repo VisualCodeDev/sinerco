@@ -103,12 +103,12 @@ const DailyReport = (props) => {
             </div>
             <div className="overflow-x-auto w-full">
                 <table className="min-w-[900px] w-full table-auto border-collapse">
-                    <thead className="bg-gray-100">
+                    <thead className="bg-primary text-white">
                         <tr>
                             {formItems?.map((item, index) => (
                                 <th
                                     key={index}
-                                    className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                    className="px-4 py-2 text-sm font-semibold border border-black text-left"
                                     rowSpan={!item.subheader ? 2 : undefined}
                                     colSpan={item.subheader?.length}
                                 >
@@ -118,7 +118,7 @@ const DailyReport = (props) => {
                             {user?.role === "super_admin" && (
                                 <th
                                     rowSpan={2}
-                                    className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                    className="px-4 py-2 text-sm font-semibold border border-black text-left"
                                 >
                                     Edit
                                 </th>
@@ -129,7 +129,7 @@ const DailyReport = (props) => {
                                 item.subheader?.map((sub, index) => (
                                     <th
                                         key={index}
-                                        className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"
+                                        className="px-4 py-2 text-sm font-semibold border border-black text-left"
                                     >
                                         {sub.sub}
                                     </th>
@@ -142,7 +142,8 @@ const DailyReport = (props) => {
                             Object.entries(currData).map(([key, value]) => (
                                 <tr
                                     key={key}
-                                    className="odd:bg-white even:bg-gray-50"
+                                    className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
+                                    onClick={() => handleEdit(key)}
                                 >
                                     <td className="px-4 py-2 border">
                                         {value.time}
@@ -194,7 +195,7 @@ const DailyReport = (props) => {
                                     </td>
                                     {user?.role === "super_admin" && (
                                         <td
-                                            className="flex justify-center items-center px-4 py-2 border cursor-pointer"
+                                            className="flex justify-center items-center px-4 py-2 cursor-pointer"
                                             onClick={() => handleEdit(key)}
                                         >
                                             <FaPen />
@@ -224,7 +225,7 @@ const DailyReport = (props) => {
                                     )
                                 )}
                                 {user?.role === "super_admin" && (
-                                    <th className="px-4 py-2 text-sm font-semibold border border-gray-300 text-left"></th>
+                                    <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
                                 )}
                             </tr>
                         )}
@@ -243,6 +244,7 @@ const DailyReport = (props) => {
             )}
             {isEditModal && (
                 <EditModal
+                    role={user.role}
                     setClick={setEditModal}
                     setEditModal={setEditModal}
                     isEditModal={isEditModal}
@@ -341,8 +343,15 @@ const ExportModal = (props) => {
 };
 
 const EditModal = (props) => {
-    const { setEditModal, isEditModal, data, formData, unitData, setData } =
-        props;
+    const {
+        setEditModal,
+        isEditModal,
+        data,
+        formData,
+        unitData,
+        setData,
+        role,
+    } = props;
     const [formDataState, setFormDataState] = useState(formData);
     const handleChange = ([field], value) => {
         setFormDataState({ ...formDataState, [field]: value });
@@ -399,6 +408,7 @@ const EditModal = (props) => {
                             formData={formData}
                             disabled
                             id={"time"}
+                            role={role}
                             name={"time"}
                             value={formDataState?.time || ""}
                             onChange={(e) =>

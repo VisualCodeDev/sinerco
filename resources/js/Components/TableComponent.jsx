@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+    FaFilter,
     FaPlus,
     FaRegBuilding,
     FaSearch,
@@ -7,6 +8,8 @@ import {
     FaSortDown,
     FaSortUp,
 } from "react-icons/fa";
+import { unitStatus } from "./utils/dashboard-util";
+import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
@@ -74,8 +77,17 @@ const TableComponent = (props) => {
         return containsQuery(item, query);
     });
 
+    const handleSelect = (value) => {
+        console.log(value)
+        router.visit(route("daily.list"), {
+            method: "get",
+            data: { status: value },
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
     return (
-        <div className="bg-white flex-col rounded-none md:rounded-3xl border shadow-none md:shadow-lg overflow-hidden">
+        <div className="bg-white flex-col rounded-none md:rounded-3xl border shadow-none md:shadow-lg ">
             <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
                 {title && (
                     <div className="flex md:justify-center items-center">
@@ -83,14 +95,32 @@ const TableComponent = (props) => {
                             <FaRegBuilding className="text-2xl md:text-3xl" />
                         </div>
                         <div className="flex-row justify-center items-center ml-2 md:ml-4">
-                            <p className="font-bold text-base md:text-2xl">{title}</p>
-                            {subtitle && <p className="text-xs md:text-sm">{subtitle}</p>}
+                            <p className="font-bold text-base md:text-2xl">
+                                {title}
+                            </p>
+                            {subtitle && (
+                                <p className="text-xs md:text-sm">{subtitle}</p>
+                            )}
                         </div>
                     </div>
                 )}
 
                 <div className="flex justify-start d:justify-center items-center gap-4">
                     <div className="flex md:justify-end">
+                        <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2 cursor-pointer">
+                            <FaFilter />
+                            <select
+                                className="border-none focus:border-none outline-none focus:outline-none"
+                                onChange={(e) => handleSelect(e.target.value)}
+                            >
+                                <option value="">-- Semua Status --</option>
+                                {unitStatus.map((item, i) => (
+                                    <option key={i} value={item.value}>
+                                        {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2">
                             <FaSearch />
                             <input
@@ -203,7 +233,9 @@ const TableComponent = (props) => {
                                     className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                     onClick={handleSubmit}
                                 >
-                                    {submitPlaceholder ? submitPlaceholder : 'Submit'}
+                                    {submitPlaceholder
+                                        ? submitPlaceholder
+                                        : "Submit"}
                                 </button>
                             </div>
                         </th>
