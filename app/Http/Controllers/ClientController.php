@@ -17,7 +17,7 @@ class ClientController extends Controller
 
     public function clientDetail($clientId)
     {
-        $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit')->get();
+        $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
         $clientData = $data->first()?->client;
         $unitData = UnitAreaLocation::where('clientId', $clientId)->with(['client', 'unit', 'dailyReportSetting'])->first();
         if ($data) {
