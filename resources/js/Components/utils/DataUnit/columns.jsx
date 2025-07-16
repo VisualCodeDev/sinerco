@@ -33,8 +33,8 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "15%",
-            Cell: ({ area }) => {
-                return <div className="flex flex-col">{area}</div>;
+            Cell: ({ location }) => {
+                return <div className="flex flex-col">{location.area?.area}</div>;
             },
         },
         {
@@ -54,7 +54,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location}</div>;
+                return <div className="flex flex-col">{location?.location}</div>;
             },
         },
         {
@@ -120,8 +120,8 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "20%",
-            Cell: ({ area }) => {
-                return <div className="flex flex-col">{area}</div>;
+            Cell: ({ location }) => {
+                return <div className="flex flex-col">{location.area.area}</div>;
             },
         },
         {
@@ -141,7 +141,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location}</div>;
+                return <div className="flex flex-col">{location?.location}</div>;
             },
         },
         {

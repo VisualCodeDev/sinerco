@@ -23,7 +23,8 @@ class DataUnitController extends Controller
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
-                }
+                },
+                'location.area'
             ])->get()->makeHidden(['created_at', 'updated_at']);
         } else {
             $data = UnitAreaLocation::with([
@@ -32,7 +33,8 @@ class DataUnitController extends Controller
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
-                }
+                },
+                'location.area'
             ])->get()->makeHidden(['created_at', 'updated_at']);
         }
         return $data;

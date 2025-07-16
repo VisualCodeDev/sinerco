@@ -15,10 +15,12 @@ return new class extends Migration {
             $table->string('unitAreaLocationId', 50)->unique();
             $table->string('unitId', 50);
             $table->string('clientId', 50);
-            $table->string('area');
-            $table->string('location');
+            // $table->string('area');
+            // $table->string('location');
+            $table->unsignedBigInteger('locationId');
             $table->timestamps();
 
+            $table->foreign('locationId')->references('id')->on('locations')->onDelete('cascade');
             $table->foreign('clientId')->references('clientId')->on('clients')->onDelete('cascade');
             $table->foreign('unitId')->references('unitId')->on('data_units')->onDelete('cascade');
         });

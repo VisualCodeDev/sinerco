@@ -9,6 +9,7 @@ import {
     FaSignInAlt,
     FaSignOutAlt,
     FaBell,
+    FaMapPin,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 
@@ -16,7 +17,6 @@ const Heading = ({ children }) => {
     const [expanded, setExpanded] = useState(false);
     const { user, loading } = useAuth();
     if (loading) return <div>Loading...</div>;
-
     const menuItems = [
         {
             condition:
@@ -30,6 +30,11 @@ const Heading = ({ children }) => {
             icon: <FaAddressBook />,
             label: "Client List",
             href: route("client.list"),
+        },
+        {
+            icon: <FaMapPin />,
+            label: "Area",
+            href: route("areas"),
         },
         { icon: <FaList />, label: "Unit List", href: route("daily.list") },
         { icon: <FaTh />, label: "Unit Request", href: route("request") },
@@ -111,18 +116,19 @@ const Heading = ({ children }) => {
                 <div
                     className="p-3 py-4 flex flex-col gap-1 justify-center items-center bg-primary fixed top-5 right-5 z-[100] rounded-full"
                     onClick={() => setExpanded(!expanded)}
-                    onMouseLeave={() => setExpanded(false)}
                 >
                     <div
                         className={`bg-white w-7 h-1 transition duration-300 ${
                             expanded && "rotate-45 translate-y-2"
                         }`}
                     />
-                    <div
-                        className={`bg-white w-7 h-1 transition duration-300 ${
-                            expanded && "rotate-45 "
-                        }`}
-                    />
+                    <div className="w-full flex justify-end">
+                        <div
+                            className={`bg-white w-5 h-1 transition duration-300 ${
+                                expanded && "rotate-45 translate-y-1"
+                            }`}
+                        />
+                    </div>
                     <div
                         className={`bg-white w-7 h-1 transition duration-300 ${
                             expanded && "-rotate-45 -translate-y-2"

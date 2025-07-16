@@ -14,6 +14,7 @@ import { router } from "@inertiajs/react";
 
 const UnitTable = (props) => {
     const { data } = props;
+    console.log(data)
     let columns = tColumns();
 
     const handleClick = (item) => {

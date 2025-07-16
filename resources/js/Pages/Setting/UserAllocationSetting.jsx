@@ -17,6 +17,8 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
         permittedData || []
     );
     const { addToast } = useToast();
+
+    console.log(unitAreaData)
     // const [client, setClient] = useState(null);
 
     // useEffect(() => {

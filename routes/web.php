@@ -5,6 +5,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -91,9 +92,6 @@ Route::controller(UserAllocationController::class)
         Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove');
     });
 
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Welcome');
-// });
 
 Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
@@ -101,9 +99,10 @@ Route::controller(AdminNotificationController::class)->group(function () {
 
 Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
         Route::get('/profile/{userId}/', 'index')->name('profile');
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    // Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::controller(LocationController::class)->middleware('auth')->group(function() {
+    Route::get('/area', 'index')->name('areas');
 });
 
 require __DIR__ . '/auth.php';

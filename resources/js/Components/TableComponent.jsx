@@ -13,6 +13,7 @@ import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
+        maxItemPerPage,
         submitPlaceholder,
         height,
         filterStatus = false,
@@ -147,7 +148,7 @@ const TableComponent = (props) => {
                 </div>
             </div>
             <div
-                className="flex-col "
+                className="flex-col max-h-[60vh]"
                 style={{ maxHeight: height || "auto", overflow: "auto" }}
             >
                 <table className="table-auto w-full relative rounded-3xl overflow-x-scroll">
@@ -231,7 +232,7 @@ const TableComponent = (props) => {
                 </table>
             </div>
             {isForm && (
-                <div className="sticky bottom-0 left-0 bg-primary w-full text-white">
+                <div className="sticky bottom-0 left-0 bg-primary w-full text-white rounded-b-2xl">
                     <tr>
                         <th colSpan={columns.length}>
                             <div className="px-8 py-3 text-sm font-medium text-left">

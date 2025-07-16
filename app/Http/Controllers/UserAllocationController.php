@@ -25,7 +25,7 @@ class UserAllocationController extends Controller
         $permittedData = UserAllocation::where('userId', $userId)->with('unitArea.client', 'unitArea.unit')->get()->toArray();
 
         $unitAreaData = [];
-        $unitAreaData = UnitAreaLocation::with(['unit', 'client'])->get();
+        $unitAreaData = UnitAreaLocation::with(['unit', 'client', 'location.area'])->get();
         // if ($userData->role == 'operator') {
         //     $unitAreaData = Client::all();
         // }
