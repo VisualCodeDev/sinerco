@@ -9,6 +9,7 @@ use App\Models\UserAllocation;
 use App\Services\WhatsAppService;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Str;
 
@@ -29,7 +30,16 @@ class StatusRequestController extends Controller
             'requestType' => 'required|string',
             'remarks' => 'required|string',
         ]);
-
+        $user = auth()->user();
+        $status = new StatusRequest();
+        $status->unitId = $val['unitId'];
+        $status->startDate = $val['startDate'];
+        $status->startTime = $val['startTime'];
+        $status->requestType = $val['requestType'];
+        $status->remarks = $val['remarks'];
+        $status->status = 'Pending';
+        $status->requestedBy = $user->id;
+        $status->save();
         try {
             $technicians = UserAllocation::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {
@@ -44,18 +54,10 @@ class StatusRequestController extends Controller
                 ->implode(',');
 
             if (!empty($numbers)) {
-                WhatsAppService::sendMessage($numbers, "TEST: A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['startDate']}\nStart Time: {$val['startTime']}\nRequest Type: {$val['requestType']}\nRemarks: {$val['remarks']}");
+                $link = route('request.seen', ['id' => $status->requestId]);
+
+                WhatsAppService::sendMessage($numbers, "TEST: A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['startDate']}\nStart Time: {$val['startTime']}\nRequest Type: {$val['requestType']}\nRemarks: {$val['remarks']}\n\nConfirm here: {$link}");
             }
-            $user = auth()->user();
-            $status = new StatusRequest();
-            $status->unitId = $val['unitId'];
-            $status->startDate = $val['startDate'];
-            $status->startTime = $val['startTime'];
-            $status->requestType = $val['requestType'];
-            $status->remarks = $val['remarks'];
-            $status->status = 'Pending';
-            $status->requestedBy = $user->id;
-            $status->save();
 
             return response()->json(['type' => 'success', 'text' => 'Request created successfully.'], 201);
         } catch (\Exception $e) {
@@ -64,8 +66,17 @@ class StatusRequestController extends Controller
     }
     public function getRequest()
     {
-        $status = StatusRequest::with(['unit', 'user'])->orderBy('created_at', 'desc')->get();
-        return Inertia::render('Request/Request', ['data' => $status]);
+        $permissionData = DataUnitController::getPermittedUnit();
+
+        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+
+        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user')->get();
+        $requestList = collect($requestList)
+            ->values()
+            ->toArray();
+        ;
+
+        return Inertia::render('Request/Request', ['data' => $requestList]);
     }
 
     public function updateRequest(Request $request)
@@ -118,43 +129,29 @@ class StatusRequestController extends Controller
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function seenRequest($id)
     {
-        //
-    }
+        if (!$id) {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'No ID provided.',
+            ], 400);
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(StatusRequest $statusRequest)
-    {
-        //
-    }
+        $selectedReq = StatusRequest::where('requestId', $id)->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(StatusRequest $statusRequest)
-    {
-        //
-    }
+        if (!$selectedReq) {
+            return response()->json([
+                'type' => 'error',
+                'text' => "Request with ID {$id} not found.",
+            ], 404);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, StatusRequest $statusRequest)
-    {
-        //
-    }
+        $selectedReq->update(['seenStatus' => !$selectedReq->seenStatus, 'seenTime' => now()]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(StatusRequest $statusRequest)
-    {
-        //
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Request seen status updated.',
+        ]);
     }
 }

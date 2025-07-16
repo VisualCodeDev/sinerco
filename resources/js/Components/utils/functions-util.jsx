@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
 
 export const getRequestTypeName = (value) => {
@@ -72,7 +73,7 @@ export const TimeInput = ({
     return (
         <>
             <select
-                className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                 value={value}
                 onChange={onChange}
                 name={name}
@@ -109,7 +110,7 @@ export const DateInput = ({
             type="date"
             onChange={onChange}
             placeholder={placeholder}
-            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
             disabled={disabled}
         />
     );
@@ -485,4 +486,12 @@ export const getCurrDateTime = () => {
 export const toCapitalizeFirstLetter = (str) => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const splitCamelCase = (str) => {
+    const result = str
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/^./, (c) => c.toUpperCase());
+
+    return result;
 };

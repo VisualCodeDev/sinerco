@@ -10,13 +10,25 @@ import {
 } from "react-icons/fa";
 import { Button } from "@headlessui/react";
 import TableComponent from "../TableComponent";
+import { router } from "@inertiajs/react";
 
 const UnitTable = (props) => {
     const { data } = props;
     let columns = tColumns();
-console.log(data)
+
+    const handleClick = (item) => {
+        if (!item.unitAreaLocationId) return;
+        router.visit(route("daily", item.unitAreaLocationId));
+    };
+
     return (
-        <TableComponent data={data} columns={columns} title={"List of Unit"} />
+        <TableComponent
+            filterStatus={true}
+            data={data}
+            columns={columns}
+            title={"List of Unit"}
+            onRowClick={handleClick}
+        />
     );
 };
 

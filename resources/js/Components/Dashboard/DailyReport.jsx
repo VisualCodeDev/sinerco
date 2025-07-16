@@ -69,17 +69,6 @@ const DailyReport = (props) => {
     };
     return (
         <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
-            {unitData && (
-                <>
-                    <div className="text-center w-full flex flex-col gap-2">
-                        <p className="text-2xl font-bold">
-                            {unitData.unit?.unit}
-                        </p>
-                        <p className="text-sm">{unitData.area}</p>
-                        <p className="text-sm">{unitData.location}</p>
-                    </div>
-                </>
-            )}
             <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">
                 <div className="flex gap-2 items-center">
                     <p>Date:</p>

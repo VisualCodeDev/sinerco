@@ -42,12 +42,13 @@ class StatusRequest extends Model
 
     }
 
-    protected $protected = [
+    protected $fillable  = [
         'date',
         'requestType',
         'timeStart',
         'status',
         'requestId',
-        'timeEnd'
+        'timeEnd',
+        'seenStatus'
     ];
 }

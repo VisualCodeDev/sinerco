@@ -24,6 +24,8 @@ return new class extends Migration {
             $table->string('action')->default('');
             $table->string('remarks')->default('');
             $table->string('status');
+            $table->boolean('seenStatus')->default(false);
+            $table->time('seenTime')->nullable();
 
             $table->unique(['unitId', 'startDate', 'startTime']);
             $table->foreign('unitId')->references('unitId')->on('data_units')->onUpdate('CASCADE')->onDelete('CASCADE');

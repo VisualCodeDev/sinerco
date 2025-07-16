@@ -24,7 +24,7 @@ export default function Dashboard({ data, unitData }) {
     );
     return (
         <PageLayout>
-            <div className="flex h-screen">
+            <div className="flex">
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
                     <div className="flex">
@@ -67,7 +67,20 @@ export default function Dashboard({ data, unitData }) {
                     </div>
 
                     {/* TABS CONTENT */}
-                    <div className="flex-1 border-t-2 border-t-primary border-2">
+                    <div className="flex flex-col border-t-2 border-t-primary border-2">
+                        {unitData && (
+                            <>
+                                <div className="text-center w-full flex flex-col lg:md:gap-2 gap-1 lg:md:py-12 py-8 bg-primary text-white">
+                                    <p className="lg:md:text-2xl text-xl font-bold">
+                                        {unitData.unit?.unit}
+                                    </p>
+                                    <p className="lg:md:text-sm text-xs">{unitData.area}</p>
+                                    <p className="lg:md:text-sm text-xs">
+                                        {unitData.location}
+                                    </p>
+                                </div>
+                            </>
+                        )}
                         {activeTab === "form" && (
                             <DailyReportForm
                                 unitData={unitData}

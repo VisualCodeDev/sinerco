@@ -15,6 +15,7 @@ const TableComponent = (props) => {
     const {
         submitPlaceholder,
         height,
+        filterStatus = false,
         isForm = false,
         columns,
         data,
@@ -78,7 +79,7 @@ const TableComponent = (props) => {
     });
 
     const handleSelect = (value) => {
-        console.log(value)
+        console.log(value);
         router.visit(route("daily.list"), {
             method: "get",
             data: { status: value },
@@ -94,7 +95,7 @@ const TableComponent = (props) => {
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-2.5 rounded-md">
                             <FaRegBuilding className="text-2xl md:text-3xl" />
                         </div>
-                        <div className="flex-row justify-center items-center ml-2 md:ml-4">
+                        <div className="flex-row justify-center items-center ml-2 md:ml-4 ">
                             <p className="font-bold text-base md:text-2xl">
                                 {title}
                             </p>
@@ -105,22 +106,27 @@ const TableComponent = (props) => {
                     </div>
                 )}
 
-                <div className="flex justify-start d:justify-center items-center gap-4">
+                <div className="flex justify-start md:justify-center items-center gap-4">
                     <div className="flex md:justify-end">
-                        <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2 cursor-pointer">
-                            <FaFilter />
-                            <select
-                                className="border-none focus:border-none outline-none focus:outline-none"
-                                onChange={(e) => handleSelect(e.target.value)}
-                            >
-                                <option value="">-- Semua Status --</option>
-                                {unitStatus.map((item, i) => (
-                                    <option key={i} value={item.value}>
-                                        {item.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        {filterStatus && (
+                            <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2 cursor-pointer">
+                                <FaFilter />
+                                <select
+                                    className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
+                                    onChange={(e) =>
+                                        handleSelect(e.target.value)
+                                    }
+                                >
+                                    <option value="">-- Semua Status --</option>
+                                    {unitStatus.map((item, i) => (
+                                        <option key={i} value={item.value}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
                         <div className="flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2">
                             <FaSearch />
                             <input
@@ -194,7 +200,7 @@ const TableComponent = (props) => {
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
-                                            className={`text-[#0F111C] px-6 py-3 md:px-8 md:py-6 text-xs md:text-sm font-semibold ${
+                                            className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-xs md:text-sm font-semibold ${
                                                 col.cellClassName || ""
                                             }`}
                                             style={{

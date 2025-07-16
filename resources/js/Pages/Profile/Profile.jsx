@@ -14,8 +14,7 @@ const Profile = ({ data, permissionData, requestList }) => {
         selectedRows: [],
     });
 
-   
-    console.log(requestList)
+    console.log(requestList);
     return (
         <PageLayout>
             <div className="flex flex-row h-screen">
@@ -58,7 +57,9 @@ const Profile = ({ data, permissionData, requestList }) => {
                     )}
                 </div> */}
                     <div>
-                        <h2 className="text-xl font-bold mb-4">Permissions ({permissionData?.length})</h2>
+                        <h2 className="text-xl font-bold mb-4">
+                            Permissions ({permissionData?.length})
+                        </h2>
                         {permissionData && permissionData.length > 0 ? (
                             <div className="flex flex-col max-h-[35vh] overflow-y-auto bg-white">
                                 {permissionData.map((permission, index) => (
@@ -144,8 +145,9 @@ const Profile = ({ data, permissionData, requestList }) => {
                                                 </p>
                                                 <p className="text-sm text-gray-500">
                                                     Seen Status:{" "}
-                                                    {request.action ||
-                                                        "Not Seen"}
+                                                    {request.seenStatus
+                                                        ? "Confirmed"
+                                                        : "Not Seen"}
                                                 </p>
                                             </div>
                                         </a>

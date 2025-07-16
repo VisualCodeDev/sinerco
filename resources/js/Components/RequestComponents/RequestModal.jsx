@@ -37,6 +37,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
+            addToast({ type: response.data.type, text: error?.response?.data?.message });
             console.log(error);
         } finally {
             handleCloseModal();
@@ -81,7 +82,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             >
                 <Modal.Body>
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                        <label className="mb-1" htmlFor="unit">Unit: </label>
+                        <label className="mb-1" htmlFor="unit">
+                            Unit:{" "}
+                        </label>
                         <div>
                             <select
                                 className="text-xs"
@@ -109,8 +112,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base  mb-4" >
-                        <label className="mb-1" htmlFor="request">Request: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base  mb-4">
+                        <label className="mb-1" htmlFor="request">
+                            Request:{" "}
+                        </label>
                         <div>
                             <select
                                 className="text-xs"
@@ -140,8 +145,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             )}
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4" >
-                        <label className="mb-1" htmlFor="date">Date Time: </label>
+                    <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
+                        <label className="mb-1" htmlFor="date">
+                            Date Time:{" "}
+                        </label>
                         <DateTimeInput
                             value={{
                                 date: data?.startDate,
@@ -178,7 +185,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                         />
                     </div> */}
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base">
-                        <label className="mb-1" htmlFor="time">Remarks: </label>
+                        <label className="mb-1" htmlFor="time">
+                            Remarks:{" "}
+                        </label>
                         <input
                             className="text-xs"
                             required

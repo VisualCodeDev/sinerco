@@ -11,7 +11,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
                         </label>
@@ -36,7 +36,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
                         </label>
@@ -69,17 +69,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -98,7 +90,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -118,17 +110,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -153,7 +137,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -173,17 +157,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -208,7 +184,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -228,17 +204,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -263,7 +231,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -283,17 +251,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -318,7 +278,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -338,17 +298,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -373,7 +325,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -393,17 +345,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -428,7 +372,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -448,17 +392,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -483,7 +419,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -503,17 +439,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -538,7 +466,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -558,17 +486,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -593,7 +513,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -623,22 +543,14 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col flew-wrap">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
-                        <div className="flex gap-4">
+                        <div className="flex lg:md:flex-row flex-col gap-4">
                             {subheader?.map((sub, index) => {
                                 return (
-                                    <div className="flex flex-col w-1/2">
+                                    <div className="flex flex-col lg:md:w-1/2 w-full">
                                         <label className="text-sm">
                                             {sub?.sub}
                                         </label>
@@ -657,7 +569,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                                 )
                                             }
                                             placeholder={decimalSetting}
-                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                                         />
                                     </div>
                                 );
@@ -681,17 +593,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -716,7 +620,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -736,17 +640,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <input
                             required
@@ -765,7 +661,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                 )
                             }
                             placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                         />
                     </div>
                 );
@@ -786,17 +682,9 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                     <div className="flex flex-col">
                         <label
                             htmlFor={name}
-                            className="font-medium text-md mb-1.5"
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {header}{" "}
-                            <div className="text-xs">
-                                {minMaxSetting?.min != null
-                                    ? `min: ${minMaxSetting.min}`
-                                    : "min: -"}{" | "}
-                                {minMaxSetting?.max != null
-                                    ? `max: ${minMaxSetting.max}`
-                                    : "max: -"}
-                            </div>
                         </label>
                         <div className="flex gap-4">
                             {subheader?.map((sub, index) => {
@@ -820,7 +708,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                                 )
                                             }
                                             placeholder={decimalSetting}
-                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9]"
+                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
                                         />
                                     </div>
                                 );

@@ -79,7 +79,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
                         href={route("daily", {
                             unitAreaLocationId,
                         })}
-                        className="bg-white border-2 border-primary/50 hover:border-none text-primary px-3 py-2 rounded-full text-sm hover:bg-primary/10"
+                        className="bg-white border-2 border-primary/50 hover:border-none text-primary lg:md:px-3 lg:md:py-2 px-2 py-1 lg:md:block hidden rounded-full lg:md:text-sm text-xs w-full hover:bg-primary/10"
                     >
                         Daily Form
                     </a>

@@ -18,7 +18,13 @@ const Heading = ({ children }) => {
     if (loading) return <div>Loading...</div>;
 
     const menuItems = [
-        { icon: <FaHome />, label: "Home", href: "/" },
+        {
+            condition:
+                user?.role === "super_admin" || user?.role === "technician",
+            icon: <FaHome />,
+            label: "Home",
+            href: "/",
+        },
         {
             condition: user?.role === "super_admin",
             icon: <FaAddressBook />,
@@ -26,7 +32,7 @@ const Heading = ({ children }) => {
             href: route("client.list"),
         },
         { icon: <FaList />, label: "Unit List", href: route("daily.list") },
-        { icon: <FaTh />, label: "Request List", href: route("request") },
+        { icon: <FaTh />, label: "Unit Request", href: route("request") },
         {
             condition: user?.role === "super_admin",
             icon: <FaUser />,
@@ -34,7 +40,8 @@ const Heading = ({ children }) => {
             href: route("allocation.setting"),
         },
         {
-            condition: user?.role === "super_admin" || user?.role === "technician",
+            condition:
+                user?.role === "super_admin" || user?.role === "technician",
             icon: <FaUser />,
             label: "Profile Settings",
             href: route("profile", { id: user.id }),
@@ -65,11 +72,11 @@ const Heading = ({ children }) => {
     ];
 
     return (
-        <div className="flex h-screen overflow-hidden w-screen">
-            {/* Sidebar */}
+        <div className="h-screen w-screen overflow-x-hidden relative">
+            {/* DESKTOP Sidebar */}
             <div
-                className={`bg-white h-full transition-all duration-300 sticky top-0 shadow-md ${
-                    expanded ? "w-48" : "w-16"
+                className={`bg-white h-full w-48 z-[100] transition-all duration-300 fixed top-0 left-0 shadow-md lg:md:block hidden ${
+                    expanded ? "translate-x-0" : "-translate-x-[72%]"
                 }`}
                 onMouseEnter={() => setExpanded(true)}
                 onMouseLeave={() => setExpanded(false)}
@@ -83,17 +90,15 @@ const Heading = ({ children }) => {
                                 <a
                                     href={item.href}
                                     key={index}
-                                    className="flex items-center gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                    className="flex items-center justify-between w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
                                     onClick={
                                         item.onClick ? item.onClick : undefined
                                     }
                                 >
+                                    <span className="text-sm text-gray-700">
+                                        {item.label}
+                                    </span>
                                     <div className="text-xl">{item.icon}</div>
-                                    {expanded && (
-                                        <span className="text-sm text-gray-700">
-                                            {item.label}
-                                        </span>
-                                    )}
                                 </a>
                             )
                         )}
@@ -101,8 +106,66 @@ const Heading = ({ children }) => {
                 </div>
             </div>
 
+            {/* PHONE Sidebar */}
+            <div className="lg:md:hidden sm:visible">
+                <div
+                    className="p-3 py-4 flex flex-col gap-1 justify-center items-center bg-primary fixed top-5 right-5 z-[100] rounded-full"
+                    onClick={() => setExpanded(!expanded)}
+                    onMouseLeave={() => setExpanded(false)}
+                >
+                    <div
+                        className={`bg-white w-7 h-1 transition duration-300 ${
+                            expanded && "rotate-45 translate-y-2"
+                        }`}
+                    />
+                    <div
+                        className={`bg-white w-7 h-1 transition duration-300 ${
+                            expanded && "rotate-45 "
+                        }`}
+                    />
+                    <div
+                        className={`bg-white w-7 h-1 transition duration-300 ${
+                            expanded && "-rotate-45 -translate-y-2"
+                        }`}
+                    />
+                </div>
+                <div
+                    className={`bg-white h-full w-48 z-[100] transition-all duration-300 fixed top-0 left-0 shadow-md ${
+                        expanded ? "translate-x-0" : "-translate-x-[100%]"
+                    }`}
+                >
+                    <div className="flex flex-col items-center py-4 space-y-4">
+                        <img src="/logo_only.webp" alt="Logo" className="h-8" />
+                        <div className="w-full mt-4">
+                            {menuItems.map((item, index) =>
+                                item?.condition === false ||
+                                item?.condition === null ? null : (
+                                    <a
+                                        href={item.href}
+                                        key={index}
+                                        className="flex items-center justify-between w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                        onClick={
+                                            item.onClick
+                                                ? item.onClick
+                                                : undefined
+                                        }
+                                    >
+                                        <span className="text-sm text-gray-700">
+                                            {item.label}
+                                        </span>
+                                        <div className="text-xl">
+                                            {item.icon}
+                                        </div>
+                                    </a>
+                                )
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Main Area */}
-            <div className="flex-1 flex flex-col w-full relative">
+            <div className="flex-1 flex flex-col w-full relative lg:ps-10">
                 {/* Top Header */}
                 <div className="bg-white flex items-center justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10">
                     <div className="h-8">
@@ -113,9 +176,9 @@ const Heading = ({ children }) => {
                             className="h-full object-contain"
                         />
                     </div>
-                    <p className="text-gray-700 text-xl font-medium">
-                        <FaBell/>
-                    </p>
+                    {/* <p className="text-gray-700 text-xl font-medium">
+                        <FaBell />
+                    </p> */}
                 </div>
 
                 {/* Page Content */}

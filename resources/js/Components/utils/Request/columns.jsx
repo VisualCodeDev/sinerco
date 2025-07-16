@@ -1,6 +1,6 @@
 import { getFormattedDate, getRequestTypeName } from "../dashboard-util";
 
-const columns = (handleSelect) => {
+const columns = ({ handleSelect, user, handleSeen }) => {
     const colItem = [
         {
             name: "no",
@@ -164,11 +164,44 @@ const columns = (handleSelect) => {
             cellClassName: "",
             sortable: false,
             width: "10%",
-            Cell: ({ seenStatus }) => {
+            Cell: ({ requestId, seenStatus }) => {
+                console.log(seenStatus)
                 return (
-                    <>
-                        <div>{seenStatus}</div>
-                    </>
+                    <div className="flex justify-center items-center">
+                        {user?.role === "technician" ? (
+                            !seenStatus ? (
+                                <button
+                                    className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSeen(requestId);
+                                    }}
+                                >
+                                    Confirm
+                                </button>
+                            ) : (
+                                <button
+                                    className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleSeen(requestId);
+                                    }}
+                                >
+                                    Undo
+                                </button>
+                            )
+                        ) : (
+                            <div>
+                                {seenStatus ? (
+                                    <p className="bg-green-500 text-white text-center px-2 py-1 rounded-lg text-sm font-medium">
+                                        Confirmed
+                                    </p>
+                                ) : (
+                                    <p className="text-slate-400 text-center">-</p>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 );
             },
         },

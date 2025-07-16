@@ -7,6 +7,7 @@ import {
     TimeInput,
     toCapitalizeFirstLetter,
     getFormattedDate,
+    splitCamelCase,
 } from "../utils/dashboard-util";
 import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
@@ -100,7 +101,7 @@ const DailyReportForm = (props) => {
     }, []);
 
     return (
-        <div className="flex flex-col justify-center items-start w-full bg-white p-10">
+        <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving && <SavingView />}
             <div
                 className={`sticky top-0 left-0 ${
@@ -121,22 +122,10 @@ const DailyReportForm = (props) => {
                     )
                 )}
             </div>
-            {unitData && (
-                <>
-                    <div className="text-center w-full flex flex-col gap-2">
-                        <div>
-                            <p className="text-2xl font-bold">
-                                {unitData.unit?.unit}
-                            </p>
-                            <p className="text-sm">{unitData.area}</p>
-                            <p className="text-sm">{unitData.location}</p>
-                        </div>
-                    </div>
-                </>
-            )}
-            <div className="w-full mt-10 px-32 text-[#3A3541]">
+
+            <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-x-10 gap-y-8 mb-4 items-center">
+                    <div className="grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
                         {formList.map((item) => (
                             <div
                                 key={item.header}
@@ -187,33 +176,36 @@ const ConfirmationModal = (props) => {
             title="Are You Sure?"
             handleCloseModal={handleCloseModal}
             showModal={isModal}
-            size={"md"}
+            size={"xl"}
         >
             <Modal.Body>
-                <div>
-                    {unitData &&
-                        Object.entries(unitData)
-                            .filter(([key]) => key !== "UnitAreaLocationId")
-                            .map(([key, value]) => (
-                                <div className="flex justify-between">
-                                    <p>{toCapitalizeFirstLetter(key)} </p>
-                                    <p>{value?.unit || value}</p>
-                                </div>
-                            ))}
-
-                    {formData &&
-                        Object.entries(formData)
-                            .filter(([key, item]) => key != "warn")
-                            .map(([key, item]) => (
-                                <div className="flex justify-between">
-                                    <p>{toCapitalizeFirstLetter(key)} </p>
-                                    <p>
-                                        {key === "date"
-                                            ? getFormattedDate(item)
-                                            : item}
-                                    </p>
-                                </div>
-                            ))}
+                <div className="flex flex-col lg:md:gap-2 gap-1 items-center px-12">
+                    <div className="border-2 lg:md:p-10 p-2 lg:md:text-lg w-full">
+                        {unitData &&
+                            Object.entries(unitData)
+                                .filter(([key]) => key !== "UnitAreaLocationId")
+                                .map(([key, value]) => (
+                                    <div className="flex justify-between font-bold capitalize">
+                                        <p>{splitCamelCase(key)} </p>
+                                        <p>{value?.unit || value}</p>
+                                    </div>
+                                ))}
+                    </div>
+                    <div className="flex flex-col lg:md:gap-2 gap-1 w-4/5">
+                        {formData &&
+                            Object.entries(formData)
+                                .filter(([key, item]) => key != "warn")
+                                .map(([key, item]) => (
+                                    <div className="flex justify-between capitalize lg:md:text-lg text-sm">
+                                        <p>{splitCamelCase(key)}</p>
+                                        <p>
+                                            {key === "date"
+                                                ? getFormattedDate(item)
+                                                : item}
+                                        </p>
+                                    </div>
+                                ))}
+                    </div>
                 </div>
             </Modal.Body>
             <Modal.Footer>

@@ -29,7 +29,7 @@ const PageLayout = ({ children }) => {
     return (
         <Heading>
             <AuthGuard>
-                <div className="relative">
+                <div className="relative h-full">
                     <NotificationContainer messages={messages} />
                     <div className="fixed bottom-0 right-0 z-[100] m-12">
                         <button

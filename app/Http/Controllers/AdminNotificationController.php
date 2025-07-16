@@ -12,7 +12,21 @@ class AdminNotificationController extends Controller
      */
     public function getNotifications()
     {
-        return response()->json(AdminNotification::where('status', '!=', 'End')->get());
+        $permissionData = DataUnitController::getPermittedUnit();
+
+        $unitIds = collect($permissionData)
+            ->pluck('unitId')
+            ->unique()
+            ->filter();
+
+        $requestList = AdminNotification::where('status', '!=', 'End')
+            ->whereHas('request', function ($query) use ($unitIds) {
+                $query->whereIn('unitId', $unitIds);
+            })
+            ->with(['request'])
+            ->get();
+
+        return response()->json($requestList);
     }
     public function index()
     {

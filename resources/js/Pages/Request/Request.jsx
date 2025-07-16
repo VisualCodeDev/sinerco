@@ -15,6 +15,8 @@ import tColumns from "@/Components/utils/Request/columns";
 import TableComponent from "@/Components/TableComponent";
 import SavingView from "@/Components/SavingView";
 import { useToast } from "@/Components/Toast/ToastProvider";
+import { useAuth } from "@/Components/Auth/auth";
+import axios from "axios";
 
 const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
@@ -25,7 +27,20 @@ const Request = ({ data }) => {
         setModal(true);
         setItem(itemData);
     };
-    const columns = tColumns(handleSelect);
+    const { user } = useAuth();
+    const { addToast } = useToast();
+
+    const handleSeen = async (id) => {
+        if (!id) return;
+        try {
+            const resp = await axios.post(route("request.seen", id));
+            addToast(resp.data);
+        } catch (e) {
+            addToast({ type: "error", text: e.response.data.message });
+        }
+    };
+
+    const columns = tColumns({ handleSelect, user, handleSeen });
     return (
         <PageLayout>
             <TableComponent

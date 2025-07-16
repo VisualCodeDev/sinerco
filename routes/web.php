@@ -40,7 +40,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Home');
-})->name('dashboard')->middleware('auth');
+})->name('dashboard')->middleware('auth', 'roles:super_admin,technician');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -68,6 +68,7 @@ Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
+    Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
 });
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
