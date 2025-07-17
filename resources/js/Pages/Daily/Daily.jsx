@@ -67,10 +67,10 @@ export default function Dashboard({ data, unitData }) {
                     </div>
 
                     {/* TABS CONTENT */}
-                    <div className="flex flex-col border-t-2 border-t-primary border-2">
+                    <div className="flex flex-col border-t-2 border-t-primary shadow-xl">
                         {unitData && (
                             <>
-                                <div className="text-center w-full flex flex-col lg:md:gap-2 gap-1 lg:md:py-12 py-8 bg-primary text-white">
+                                <div className="text-center w-full flex flex-col lg:md:gap-2 gap-1 lg:md:py-8 py-6 bg-primary text-white">
                                     <p className="lg:md:text-2xl text-xl font-bold">
                                         {unitData.unit?.unit}
                                     </p>

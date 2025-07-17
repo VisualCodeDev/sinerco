@@ -89,7 +89,7 @@ const TableComponent = (props) => {
         });
     };
     return (
-        <div className="bg-white flex-col rounded-none md:rounded-3xl border shadow-none md:shadow-lg ">
+        <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg">
             <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
                 {title && (
                     <div className="flex md:justify-center items-center">
@@ -108,9 +108,9 @@ const TableComponent = (props) => {
                 )}
 
                 <div className="flex justify-start md:justify-center items-center gap-4">
-                    <div className="flex md:justify-end">
+                    <div className="flex md:justify-end flex-col md:flex-row">
                         {filterStatus && (
-                            <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2 cursor-pointer">
+                            <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
                                 <FaFilter />
                                 <select
                                     className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
@@ -148,7 +148,7 @@ const TableComponent = (props) => {
                 </div>
             </div>
             <div
-                className="flex-col max-h-[60vh]"
+                className="flex-col"
                 style={{ maxHeight: height || "auto", overflow: "auto" }}
             >
                 <table className="table-auto w-full relative rounded-3xl overflow-x-scroll">

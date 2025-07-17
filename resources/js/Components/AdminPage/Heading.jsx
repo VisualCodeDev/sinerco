@@ -87,7 +87,7 @@ const Heading = ({ children }) => {
                 onMouseLeave={() => setExpanded(false)}
             >
                 <div className="flex flex-col items-center py-4 space-y-4">
-                    <img src="/logo_only.webp" alt="Logo" className="h-8" />
+                    <img src="/logo_sinerco.webp" alt="Logo" className="h-8" />
                     <div className="w-full mt-4">
                         {menuItems.map((item, index) =>
                             item?.condition === false ||
@@ -95,7 +95,7 @@ const Heading = ({ children }) => {
                                 <a
                                     href={item.href}
                                     key={index}
-                                    className="flex items-center justify-between w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                    className="flex items-center justify-between w-full mb-2 gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
                                     onClick={
                                         item.onClick ? item.onClick : undefined
                                     }
@@ -114,24 +114,24 @@ const Heading = ({ children }) => {
             {/* PHONE Sidebar */}
             <div className="lg:md:hidden sm:visible">
                 <div
-                    className="p-3 py-4 flex flex-col gap-1 justify-center items-center bg-primary fixed top-5 right-5 z-[100] rounded-full"
+                    className="p-2.5 py-3 flex flex-col gap-1 justify-center items-center bg-primary fixed top-3 right-5 z-[100] rounded-full"
                     onClick={() => setExpanded(!expanded)}
                 >
                     <div
-                        className={`bg-white w-7 h-1 transition duration-300 ${
-                            expanded && "rotate-45 translate-y-2"
+                        className={`bg-white w-5 h-0.5 transition duration-300 ${
+                            expanded && "rotate-45 translate-y-1"
                         }`}
                     />
                     <div className="w-full flex justify-end">
                         <div
-                            className={`bg-white w-5 h-1 transition duration-300 ${
-                                expanded && "rotate-45 translate-y-1"
+                            className={`bg-white w-3 h-0.5 transition duration-300 ${
+                                expanded && "rotate-45 translate-y-1 hidden"
                             }`}
                         />
                     </div>
                     <div
-                        className={`bg-white w-7 h-1 transition duration-300 ${
-                            expanded && "-rotate-45 -translate-y-2"
+                        className={`bg-white w-5 h-0.5 transition duration-300 ${
+                            expanded && "-rotate-45 -translate-y-1.5"
                         }`}
                     />
                 </div>
@@ -141,7 +141,13 @@ const Heading = ({ children }) => {
                     }`}
                 >
                     <div className="flex flex-col items-center py-4 space-y-4">
-                        <img src="/logo_only.webp" alt="Logo" className="h-8" />
+                        <div className="self-start px-4">
+                            <img
+                                src="/logo_sinerco.webp"
+                                alt="Logo"
+                                className="h-8"
+                            />
+                        </div>
                         <div className="w-full mt-4">
                             {menuItems.map((item, index) =>
                                 item?.condition === false ||
@@ -149,19 +155,19 @@ const Heading = ({ children }) => {
                                     <a
                                         href={item.href}
                                         key={index}
-                                        className="flex items-center justify-between w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                        className="flex items-center w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
                                         onClick={
                                             item.onClick
                                                 ? item.onClick
                                                 : undefined
                                         }
                                     >
-                                        <span className="text-sm text-gray-700">
-                                            {item.label}
-                                        </span>
                                         <div className="text-xl">
                                             {item.icon}
                                         </div>
+                                        <span className="text-sm text-gray-700">
+                                            {item.label}
+                                        </span>
                                     </a>
                                 )
                             )}

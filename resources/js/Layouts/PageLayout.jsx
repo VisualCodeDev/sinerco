@@ -34,7 +34,7 @@ const PageLayout = ({ children }) => {
                     <div className="fixed bottom-0 right-0 z-[100] m-12">
                         <button
                             onClick={() => setShowModal(true)}
-                            className="bg-secondary text-white px-4 py-2 text-lg rounded-md shadow"
+                            className="bg-secondary/90 text-white px-4 py-2 text-lg rounded-md shadow hover:bg-secondary hover:scale-105 transition ease-in-out delay-75"
                         >
                             Report SD/STDBY
                         </button>

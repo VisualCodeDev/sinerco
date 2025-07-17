@@ -12,7 +12,7 @@ import {
 } from "../utils/dashboard-util";
 import Card from "../Card";
 import { useAuth } from "../Auth/auth";
-import { FaPen } from "react-icons/fa";
+import { FaPen, FaFileExport } from "react-icons/fa";
 import Modal from "../Modal";
 import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
@@ -68,11 +68,12 @@ const DailyReport = (props) => {
         setSelectedData(data);
     };
     return (
-        <div className="bg-white flex flex-col p-10 overflow-scroll h-full w-full">
-            <div className="flex gap-3 sticky top-0 left-0 pb-2 w-full z-10">
+        <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
+            <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
                 <div className="flex gap-2 items-center">
-                    <p>Date:</p>
+                    <p className="font-semibold text-lg">Date:</p>
                     <input
+                        className="rounded-full py-1 px-3"
                         type="date"
                         value={selectedDate}
                         onChange={(e) => handleSelectDate(e)}
@@ -88,7 +89,10 @@ const DailyReport = (props) => {
                         ))}
                     </select> */}
                 </div>
-                <button onClick={() => setClick(true)}>Export</button>
+                <div className="flex items-center justify-center md:gap-2 bg-secondary/90 hover:bg-secondary text-white px-4 rounded-full transition ease-in-out delay-75 hover:scale-95">
+                    <FaFileExport />
+                    <button onClick={() => setClick(true)}> <p className="md:block hidden">Export</p></button>
+                </div>
             </div>
             <div className="overflow-x-auto w-full">
                 <table className="min-w-[900px] w-full table-auto border-collapse">
@@ -278,11 +282,11 @@ const ExportModal = (props) => {
     };
 
     return (
-        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
+        <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>
                 <Card.Header>Export to Excel</Card.Header>
                 <Card.Body>
-                    <div>Select Date to Export:</div>
+                    <div className="font-semibold mb-4">Select Date to Export:</div>
                     <div className="flex gap-1 items-center">
                         <input
                             type="checkbox"
@@ -292,11 +296,11 @@ const ExportModal = (props) => {
                         />
                         <span>Select All</span>
                     </div>
-                    <div className="grid grid-cols-5 gap-2 mt-2">
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2 mb-6">
                         {list.map((item, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-1"
+                                className="flex items-center gap-1 md:text-md text-sm"
                             >
                                 <input
                                     type="checkbox"
@@ -308,20 +312,27 @@ const ExportModal = (props) => {
                             </div>
                         ))}
                     </div>
-                    <button
-                        onClick={
-                            () =>
-                                generateExcel("Report.xlsx", data, checkedItems)
-                            // exportToExcel("Report.xlsx", data, checkedItems)
-                        }
-                    >
-                        Export to Excel
-                    </button>
+                    <div className="flex items-center place-self-center w-fit gap-2 bg-secondary text-white px-4 py-1 rounded-full transition ease-in-out delay-75 hover:scale-95">
+                        <FaFileExport />
+                        <button
+                            onClick={
+                                () =>
+                                    generateExcel(
+                                        "Report.xlsx",
+                                        data,
+                                        checkedItems
+                                    )
+                                // exportToExcel("Report.xlsx", data, checkedItems)
+                            }
+                        >
+                            Export to Excel
+                        </button>
+                    </div>
                 </Card.Body>
                 <Card.Footer>
                     <button
                         onClick={() => setClick(false)}
-                        className="font-bold w-full h-full"
+                        className="font-bold w-full h-full text-white"
                     >
                         Tutup
                     </button>

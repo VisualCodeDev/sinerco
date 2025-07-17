@@ -146,7 +146,7 @@ const DailyReportForm = (props) => {
                             </div>
                         ))}
                     </div>
-                    <div>
+                    <div className="mb-32 md:mb-0 flex place-self-center w-fit mt-10 items-center justify-center gap-2 bg-secondary/90 hover:bg-secondary text-white py-2 px-8 rounded-full transition ease-in-out delay-75 hover:scale-95">
                         <button className="font-bold w-full h-full">
                             Simpan
                         </button>
@@ -176,28 +176,28 @@ const ConfirmationModal = (props) => {
             title="Are You Sure?"
             handleCloseModal={handleCloseModal}
             showModal={isModal}
-            size={"xl"}
+            size={"responsive"}
         >
             <Modal.Body>
-                <div className="flex flex-col lg:md:gap-2 gap-1 items-center px-12">
-                    <div className="border-2 lg:md:p-10 p-2 lg:md:text-lg w-full">
+                <div className="flex flex-col lg:md:gap-2 gap-1 items-center md:px-4">
+                    <div className="border-2 lg:md:p-4 p-2 lg:md:text-lg w-full text-sm mb-4 md:mb-6">
                         {unitData &&
                             Object.entries(unitData)
                                 .filter(([key]) => key !== "UnitAreaLocationId")
                                 .map(([key, value]) => (
                                     <div className="flex justify-between font-bold capitalize">
                                         <p>{splitCamelCase(key)} </p>
-                                        <p>{value?.unit || value}</p>
+                                        <p className="text-primary">{value?.unit || value}</p>
                                     </div>
                                 ))}
                     </div>
-                    <div className="flex flex-col lg:md:gap-2 gap-1 w-4/5">
+                    <div className="flex flex-col lg:md:gap-2 gap-1.5 w-[90%]">
                         {formData &&
                             Object.entries(formData)
                                 .filter(([key, item]) => key != "warn")
                                 .map(([key, item]) => (
-                                    <div className="flex justify-between capitalize lg:md:text-lg text-sm">
-                                        <p>{splitCamelCase(key)}</p>
+                                    <div className="flex justify-between capitalize lg:md:text-lg text-sm pb-2.5 border-b border-b-[#e5e5e5]">
+                                        <p className="font-semibold">{splitCamelCase(key)}</p>
                                         <p>
                                             {key === "date"
                                                 ? getFormattedDate(item)

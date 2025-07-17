@@ -17,7 +17,7 @@ const Card = ({ form = false, className = "", children }) => {
 Card.Header = ({ children, className = "", headerSticky = false, style }) => {
     return (
         <div
-            className={`w-full p-5 text-white ${
+            className={`w-full p-2.5 px-5 md:p-5 text-white ${
                 headerSticky ? "sticky top-0 left-0 z-10" : ""
             } ${className}`}
             style={{ ...style }}

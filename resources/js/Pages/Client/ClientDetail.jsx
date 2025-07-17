@@ -15,13 +15,15 @@ const ClientDetail = ({ data, unitData }) => {
     const handleConfirmSettings = () => {};
     return (
         <PageLayout>
-            <div className="mb-2">
-                <button
-                    className="bg-primary text-white px-6 py-2 rounded-md"
-                    onClick={() => setSettingModal(true)}
-                >
-                    Setting
-                </button>
+            <div className="flex md:justify-start justify-center">
+                <div className="my-4">
+                    <button
+                        className="bg-primary text-white px-6 py-2 rounded-md"
+                        onClick={() => setSettingModal(true)}
+                    >
+                        Setting
+                    </button>
+                </div>
             </div>
             <TableComponent columns={columns} data={data} />
             <SettingModal
@@ -36,7 +38,13 @@ const ClientDetail = ({ data, unitData }) => {
 };
 
 const SettingModal = (props) => {
-    const { isModal, handleCloseModal, handleConfirmSettings, data, clientData } = props;
+    const {
+        isModal,
+        handleCloseModal,
+        handleConfirmSettings,
+        data,
+        clientData,
+    } = props;
     const [formData, setFormData] = useState({});
     const [decimalActive, setDecimalActive] = useState(false);
     const [minMaxActive, setMinMaxActive] = useState(false);
@@ -133,30 +141,32 @@ const SettingModal = (props) => {
             title={"Setting"}
             handleCloseModal={handleCloseModal}
             showModal={isModal}
-            size={"md"}
+            size={"responsive"}
         >
             <Modal.Body>
                 <div className="flex flex-col gap-2">
                     <div>
-                        <div>
+                        <div className="mb-4">
                             <div
-                                className="border-b-2 py-2 text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                className="border-b-2 py-2 mb-4 md:mb-0 text-md md:text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
                                 onClick={() => setDecimalActive(!decimalActive)}
                             >
-                                <p>Decimal Settings</p>
+                                <p className="font-semibold">
+                                    Decimal Settings
+                                </p>
                                 <FaAngleDown className="font-light" />
                             </div>
                             {decimalActive && (
-                                <div className="p-3 pt-1 flex flex-col gap-2">
+                                <div className="md:p-3 pt-1 flex flex-col gap-2">
                                     {formItems
                                         .filter((item) => item.name !== "time")
                                         .map((item) => (
-                                            <div className="flex justify-between items-center">
-                                                <p className="w-1/2">
+                                            <div className="flex justify-between items-center mb-2 md:mb-0">
+                                                <p className="md:w-1/2">
                                                     {item.header}
                                                 </p>
                                                 <select
-                                                    className="w-1/2"
+                                                    className="py-1 md:w-1/2"
                                                     onChange={(e) =>
                                                         handleChange(
                                                             "decimalSetting",
@@ -201,20 +211,22 @@ const SettingModal = (props) => {
                         </div>
                         <div>
                             <div
-                                className="border-b-2 py-2 text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                className="border-b-2 py-2 text-md md:text-lg mb-4 md:mb-0 flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
                                 onClick={() => setMinMaxActive(!minMaxActive)}
                             >
-                                <p>MinMax Settings</p>
+                                <p className="font-semibold">MinMax Settings</p>
                                 <FaAngleDown className="font-light" />
                             </div>
                             {minMaxActive && (
-                                <div className="p-3 pt-1 flex flex-col gap-2">
+                                <div className="md:p-3 pt-1 flex flex-col gap-2">
                                     {formItems
                                         .filter((item) => item.name !== "time")
                                         .map((item) => (
-                                            <div className="flex justify-between items-center">
-                                                <p>{item.header}</p>
-                                                <div className="flex gap-1">
+                                            <div className="flex flex-col md:flex-row mb-4 md:mb-0">
+                                                <p className="mb-2 md:mb-0">
+                                                    {item.header}
+                                                </p>
+                                                <div className="flex flex-col md:flex-row gap-1">
                                                     <input
                                                         type="number"
                                                         step={1}
