@@ -194,7 +194,7 @@ const Heading = ({ children }) => {
                 </div>
 
                 {/* Page Content */}
-                <main className="p-0 md:py-10 md:px-10 overflow-y-auto bg-[#f5f7f9]">
+                <main className="p-0 md:py-10 md:px-10 overflow-y-auto bg-[#f5f7f9] min-h-screen">
                     {children}
                 </main>
             </div>

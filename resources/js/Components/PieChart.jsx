@@ -20,18 +20,26 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
         chartData.push({
             label: "Remaining",
             value: gap,
-            color: "#E0E0E0", // abu-abu
+            color: "#e5e7eb", // abu-abu
         });
     }
 
     let cumulative = 0;
 
     return (
-        <div className="flex flex-col items-center w-max">
-            <div className="mb-2">
-                <h1 className="font-bold text-lg">{chartData[0]?.label}</h1>
+        <div className="flex flex-row justify-center gap-10 items-center w-full text-center">
+            {/* Title and Value */}
+            <div className="flex flex-col gap-2 md:gap-4 mb-1 text-start">
+                <p className="text-base md:text-xl text-gray-500">Total Unit {chartData[0]?.label}</p>
+                <p className="text-2xl md:text-5xl font-bold">
+                    {chartData[0]?.value.toLocaleString()}{" "} <span className="text-base md:text-xl">Units</span>
+                </p>
             </div>
-            <div className="flex items-center relative w-max">
+
+            <div
+                className="relative my-2"
+                style={{ width: `${size}px`, height: `${size}px` }}
+            >
                 <svg
                     width={size}
                     height={size}
@@ -61,23 +69,20 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
                                 strokeWidth={strokeWidth}
                                 strokeDasharray={dashArray}
                                 strokeDashoffset={offset}
-                                strokeLinecap="butt"
+                                strokeLinecap="round"
                                 transform={`rotate(-90 ${center} ${center})`}
                             />
                         );
                     })}
                 </svg>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="flex flex-col justify-center items-center">
-                        <span className="font-bold font-lato text-lg">
-                            {percentage.toFixed(2)}%
-                        </span>
-                        <span className="font-bold font-lato text-xs">
-                            ({chartData[0]?.value} unit)
-                        </span>
-                    </div>
+
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-black">
+                        {percentage.toFixed()}%
+                    </span>
                 </div>
             </div>
+
         </div>
     );
 };
