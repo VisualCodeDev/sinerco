@@ -129,32 +129,32 @@ const Profile = ({ data, permissionData, requestList }) => {
                                         <a
                                             href={route("request")}
                                             key={request.requestId}
-                                            className="p-4 border-b border-gray-200 flex justify-between hover:bg-gray-100 transition-all"
+                                            className="md:p-4 border-b border-gray-200 flex justify-between hover:bg-gray-100 transition-all"
                                         >
                                             <div>
-                                                <p className="font-semibold text-lg">
+                                                <p className="font-semibold text-base md:text-lg">
                                                     {request?.unit?.unit} -{" "}
                                                     {getRequestTypeName(
                                                         request.requestType
                                                     )}
                                                 </p>
-                                                <p className="text-sm text-gray-600">
+                                                <p className="text-xs md:text-sm text-gray-600">
                                                     {request.description}
                                                 </p>
-                                                <p className="text-sm text-gray-500">
+                                                <p className="text-xs md:text-sm text-gray-500">
                                                     Requested on:{" "}
                                                     {getFormattedDate(
                                                         request.created_at,
                                                         "DD MMM YYYY, HH:mm"
                                                     )}
                                                 </p>
-                                                <p className="text-sm text-gray-500">
+                                                <p className="text-xs md:text-sm text-gray-500">
                                                     Status: {request.status}
                                                 </p>
                                             </div>
                                             <div className="text-end">
                                                 <p
-                                                    className={`text-lg font-bold ${
+                                                    className={`text-base md:text-lg font-bold ${
                                                         request.unit.status ===
                                                         "online"
                                                             ? "text-green-600"

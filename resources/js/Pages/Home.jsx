@@ -5,7 +5,12 @@ import Modal from "@/Components/Modal";
 import MultiRingChart from "@/Components/MultiPieChart";
 import PieChart from "@/Components/PieChart";
 import PageLayout from "@/Layouts/PageLayout";
-import { FaCalendarWeek, FaUserCircle } from "react-icons/fa";
+import {
+    FaCalendarWeek,
+    FaUserCircle,
+    FaPhoneAlt,
+    FaEnvelopeOpenText,
+} from "react-icons/fa";
 import { useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 
@@ -124,23 +129,37 @@ export default function Home() {
                     </div>
 
                     {/* ADMIN INFO */}
-                    <div className="flex flex-row md:w-1/3 bg-white shadow-xl p-4 md:p-8 rounded-lg md:rounded-3xl">
-                        <div className="flex justify-center gap-5">
-                            <div className="text-8xl text-primary">
+                    <div className="flex flex-col justify-between items-start md:w-1/3 bg-white shadow-xl p-4 md:p-8 rounded-lg md:rounded-3xl">
+                        <div className="flex items-center justify-center gap-5">
+                            <div className="text-6xl md:text-[7rem] text-primary">
                                 <FaUserCircle />
                             </div>
-                            <div className="flex flex-col font-semibold">
-                                <p className="text-2xl">Admin Name</p>
-                                <p className="text-gray-500 mb-3">
-                                    Admin Email
+                            <div className="flex flex-col justify-center font-semibold">
+                                <p className="text-lg md:text-2xl">
+                                    Admin Name
                                 </p>
+                                <p className="text-sm md:text-base text-gray-500 mb-3">
+                                    Admin's Role
+                                </p>
+                                <a href="./profile" className="text-sm text-white bg-primary px-3 p-1.5 w-fit rounded-lg border-primary border-2 transition delay-75 ease-in-out hover:bg-white hover:text-primary hover:scale-90">View Profile</a>
+                            </div>
+                        </div>
+                        <div className="flex flex-row items-center w-full">
+                            <div className="flex flex-1 flex-col justify-center items-center text-center">
+                                <FaPhoneAlt className="text-2xl mb-4" />
+                                <p>Phone Number</p>
+                            </div>
+                            <div className="w-[1px] h-full bg-gray-400 mx-4" />
+                            <div className="flex flex-1 flex-col justify-center items-center text-center">
+                                <FaEnvelopeOpenText className="text-2xl mb-4" />
+                                <p>Email</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* PIECHART */}
-                <div className="flex md:flex-row flex-col justify-between items-center gap-4 bg-white p-4 md:p-10 md:py-4 rounded-lg md:rounded-3xl shadow-xl">
+                <div className="flex md:flex-row flex-col justify-between items-center gap-4 bg-white p-4 md:p-10 md:py-6 rounded-lg md:rounded-3xl shadow-xl">
                     <div className="md:w-1/3">
                         <PieChart
                             stroke={20}

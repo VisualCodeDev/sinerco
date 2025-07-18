@@ -151,7 +151,7 @@ const EditItem = ({
             title="Edit Request"
             handleCloseModal={() => setModal(false)}
             showModal={isModal}
-            size="md"
+            size="responsive"
         >
             <Modal.Body>
                 <div className="grid grid-cols-2 gap-5 items-center">
@@ -162,7 +162,7 @@ const EditItem = ({
 
                         return (
                             <>
-                                <div>{item?.name}</div>
+                                <div className="font-semibold">{item?.name}</div>
                                 {!itemInputType ? (
                                     <div>
                                         {item?.name === "Start Date Time"

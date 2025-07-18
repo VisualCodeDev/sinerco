@@ -6,7 +6,7 @@ const Modal = (props) => {
 
     let selectedSize =
     size === "responsive"
-        ? "w-[80%] md:w-1/2 lg:w-1/3"
+        ? "w-[80%] md:w-1/3"
         : size === "xl"
         ? "w-2/3"
         : size === "sm"

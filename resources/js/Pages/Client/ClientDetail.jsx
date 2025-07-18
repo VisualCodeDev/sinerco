@@ -161,12 +161,12 @@ const SettingModal = (props) => {
                                     {formItems
                                         .filter((item) => item.name !== "time")
                                         .map((item) => (
-                                            <div className="flex justify-between items-center mb-2 md:mb-0">
-                                                <p className="md:w-1/2">
+                                            <div className="flex justify-between items-center mb-2">
+                                                <p className="md:w-1/2 font-semibold">
                                                     {item.header}
                                                 </p>
                                                 <select
-                                                    className="py-1 md:w-1/2"
+                                                    className="py-1 md:w-[100px]"
                                                     onChange={(e) =>
                                                         handleChange(
                                                             "decimalSetting",
@@ -222,12 +222,13 @@ const SettingModal = (props) => {
                                     {formItems
                                         .filter((item) => item.name !== "time")
                                         .map((item) => (
-                                            <div className="flex flex-col md:flex-row mb-4 md:mb-0">
-                                                <p className="mb-2 md:mb-0">
+                                            <div className="flex flex-col justify-between items-center md:flex-row mb-4 md:mb-2">
+                                                <p className="mb-2 md:mb-0 font-semibold">
                                                     {item.header}
                                                 </p>
-                                                <div className="flex flex-col md:flex-row gap-1">
+                                                <div className="flex flex-col md:flex-row gap-2">
                                                     <input
+                                                        className="md:w-[100px]"
                                                         type="number"
                                                         step={1}
                                                         placeholder="min."
@@ -250,6 +251,7 @@ const SettingModal = (props) => {
                                                         }
                                                     />
                                                     <input
+                                                        className="md:w-[100px]"
                                                         type="number"
                                                         step={1}
                                                         placeholder="max."

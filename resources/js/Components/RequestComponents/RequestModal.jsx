@@ -82,7 +82,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             >
                 <Modal.Body>
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                        <label className="mb-2" htmlFor="unit">
+                        <label className="font-semibold mb-2" htmlFor="unit">
                             Unit:{" "}
                         </label>
                         <div>
@@ -113,7 +113,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                        <label className="mb-2" htmlFor="request">
+                        <label className="font-semibold mb-2" htmlFor="request">
                             Request:{" "}
                         </label>
                         <div>
@@ -146,7 +146,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                         </div>
                     </div>
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                        <label className="mb-2" htmlFor="date">
+                        <label className="font-semibold mb-2" htmlFor="date">
                             Date Time:{" "}
                         </label>
                         <DateTimeInput
@@ -185,7 +185,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                         />
                     </div> */}
                     <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base">
-                        <label className="mb-2" htmlFor="time">
+                        <label className="font-semibold mb-2" htmlFor="time">
                             Remarks:{" "}
                         </label>
                         <input
