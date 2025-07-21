@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('requestId')->unique();
             $table->unsignedBigInteger('requestedBy');
             $table->string('unitId', 50);
+            $table->unsignedBigInteger('locationId');
             $table->date('startDate');
             $table->string('startTime');
             $table->date('endDate')->nullable();
@@ -28,6 +29,7 @@ return new class extends Migration {
             $table->time('seenTime')->nullable();
 
             $table->unique(['unitId', 'startDate', 'startTime']);
+            $table->foreign('locationId')->references('id')->on('locations')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreign('unitId')->references('unitId')->on('data_units')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreign('requestedBy')->references('id')->on('users')->onUpdate('CASCADE')->onDelete('CASCADE');
         });

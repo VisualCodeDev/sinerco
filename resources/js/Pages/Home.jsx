@@ -11,11 +11,20 @@ import {
     FaPhoneAlt,
     FaEnvelopeOpenText,
 } from "react-icons/fa";
-import { useForm, usePage } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import Carousel from "@/Components/Carousel";
+import {
+    getFormattedDate,
+    getRequestStatus,
+    getRequestTypeName,
+} from "@/Components/utils/dashboard-util";
+import { useAuth } from "@/Components/Auth/auth";
 
 export default function Home() {
+    const {user} = useAuth();
     const [data, setData] = useState(null);
+    const [unitData, setUnitData] = useState([]);
     const [total, setTotal] = useState(0);
     const [multiData, setMultiData] = useState([]);
     const [dateTime, setDateTime] = useState(new Date());
@@ -45,6 +54,13 @@ export default function Home() {
 
     const fetchData = async () => {
         const response = await axios.get(route("getUnitStatus"));
+        const respUnitData = await axios.get(route("getRequestUnitStatus"));
+        if (respUnitData.data) {
+            const filteredData = respUnitData?.data?.filter(
+                (item) => item.status === "Ongoing"
+            );
+            setUnitData(filteredData || []);
+        }
         if (response.data) {
             let online = 0;
             let down = 0;
@@ -90,6 +106,7 @@ export default function Home() {
 
         // setData(response.data);
     };
+
     useEffect(() => {
         fetchData();
         const interval = setInterval(() => {
@@ -100,10 +117,26 @@ export default function Home() {
     if (!data) {
         return <div>Loading...</div>;
     }
+
+    const getDuration = (startDate, startTime) => {
+        const start = new Date(`${startDate}T${startTime}`);
+        const diffMs = dateTime - start;
+
+        const diffSec = Math.floor(diffMs / 1000);
+        const hours = Math.floor(diffSec / 3600);
+        const minutes = Math.floor((diffSec % 3600) / 60);
+        const seconds = diffSec % 60;
+
+        const formatted = `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+        return formatted;
+    };
+
     return (
         <PageLayout>
             {/* <UnitTable /> */}
-
             <div className="flex flex-col gap-6 md:gap-10">
                 <div className="flex flex-col md:flex-row w-full gap-4 md:gap-10">
                     <div className="flex justify-between items-center md:items-stretch shadow-xl p-4 md:p-8 bg-gradient-to-tr from-primary to-primary/75 md:w-2/3 rounded-lg md:rounded-3xl">
@@ -116,7 +149,7 @@ export default function Home() {
                             </div>
                             <div className="flex flex-col md:gap-3">
                                 <p className="text-white font-bold text-xl md:text-5xl">
-                                    Good Day! Admin
+                                    Good Day! {user.name}
                                 </p>
                                 <p className="text-white text-base md:text-xl">
                                     Have a Nice Day!
@@ -136,12 +169,17 @@ export default function Home() {
                             </div>
                             <div className="flex flex-col justify-center font-semibold">
                                 <p className="text-lg md:text-2xl">
-                                    Admin Name
+                                    {user.name}
                                 </p>
                                 <p className="text-sm md:text-base text-gray-500 mb-3">
-                                    Admin's Role
+                                    {user.role}
                                 </p>
-                                <a href="./profile" className="text-sm text-white bg-primary px-3 p-1.5 w-fit rounded-lg border-primary border-2 transition delay-75 ease-in-out hover:bg-white hover:text-primary hover:scale-90">View Profile</a>
+                                <a
+                                    href={route('profile', user.id)}
+                                    className="text-sm text-white bg-primary px-3 p-1.5 w-fit rounded-lg border-primary border-2 transition delay-75 ease-in-out hover:bg-white hover:text-primary hover:scale-90"
+                                >
+                                    View Profile
+                                </a>
                             </div>
                         </div>
                         <div className="flex flex-row items-center w-full">
@@ -185,8 +223,107 @@ export default function Home() {
                         />
                     </div>
                 </div>
-                <div className="flex md:flex-row flex-col w-full md:gap-10 justify-between items-center">
-                    <div className="w-full flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg md:rounded-3xl shadow-xl">
+                {/* UNIT TABLE */}
+                <div>
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[300px] overflow-auto">
+                        <table class="w-full text-sm text-left rtl:text-right">
+                            <thead class="text-xs text-white uppercase bg-primary">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3">
+                                        Unit
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Location
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        PIC
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Start
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Duration
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {unitData && unitData.length > 0 ? (
+                                    unitData
+                                        .filter(
+                                            (item) => item?.status != "Pending"
+                                        )
+                                        .map((item, index) => (
+                                            <tr
+                                                class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer md:text-sm text-xs"
+                                                key={item?.id || index}
+                                                onClick={() =>
+                                                    router.visit(
+                                                        route("request")
+                                                    )
+                                                }
+                                            >
+                                                <th
+                                                    scope="row"
+                                                    class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
+                                                >
+                                                    <div class="md:text-base font-semibold">
+                                                        {item?.unit?.unit}
+                                                    </div>
+                                                </th>
+                                                <td class="px-6 py-4">
+                                                    {item?.location?.location}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    {item?.user?.name}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    {getFormattedDate(
+                                                        item?.startDate
+                                                    )}
+                                                    , {item?.startTime}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    {getDuration(
+                                                        item?.startDate,
+                                                        item?.startTime
+                                                    )}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    <div class="flex items-center whitespace-nowrap">
+                                                        <div
+                                                            class={`md:h-2.5 md:w-2.5 w-2 h-2 rounded-full ${
+                                                                item?.requestType ===
+                                                                "stdby"
+                                                                    ? "bg-orange-500"
+                                                                    : "bg-red-500"
+                                                            } me-2`}
+                                                        ></div>{" "}
+                                                        {getRequestTypeName(
+                                                            item?.requestType
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan={5}
+                                            className="text-center text-gray-500 py-6"
+                                        >
+                                            All units are running.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div className="flex md:flex-row flex-col w-full md:gap-10 gap-5 justify-between items-center">
+                    <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg md:rounded-3xl shadow-xl">
                         <MultiRingChart
                             data={multiData}
                             size={180}
@@ -194,11 +331,10 @@ export default function Home() {
                             gap={18}
                         />
                     </div>
-                    <div className="hidden md:block">
+                    <div className="block md:w-1/2">
                         <iframe
+                            className="md:w-full md:h-[280px] w-screen h-[300px]"
                             src="https://www.google.com/maps/d/u/0/embed?mid=1sLcUWsWeoXzlWSPIA8jsQB8X62MSK80&ehbc=2E312F&noprof=1"
-                            width="800"
-                            height="280"
                         ></iframe>
                     </div>
                 </div>

@@ -1,13 +1,13 @@
 import Heading from "@/Components/AdminPage/Heading";
 import { FaPenAlt } from "react-icons/fa";
-import { AuthGuard } from "@/Components/Auth/auth";
+import { AuthGuard, useAuth } from "@/Components/Auth/auth";
 import { RequestModal } from "@/Components/RequestComponents/RequestModal";
 import { NotificationContainer } from "@/Components/Toast/Notification";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 
 const PageLayout = ({ children }) => {
-    const { flash } = usePage().props;
+    const { user } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -44,35 +44,36 @@ const PageLayout = ({ children }) => {
             <AuthGuard>
                 <div className="relative h-full">
                     <NotificationContainer messages={messages} />
-                    <div className="fixed bottom-0 right-0 z-[100] md:m-12 m-5">
-                        {/* Mobile button */}
-                        <button
-                            onClick={handleClick}
-                            className={`flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out 
+                    {user && user?.role === "operator" && (
+                        <div className="fixed bottom-0 right-0 z-[100] md:m-12 m-5">
+                            {/* Mobile button */}
+                            <button
+                                onClick={handleClick}
+                                className={`flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out 
         ${expanded ? "w-auto" : "w-[50px] h-[50px] justify-center"} md:hidden`} // Only visible on mobile
-                        >
-                            <FaPenAlt className="text-xl" />
-                            {expanded && (
-                                <span className="whitespace-nowrap">
-                                    Report SD/STDBY
-                                </span>
-                            )}
-                        </button>
+                            >
+                                <FaPenAlt className="text-xl" />
+                                {expanded && (
+                                    <span className="whitespace-nowrap">
+                                        Report SD/STDBY
+                                    </span>
+                                )}
+                            </button>
 
-                        {/* Desktop button */}
-                        <button
-                            onClick={() => setShowModal(true)}
-                            className="hidden md:flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-md shadow hover:bg-secondary hover:scale-105 transition ease-in-out delay-75"
-                        >
-                            <FaPenAlt className="text-xl" />
-                            <span>Report SD/STDBY</span>
-                        </button>
-
-                        <RequestModal
-                            handleCloseModal={() => setShowModal(false)}
-                            showModal={showModal}
-                        />
-                    </div>
+                            {/* Desktop button */}
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="hidden md:flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-md shadow hover:bg-secondary hover:scale-105 transition ease-in-out delay-75"
+                            >
+                                <FaPenAlt className="text-xl" />
+                                <span>Report SD/STDBY</span>
+                            </button>
+                            <RequestModal
+                                handleCloseModal={() => setShowModal(false)}
+                                showModal={showModal}
+                            />
+                        </div>
+                    )}
                     {children}
                 </div>
             </AuthGuard>

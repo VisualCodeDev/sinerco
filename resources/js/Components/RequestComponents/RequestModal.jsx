@@ -37,7 +37,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
-            addToast({ type: response.data.type, text: error?.response?.data?.message });
+            addToast({
+                type: 'error',
+                text: error?.response?.data?.message,
+            });
             console.log(error);
         } finally {
             handleCloseModal();
@@ -68,6 +71,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             fetchDataUnit();
         }
     }, [showModal]);
+
+    useEffect(() => {
+        const location = unitData.find(item => item?.unitId === data?.unitId);
+        handleChange(["locationId"], location?.id);
+    }, [data?.unitId]);
+    
     return (
         <Modal
             title="Report SD/STDBY"
@@ -91,9 +100,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                 required
                                 id="unit"
                                 value={data?.unitId || ""}
-                                onChange={(e) =>
-                                    handleChange(["unitId"], e.target.value)
-                                }
+                                onChange={(e) => {
+                                    handleChange(["unitId"], e.target.value);
+                                }}
                             >
                                 <option value={null}>-- Select Unit --</option>
                                 {unitData?.map((item, index) => (

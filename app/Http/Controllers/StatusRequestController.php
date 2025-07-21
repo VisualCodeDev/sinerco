@@ -29,6 +29,7 @@ class StatusRequestController extends Controller
             'startTime' => 'required|string',
             'requestType' => 'required|string',
             'remarks' => 'required|string',
+            'locationId' => 'required',
         ]);
         $user = auth()->user();
         $status = new StatusRequest();
@@ -39,6 +40,7 @@ class StatusRequestController extends Controller
         $status->remarks = $val['remarks'];
         $status->status = 'Pending';
         $status->requestedBy = $user->id;
+        $status->locationId = $val['locationId'];
         $status->save();
         try {
             $technicians = UserAllocation::with(['user', 'unitArea'])
@@ -77,6 +79,19 @@ class StatusRequestController extends Controller
         ;
 
         return Inertia::render('Request/Request', ['data' => $requestList]);
+    }
+
+    public function getRequestedUnit()
+    {
+        $permissionData = DataUnitController::getPermittedUnit();
+
+        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+
+        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'location.area')->get();
+        $requestList = collect($requestList)
+            ->values()
+            ->toArray();
+        return response()->json($requestList);
     }
 
     public function updateRequest(Request $request)

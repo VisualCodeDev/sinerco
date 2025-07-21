@@ -10,71 +10,129 @@ import {
     FaSignOutAlt,
     FaBell,
     FaMapPin,
+    FaSearchLocation,
+    FaHistory,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 
 const Heading = ({ children }) => {
+    const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
+    const [openIndex, setOpenIndex] = useState(null);
+
+    const handleSubMenu = (index) => {
+        setOpenIndex(openIndex === index ? null : index);
+    };
+    let menuItems = [];
     const { user, loading } = useAuth();
-    if (loading) return <div>Loading...</div>;
-    const menuItems = [
-        {
-            condition:
-                user?.role === "super_admin" || user?.role === "technician",
+    if (isLoading) return <div>Loading...</div>;
+    const menu = {
+        home: {
             icon: <FaHome />,
             label: "Home",
             href: "/",
         },
-        {
-            condition: user?.role === "super_admin",
+        clientList: {
             icon: <FaAddressBook />,
             label: "Client List",
             href: route("client.list"),
         },
-        {
+        area: {
             icon: <FaMapPin />,
             label: "Area",
             href: route("areas"),
         },
-        { icon: <FaList />, label: "Unit List", href: route("daily.list") },
-        { icon: <FaTh />, label: "Unit Request", href: route("request") },
-        {
-            condition: user?.role === "super_admin",
-            icon: <FaUser />,
-            label: "Allocation Settings",
+        unitList: {
+            icon: <FaList />,
+            label: "Unit List",
+            submenu: [
+                { label: "Data Unit", href: route("daily.list") },
+                { label: "Gas Composition", href: route("daily.list") },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Classified Contract",
+                    href: route("daily.list"),
+                },
+                {
+                    label: "Contract",
+                    href: route("daily.list"),
+                },
+            ],
+        },
+        eventHistory: {
+            icon: <FaTh />,
+            label: "Event History",
+            href: route("request"),
+        },
+        allocation: {
+            icon: <FaSearchLocation />,
+            label: "User Settings",
             href: route("allocation.setting"),
         },
-        {
-            condition:
-                user?.role === "super_admin" || user?.role === "technician",
+        profile: {
             icon: <FaUser />,
-            label: "Profile Settings",
+            label: "View Profile",
             href: route("profile", { id: user.id }),
         },
-        {
-            condition: !user,
+        login: {
             icon: <FaSignInAlt />,
             label: "Login",
             onClick: async () => {
                 window.location.href = "/login";
             },
         },
-        {
-            condition: user,
+        logHistory: {
+            icon: <FaHistory />,
+            label: "Log History",
+            // href: route("profile", { id: user.id }),
+        },
+        logout: {
             icon: <FaSignOutAlt />,
             label: "Logout",
             onClick: async () => {
                 try {
                     await axios.post(route("logout"));
-                    window.location.href = "/login";
                 } catch (error) {
                     console.error("Logout failed:", error);
                 } finally {
-                    window.location.href = "/login";
+                    window.location.reload();
                 }
             },
         },
-    ];
+    };
+    if (user?.role === "super_admin") {
+        menuItems = [
+            menu.home,
+            menu.clientList,
+            menu.area,
+            menu.unitList,
+            menu.eventHistory,
+            menu.allocation,
+            menu.profile,
+            menu.logHistory,
+        ];
+    }
+    if (user?.role === "technician") {
+        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+    }
+    if (user?.role === "operator") {
+        menuItems = [menu.unitList, menu.eventHistory];
+    }
+    if (user?.role === "client") {
+        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+    }
+    if (user?.role === "workshop") {
+        menuItems = [menu.home, menu.unitList];
+    }
+    if (user?.role === "management") {
+        menuItems = [
+            menu.home,
+            menu.clientList,
+            menu.unitList,
+            menu.eventHistory,
+        ];
+    }
+    menuItems.push(menu.logout);
 
     return (
         <div className="h-screen w-screen overflow-x-hidden relative">
@@ -84,29 +142,56 @@ const Heading = ({ children }) => {
                     expanded ? "translate-x-0" : "-translate-x-[72%]"
                 }`}
                 onMouseEnter={() => setExpanded(true)}
-                onMouseLeave={() => setExpanded(false)}
+                onMouseLeave={() => {
+                    setExpanded(false);
+                    setOpenIndex(null);
+                }}
             >
                 <div className="flex flex-col items-center py-4 space-y-4">
                     <img src="/logo_sinerco.webp" alt="Logo" className="h-8" />
                     <div className="w-full mt-4">
-                        {menuItems.map((item, index) =>
-                            item?.condition === false ||
-                            item?.condition === null ? null : (
+                        {menuItems.map((item, index) => (
+                            <div key={index} className="w-full">
+                                {/* Item utama */}
                                 <a
                                     href={item.href}
                                     key={index}
                                     className="flex items-center justify-between w-full mb-2 gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-                                    onClick={
-                                        item.onClick ? item.onClick : undefined
-                                    }
+                                    onClick={() => {
+                                        handleSubMenu(index);
+                                        item?.onClick && item?.onClick();
+                                    }}
                                 >
                                     <span className="text-sm text-gray-700">
                                         {item.label}
                                     </span>
                                     <div className="text-xl">{item.icon}</div>
                                 </a>
-                            )
-                        )}
+
+                                {/* Submenu */}
+                                {Array.isArray(item.submenu) &&
+                                    item.submenu.length > 0 &&
+                                    openIndex === index && (
+                                        <div className="pl-6">
+                                            {item.submenu.map((sub, subIndex) =>
+                                                sub?.condition === false ||
+                                                sub?.condition ===
+                                                    null ? null : (
+                                                    <a
+                                                        key={subIndex}
+                                                        href={sub.href}
+                                                        className="flex items-center justify-between w-full mb-1 gap-3 px-3 py-1 hover:bg-gray-50 cursor-pointer transition"
+                                                    >
+                                                        <span className="text-sm text-gray-600">
+                                                            {sub.label}
+                                                        </span>
+                                                    </a>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -149,28 +234,52 @@ const Heading = ({ children }) => {
                             />
                         </div>
                         <div className="w-full mt-4">
-                            {menuItems.map((item, index) =>
-                                item?.condition === false ||
-                                item?.condition === null ? null : (
+                            {menuItems.map((item, index) => (
+                                <div key={index} className="w-full">
+                                    {/* Item utama */}
                                     <a
                                         href={item.href}
                                         key={index}
-                                        className="flex items-center w-full gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
-                                        onClick={
-                                            item.onClick
-                                                ? item.onClick
-                                                : undefined
-                                        }
+                                        className="flex items-center justify-between w-full mb-2 gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
+                                        onClick={() => {
+                                            handleSubMenu(index);
+                                            item?.onClick && item?.onClick();
+                                        }}
                                     >
-                                        <div className="text-xl">
-                                            {item.icon}
-                                        </div>
                                         <span className="text-sm text-gray-700">
                                             {item.label}
                                         </span>
+                                        <div className="text-xl">
+                                            {item.icon}
+                                        </div>
                                     </a>
-                                )
-                            )}
+
+                                    {/* Submenu */}
+                                    {Array.isArray(item.submenu) &&
+                                        item.submenu.length > 0 &&
+                                        openIndex === index && (
+                                            <div className="pl-6">
+                                                {item.submenu.map(
+                                                    (sub, subIndex) =>
+                                                        sub?.condition ===
+                                                            false ||
+                                                        sub?.condition ===
+                                                            null ? null : (
+                                                            <a
+                                                                key={subIndex}
+                                                                href={sub.href}
+                                                                className="flex items-center justify-between w-full mb-1 gap-3 px-3 py-1 hover:bg-gray-50 cursor-pointer transition"
+                                                            >
+                                                                <span className="text-sm text-gray-600">
+                                                                    {sub.label}
+                                                                </span>
+                                                            </a>
+                                                        )
+                                                )}
+                                            </div>
+                                        )}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>

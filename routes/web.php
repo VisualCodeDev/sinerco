@@ -66,6 +66,7 @@ Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'ro
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
+    Route::get('/get-request', 'getRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');

@@ -42,6 +42,11 @@ class StatusRequest extends Model
 
     }
 
+    public function location()
+    {
+        return $this->belongsTo(Location::class, 'locationId', 'id');
+    }
+
     protected $fillable  = [
         'date',
         'requestType',
