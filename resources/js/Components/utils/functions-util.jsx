@@ -1,5 +1,7 @@
 import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export const getRequestTypeName = (value) => {
     if (!value) return "";
@@ -120,10 +122,10 @@ export const generateExcel = (fileName, formData, checkedItems) => {
     const workbook = new ExcelJS.Workbook();
     const filteredData = formData.filter((item) => {
         const date = new Date(item.date);
-        const formattedDate = getDDMMYYDate(date);
+        const formattedDate = getDDMMYYDate(date, 'YYYY-MM-DD');
         return checkedItems.includes(formattedDate);
     });
-
+    console.log(filteredData);
     const dataByDate = filteredData.reduce((acc, curr) => {
         const date = curr.date;
         if (!acc[date]) acc[date] = [];

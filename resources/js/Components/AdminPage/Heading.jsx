@@ -162,7 +162,7 @@ const Heading = ({ children }) => {
                                         item?.onClick && item?.onClick();
                                     }}
                                 >
-                                    <span className="text-sm text-gray-700">
+                                    <span className="text-sm text-gray-700 font-bold">
                                         {item.label}
                                     </span>
                                     <div className="text-xl">{item.icon}</div>
@@ -172,7 +172,7 @@ const Heading = ({ children }) => {
                                 {Array.isArray(item.submenu) &&
                                     item.submenu.length > 0 &&
                                     openIndex === index && (
-                                        <div className="pl-6">
+                                        <div className="pl-6 font-semibold">
                                             {item.submenu.map((sub, subIndex) =>
                                                 sub?.condition === false ||
                                                 sub?.condition ===

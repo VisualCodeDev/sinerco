@@ -91,7 +91,10 @@ const DailyReport = (props) => {
                 </div>
                 <div className="flex items-center justify-center md:gap-2 bg-secondary/90 hover:bg-secondary text-white px-4 rounded-full transition ease-in-out delay-75 hover:scale-95">
                     <FaFileExport />
-                    <button onClick={() => setClick(true)}> <p className="md:block hidden">Export</p></button>
+                    <button onClick={() => setClick(true)}>
+                        {" "}
+                        <p className="md:block hidden">Export</p>
+                    </button>
                 </div>
             </div>
             <div className="overflow-x-auto w-full">
@@ -255,6 +258,10 @@ const ExportModal = (props) => {
     const { setClick, list, data } = props;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
+    const [selectedDate, setSelectedDate] = useState({
+        start: "",
+        end: "",
+    });
 
     useEffect(() => {
         if (checkedItems.length === list.length) {
@@ -281,13 +288,57 @@ const ExportModal = (props) => {
         }
     };
 
+    const handleSelectDate = (field, item) => {
+        setSelectedDate({ ...selectedDate, [field]: item });
+    };
+
+    const getDateRange = (start, end) => {
+        const dateArray = [];
+        let currentDate = new Date(start);
+        const endDate = new Date(end);
+
+        while (currentDate <= endDate) {
+            dateArray.push(currentDate.toISOString().split("T")[0]); // format YYYY-MM-DD
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        return dateArray;
+    };
+
+    const handleGenerate = () => {
+        const range = getDateRange(selectedDate.start, selectedDate.end);
+        console.log(range);
+        generateExcel("Report.xlsx", data, range);
+    };
+    
     return (
         <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>
                 <Card.Header>Export to Excel</Card.Header>
                 <Card.Body>
-                    <div className="font-semibold mb-4">Select Date to Export:</div>
-                    <div className="flex gap-1 items-center">
+                    <div className="font-semibold mb-4 text-center">
+                        <p>Select Date to Export:</p>
+                    </div>
+                    <div className="flex gap-3 items-center justify-center mb-5">
+                        <input
+                            className="rounded-full py-1 px-3"
+                            type="date"
+                            value={selectedDate?.start}
+                            onChange={(e) =>
+                                handleSelectDate(["start"], e.target.value)
+                            }
+                        />
+                        -
+                        <input
+                            className="rounded-full py-1 px-3"
+                            type="date"
+                            value={selectedDate?.end}
+                            onChange={(e) =>
+                                handleSelectDate(["end"], e.target.value)
+                            }
+                        />
+                    </div>
+                    {/* <div className="flex gap-1 items-center">
                         <input
                             type="checkbox"
                             value="all"
@@ -311,17 +362,12 @@ const ExportModal = (props) => {
                                 <span>{item}</span>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
                     <div className="flex items-center place-self-center w-fit gap-2 bg-secondary text-white px-4 py-1 rounded-full transition ease-in-out delay-75 hover:scale-95">
                         <FaFileExport />
                         <button
                             onClick={
-                                () =>
-                                    generateExcel(
-                                        "Report.xlsx",
-                                        data,
-                                        checkedItems
-                                    )
+                                () => handleGenerate()
                                 // exportToExcel("Report.xlsx", data, checkedItems)
                             }
                         >
