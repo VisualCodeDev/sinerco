@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserAllocation extends Model
+class UserSetting extends Model
 {
     public function user()
     {

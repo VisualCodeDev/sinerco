@@ -2,6 +2,7 @@ import Heading from "@/Components/AdminPage/Heading";
 import { useAuth } from "@/Components/Auth/auth";
 import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
+import LoadingSpinner from "@/Components/Loading";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
 import { Head, usePage } from "@inertiajs/react";
@@ -13,7 +14,7 @@ export default function Dashboard({ data, unitData }) {
     if (!user) {
         return (
             <PageLayout>
-                <div>Loading...</div>
+                <LoadingSpinner/>
             </PageLayout>
         );
     }

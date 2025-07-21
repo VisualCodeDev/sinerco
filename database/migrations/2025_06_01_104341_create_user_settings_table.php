@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('user_allocations', function (Blueprint $table) {
+        Schema::create('user_settings', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userId');
             $table->string('unitAreaLocationId', 50);

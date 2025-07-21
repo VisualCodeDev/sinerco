@@ -64,8 +64,8 @@ const Location = ({ data }) => {
                         </h2>
                     </div>
                     <div className="space-y-2 max-h-[10vh] relative px-2">
-                        <div className="flex justify-between items-center">
-                            <div onClick={() => setExpanded(!expanded)}>
+                        <div className="flex justify-between items-center" onClick={() => setExpanded(!expanded)}>
+                            <div>
                                 {selectedAreas?.area || areas[0]?.area}
                             </div>
                             <FaAngleDown />

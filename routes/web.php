@@ -9,8 +9,8 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\UserAllocationController;
 use App\Http\Controllers\UserPermissionController;
+use App\Http\Controllers\UserSettingController;
 use App\Http\Controllers\UserUnitController;
 use App\Models\AdminNotification;
 use App\Models\DailyReportSettings;
@@ -84,9 +84,11 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
 });
 
-Route::controller(UserAllocationController::class)
+Route::controller(UserSettingController::class)
     ->middleware(['auth', 'roles:super_admin'])
     ->group(function () {
+        Route::get('/setting/add-user', 'newUserIndex')->name('user.new');
+        Route::post('/setting/add-user/new', 'addNewUser')->name('user.add');
         Route::get('/setting/user-allocation', 'index')->name('allocation.setting');
         Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation');
         Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add');

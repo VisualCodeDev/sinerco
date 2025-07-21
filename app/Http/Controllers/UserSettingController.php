@@ -2,27 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\UnitAreaLocation;
 use App\Models\User;
-use App\Models\UserAllocation;
+use App\Models\UserSetting;
+use Hash;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class UserAllocationController extends Controller
+class UserSettingController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    public function newUserIndex()
+    {
+        $roles = Role::all();
+        return Inertia::render('Setting/AddUser', ['roles' => $roles]);
+    }
+
+    public function addNewUser(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role_id' => 'required|exists:roles,id',
+        ]);
+        
+        $validated['password'] = Hash::make($validated['password']);
+
+        $user = User::create($validated);
+
+        return response()->json(['text' => 'User Added', 'type' => 'success'], 200);
+    }
+
     public function index()
     {
-        $technicianData = User::where('role', 'technician')->get();
-        $operatorData = User::where('role', 'operator')->get();
-        return Inertia::render('Setting/UserAllocation', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
+        $users = User::all();
+        $roles = Role::all();
+        // $technicianData = User::where('role', 'technician')->get();
+        // $operatorData = User::where('role', 'operator')->get();
+        return Inertia::render('Setting/UserAllocation', ['users' => $users, 'roles' => $roles]);
     }
     public function allocationSettings($userId)
     {
         $userData = User::where('id', $userId)->first();
-        $permittedData = UserAllocation::where('userId', $userId)->with('unitArea.client', 'unitArea.unit')->get()->toArray();
+        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit')->get()->toArray();
 
         $unitAreaData = [];
         $unitAreaData = UnitAreaLocation::with(['unit', 'client', 'location.area'])->get();
@@ -56,7 +82,7 @@ class UserAllocationController extends Controller
                 ->exists();
 
             if (!$exists) {
-                UserAllocation::create([
+                UserSetting::create([
                     'userId' => $userId,
                     'unitAreaLocationId' => $unitId,
                 ]);
@@ -89,7 +115,7 @@ class UserAllocationController extends Controller
 
 
         foreach ($unitAreaLocationIds as $unitId) {
-            $allocation = UserAllocation::where('userId', $userId)
+            $allocation = UserSetting::where('userId', $userId)
                 ->where('unitAreaLocationId', $unitId)
                 ->first();
 

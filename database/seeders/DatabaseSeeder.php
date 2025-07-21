@@ -14,11 +14,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            RoleSeeder::class,
             UserSeeder::class,
             AreaSeeder::class,
             ClientSeeder::class,
             DataUnitSeeder::class,
-            UnitAreaLocationSeeder::class
+            UnitAreaLocationSeeder::class,
         ]);
 
         // User::factory()->create([

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -14,90 +15,102 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $roles = Role::pluck('id', 'name');
+
         User::updateOrCreate(
-            ['email' => 'admin@sinerco.com'],
+            ['email' => 'feriyanto167@gmail.com'],
             [
-                'name' => 'Admin',
-                'password' => Hash::make('admin_sinerco'),
+                'name' => 'Feriyanto',
+                'password' => Hash::make('password12345'),
+                'role_id' => $roles['operator'] ?? null,
+                // 'whatsAppNum' => '081359113349',
             ],
         );
+
         User::updateOrCreate(
-            [
-                'email' => 'ramadhans.businessmail@gmail.com'
-            ],
+            ['email' => 'ramadhans.businessmail@gmail.com'],
             [
                 'name' => 'Rama',
                 'password' => Hash::make('admin12345'),
-                'role' => 'super_admin',
-                'whatsAppNum' => '081359113349'
+                'role_id' => $roles['super_admin'] ?? null,
+                'whatsAppNum' => '081359113349',
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'johan@sinerco.co.id'],
             [
                 'name' => 'Johan',
                 'password' => Hash::make('admin12345'),
-                'role' => 'super_admin',
-                'whatsAppNum' => '082113837546'
+                'role_id' => $roles['super_admin'] ?? null,
+                'whatsAppNum' => '082113837546',
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'operator@sinerco.co.id'],
             [
                 'name' => 'John Doe',
                 'password' => Hash::make('operator12345'),
-                'role' => 'operator',
+                'role_id' => $roles['operator'] ?? null,
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'teknisi@sinerco.co.id'],
             [
                 'name' => 'Budi Kentaki',
                 'password' => Hash::make('teknisi12345'),
-                'role' => 'technician',
+                'role_id' => $roles['technician'] ?? null,
                 'whatsAppNum' => '085921774621',
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'client@sinerco.co.id'],
             [
                 'name' => 'Client',
                 'password' => Hash::make('client12345'),
-                'role' => 'client',
+                'role_id' => $roles['client'] ?? null,
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'manager@sinerco.co.id'],
             [
                 'name' => 'Manager',
                 'password' => Hash::make('manager12345'),
-                'role' => 'guest',
+                'role_id' => $roles['guest'] ?? null,
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'general.manager@sinerco.co.id'],
             [
                 'name' => 'General Manager',
                 'password' => Hash::make('general.manager12345'),
-                'role' => 'guest',
+                'role_id' => $roles['guest'] ?? null,
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'direksi@sinerco.co.id'],
             [
-                'name' => 'direksi',
+                'name' => 'Direksi',
                 'password' => Hash::make('direksi12345'),
-                'role' => 'guest',
+                'role_id' => $roles['guest'] ?? null,
             ],
         );
+
         User::updateOrCreate(
             ['email' => 'testTeknisi@sinerco.co.id'],
             [
                 'name' => 'Jono Santoso',
                 'password' => Hash::make('direksi12345'),
                 'whatsAppNum' => '081281995158',
-                'role' => 'technician',
+                'role_id' => $roles['technician'] ?? null,
             ],
         );
     }
+
 }

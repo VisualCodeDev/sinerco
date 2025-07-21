@@ -20,6 +20,7 @@ import {
     getRequestTypeName,
 } from "@/Components/utils/dashboard-util";
 import { useAuth } from "@/Components/Auth/auth";
+import LoadingSpinner from "@/Components/Loading";
 
 export default function Home() {
     const {user} = useAuth();
@@ -115,7 +116,7 @@ export default function Home() {
         return () => clearInterval(interval);
     }, []);
     if (!data) {
-        return <div>Loading...</div>;
+        return <LoadingSpinner/>;
     }
 
     const getDuration = (startDate, startTime) => {

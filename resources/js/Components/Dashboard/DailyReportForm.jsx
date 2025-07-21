@@ -13,8 +13,8 @@ import { router, usePage } from "@inertiajs/react";
 import list from "../utils/DailyReport/columns";
 import Modal from "../Modal";
 import { FaAngleDown, FaCog } from "react-icons/fa";
-import SavingView from "../SavingView";
 import { useAuth } from "../Auth/auth";
+import LoadingSpinner from "../Loading";
 
 const DailyReportForm = (props) => {
     const { user } = useAuth();
@@ -102,7 +102,7 @@ const DailyReportForm = (props) => {
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
-            {saving && <SavingView />}
+            {saving && <LoadingSpinner text="Saving..." />}
             <div
                 className={`sticky top-0 left-0 ${
                     status === "success"

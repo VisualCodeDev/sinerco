@@ -14,18 +14,18 @@ import {
     FaHistory,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
+import LoadingSpinner from "../Loading";
 
 const Heading = ({ children }) => {
     const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [openIndex, setOpenIndex] = useState(null);
-
     const handleSubMenu = (index) => {
         setOpenIndex(openIndex === index ? null : index);
     };
     let menuItems = [];
     const { user, loading } = useAuth();
-    if (isLoading) return <div>Loading...</div>;
+    if (isLoading) return <LoadingSpinner/>;
     const menu = {
         home: {
             icon: <FaHome />,

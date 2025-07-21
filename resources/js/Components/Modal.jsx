@@ -19,9 +19,9 @@ const Modal = (props) => {
         <>
             {showModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 z-[190] pointer-events-auto"></div>
+                    <div className="fixed inset-0 bg-black/50 z-[150] pointer-events-auto"></div>
                     <div
-                        className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] flex flex-col z-[200] rounded-md overflow-hidden`}
+                        className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] flex flex-col z-[160] rounded-md overflow-hidden`}
                     >
                         <div className="bg-primary text-white w-full px-5 p-2.5 md:p-5 sticky top-0 left-0 flex justify-between">
                             <div className="w-full">
