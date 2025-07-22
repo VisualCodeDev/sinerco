@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\UnitAreaLocation;
 use App\Models\User;
-use App\Models\UserAllocation;
 use App\Models\UserAlocation;
 use App\Models\Client;
 use App\Models\StatusRequest;

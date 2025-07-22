@@ -16,10 +16,11 @@ import { FaPen, FaFileExport } from "react-icons/fa";
 import Modal from "../Modal";
 import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
+import LoadingSpinner from "../Loading";
 
 const DailyReport = (props) => {
     const { formData, unitData } = props;
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
@@ -67,6 +68,11 @@ const DailyReport = (props) => {
         setEditModal(true);
         setSelectedData(data);
     };
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+    
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -310,7 +316,7 @@ const ExportModal = (props) => {
         console.log(range);
         generateExcel("Report.xlsx", data, range);
     };
-    
+
     return (
         <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>

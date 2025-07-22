@@ -17,6 +17,7 @@ import SavingView from "@/Components/SavingView";
 import { useToast } from "@/Components/Toast/ToastProvider";
 import { useAuth } from "@/Components/Auth/auth";
 import axios from "axios";
+import LoadingSpinner from "@/Components/Loading";
 
 const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
@@ -27,9 +28,11 @@ const Request = ({ data }) => {
         setModal(true);
         setItem(itemData);
     };
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const { addToast } = useToast();
-
+    if (loading) {
+        return <LoadingSpinner />;
+    }
     const handleSeen = async (id) => {
         if (!id) return;
         try {
@@ -162,7 +165,9 @@ const EditItem = ({
 
                         return (
                             <>
-                                <div className="font-semibold">{item?.name}</div>
+                                <div className="font-semibold">
+                                    {item?.name}
+                                </div>
                                 {!itemInputType ? (
                                     <div>
                                         {item?.name === "Start Date Time"

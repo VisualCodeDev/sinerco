@@ -23,7 +23,7 @@ import { useAuth } from "@/Components/Auth/auth";
 import LoadingSpinner from "@/Components/Loading";
 
 export default function Home() {
-    const {user} = useAuth();
+    const { user, loading } = useAuth();
     const [data, setData] = useState(null);
     const [unitData, setUnitData] = useState([]);
     const [total, setTotal] = useState(0);
@@ -115,8 +115,8 @@ export default function Home() {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
-    if (!data) {
-        return <LoadingSpinner/>;
+    if (!data || loading) {
+        return <LoadingSpinner />;
     }
 
     const getDuration = (startDate, startTime) => {
@@ -126,11 +126,10 @@ export default function Home() {
         const diffSec = Math.floor(diffMs / 1000);
         const hours = Math.floor(diffSec / 3600);
         const minutes = Math.floor((diffSec % 3600) / 60);
-        const seconds = diffSec % 60;
 
-        const formatted = `${hours.toString().padStart(2, "0")}:${minutes
+        const formatted = `${hours.toString().padStart(2, "0")} jam ${minutes
             .toString()
-            .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+            .padStart(2, "0")} menit`;
 
         return formatted;
     };
@@ -139,8 +138,8 @@ export default function Home() {
         <PageLayout>
             {/* <UnitTable /> */}
             <div className="flex flex-col gap-6 md:gap-10">
-                <div className="flex flex-col md:flex-row w-full gap-4 md:gap-10">
-                    <div className="flex justify-between items-center md:items-stretch shadow-xl p-4 md:p-8 bg-gradient-to-tr from-primary to-primary/75 md:w-2/3 rounded-lg md:rounded-3xl">
+                <div className="flex flex-col-reverse md:flex-row w-full gap-4 md:gap-10">
+                    {/* <div className="flex justify-between items-center md:items-stretch shadow-xl p-4 md:p-8 bg-gradient-to-tr from-primary to-primary/75 md:w-2/3 rounded-lg md:rounded-3xl">
                         <div className="flex flex-col justify-between">
                             <div className="flex items-center mb-6 md:mb-0 gap-2 rounded-md md:rounded-xl bg-primary p-2.5 text-white text-xs md:text-base font-semibold w-fit">
                                 <FaCalendarWeek />
@@ -150,7 +149,7 @@ export default function Home() {
                             </div>
                             <div className="flex flex-col md:gap-3">
                                 <p className="text-white font-bold text-xl md:text-5xl">
-                                    Good Day! {user.name}
+                                    Good Day! {user?.name}
                                 </p>
                                 <p className="text-white text-base md:text-xl">
                                     Have a Nice Day!
@@ -160,70 +159,52 @@ export default function Home() {
                         <div className="w-[40%] md:w-1/3 md:mr-10">
                             <img src="/dashboard_icon.png" alt="" />
                         </div>
+                    </div> */}
+                    {/* PIECHART */}
+                    <div className="flex md:flex-row flex-col justify-between items-center gap-4 bg-white p-4 md:p-10 md:py-6 rounded-lg md:rounded-3xl shadow-xl md:w-3/4">
+                        <div className="md:w-1/3">
+                            <PieChart
+                                stroke={20}
+                                size={120}
+                                data={data?.online ? data.online : []}
+                                totalData={total}
+                            />
+                        </div>
+                        <div className="md:w-1/3">
+                            <PieChart
+                                stroke={20}
+                                size={120}
+                                data={data?.standBy ? data.standBy : []}
+                                totalData={total}
+                            />
+                        </div>
+                        <div className="md:w-1/3">
+                            <PieChart
+                                stroke={20}
+                                size={120}
+                                data={data?.down ? data.down : []}
+                                totalData={total}
+                            />
+                        </div>
                     </div>
-
                     {/* ADMIN INFO */}
-                    <div className="flex flex-col justify-between items-start md:w-1/3 bg-white shadow-xl p-4 md:p-8 rounded-lg md:rounded-3xl">
+                    <div className="flex items-center md:w-1/4 bg-white shadow-xl p-4 md:p-8 rounded-lg md:rounded-3xl">
                         <div className="flex items-center justify-center gap-5">
-                            <div className="text-6xl md:text-[7rem] text-primary">
+                            <div className="text-6xl md:text-[5rem] text-primary">
                                 <FaUserCircle />
                             </div>
                             <div className="flex flex-col justify-center font-semibold">
                                 <p className="text-lg md:text-2xl">
-                                    {user.name}
+                                    {user?.name}
                                 </p>
                                 <p className="text-sm md:text-base text-gray-500 mb-3">
-                                    {user.role}
+                                    {user?.role}
                                 </p>
-                                <a
-                                    href={route('profile', user.id)}
-                                    className="text-sm text-white bg-primary px-3 p-1.5 w-fit rounded-lg border-primary border-2 transition delay-75 ease-in-out hover:bg-white hover:text-primary hover:scale-90"
-                                >
-                                    View Profile
-                                </a>
-                            </div>
-                        </div>
-                        <div className="flex flex-row items-center w-full">
-                            <div className="flex flex-1 flex-col justify-center items-center text-center">
-                                <FaPhoneAlt className="text-2xl mb-4" />
-                                <p>Phone Number</p>
-                            </div>
-                            <div className="w-[1px] h-full bg-gray-400 mx-4" />
-                            <div className="flex flex-1 flex-col justify-center items-center text-center">
-                                <FaEnvelopeOpenText className="text-2xl mb-4" />
-                                <p>Email</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* PIECHART */}
-                <div className="flex md:flex-row flex-col justify-between items-center gap-4 bg-white p-4 md:p-10 md:py-6 rounded-lg md:rounded-3xl shadow-xl">
-                    <div className="md:w-1/3">
-                        <PieChart
-                            stroke={20}
-                            size={120}
-                            data={data?.online ? data.online : []}
-                            totalData={total}
-                        />
-                    </div>
-                    <div className="md:w-1/3">
-                        <PieChart
-                            stroke={20}
-                            size={120}
-                            data={data?.standBy ? data.standBy : []}
-                            totalData={total}
-                        />
-                    </div>
-                    <div className="md:w-1/3">
-                        <PieChart
-                            stroke={20}
-                            size={120}
-                            data={data?.down ? data.down : []}
-                            totalData={total}
-                        />
-                    </div>
-                </div>
                 {/* UNIT TABLE */}
                 <div>
                     <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[300px] overflow-auto">
@@ -237,16 +218,16 @@ export default function Home() {
                                         Location
                                     </th>
                                     <th scope="col" class="px-6 py-3">
-                                        PIC
+                                        Status
                                     </th>
                                     <th scope="col" class="px-6 py-3">
-                                        Start
+                                        Remark
                                     </th>
                                     <th scope="col" class="px-6 py-3">
                                         Duration
                                     </th>
                                     <th scope="col" class="px-6 py-3">
-                                        Status
+                                        PIC
                                     </th>
                                 </tr>
                             </thead>
@@ -259,7 +240,7 @@ export default function Home() {
                                         .map((item, index) => (
                                             <tr
                                                 class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer md:text-sm text-xs"
-                                                key={item?.id || index}
+                                                // key={item?.id || index}
                                                 onClick={() =>
                                                     router.visit(
                                                         route("request")
@@ -278,21 +259,6 @@ export default function Home() {
                                                     {item?.location?.location}
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    {item?.user?.name}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {getFormattedDate(
-                                                        item?.startDate
-                                                    )}
-                                                    , {item?.startTime}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {getDuration(
-                                                        item?.startDate,
-                                                        item?.startTime
-                                                    )}
-                                                </td>
-                                                <td class="px-6 py-4">
                                                     <div class="flex items-center whitespace-nowrap">
                                                         <div
                                                             class={`md:h-2.5 md:w-2.5 w-2 h-2 rounded-full ${
@@ -307,12 +273,24 @@ export default function Home() {
                                                         )}
                                                     </div>
                                                 </td>
+                                                <td class="px-6 py-4">
+                                                    {item?.remarks || '-'}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    {getDuration(
+                                                        item?.startDate,
+                                                        item?.startTime
+                                                    )}
+                                                </td>
+                                                <td class="px-6 py-4">
+                                                    {item?.user?.name}
+                                                </td>
                                             </tr>
                                         ))
                                 ) : (
                                     <tr>
                                         <td
-                                            colSpan={5}
+                                            colSpan={6}
                                             className="text-center text-gray-500 py-6"
                                         >
                                             All units are running.
@@ -324,17 +302,17 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="flex md:flex-row flex-col w-full md:gap-10 gap-5 justify-between items-center">
-                    <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg md:rounded-3xl shadow-xl">
+                    {/* <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg md:rounded-3xl shadow-xl">
                         <MultiRingChart
                             data={multiData}
                             size={180}
                             stroke={12}
                             gap={18}
                         />
-                    </div>
-                    <div className="block md:w-1/2">
+                    </div> */}
+                    <div className="block w-full">
                         <iframe
-                            className="md:w-full md:h-[280px] w-screen h-[300px]"
+                            className="md:w-full md:min-h-[480px] w-screen h-[300px]"
                             src="https://www.google.com/maps/d/u/0/embed?mid=1sLcUWsWeoXzlWSPIA8jsQB8X62MSK80&ehbc=2E312F&noprof=1"
                         ></iframe>
                     </div>

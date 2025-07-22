@@ -1,49 +1,37 @@
+import LoadingSpinner from "@/Components/Loading";
 import TableComponent from "@/Components/TableComponent";
+import { fetch } from "@/Components/utils/database-util";
 import columns from "@/Components/utils/Setting/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import { router } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
-const UserAllocation = ({ roles, users }) => {
-    const [expanded, setExpanded] = useState();
-    const [selectedRole, setRole] = useState();
+const UserAllocation = ({ roles }) => {
+    const [expanded, setExpanded] = useState(false);
+    const [selectedRole, setRole] = useState(1);
     const [filteredUser, setFilteredUser] = useState();
-
+    const { data: users, loading, error } = fetch("user.get");
     const onRowClick = (item) => {
         router.visit(route("allocation", item?.id));
     };
 
     useEffect(() => {
+        if (loading) return;
         const selectedFilterUser = users?.filter(
             (item) => item?.role_id === selectedRole?.id
         );
         setFilteredUser(selectedFilterUser);
     }, [selectedRole]);
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+    
     return (
-        // <PageLayout>
-        //     <div className="flex flex-col md:flex-row gap-5 w-full justify-between">
-        //         <div className="w-full md:w-1/2">
-        //             <TableComponent
-        //                 onRowClick={onRowClick}
-        //                 columns={techColumn}
-        //                 data={operatorData}
-        //                 title={"Operator"}
-        //             />
-        //         </div>
-        //         <div className="w-full md:w-1/2">
-        //             <TableComponent
-        //                 onRowClick={onRowClick}
-        //                 columns={techColumn}
-        //                 data={technicianData}
-        //                 title={"Technician"}
-        //             />
-        //         </div>
-        //     </div>
-        // </PageLayout>
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
-                {/* Area List Desktop*/}
+                {/* Role List Desktop*/}
                 <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
                     <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
@@ -58,7 +46,7 @@ const UserAllocation = ({ roles, users }) => {
                             ?.filter((item) => item?.name != "super_admin")
                             .map((item, index) => (
                                 <button
-                                    key={item?.id || index}
+                                    key={item?.id}
                                     onClick={() => setRole(item)}
                                     className={`capitalize w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
                                         selectedRole?.id === item?.id
@@ -72,7 +60,7 @@ const UserAllocation = ({ roles, users }) => {
                     </div>
                 </div>
 
-                {/* Area List Mobile*/}
+                {/* Role List Mobile*/}
                 <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
                     <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
@@ -99,7 +87,7 @@ const UserAllocation = ({ roles, users }) => {
                                 ?.filter((item) => item?.name != "super_admin")
                                 .map((item) => (
                                     <button
-                                        key={item?.id}
+                                        key={item?.name}
                                         onClick={() => {
                                             setRole(item);
                                             setExpanded(false);
@@ -117,7 +105,7 @@ const UserAllocation = ({ roles, users }) => {
                     </div>
                 </div>
 
-                {/* Location List */}
+                {/* User List */}
                 <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
                     <div className="flex flex-row justify-between items-center mb-6 text-lg md:text-xl font-semibold">
                         <div className="flex flex-row items-center gap-3 ">
@@ -139,12 +127,14 @@ const UserAllocation = ({ roles, users }) => {
                         {filteredUser?.length > 0 ? (
                             filteredUser.map((item) => (
                                 <div
-                                    key={item?.id}
+                                    key={item?.email}
                                     onClick={() => onRowClick(item)}
                                     className="px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 cursor-pointer text-blue-800 font-medium shadow-sm"
                                 >
                                     <p>{item?.name}</p>
-                                    <p className="md:text-sm text-xs text-slate-400">{item?.email}</p>
+                                    <p className="md:text-sm text-xs text-slate-400">
+                                        {item?.email}
+                                    </p>
                                 </div>
                             ))
                         ) : (

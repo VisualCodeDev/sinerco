@@ -11,8 +11,13 @@ class ClientController extends Controller
 {
     public function index()
     {
+        return Inertia::render('Client/ClientList');
+    }
+
+    public function getAllClient()
+    {
         $allData = Client::all();
-        return Inertia::render('Client/ClientList', ['data' => $allData]);
+        return response()->json($allData);
     }
 
     public function clientDetail($clientId)

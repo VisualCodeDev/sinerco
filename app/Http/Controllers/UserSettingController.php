@@ -15,6 +15,19 @@ class UserSettingController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function getAllUsers()
+    {
+        $users = User::with('roleData')->get();
+        return response()->json(
+            $users->map(fn($user) => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->roleData?->name,
+                'role_id' => $user->roleData?->id,
+            ])
+        );
+    }
     public function newUserIndex()
     {
         $roles = Role::all();
@@ -29,7 +42,7 @@ class UserSettingController extends Controller
             'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id',
         ]);
-        
+
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -43,7 +56,7 @@ class UserSettingController extends Controller
         $roles = Role::all();
         // $technicianData = User::where('role', 'technician')->get();
         // $operatorData = User::where('role', 'operator')->get();
-        return Inertia::render('Setting/UserAllocation', ['users' => $users, 'roles' => $roles]);
+        return Inertia::render('Setting/UserAllocation', ['roles' => $roles]);
     }
     public function allocationSettings($userId)
     {
@@ -77,7 +90,7 @@ class UserSettingController extends Controller
         $skipped = [];
 
         foreach ($unitAreaLocationIds as $unitId) {
-            $exists = UserAllocation::where('userId', $userId)
+            $exists = UserSetting::where('userId', $userId)
                 ->where('unitAreaLocationId', $unitId)
                 ->exists();
 

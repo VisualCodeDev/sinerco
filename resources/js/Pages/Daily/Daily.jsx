@@ -10,8 +10,8 @@ import { useState } from "react";
 import { FaRegFileAlt, FaRegCalendarAlt } from "react-icons/fa";
 
 export default function Dashboard({ data, unitData }) {
-    const { user } = useAuth();
-    if (!user) {
+    const { user, loading } = useAuth();
+    if (!user || loading) {
         return (
             <PageLayout>
                 <LoadingSpinner/>

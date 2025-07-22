@@ -46,6 +46,9 @@ Route::get('/', function () {
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+Route::get('/fetch/auth', [AuthenticatedSessionController::class, 'getCurrent'])->name('auth.get')
+    ->middleware('auth');
+
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
@@ -80,6 +83,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 });
 
 Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::get('/fetch/client', 'getAllClient')->name('client.get');
     Route::get('/client-list', 'index')->name('client.list');
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
 });
@@ -87,6 +91,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
 Route::controller(UserSettingController::class)
     ->middleware(['auth', 'roles:super_admin'])
     ->group(function () {
+        Route::get('/fetch/users', 'getAllUsers')->name('user.get');
         Route::get('/setting/add-user', 'newUserIndex')->name('user.new');
         Route::post('/setting/add-user/new', 'addNewUser')->name('user.add');
         Route::get('/setting/user-allocation', 'index')->name('allocation.setting');
@@ -101,10 +106,10 @@ Route::controller(AdminNotificationController::class)->group(function () {
 });
 
 Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
-        Route::get('/profile/{userId}/', 'index')->name('profile');
+    Route::get('/profile/{userId}/', 'index')->name('profile');
 });
 
-Route::controller(LocationController::class)->middleware('auth')->group(function() {
+Route::controller(LocationController::class)->middleware('auth')->group(function () {
     Route::get('/area', 'index')->name('areas');
 });
 

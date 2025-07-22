@@ -17,7 +17,7 @@ import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
 
 const DailyReportForm = (props) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const { unitData, formData } = props;
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
@@ -99,6 +99,10 @@ const DailyReportForm = (props) => {
             return newData;
         });
     }, []);
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
@@ -187,7 +191,9 @@ const ConfirmationModal = (props) => {
                                 .map(([key, value]) => (
                                     <div className="flex justify-between font-bold capitalize">
                                         <p>{splitCamelCase(key)} </p>
-                                        <p className="text-primary">{value?.unit || value}</p>
+                                        <p className="text-primary">
+                                            {value?.unit || value}
+                                        </p>
                                     </div>
                                 ))}
                     </div>
@@ -197,7 +203,9 @@ const ConfirmationModal = (props) => {
                                 .filter(([key, item]) => key != "warn")
                                 .map(([key, item]) => (
                                     <div className="flex justify-between capitalize lg:md:text-lg text-sm pb-2.5 border-b border-b-[#e5e5e5]">
-                                        <p className="font-semibold">{splitCamelCase(key)}</p>
+                                        <p className="font-semibold">
+                                            {splitCamelCase(key)}
+                                        </p>
                                         <p>
                                             {key === "date"
                                                 ? getFormattedDate(item)

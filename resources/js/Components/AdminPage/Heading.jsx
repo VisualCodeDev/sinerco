@@ -25,7 +25,7 @@ const Heading = ({ children }) => {
     };
     let menuItems = [];
     const { user, loading } = useAuth();
-    if (isLoading) return <LoadingSpinner/>;
+    if (isLoading || loading) return <LoadingSpinner/>;
     const menu = {
         home: {
             icon: <FaHome />,

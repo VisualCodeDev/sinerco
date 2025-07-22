@@ -5,9 +5,10 @@ import { RequestModal } from "@/Components/RequestComponents/RequestModal";
 import { NotificationContainer } from "@/Components/Toast/Notification";
 import { usePage } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
+import LoadingSpinner from "@/Components/Loading";
 
 const PageLayout = ({ children }) => {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -38,6 +39,10 @@ const PageLayout = ({ children }) => {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
+    
+    if (loading) {
+        return <LoadingSpinner />;
+    }
 
     return (
         <Heading>

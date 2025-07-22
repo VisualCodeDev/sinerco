@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminNotification;
 use App\Models\DataUnit;
 use App\Models\StatusRequest;
-use App\Models\UserAllocation;
+use App\Models\UserSetting;
 use App\Services\WhatsAppService;
 use DB;
 use Illuminate\Http\Request;
@@ -43,7 +43,7 @@ class StatusRequestController extends Controller
         $status->locationId = $val['locationId'];
         $status->save();
         try {
-            $technicians = UserAllocation::with(['user', 'unitArea'])
+            $technicians = UserSetting::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {
                     $query->where('unitId', $val['unitId']);
                 })

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
 use App\Models\UnitAreaLocation;
-use App\Models\UserAllocation;
+use App\Models\UserSetting;
 use App\Services\WhatsAppService;
 use Auth;
 use Illuminate\Http\Request;
@@ -82,7 +82,7 @@ class DailyReportController extends Controller
                     foreach ($warnings as $field => $message) {
                         $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
                     }
-                    $technicians = UserAllocation::with('user')
+                    $technicians = UserSetting::with('user')
                         ->where('unitAreaLocationId', $unitAreaLocationId)
                         ->get()
                         ->filter(fn($allocation) => $allocation->user?->role === 'technician');

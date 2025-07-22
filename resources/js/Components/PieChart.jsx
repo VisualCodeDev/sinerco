@@ -27,11 +27,11 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
     let cumulative = 0;
 
     return (
-        <div className="flex flex-row justify-center gap-10 items-center w-full text-center">
+        <div className="flex flex-row justify-center gap-5 items-center w-full text-center">
             {/* Title and Value */}
-            <div className="flex flex-col gap-2 md:gap-4 mb-1 text-start">
+            <div className="flex flex-col gap-2 md:gap-3 mb-1 text-start">
                 <p className="text-base md:text-xl text-gray-500">Total Unit {chartData[0]?.label}</p>
-                <p className="text-2xl md:text-5xl font-bold">
+                <p className="text-2xl md:text-4xl font-bold">
                     {chartData[0]?.value.toLocaleString()}{" "} <span className="text-base md:text-xl">Units</span>
                 </p>
             </div>
@@ -77,7 +77,7 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
                 </svg>
 
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-lg font-black">
+                    <span className="text-base font-black">
                         {percentage.toFixed()}%
                     </span>
                 </div>
