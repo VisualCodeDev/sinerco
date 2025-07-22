@@ -16,11 +16,9 @@ import { FaPen, FaFileExport } from "react-icons/fa";
 import Modal from "../Modal";
 import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
-import LoadingSpinner from "../Loading";
 
 const DailyReport = (props) => {
-    const { formData, unitData } = props;
-    const { user, loading } = useAuth();
+    const { formData, unitData, user } = props;
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
@@ -68,10 +66,6 @@ const DailyReport = (props) => {
         setEditModal(true);
         setSelectedData(data);
     };
-
-    if (loading) {
-        return <LoadingSpinner />;
-    }
     
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">

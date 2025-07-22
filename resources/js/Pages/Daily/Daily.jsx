@@ -11,18 +11,15 @@ import { FaRegFileAlt, FaRegCalendarAlt } from "react-icons/fa";
 
 export default function Dashboard({ data, unitData }) {
     const { user, loading } = useAuth();
-    if (!user || loading) {
-        return (
-            <PageLayout>
-                <LoadingSpinner/>
-            </PageLayout>
-        );
-    }
+
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
             : "report"
     );
+    if (loading) {
+        return <LoadingSpinner />;
+    }
     return (
         <PageLayout>
             <div className="flex">
@@ -75,7 +72,9 @@ export default function Dashboard({ data, unitData }) {
                                     <p className="lg:md:text-2xl text-xl font-bold">
                                         {unitData.unit?.unit}
                                     </p>
-                                    <p className="lg:md:text-sm text-xs">{unitData.area}</p>
+                                    <p className="lg:md:text-sm text-xs">
+                                        {unitData.area}
+                                    </p>
                                     <p className="lg:md:text-sm text-xs">
                                         {unitData.location}
                                     </p>
@@ -84,13 +83,18 @@ export default function Dashboard({ data, unitData }) {
                         )}
                         {activeTab === "form" && (
                             <DailyReportForm
+                                user={user}
                                 unitData={unitData}
                                 formData={data}
                             />
                         )}
 
                         {activeTab === "report" && (
-                            <DailyReport formData={data} unitData={unitData} />
+                            <DailyReport
+                                formData={data}
+                                unitData={unitData}
+                                user={user}
+                            />
                         )}
                     </div>
                 </div>

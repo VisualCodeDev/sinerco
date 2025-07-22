@@ -17,8 +17,7 @@ import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
 
 const DailyReportForm = (props) => {
-    const { user, loading } = useAuth();
-    const { unitData, formData } = props;
+    const { unitData, formData, user } = props;
     const [data, setData] = useState({});
     const [isSettingModal, setSettingModal] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -77,12 +76,12 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
-
+    
     const formList = list({
         handleChange: handleChange,
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
-        role: user.role,
+        role: user?.role,
     });
 
     useEffect(() => {
@@ -100,9 +99,6 @@ const DailyReportForm = (props) => {
         });
     }, []);
 
-    if (loading) {
-        return <LoadingSpinner />;
-    }
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
