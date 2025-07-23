@@ -25,7 +25,7 @@ const Heading = ({ children }) => {
     };
     let menuItems = [];
     const { user, loading } = useAuth();
-    if (isLoading || loading) return <LoadingSpinner/>;
+    if (isLoading || loading) return <LoadingSpinner />;
     const menu = {
         home: {
             icon: <FaHome />,
@@ -92,10 +92,9 @@ const Heading = ({ children }) => {
             onClick: async () => {
                 try {
                     await axios.post(route("logout"));
+                    window.location.reload();
                 } catch (error) {
                     console.error("Logout failed:", error);
-                } finally {
-                    window.location.reload();
                 }
             },
         },

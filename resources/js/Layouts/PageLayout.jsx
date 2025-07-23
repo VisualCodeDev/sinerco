@@ -39,7 +39,7 @@ const PageLayout = ({ children }) => {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
-    
+
     if (loading) {
         return <LoadingSpinner />;
     }
@@ -54,24 +54,44 @@ const PageLayout = ({ children }) => {
                             {/* Mobile button */}
                             <button
                                 onClick={handleClick}
-                                className={`flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out 
-        ${expanded ? "w-auto" : "w-[50px] h-[50px] justify-center"} md:hidden`} // Only visible on mobile
+                                className={`flex items-center bg-secondary text-white text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out 
+                                ${
+                                    expanded
+                                        ? "w-auto"
+                                        : "w-[50px] h-[50px] justify-center px-4 py-2 gap-2"
+                                } md:hidden`} // Only visible on mobile
                             >
-                                <FaPenAlt className="text-xl" />
+                                <FaPenAlt
+                                    className={`text-xl ${
+                                        expanded && "hidden"
+                                    }`}
+                                />
                                 {expanded && (
-                                    <span className="whitespace-nowrap">
-                                        Report SD/STDBY
-                                    </span>
+                                    // <span className="whitespace-nowrap">
+                                    //     SD/STDBY
+                                    // </span>
+                                    <>
+                                        <span className="bg-red-500 px-4 py-2 rounded-l-full whitespace-nowrap">
+                                            SD
+                                        </span>
+                                        <span className="bg-yellow-500 px-4 py-2 rounded-r-full whitespace-nowrap">
+                                            STDBY
+                                        </span>
+                                    </>
                                 )}
                             </button>
 
                             {/* Desktop button */}
                             <button
                                 onClick={() => setShowModal(true)}
-                                className="hidden md:flex items-center gap-2 bg-secondary text-white px-4 py-2 text-lg rounded-md shadow hover:bg-secondary hover:scale-105 transition ease-in-out delay-75"
+                                className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
                             >
-                                <FaPenAlt className="text-xl" />
-                                <span>Report SD/STDBY</span>
+                                <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
+                                    SD
+                                </span>
+                                <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
+                                    STDBY
+                                </span>
                             </button>
                             <RequestModal
                                 handleCloseModal={() => setShowModal(false)}

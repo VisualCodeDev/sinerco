@@ -70,7 +70,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             Cell: ({ unit }) => {
                 return (
                     <div className="flex flex-col text-center">
-                        <p className={`px-2 py-1 rounded-lg text-white ${unit?.status === 'stdby' ? 'bg-orange-400': unit?.status === 'sd' ? 'bg-red-500' : 'bg-green-500'}`}>
+                        <p className={`px-2 py-2 rounded-lg text-white ${unit?.status === 'stdby' ? 'bg-yellow-500': unit?.status === 'sd' ? 'bg-red-500' : 'bg-green-500'}`}>
                             {toCapitalizeFirstLetter(
                                 getRequestTypeName(unit?.status)
                             )}

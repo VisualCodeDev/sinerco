@@ -48,7 +48,7 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                             className={`flex gap-2 items-center text-white justify-center px-3 py-2 rounded-lg
                                     ${
                                         requestType === "stdby"
-                                            ? "bg-orange-500"
+                                            ? "bg-yellow-500"
                                             : "bg-red-500"
                                     }
                                 `}

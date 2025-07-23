@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
-import ExcelJS from 'exceljs';
-import { saveAs } from 'file-saver';
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 export const getRequestTypeName = (value) => {
     if (!value) return "";
@@ -60,13 +60,19 @@ export const TimeInput = ({
                 ?.filter((data) => item?.date === data?.date)
                 .map((data) => parseInt(data?.time.split(":")[0]))) ||
         [];
-    let initTime = role === "operator" ? time - 1 : (role === "super_admin" || role === 'technician') && 1;
-    let maxTime = role === "operator" ? time : (role === "super_admin" || role === 'technician') && 23;
+    let initTime =
+        role === "operator"
+            ? time - 1
+            : (role === "super_admin" || role === "technician") && 1;
+    let maxTime =
+        role === "operator"
+            ? time
+            : (role === "super_admin" || role === "technician") && 23;
     for (let i = initTime; i <= maxTime; i++) {
         if (!filledFormTime?.includes(i)) {
             options.push(
-                <option key={i} value={`${i}:00`}>
-                    {i}:00
+                <option key={i} value={`${i.toString().padStart(2, "0")}:00`}>
+                    {i.toString().padStart(2, "0")}:00
                 </option>
             );
         }
@@ -122,7 +128,7 @@ export const generateExcel = (fileName, formData, checkedItems) => {
     const workbook = new ExcelJS.Workbook();
     const filteredData = formData.filter((item) => {
         const date = new Date(item.date);
-        const formattedDate = getDDMMYYDate(date, 'YYYY-MM-DD');
+        const formattedDate = getDDMMYYDate(date, "YYYY-MM-DD");
         return checkedItems.includes(formattedDate);
     });
     console.log(filteredData);
