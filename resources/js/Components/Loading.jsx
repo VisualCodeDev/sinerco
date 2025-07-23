@@ -5,7 +5,7 @@ const LoadingSpinner = ({ text = "Loading..." }) => {
         <div className="fixed inset-0 z-[200] bg-white bg-opacity-70 flex items-center justify-center">
             <div className="flex items-center gap-3">
                 <svg
-                    className="w-6 h-6 animate-spin text-indigo-600"
+                    className="w-6 h-6 animate-spin-slow text-indigo-600"
                     fill="none"
                     viewBox="0 0 24 24"
                 >

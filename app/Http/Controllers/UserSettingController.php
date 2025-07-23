@@ -61,7 +61,7 @@ class UserSettingController extends Controller
     public function allocationSettings($userId)
     {
         $userData = User::where('id', $userId)->first();
-        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit')->get()->toArray();
+        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit', 'unitArea.location.area')->get()->toArray();
 
         $unitAreaData = [];
         $unitAreaData = UnitAreaLocation::with(['unit', 'client', 'location.area'])->get();

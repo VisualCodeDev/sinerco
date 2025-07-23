@@ -121,7 +121,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location.area.area}</div>;
+                return <div className="flex flex-col">{location?.area?.area}</div>;
             },
         },
         {
