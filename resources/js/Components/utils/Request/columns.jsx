@@ -72,7 +72,7 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (
-                            seenStatus === 0 ? (
+                            !seenStatus ? (
                                 <button
                                     className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
@@ -83,20 +83,22 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                                     Confirm
                                 </button>
                             ) : (
-                                <button
-                                    className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleSeen(requestId);
-                                    }}
-                                >
-                                    Undo
-                                </button>
+                                seenStatus && (
+                                    <button
+                                        className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSeen(requestId);
+                                        }}
+                                    >
+                                        Undo
+                                    </button>
+                                )
                             )
                         ) : (
                             <div>
                                 {seenStatus ? (
-                                    <p className="text-center px-2 py-1 rounded-lg text-sm font-medium whitespace-nowrap">
+                                    <p className="flex justify-center items-center text-center px-2 py-1 rounded-lg text-sm font-medium whitespace-nowrap">
                                         <p>{pic?.name}</p>
                                     </p>
                                 ) : (
