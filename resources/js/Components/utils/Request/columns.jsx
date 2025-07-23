@@ -72,7 +72,7 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (
-                            !seenStatus ? (
+                            seenStatus === 0 ? (
                                 <button
                                     className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
