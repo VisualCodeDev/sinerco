@@ -31,10 +31,10 @@ return new class extends Migration {
             $table->float('staticPress');
             $table->float('diffPress');
             $table->float('mscfd');
-            $table->boolean('approval1')->default(false);
-            $table->boolean('approval2')->default(false);
+            $table->string('requestId')->nullable();
             $table->unique(['date', 'time', 'unitAreaLocationId']);
 
+            $table->foreign('requestId')->references('requestId')->on('status_requests')->onDelete('cascade');
             $table->foreign('unitAreaLocationId')->references('unitAreaLocationId')->on('unit_area_locations')->onDelete('cascade');
         });
     }

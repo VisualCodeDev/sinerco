@@ -131,40 +131,39 @@ export const formItems = [
         header: "Flowrate",
         subheader: [{ name: "mscfd", sub: "MSCFD" }],
     },
+    {
+        name: "remarks",
+        header: "Remarks",
+    },
 ];
 
 export const unitStatus = [
     {
-        name: "Online",
-        value: "online",
+        name: "RUNNING",
+        value: "running",
     },
     {
-        name: "Shut Down",
+        name: "SHUTDOWN",
         value: "sd",
     },
     {
-        name: "Stand By",
+        name: "STANDBY",
         value: "stdby",
     },
 ];
 
 export const requestType = [
     {
-        name: "Stand By",
+        name: "STANDBY",
         value: "stdby",
     },
     {
-        name: "Shut Down",
+        name: "SHUTDOWN",
         value: "sd",
     },
 ];
 
 export const requestStatus = [
-    {
-        name: "Pending",
-        value: "Pending",
-        color: "#d9534f",
-    },
     {
         name: "On Going",
         value: "Ongoing",

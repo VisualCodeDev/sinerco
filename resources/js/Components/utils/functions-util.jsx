@@ -7,7 +7,7 @@ export const getRequestTypeName = (value) => {
     if (!value) return "";
 
     const found = requestType.find((item) => item.value === value);
-    return found ? found.name : value;
+    return found ? found.name : "RUNNING";
 };
 
 export const getRequestStatus = (value) => {
@@ -19,7 +19,7 @@ export const getRequestStatus = (value) => {
 
 export const DateTimeInput = ({ value, name, handleChange }) => {
     return (
-        <div className="flex items-center">
+        <div className="flex items-center flex-wrap w-full">
             <input
                 className="text-sm md:text-base"
                 type="date"
@@ -60,8 +60,8 @@ export const TimeInput = ({
                 ?.filter((data) => item?.date === data?.date)
                 .map((data) => parseInt(data?.time.split(":")[0]))) ||
         [];
-    let initTime = role === "operator" ? time - 1 : role === "super_admin" && 1;
-    let maxTime = role === "operator" ? time : role === "super_admin" && 23;
+    let initTime = role === "operator" ? time - 1 : (role === "super_admin" || role === 'technician') && 1;
+    let maxTime = role === "operator" ? time : (role === "super_admin" || role === 'technician') && 23;
     for (let i = initTime; i <= maxTime; i++) {
         if (!filledFormTime?.includes(i)) {
             options.push(

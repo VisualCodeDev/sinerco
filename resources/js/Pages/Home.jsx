@@ -1,24 +1,10 @@
-import Card from "@/Components/Card";
-import DailyReport from "@/Components/Dashboard/DailyReport";
-import UnitTable from "@/Components/Dashboard/UnitTable";
-import Modal from "@/Components/Modal";
-import MultiRingChart from "@/Components/MultiPieChart";
 import PieChart from "@/Components/PieChart";
 import PageLayout from "@/Layouts/PageLayout";
-import {
-    FaCalendarWeek,
-    FaUserCircle,
-    FaPhoneAlt,
-    FaEnvelopeOpenText,
-} from "react-icons/fa";
-import { router, useForm, usePage } from "@inertiajs/react";
+import { FaUserCircle, FaClock, FaPowerOff } from "react-icons/fa";
+import { router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Carousel from "@/Components/Carousel";
-import {
-    getFormattedDate,
-    getRequestStatus,
-    getRequestTypeName,
-} from "@/Components/utils/dashboard-util";
+import { getRequestTypeName } from "@/Components/utils/dashboard-util";
 import { useAuth } from "@/Components/Auth/auth";
 import LoadingSpinner from "@/Components/Loading";
 
@@ -27,7 +13,6 @@ export default function Home() {
     const [data, setData] = useState(null);
     const [unitData, setUnitData] = useState([]);
     const [total, setTotal] = useState(0);
-    const [multiData, setMultiData] = useState([]);
     const [dateTime, setDateTime] = useState(new Date());
 
     useEffect(() => {
@@ -37,21 +22,6 @@ export default function Home() {
 
         return () => clearInterval(interval);
     }, []);
-
-    const formattedTime = dateTime.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
-
-    const today = new Date();
-
-    const formattedDate = today.toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
 
     const fetchData = async () => {
         const response = await axios.get(route("getUnitStatus"));
@@ -63,13 +33,13 @@ export default function Home() {
             setUnitData(filteredData || []);
         }
         if (response.data) {
-            let online = 0;
+            let running = 0;
             let down = 0;
             let standby = 0;
             response.data.reduce((acc, curr) => {
                 const status = curr.status;
-                if (status === "online") {
-                    online += 1;
+                if (status === "running") {
+                    running += 1;
                 }
                 if (status === "sd") {
                     down += 1;
@@ -79,9 +49,9 @@ export default function Home() {
                 }
             }, {});
             setData({
-                online: {
-                    label: "Online",
-                    value: online,
+                running: {
+                    label: "Running",
+                    value: running,
                     color: "#4ec48f",
                 },
                 down: {
@@ -90,17 +60,11 @@ export default function Home() {
                     color: "#c44e4e",
                 },
                 standBy: {
-                    label: "Stand By",
+                    label: "Standby",
                     value: standby,
                     color: "#f1cf95",
                 },
             });
-
-            setMultiData([
-                { label: "Online", value: online, color: "#4ec48f" },
-                { label: "Down", value: down, color: "#c44e4e" },
-                { label: "Stand By", value: standby, color: "#f1cf95" },
-            ]);
 
             setTotal(response.data?.length);
         }
@@ -166,7 +130,7 @@ export default function Home() {
                             <PieChart
                                 stroke={20}
                                 size={120}
-                                data={data?.online ? data.online : []}
+                                data={data?.running ? data.running : []}
                                 totalData={total}
                             />
                         </div>
@@ -207,7 +171,7 @@ export default function Home() {
 
                 {/* UNIT TABLE */}
                 <div>
-                    <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[300px] overflow-auto">
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[400px] overflow-auto">
                         <table class="w-full text-sm text-left rtl:text-right">
                             <thead class="text-xs text-white uppercase bg-primary">
                                 <tr>
@@ -233,60 +197,68 @@ export default function Home() {
                             </thead>
                             <tbody>
                                 {unitData && unitData.length > 0 ? (
-                                    unitData
-                                        .filter(
-                                            (item) => item?.status != "Pending"
-                                        )
-                                        .map((item, index) => (
-                                            <tr
-                                                class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer md:text-sm text-xs"
-                                                // key={item?.id || index}
-                                                onClick={() =>
-                                                    router.visit(
-                                                        route("request")
-                                                    )
-                                                }
+                                    unitData.map((item, index) => (
+                                        <tr
+                                            class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer md:text-sm text-xs"
+                                            // key={item?.id || index}
+                                            onClick={() =>
+                                                router.visit(route("request"))
+                                            }
+                                        >
+                                            <th
+                                                scope="row"
+                                                class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                                             >
-                                                <th
-                                                    scope="row"
-                                                    class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
-                                                >
-                                                    <div class="md:text-base font-semibold">
-                                                        {item?.unit?.unit}
-                                                    </div>
-                                                </th>
-                                                <td class="px-6 py-4">
-                                                    {item?.location?.location}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="flex items-center whitespace-nowrap">
-                                                        <div
+                                                <div class="md:text-base font-semibold">
+                                                    {item?.unit?.unit}
+                                                </div>
+                                            </th>
+                                            <td class="px-6 py-4">
+                                                {item?.location?.location}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center whitespace-nowrap gap-2">
+                                                    {/* <div
                                                             class={`md:h-2.5 md:w-2.5 w-2 h-2 rounded-full ${
                                                                 item?.requestType ===
                                                                 "stdby"
-                                                                    ? "bg-orange-500"
+                                                                    ? "bg-yellow-500"
                                                                     : "bg-red-500"
                                                             } me-2`}
-                                                        ></div>{" "}
+                                                        ></div>{" "} */}
+                                                    {item?.requestType ===
+                                                    "stdby" ? (
+                                                        <FaClock
+                                                            color="orange"
+                                                            className="md:h-4 md:w-4 w-3 h-3"
+                                                        />
+                                                    ) : (
+                                                        <FaPowerOff
+                                                            color="red"
+                                                            className="md:h-4 md:w-4 w-3 h-3"
+                                                        />
+                                                    )}
+                                                    <p>
                                                         {getRequestTypeName(
                                                             item?.requestType
                                                         )}
-                                                    </div>
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {item?.remarks || '-'}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {getDuration(
-                                                        item?.startDate,
-                                                        item?.startTime
-                                                    )}
-                                                </td>
-                                                <td class="px-6 py-4">
-                                                    {item?.user?.name}
-                                                </td>
-                                            </tr>
-                                        ))
+                                                    </p>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {item?.remarks || "-"}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {getDuration(
+                                                    item?.startDate,
+                                                    item?.startTime
+                                                )}
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                {item?.pic?.name}
+                                            </td>
+                                        </tr>
+                                    ))
                                 ) : (
                                     <tr>
                                         <td
@@ -324,7 +296,7 @@ export default function Home() {
                     <PieChart
                         stroke={20}
                         size={130}
-                        data={data?.online ? data.online : []}
+                        data={data?.running ? data.running : []}
                         totalData={total}
                     />
                     <PieChart

@@ -37,10 +37,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
-            addToast({
-                type: 'error',
-                text: error?.response?.data?.message,
-            });
+            addToast(error?.response?.data);
             console.log(error);
         } finally {
             handleCloseModal();
@@ -73,10 +70,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     }, [showModal]);
 
     useEffect(() => {
-        const location = unitData.find(item => item?.unitId === data?.unitId);
+        const location = unitData.find((item) => item?.unitId === data?.unitId);
         handleChange(["locationId"], location?.id);
     }, [data?.unitId]);
-    
+
     return (
         <Modal
             title="Report SD/STDBY"

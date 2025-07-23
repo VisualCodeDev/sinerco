@@ -42,18 +42,26 @@ class StatusRequest extends Model
 
     }
 
+    public function pic()
+    {
+        return $this->belongsTo(User::class, 'seenBy', 'id')
+            ->select('id', 'name');
+    }
+
     public function location()
     {
         return $this->belongsTo(Location::class, 'locationId', 'id');
     }
 
-    protected $fillable  = [
+    protected $fillable = [
         'date',
         'requestType',
         'timeStart',
         'status',
         'requestId',
         'timeEnd',
-        'seenStatus'
+        'seenStatus',
+        'seenTime',
+        'seenBy'
     ];
 }

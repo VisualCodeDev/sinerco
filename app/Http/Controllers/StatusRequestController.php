@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdminNotification;
+use App\Models\DailyReport;
 use App\Models\DataUnit;
 use App\Models\StatusRequest;
+use App\Models\UnitAreaLocation;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
+use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -31,6 +34,20 @@ class StatusRequestController extends Controller
             'remarks' => 'required|string',
             'locationId' => 'required',
         ]);
+
+        $start = Carbon::parse($val['startTime']);
+        if ($start->minute > 0) {
+            $start->addHour()->minute(0)->second(0);
+        } else {
+            $start->minute(0)->second(0);
+        }
+
+        $formatted = $start->format('H:i');
+
+        $unit = DailyReport::whereRelation('unitAreaLocation', 'unitId', $val['unitId'])->where('date', $val['startDate'])->where('time', $formatted)->first();
+        if (!$unit) {
+            return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+        }
         $user = auth()->user();
         $status = new StatusRequest();
         $status->unitId = $val['unitId'];
@@ -38,10 +55,11 @@ class StatusRequestController extends Controller
         $status->startTime = $val['startTime'];
         $status->requestType = $val['requestType'];
         $status->remarks = $val['remarks'];
-        $status->status = 'Pending';
+        $status->status = 'Ongoing';
         $status->requestedBy = $user->id;
         $status->locationId = $val['locationId'];
         $status->save();
+        $unit->update(['requestId' => $status->requestId]);
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {
@@ -72,7 +90,7 @@ class StatusRequestController extends Controller
 
         $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user')->get();
+        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'pic')->get();
         $requestList = collect($requestList)
             ->values()
             ->toArray();
@@ -87,7 +105,7 @@ class StatusRequestController extends Controller
 
         $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'location.area')->get();
+        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'location.area', 'pic')->get();
         $requestList = collect($requestList)
             ->values()
             ->toArray();
@@ -96,13 +114,35 @@ class StatusRequestController extends Controller
 
     public function updateRequest(Request $request)
     {
-        $request->validate([
+        $val = $request->validate([
+            'unitId' => 'required|string',
+            'startDate' => 'nullable|string',
+            'startTime' => 'nullable|string',
             'requestId' => 'required|string',
             'status' => 'required|string',
             'endTime' => 'nullable|string',
             'endDate' => 'nullable|string',
+            'remarks' => 'nullable|string',
         ]);
         $status = StatusRequest::with('unit')->where('requestId', $request->requestId)->first();
+
+        if ($val['startTime'] || $val['startDate']) {
+            $startTime = $val['startTime'] ?? $status->startTime;
+            $startDate = $val['startDate'] ?? $status->startDate;
+
+            $start = Carbon::parse($startTime);
+            if ($start->minute > 0) {
+                $start->addHour()->minute(0)->second(0);
+            } else {
+                $start->minute(0)->second(0);
+            }
+            $formatted = $start->format('H:i');
+            $unit = DailyReport::whereRelation('unitAreaLocation', 'unitId', $val['unitId'])->where('date', $startDate)->where('time', $formatted)->first();
+            if (!$unit) {
+                return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+            }
+        }
+
 
         if (!$status) {
             return back()->with('status', 'Request not found.');
@@ -112,12 +152,13 @@ class StatusRequestController extends Controller
         $status->status = $request->status;
         $status->endTime = $request->endTime ?? null;
         $status->endDate = $request->endDate ?? null;
+        $status->remarks = $request->remarks ?? $status->remarks;
 
         // Handle unit status updates if the relationship is loaded
         if ($status->unit) {
             $newUnitStatus = match ($status->status) {
                 'Ongoing' => $status->requestType,
-                'End' => 'online',
+                'End' => 'running',
                 default => null,
             };
 
@@ -144,7 +185,7 @@ class StatusRequestController extends Controller
 
     }
 
-    public function seenRequest($id)
+    public function seenRequest(Request $request, $id)
     {
         if (!$id) {
             return response()->json([
@@ -152,7 +193,20 @@ class StatusRequestController extends Controller
                 'text' => 'No ID provided.',
             ], 400);
         }
-
+        $user = $request->user();
+        $user->load('roleData');
+        if (!$user && !$user->id) {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'User Not Found',
+            ], 400);
+        }
+        if ($user->roleData?->name != 'technician') {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'Unauthorized',
+            ], 400);
+        }
         $selectedReq = StatusRequest::where('requestId', $id)->first();
 
         if (!$selectedReq) {
@@ -161,9 +215,11 @@ class StatusRequestController extends Controller
                 'text' => "Request with ID {$id} not found.",
             ], 404);
         }
-
-        $selectedReq->update(['seenStatus' => !$selectedReq->seenStatus, 'seenTime' => now()]);
-
+        if ($selectedReq->seenStatus) {
+            $selectedReq->update(['seenStatus' => !$selectedReq->seenStatus, 'seenTime' => null, 'seenBy' => null]);
+        } else {
+            $selectedReq->update(['seenStatus' => !$selectedReq->seenStatus, 'seenTime' => now(), 'seenBy' => $user->id]);
+        }
         return response()->json([
             'type' => 'success',
             'text' => 'Request seen status updated.',

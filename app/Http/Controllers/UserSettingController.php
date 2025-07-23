@@ -52,7 +52,6 @@ class UserSettingController extends Controller
 
     public function index()
     {
-        $users = User::all();
         $roles = Role::all();
         // $technicianData = User::where('role', 'technician')->get();
         // $operatorData = User::where('role', 'operator')->get();

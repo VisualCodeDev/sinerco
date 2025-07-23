@@ -156,7 +156,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                                 <p
                                                     className={`text-base md:text-lg font-bold ${
                                                         request.unit.status ===
-                                                        "online"
+                                                        "running"
                                                             ? "text-green-600"
                                                             : request.unit
                                                                   .status ===

@@ -5,7 +5,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
         {
             name: "id",
             header: "NO.",
-            headerClassName: "text-center bg-primary text-white",
+            headerClassName: "text-center bg-primary text-white border-b",
             cellClassName: "text-center",
             sortable: false,
             width: "3%",
@@ -34,7 +34,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "15%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location?.area?.area}</div>;
+                return (
+                    <div className="flex flex-col">{location?.area?.area}</div>
+                );
             },
         },
         {
@@ -52,37 +54,28 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Location",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "20%",
+            width: "23%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location?.location}</div>;
+                return (
+                    <div className="flex flex-col">{location?.location}</div>
+                );
             },
         },
         {
             name: "status",
             header: "Status",
-            headerClassName: "bg-primary text-white",
+            headerClassName: "bg-primary text-white text-center flex items-center justify-center",
             sortable: true,
             width: "10%",
             Cell: ({ unit }) => {
-                return <div className="flex flex-col">{toCapitalizeFirstLetter(getRequestTypeName(unit?.status))}</div>;
-            },
-        },
-        {
-            name: "dailyForm",
-            headerClassName: "bg-primary text-white text-center justify-center",
-            sortable: false,
-            cellClassName: "text-center",
-            width: "20%",
-            Cell: ({ unitAreaLocationId }) => {
                 return (
-                    <a
-                        href={route("daily", {
-                            unitAreaLocationId,
-                        })}
-                        className="bg-white border-2 border-primary/50 hover:border-none text-primary lg:md:px-3 lg:md:py-2 px-2 py-1 lg:md:block hidden rounded-full lg:md:text-sm text-xs w-full hover:bg-primary/10"
-                    >
-                        Daily Form
-                    </a>
+                    <div className="flex flex-col text-center">
+                        <p className={`px-2 py-1 rounded-lg text-white ${unit?.status === 'stdby' ? 'bg-orange-400': unit?.status === 'sd' ? 'bg-red-500' : 'bg-green-500'}`}>
+                            {toCapitalizeFirstLetter(
+                                getRequestTypeName(unit?.status)
+                            )}
+                        </p>
+                    </div>
                 );
             },
         },
@@ -121,7 +114,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location?.area?.area}</div>;
+                return (
+                    <div className="flex flex-col">{location?.area?.area}</div>
+                );
             },
         },
         {
@@ -141,7 +136,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return <div className="flex flex-col">{location?.location}</div>;
+                return (
+                    <div className="flex flex-col">{location?.location}</div>
+                );
             },
         },
         {

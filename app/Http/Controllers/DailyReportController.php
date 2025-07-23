@@ -132,7 +132,7 @@ class DailyReportController extends Controller
 
     public function index($unitAreaLocationId)
     {
-        $data = DailyReport::where('unitAreaLocationId', $unitAreaLocationId)->get()->map(function ($item) {
+        $data = DailyReport::with('request')->where('unitAreaLocationId', $unitAreaLocationId)->get()->map(function ($item) {
             return collect($item)->except([
                 "created_at",
                 "updated_at",

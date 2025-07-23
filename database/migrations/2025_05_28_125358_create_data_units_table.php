@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('data_units', function (Blueprint $table) {
             $table->string('unitId', 50)->unique()->primary();
             $table->string('unit');
-            $table->enum('status', ['stdby', 'sd', 'online'])->default('online');
+            $table->enum('status', ['stdby', 'sd', 'running'])->default('running');
 
             $table->timestamps();
         });

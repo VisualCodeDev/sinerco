@@ -76,7 +76,7 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
-    
+
     const formList = list({
         handleChange: handleChange,
         formData: formData,
@@ -98,7 +98,6 @@ const DailyReportForm = (props) => {
             return newData;
         });
     }, []);
-
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">

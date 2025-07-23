@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyReport extends Model
 {
+    public function unitAreaLocation()
+    {
+        return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId');
+    }
+    public function request()
+    {
+        return $this->belongsTo(StatusRequest::class, 'requestId', 'requestId');
+    }
     protected $fillable = [
         'date',
         'time',
@@ -24,7 +32,6 @@ class DailyReport extends Model
         'staticPress',
         'diffPress',
         'mscfd',
-        'approval1',
-        'approval2'
+        'requestId'
     ];
 }

@@ -8,7 +8,7 @@ import {
     FaSortDown,
     FaSortUp,
 } from "react-icons/fa";
-import { unitStatus } from "./utils/dashboard-util";
+import { getRequestStatus, unitStatus } from "./utils/dashboard-util";
 import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
@@ -36,9 +36,11 @@ const TableComponent = (props) => {
     const sortedData = data?.sort((a, b) => {
         if (!sortConfig.key) return 0;
         const getNestedValue = (obj, key) => {
+            console.log(obj, key)
             if (key === "user") return obj.user?.user?.toLowerCase() || "";
             if (key === "unit") return obj.unit?.unit?.toLowerCase() || "";
             if (key === "userId") return obj.unit?.unit?.toLowerCase() || "";
+            if (key === "status") return getRequestStatus(obj.unit?.status).toLowerCase() || "";
             return (obj[key] || "").toString().toLowerCase();
         };
 
@@ -163,7 +165,7 @@ const TableComponent = (props) => {
                                     }
                                     onClick={() => handleSort(col.name)}
                                 >
-                                    <div className="flex items-center">
+                                    <div className="">
                                         {typeof col?.Header === "function"
                                             ? col?.Header(filteredData)
                                             : col?.header}
@@ -193,7 +195,7 @@ const TableComponent = (props) => {
                                 <tr
                                     key={rowIndex}
                                     className={
-                                        "border-b " + onRowClick &&
+                                        "border-" + onRowClick &&
                                         `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                     }
                                     onClick={() => onRowClick(item)}
@@ -201,7 +203,7 @@ const TableComponent = (props) => {
                                     {columns.map((col, colIndex) => (
                                         <td
                                             key={colIndex}
-                                            className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-xs md:text-sm font-semibold ${
+                                            className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-xs md:text-sm font-semibold border-b border-primary ${
                                                 col.cellClassName || ""
                                             }`}
                                             style={{

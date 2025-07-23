@@ -24,11 +24,13 @@ return new class extends Migration {
             $table->string('requestType');
             $table->string('action')->default('');
             $table->string('remarks')->default('');
-            $table->string('status');
+            $table->enum('status', ['Ongoing', 'End'])->default('Ongoing');
             $table->boolean('seenStatus')->default(false);
             $table->time('seenTime')->nullable();
+            $table->unsignedBigInteger('seenBy')->nullable();
 
             $table->unique(['unitId', 'startDate', 'startTime']);
+            $table->foreign('seenBy')->references('id')->on('users')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreign('locationId')->references('id')->on('locations')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreign('unitId')->references('unitId')->on('data_units')->onUpdate('CASCADE')->onDelete('CASCADE');
             $table->foreign('requestedBy')->references('id')->on('users')->onUpdate('CASCADE')->onDelete('CASCADE');

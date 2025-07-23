@@ -48,14 +48,14 @@ class User extends Authenticatable
     }
     public function roleData()
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
     public function unitAreaLocations()
     {
         return $this->belongsToMany(
             UnitAreaLocation::class,
-            'user_allocations',         // Pivot table
+            'user_settings',         // Pivot table
             'userId',                   // foreign key on pivot to User
             'unitAreaLocationId',       // foreign key on pivot to UnitAreaLocation
             'id',                       // local key on User (primary key)

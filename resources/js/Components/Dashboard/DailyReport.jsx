@@ -66,7 +66,7 @@ const DailyReport = (props) => {
         setEditModal(true);
         setSelectedData(data);
     };
-    
+
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -189,6 +189,9 @@ const DailyReport = (props) => {
                                     <td className="px-4 py-2 border">
                                         {value.mscfd}
                                     </td>
+                                    <td className="px-4 py-2 border">
+                                        {value?.request?.remarks || ""}
+                                    </td>
                                     {user?.role === "super_admin" && (
                                         <td
                                             className="flex justify-center items-center px-4 py-2 cursor-pointer"
@@ -200,7 +203,7 @@ const DailyReport = (props) => {
                                 </tr>
                             ))}
                         {averages && (
-                            <tr className="bg-slate-100 sticky bottom-0 left-0 z-10">
+                            <tr className="bg-slate-100 sticky bottom-0 left-0 z-10 w-full">
                                 <th className="px-4 py-2 border">Average</th>
                                 {Object.keys(averages).map((field, index) =>
                                     [
@@ -208,18 +211,19 @@ const DailyReport = (props) => {
                                         "created_at",
                                         "updated_at",
                                         "date",
-                                        "approval1",
-                                        "approval2",
+                                        "requestId",
+                                        "request",
                                         "id",
                                     ].includes(field) ? null : (
                                         <th
                                             key={index}
                                             className="px-4 py-2 border"
                                         >
-                                            {averages[field]}
+                                            {averages[field] || ""}
                                         </th>
                                     )
                                 )}
+                                <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
                                 {user?.role === "super_admin" && (
                                     <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
                                 )}

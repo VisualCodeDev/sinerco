@@ -15,8 +15,8 @@ class DataUnitController extends Controller
      */
     public static function getPermittedUnit()
     {
-        $user = Auth::user();
-        if ($user->role == 'technician' || $user->role == 'operator') {
+        $user = Auth::user()->load('roleData');
+        if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $data = $user->unitAreaLocations()->with([
                 'unit' => function ($q) {
                     $q->select(['unitId', 'unit', 'status']);

@@ -4,7 +4,6 @@ import {
     editRequestItems,
     getCurrDateTime,
     getFormattedDate,
-    getRequestStatus,
     getRequestTypeName,
 } from "@/Components/utils/dashboard-util";
 import Modal from "@/Components/Modal";
@@ -37,12 +36,24 @@ const Request = ({ data }) => {
         if (!id) return;
         try {
             const resp = await axios.post(route("request.seen", id));
-            addToast(resp.data);
+            if (resp) {
+                addToast(resp.data);
+                setAllData((prev) =>
+                    prev.map((item) =>
+                        item.requestId === id
+                            ? {
+                                  ...item,
+                                  seenStatus: !item.seenStatus,
+                              }
+                            : item
+                    )
+                );
+            }
         } catch (e) {
-            addToast({ type: "error", text: e.response.data.message });
+            console.error(e);
+            addToast(e.response.data || e.response.data.message);
         }
     };
-
     const columns = tColumns({ handleSelect, user, handleSeen });
     return (
         <PageLayout>
@@ -54,6 +65,7 @@ const Request = ({ data }) => {
                 onRowClick={handleSelect}
             />
             <EditItem
+                user={user}
                 selectedItem={selectedItem}
                 setModal={setModal}
                 isModal={isModal}
@@ -73,6 +85,7 @@ const EditItem = ({
     setSaving,
     allData,
     setAllData,
+    user,
 }) => {
     const {
         data: formData,
@@ -82,7 +95,6 @@ const EditItem = ({
         ...selectedItem,
     });
     const { addToast } = useToast();
-
     useEffect(() => {
         if (selectedItem) {
             setData({
@@ -158,77 +170,183 @@ const EditItem = ({
         >
             <Modal.Body>
                 <div className="grid grid-cols-2 gap-5 items-center">
-                    {editRequestItems.map((item, index) => {
-                        const itemInputType = item?.isInput
-                            ? item?.type
-                            : false;
+                    {user?.role === "operator"
+                        ? editRequestItems
+                              .filter(
+                                  (item) =>
+                                      item?.name === "Request" ||
+                                      item?.name === "Status" ||
+                                      item?.name === "End Date Time"
+                              )
+                              .map((item, index) => {
+                                  const itemInputType = item?.isInput
+                                      ? item?.type
+                                      : false;
 
-                        return (
-                            <>
-                                <div className="font-semibold">
-                                    {item?.name}
-                                </div>
-                                {!itemInputType ? (
-                                    <div>
-                                        {item?.name === "Start Date Time"
-                                            ? getFormattedDate(
-                                                  formData[item?.value]
-                                              )
-                                            : getRequestTypeName(
-                                                  formData[item?.value]
-                                              )}
-                                    </div>
-                                ) : itemInputType &&
-                                  item?.type != "option" &&
-                                  item?.type != "dateTime" ? (
-                                    <input
-                                        type={itemInputType}
-                                        value={formData[item?.value]}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                item?.value,
-                                                e.target.value
-                                            )
-                                        }
-                                    />
-                                ) : item?.type === "dateTime" ? (
-                                    <DateTimeInput
-                                        value={{
-                                            date: formData[item?.value?.date],
-                                            time: formData[item?.value?.time],
-                                        }}
-                                        name={{
-                                            date: item?.value?.date,
-                                            time: item?.value?.time,
-                                        }}
-                                        handleChange={handleChange}
-                                    />
-                                ) : (
-                                    <div key={index}>
-                                        <select
-                                            value={formData[item?.value]}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    item?.value,
-                                                    e.target.value
-                                                )
-                                            }
-                                        >
-                                            {item?.options &&
-                                                item?.options?.map((item) => (
-                                                    <option
-                                                        value={item?.value}
-                                                        key={index}
-                                                    >
-                                                        {item?.name}
-                                                    </option>
-                                                ))}
-                                        </select>
-                                    </div>
-                                )}
-                            </>
-                        );
-                    })}
+                                  return (
+                                      <>
+                                          <div className="font-semibold">
+                                              {item?.name}
+                                          </div>
+                                          {!itemInputType ? (
+                                              <div>
+                                                  {item?.name ===
+                                                  "Start Date Time"
+                                                      ? getFormattedDate(
+                                                            formData[
+                                                                item?.value
+                                                            ]
+                                                        )
+                                                      : getRequestTypeName(
+                                                            formData[
+                                                                item?.value
+                                                            ]
+                                                        )}
+                                              </div>
+                                          ) : itemInputType &&
+                                            item?.type != "option" &&
+                                            item?.type != "dateTime" ? (
+                                              <input
+                                                  type={itemInputType}
+                                                  value={formData[item?.value]}
+                                                  onChange={(e) =>
+                                                      handleChange(
+                                                          item?.value,
+                                                          e.target.value
+                                                      )
+                                                  }
+                                              />
+                                          ) : item?.type === "dateTime" ? (
+                                              <DateTimeInput
+                                                  value={{
+                                                      date: formData[
+                                                          item?.value?.date
+                                                      ],
+                                                      time: formData[
+                                                          item?.value?.time
+                                                      ],
+                                                  }}
+                                                  name={{
+                                                      date: item?.value?.date,
+                                                      time: item?.value?.time,
+                                                  }}
+                                                  handleChange={handleChange}
+                                              />
+                                          ) : (
+                                              <div key={index}>
+                                                  <select
+                                                      value={
+                                                          formData[item?.value]
+                                                      }
+                                                      onChange={(e) =>
+                                                          handleChange(
+                                                              item?.value,
+                                                              e.target.value
+                                                          )
+                                                      }
+                                                  >
+                                                      {item?.options &&
+                                                          item?.options?.map(
+                                                              (item) => (
+                                                                  <option
+                                                                      value={
+                                                                          item?.value
+                                                                      }
+                                                                      key={
+                                                                          index
+                                                                      }
+                                                                  >
+                                                                      {
+                                                                          item?.name
+                                                                      }
+                                                                  </option>
+                                                              )
+                                                          )}
+                                                  </select>
+                                              </div>
+                                          )}
+                                      </>
+                                  );
+                              })
+                        : editRequestItems.map((item, index) => {
+                              const itemInputType = item?.isInput
+                                  ? item?.type
+                                  : false;
+
+                              return (
+                                  <>
+                                      <div className="font-semibold">
+                                          {item?.name}
+                                      </div>
+                                      {!itemInputType ? (
+                                          <div>
+                                              {item?.name === "Start Date Time"
+                                                  ? getFormattedDate(
+                                                        formData[item?.value]
+                                                    )
+                                                  : getRequestTypeName(
+                                                        formData[item?.value]
+                                                    )}
+                                          </div>
+                                      ) : itemInputType &&
+                                        item?.type != "option" &&
+                                        item?.type != "dateTime" ? (
+                                          <input
+                                              type={itemInputType}
+                                              value={formData[item?.value]}
+                                              onChange={(e) =>
+                                                  handleChange(
+                                                      item?.value,
+                                                      e.target.value
+                                                  )
+                                              }
+                                          />
+                                      ) : item?.type === "dateTime" ? (
+                                          <DateTimeInput
+                                              value={{
+                                                  date: formData[
+                                                      item?.value?.date
+                                                  ],
+                                                  time: formData[
+                                                      item?.value?.time
+                                                  ],
+                                              }}
+                                              name={{
+                                                  date: item?.value?.date,
+                                                  time: item?.value?.time,
+                                              }}
+                                              handleChange={handleChange}
+                                          />
+                                      ) : (
+                                          <div key={index}>
+                                              <select
+                                                  value={formData[item?.value]}
+                                                  onChange={(e) =>
+                                                      handleChange(
+                                                          item?.value,
+                                                          e.target.value
+                                                      )
+                                                  }
+                                              >
+                                                  {item?.options &&
+                                                      item?.options?.map(
+                                                          (item) => (
+                                                              <option
+                                                                  value={
+                                                                      item?.value
+                                                                  }
+                                                                  key={index}
+                                                              >
+                                                                  {item?.name}
+                                                              </option>
+                                                          )
+                                                      )}
+                                              </select>
+                                          </div>
+                                      )}
+                                  </>
+                              );
+                          })}
                 </div>
             </Modal.Body>
             <Modal.Footer>
