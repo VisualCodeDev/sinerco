@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DataUnitSeeder::class,
             UnitAreaLocationSeeder::class,
             DailyReportSeeder::class,
+            WorkshopSeeder::class,
         ]);
 
         // User::factory()->create([

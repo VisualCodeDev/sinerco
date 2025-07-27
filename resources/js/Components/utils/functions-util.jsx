@@ -447,19 +447,23 @@ export const getDateLists = (currDate) => {
 };
 
 export const getAvg = (data) => {
-    if (!data || data.length === 0) return null;
+    if (
+        !data ||
+        !Array.isArray(data) ||
+        data.length === 0 ||
+        typeof data[0] !== "object"
+    )
+        return null;
 
     const fields = Object.keys(data[0]);
-
-    // List of fields to exclude from averaging
     const excludeFields = [
         "time",
         "created_at",
         "updated_at",
         "date",
-        "approval1",
-        "approval2",
         "id",
+        "requestId",
+        "request",
     ];
 
     const fieldsToAvg = fields.filter(
@@ -467,11 +471,11 @@ export const getAvg = (data) => {
     );
 
     const averages = fieldsToAvg.reduce((acc, field) => {
-        const sum = data.reduce(
-            (sumAcc, item) => sumAcc + (item[field] || 0),
-            0
-        );
-        acc[field] = (sum / data.length).toFixed(2) || 0;
+        const sum = data.reduce((sumAcc, item) => {
+            const value = parseFloat(item[field]);
+            return sumAcc + (isNaN(value) ? 0 : value);
+        }, 0);
+        acc[field] = (sum / data.length).toFixed(2) || "0.00";
         return acc;
     }, {});
 
