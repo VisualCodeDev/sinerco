@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ClientSeeder::class,
             DataUnitSeeder::class,
             UnitAreaLocationSeeder::class,
+            DailyReportSeeder::class,
         ]);
 
         // User::factory()->create([

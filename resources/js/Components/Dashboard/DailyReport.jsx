@@ -99,12 +99,12 @@ const DailyReport = (props) => {
             </div>
             <div className="overflow-x-auto w-full">
                 <table className="min-w-[900px] w-full table-auto border-collapse">
-                    <thead className="bg-primary text-white">
+                    <thead className="bg-primary text-white text-center">
                         <tr>
                             {formItems?.map((item, index) => (
                                 <th
                                     key={index}
-                                    className="px-4 py-2 text-sm font-semibold border border-black text-left"
+                                    className="px-4 py-2 text-sm font-semibold border border-black text-center"
                                     rowSpan={!item.subheader ? 2 : undefined}
                                     colSpan={item.subheader?.length}
                                 >
@@ -114,7 +114,7 @@ const DailyReport = (props) => {
                             {user?.role === "super_admin" && (
                                 <th
                                     rowSpan={2}
-                                    className="px-4 py-2 text-sm font-semibold border border-black text-left"
+                                    className="px-4 py-2 text-sm font-semibold border border-black text-left text-center"
                                 >
                                     Edit
                                 </th>
@@ -141,55 +141,55 @@ const DailyReport = (props) => {
                                     className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
                                     onClick={() => handleEdit(key)}
                                 >
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.time}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.sourcePress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.suctionPress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.dischargePress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.speed}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.manifoldPress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.oilPress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.oilDiff}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.runningHours}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.voltage}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.waterTemp}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.befCooler}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.aftCooler}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.staticPress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.diffPress}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value.mscfd}
                                     </td>
-                                    <td className="px-4 py-2 border">
+                                    <td className="px-4 py-2 border text-center">
                                         {value?.request?.remarks || ""}
                                     </td>
                                     {user?.role === "super_admin" && (
