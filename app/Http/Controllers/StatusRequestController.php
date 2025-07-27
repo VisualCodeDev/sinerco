@@ -67,7 +67,6 @@ class StatusRequestController extends Controller
         $unit->update(['requestId' => $status->requestId]);
 
         $unit->load(['request', 'unitAreaLocation.unit']);
-        Log::debug($unit);
         if ($unit->request && $unit->unitAreaLocation && $unit->unitAreaLocation->unit) {
             $unit->unitAreaLocation->unit->update([
                 'status' => $unit->request->requestType

@@ -88,7 +88,20 @@ const DailyReportForm = (props) => {
         setData((prevData) => {
             const dateTime = getCurrDateTime();
             const now = dateTime.now;
-            const time = now.format("HH") + ":00";
+            const filledFormTime = Array.isArray(formData)
+                ? formData
+                      .filter((data) => dateTime?.date === data?.date)
+                      .map((data) => parseInt(data?.time.split(":")[0], 10))
+                : [];
+
+            let currentHour = parseInt(now.format("HH"), 10);
+
+            if (filledFormTime.includes(currentHour)) {
+                currentHour = currentHour - 1;
+                if (currentHour < 0) currentHour = 23;
+            }
+
+            const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
             const newData = {
                 ...prevData,
@@ -98,6 +111,7 @@ const DailyReportForm = (props) => {
             return newData;
         });
     }, []);
+    console.log(data);
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">

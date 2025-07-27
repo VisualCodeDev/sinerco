@@ -421,6 +421,7 @@ const EditModal = (props) => {
             setData(updatedItems);
         }
     };
+
     return (
         <Modal
             title="Edit Report"
