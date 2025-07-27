@@ -41,13 +41,17 @@ class StatusRequestController extends Controller
         } else {
             $start->minute(0)->second(0);
         }
-
         $formatted = $start->format('H:i');
 
-        $unit = DailyReport::whereRelation('unitAreaLocation', 'unitId', $val['unitId'])->where('date', $val['startDate'])->where('time', $formatted)->first();
+        $unit = DailyReport::whereRelation('unitAreaLocation', 'unitId', $val['unitId'])
+            ->where('date', $val['startDate'])
+            ->where('time', $formatted)
+            ->first();
+
         if (!$unit) {
             return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
         }
+
         $user = auth()->user();
         $status = new StatusRequest();
         $status->unitId = $val['unitId'];
@@ -59,7 +63,16 @@ class StatusRequestController extends Controller
         $status->requestedBy = $user->id;
         $status->locationId = $val['locationId'];
         $status->save();
+
         $unit->update(['requestId' => $status->requestId]);
+
+        $unit->load(['request', 'unitAreaLocation.unit']);
+        Log::debug($unit);
+        if ($unit->request && $unit->unitAreaLocation && $unit->unitAreaLocation->unit) {
+            $unit->unitAreaLocation->unit->update([
+                'status' => $unit->request->requestType
+            ]);
+        }
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {

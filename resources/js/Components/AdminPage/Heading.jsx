@@ -25,7 +25,7 @@ const Heading = ({ children }) => {
     };
     let menuItems = [];
     const { user, loading } = useAuth();
-    if (isLoading || loading) return <LoadingSpinner/>;
+    if (isLoading || loading) return <LoadingSpinner />;
     const menu = {
         home: {
             icon: <FaHome />,
@@ -45,18 +45,20 @@ const Heading = ({ children }) => {
         unitList: {
             icon: <FaList />,
             label: "Unit List",
-            submenu: [
-                { label: "Data Unit", href: route("daily.list") },
-                {
-                    condition: user?.role === "super_admin",
-                    label: "Classified Contract",
-                    href: route("daily.list"),
-                },
-                {
-                    label: "Contract",
-                    href: route("daily.list"),
-                },
-            ],
+            href: route("daily.list"),
+
+            // submenu: [
+            //     { label: "Data Unit", href: route("daily.list") },
+            //     {
+            //         condition: user?.role === "super_admin",
+            //         label: "Classified Contract",
+            //         href: route("daily.list"),
+            //     },
+            //     {
+            //         label: "Contract",
+            //         href: route("daily.list"),
+            //     },
+            // ],
         },
         eventHistory: {
             icon: <FaTh />,
