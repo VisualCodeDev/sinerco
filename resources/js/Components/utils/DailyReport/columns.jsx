@@ -547,7 +547,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                         >
                             {header}{" "}
                         </label>
-                        <div className="flex lg:md:flex-row flex-col gap-4">
+                        <div className="flex flex-row gap-4">
                             {subheader?.map((sub, index) => {
                                 return (
                                     <div className="flex flex-col lg:md:w-1/2 w-full">

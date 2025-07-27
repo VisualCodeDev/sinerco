@@ -7,6 +7,7 @@ use App\Models\UnitAreaLocation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Log;
 
 class DataUnitController extends Controller
 {
@@ -39,6 +40,22 @@ class DataUnitController extends Controller
         }
         return $data;
     }
+
+    public function getAllUnit(Request $request)
+    {
+        $filterStatus = $request->query('status');
+
+        $units = self::getPermittedUnit();
+
+        if ($filterStatus) {
+            $units = $units->filter(function ($item) use ($filterStatus) {
+                return optional($item->unit)->status === $filterStatus;
+            });
+        }
+
+        return response()->json($units->values(), 200);
+    }
+
     public function unitList(Request $request)
     {
         $status = $request->query('status');

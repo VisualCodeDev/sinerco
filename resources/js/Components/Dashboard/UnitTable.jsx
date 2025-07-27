@@ -11,17 +11,34 @@ import {
 import { Button } from "@headlessui/react";
 import TableComponent from "../TableComponent";
 import { router } from "@inertiajs/react";
+import LoadingSpinner from "../Loading";
+import { fetch } from "../utils/database-util";
 
 const UnitTable = (props) => {
-    const { data } = props;
-    console.log(data)
-    let columns = tColumns();
+    const { data: propsData } = props;
+    const columns = tColumns();
+    const data = propsData ?? fetchedData;
 
     const handleClick = (item) => {
         if (!item.unitAreaLocationId) return;
         router.visit(route("daily", item.unitAreaLocationId));
     };
-
+    if (!propsData) {
+        const { data, loading, error } = fetch("unit.get");
+        if (loading) {
+            return <LoadingSpinner />;
+        }
+        if (error) return <div>Error: {error.message}</div>;
+        return (
+            <TableComponent
+                filterStatus={true}
+                data={data}
+                columns={columns}
+                title={"List of Unit"}
+                onRowClick={handleClick}
+            />
+        );
+    }
     return (
         <TableComponent
             filterStatus={true}

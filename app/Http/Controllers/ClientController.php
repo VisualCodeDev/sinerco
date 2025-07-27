@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\UnitAreaLocation;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Log;
 
 class ClientController extends Controller
 {
@@ -20,13 +21,18 @@ class ClientController extends Controller
         return response()->json($allData);
     }
 
-    public function clientDetail($clientId)
+    public function clientDetail(Request $request)
     {
+        $clientId = $request->clientId;
+        Log::debug(
+            $clientId
+        );
         $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
         $clientData = $data->first()?->client;
         $unitData = UnitAreaLocation::where('clientId', $clientId)->with(['client', 'unit', 'dailyReportSetting'])->first();
         if ($data) {
-            return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
+            return response()->json($data);
+            // return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
         }
     }
 

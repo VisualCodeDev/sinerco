@@ -124,7 +124,7 @@ const DailyReportForm = (props) => {
 
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
+                    <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
                         {formList.map((item) => (
                             <div
                                 key={item.header}

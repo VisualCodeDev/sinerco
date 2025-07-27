@@ -30,7 +30,7 @@ const Notification = ({ message }) => {
                 Available{" "}
                 <a
                     href={route("request") + "#" + message.id}
-                    className="text-blue-500 hover:underline font-bold text-xs"
+                    className={`${message?.requestType === 'stdby' ? "text-yellow-500": 'text-red-500'} ms-2 p-1 underline font-semibold font-xs bg-white`}
                 >
                     (View Request)
                 </a>

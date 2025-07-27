@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     FaFilter,
     FaPlus,
@@ -31,16 +31,20 @@ const TableComponent = (props) => {
         key: null,
         direction: "asc",
     });
+    const [filterConfig, setFilterConfig] = useState();
+    const [filteredData, setFilteredData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     const sortedData = data?.sort((a, b) => {
         if (!sortConfig.key) return 0;
         const getNestedValue = (obj, key) => {
-            console.log(obj, key)
             if (key === "user") return obj.user?.user?.toLowerCase() || "";
             if (key === "unit") return obj.unit?.unit?.toLowerCase() || "";
             if (key === "userId") return obj.unit?.unit?.toLowerCase() || "";
-            if (key === "status") return getRequestStatus(obj.unit?.status).toLowerCase() || "";
+            if (key === "status")
+                return getRequestStatus(obj.unit?.status).toLowerCase() || "";
+            if (key === "location") return obj?.location?.location || "";
+            if (key === "client") return obj?.client?.name || "";
             return (obj[key] || "").toString().toLowerCase();
         };
 
@@ -51,6 +55,7 @@ const TableComponent = (props) => {
         if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
         return 0;
     });
+
     const handleSort = (key) => {
         setSortConfig((prev) => {
             if (prev.key === key) {
@@ -77,19 +82,29 @@ const TableComponent = (props) => {
 
     const query = searchQuery.toLowerCase();
 
-    const filteredData = sortedData?.filter((item) => {
-        return containsQuery(item, query);
-    });
-
     const handleSelect = (value) => {
-        console.log(value);
-        router.visit(route("daily.list"), {
-            method: "get",
-            data: { status: value },
-            preserveScroll: true,
-            preserveState: true,
-        });
+        // router.visit(route("daily.list"), {
+        //     method: "get",
+        //     data: { status: value },
+        //     preserveScroll: true,
+        //     preserveState: true,
+        // });
     };
+
+    useEffect(() => {
+        let filterData = [];
+        if (filterConfig) {
+            filterData = data?.filter((item) => {
+                return item?.unit?.status === filterConfig;
+            });
+            return setFilteredData(filterData);
+        }
+        filterData = sortedData?.filter((item) => {
+            return containsQuery(item, query);
+        });
+        setFilteredData(sortedData);
+    }, [filterConfig, sortConfig?.key]);
+
     return (
         <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg">
             <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
@@ -117,7 +132,7 @@ const TableComponent = (props) => {
                                 <select
                                     className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
                                     onChange={(e) =>
-                                        handleSelect(e.target.value)
+                                        setFilterConfig(e.target.value)
                                     }
                                 >
                                     <option value="">-- Semua Status --</option>
@@ -165,7 +180,7 @@ const TableComponent = (props) => {
                                     }
                                     onClick={() => handleSort(col.name)}
                                 >
-                                    <div className="">
+                                    <div className="flex items-center">
                                         {typeof col?.Header === "function"
                                             ? col?.Header(filteredData)
                                             : col?.header}

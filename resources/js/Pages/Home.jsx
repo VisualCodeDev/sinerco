@@ -4,7 +4,10 @@ import { FaUserCircle, FaClock, FaPowerOff } from "react-icons/fa";
 import { router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Carousel from "@/Components/Carousel";
-import { getRequestTypeName } from "@/Components/utils/dashboard-util";
+import {
+    getFormattedDate,
+    getRequestTypeName,
+} from "@/Components/utils/dashboard-util";
 import { useAuth } from "@/Components/Auth/auth";
 import LoadingSpinner from "@/Components/Loading";
 
@@ -91,9 +94,9 @@ export default function Home() {
         const hours = Math.floor(diffSec / 3600);
         const minutes = Math.floor((diffSec % 3600) / 60);
 
-        const formatted = `${hours.toString().padStart(2, "0")} jam ${minutes
+        const formatted = `${hours.toString().padStart(2, "0")} ${hours > 0 ? 'hours' : 'hour'}  ${minutes
             .toString()
-            .padStart(2, "0")} menit`;
+            .padStart(2, "0")} ${minutes > 0 ? 'minutes' :'minute'}`;
 
         return formatted;
     };
@@ -162,7 +165,9 @@ export default function Home() {
                                     {user?.name}
                                 </p>
                                 <p className="text-sm md:text-base text-gray-500 mb-3">
-                                    {user?.role}
+                                    {user?.role === "super_admin"
+                                        ? "ADMIN"
+                                        : user?.role}
                                 </p>
                             </div>
                         </div>
@@ -183,6 +188,9 @@ export default function Home() {
                                     </th>
                                     <th scope="col" class="px-6 py-3">
                                         Status
+                                    </th>
+                                    <th scope="col" class="px-6 py-3">
+                                        Start
                                     </th>
                                     <th scope="col" class="px-6 py-3">
                                         Remark
@@ -226,24 +234,32 @@ export default function Home() {
                                                                     : "bg-red-500"
                                                             } me-2`}
                                                         ></div>{" "} */}
-                                                    {item?.requestType ===
-                                                    "stdby" ? (
-                                                        <FaClock
-                                                            color="orange"
-                                                            className="md:h-4 md:w-4 w-3 h-3"
-                                                        />
-                                                    ) : (
-                                                        <FaPowerOff
-                                                            color="red"
-                                                            className="md:h-4 md:w-4 w-3 h-3"
-                                                        />
-                                                    )}
-                                                    <p>
-                                                        {getRequestTypeName(
-                                                            item?.requestType
-                                                        )}
-                                                    </p>
+                                                    <div className="flex flex-col text-center">
+                                                        <p
+                                                            className={`px-2 py-2 rounded-lg text-white capitalize ${
+                                                                item?.requestType ===
+                                                                "stdby"
+                                                                    ? "bg-yellow-500"
+                                                                    : item?.requestType ===
+                                                                      "sd"
+                                                                    ? "bg-red-500"
+                                                                    : "bg-green-500"
+                                                            }`}
+                                                        >
+                                                            {getRequestTypeName(
+                                                                item?.requestType
+                                                            )}
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <p>
+                                                    {getFormattedDate(
+                                                        item?.startDate
+                                                    ) || "-"}
+                                                </p>
+                                                <p>{item?.startTime}</p>
                                             </td>
                                             <td class="px-6 py-4">
                                                 {item?.remarks || "-"}

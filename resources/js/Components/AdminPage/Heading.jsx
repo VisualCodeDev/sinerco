@@ -47,7 +47,6 @@ const Heading = ({ children }) => {
             label: "Unit List",
             submenu: [
                 { label: "Data Unit", href: route("daily.list") },
-                { label: "Gas Composition", href: route("daily.list") },
                 {
                     condition: user?.role === "super_admin",
                     label: "Classified Contract",

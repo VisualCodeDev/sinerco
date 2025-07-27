@@ -22,21 +22,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Client",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "17%",
+            width: "22%",
             Cell: ({ client }) => {
                 return <div className="flex flex-col">{client?.name}</div>;
-            },
-        },
-        {
-            name: "area",
-            header: "Area",
-            headerClassName: "bg-primary text-white",
-            sortable: true,
-            width: "15%",
-            Cell: ({ location }) => {
-                return (
-                    <div className="flex flex-col">{location?.area?.area}</div>
-                );
             },
         },
         {
@@ -44,9 +32,36 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Unit",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "15%",
+            width: "25%",
             Cell: ({ unit }) => {
                 return <div className="flex flex-col">{unit?.unit}</div>;
+            },
+        },
+        {
+            name: "status",
+            header: "Status",
+            headerClassName:
+                "bg-primary text-white text-center flex items-center justify-center",
+            sortable: true,
+            width: "25%",
+            Cell: ({ unit }) => {
+                return (
+                    <div className="flex flex-col text-center px-20">
+                        <p
+                            className={`px-2 py-2 rounded-lg text-white ${
+                                unit?.status === "stdby"
+                                    ? "bg-yellow-500"
+                                    : unit?.status === "sd"
+                                    ? "bg-red-500"
+                                    : "bg-green-500"
+                            }`}
+                        >
+                            {toCapitalizeFirstLetter(
+                                getRequestTypeName(unit?.status)
+                            )}
+                        </p>
+                    </div>
+                );
             },
         },
         {
@@ -54,28 +69,10 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             header: "Location",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "23%",
+            width: "25%",
             Cell: ({ location }) => {
                 return (
                     <div className="flex flex-col">{location?.location}</div>
-                );
-            },
-        },
-        {
-            name: "status",
-            header: "Status",
-            headerClassName: "bg-primary text-white text-center flex items-center justify-center",
-            sortable: true,
-            width: "10%",
-            Cell: ({ unit }) => {
-                return (
-                    <div className="flex flex-col text-center">
-                        <p className={`px-2 py-2 rounded-lg text-white ${unit?.status === 'stdby' ? 'bg-yellow-500': unit?.status === 'sd' ? 'bg-red-500' : 'bg-green-500'}`}>
-                            {toCapitalizeFirstLetter(
-                                getRequestTypeName(unit?.status)
-                            )}
-                        </p>
-                    </div>
                 );
             },
         },

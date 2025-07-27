@@ -1,33 +1,494 @@
 import LoadingSpinner from "@/Components/Loading";
+import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
+import { useToast } from "@/Components/Toast/ToastProvider";
+import { formItems } from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
 import tColumns from "@/Components/utils/User/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import { router } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
+import {
+    FaAngleDown,
+    FaFileContract,
+    FaList,
+    FaUserFriends,
+} from "react-icons/fa";
 
 const ClientList = () => {
-    const columns = tColumns();
-    const { data, loading, error } = fetch('client.get');
+    // const columns = tColumns();
+    const { data, loading, error } = fetch("client.get");
+    const [tab, setTab] = useState("unit");
+    const [clients, setClients] = useState([]);
+    const [expanded, setExpanded] = useState(false);
+    const [selectedClient, setSelectedClients] = useState([]);
+    const [filteredUnits, setUnit] = useState([]);
+    const [isLoading, setLoading] = useState(false);
+    // const dailyReportSettingData = unitData?.daily_report_setting || {};
+    const [isSettingModal, setSettingModal] = useState(false);
+    const handleConfirmSettings = () => {};
 
-    const onRowClick = (items) => {
-        router.visit(route("client.detail", { clientId: items.clientId }));
-    };
+    const tabs = [
+        { key: "unit", label: "Unit" },
+        { key: "contract", label: "Contracts" },
+        { key: "classified", label: "Classified Contracts" },
+    ];
+
+    useEffect(() => {
+        const fetchUnits = async () => {
+            setLoading(true);
+            if (selectedClient) {
+                try {
+                    const response = await axios.get(
+                        route("unit.filter.get", selectedClient)
+                    );
+                    setUnit(response.data);
+                } catch (err) {
+                    console.error("Error fetching unit:", err);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchUnits();
+    }, [data, selectedClient]);
 
     if (loading) {
         return <LoadingSpinner />;
     }
+
+    const handleClick = (item) => {
+        if (!item.unitAreaLocationId) return;
+        router.visit(route("daily", item.unitAreaLocationId));
+    };
+
     return (
         <PageLayout>
-            <div className="w-full md:w-2/3 text-sm md:text-base">
+            <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
+                {/* Area List Desktop*/}
+                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
+                    <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
+                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                            <FaUserFriends className="text-2xl md:text-3xl" />
+                        </div>
+                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                            Client
+                        </h2>
+                    </div>
+                    <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+                        {data?.map((item) => (
+                            <button
+                                key={item?.id}
+                                onClick={() => setSelectedClients(item)}
+                                className={`w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                    selectedClient?.id === item?.id
+                                        ? "bg-blue-100"
+                                        : "bg-gray-100"
+                                }`}
+                            >
+                                {item?.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Area List Mobile*/}
+                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
+                    <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
+                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                            <FaUserFriends className="" />
+                        </div>
+                        <h2 className="text-lg font-semibold text-gray-700">
+                            Client
+                        </h2>
+                    </div>
+                    <div className="space-y-2 max-h-[10vh] relative px-2">
+                        <div
+                            className="flex justify-between items-center"
+                            onClick={() => setExpanded(!expanded)}
+                        >
+                            <div>
+                                {selectedClient?.name || clients[0]?.name}
+                            </div>
+                            <FaAngleDown />
+                        </div>
+                        <div
+                            className={`absolute top-5 left-0 max-h-[20vh] overflow-y-auto ${
+                                expanded ? "block" : "hidden"
+                            }`}
+                        >
+                            {data?.map((item) => (
+                                <button
+                                    key={item?.id}
+                                    onClick={() => {
+                                        setSelectedClients(item);
+                                        setExpanded(false);
+                                    }}
+                                    className={`w-full text-left px-4 py-2 hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                        selectedClient?.id === item?.id
+                                            ? "bg-blue-100"
+                                            : "bg-gray-100"
+                                    }`}
+                                >
+                                    {item?.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Location List */}
+                <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
+                    <div className="flex gap-2">
+                        {tabs.map(({ key, label }) => (
+                            <div
+                                key={key}
+                                onClick={() => setTab(key)}
+                                className={`flex justify-center items-center px-4 py-2 cursor-pointer transition ${
+                                    tab === key
+                                        ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
+                                        : "text-gray-500"
+                                }`}
+                            >
+                                {label}
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex gap-2 py-4">
+                        {tab === "unit" && (
+                            <div className="flex justify-between items-center mb-4 text-lg md:text-xl font-semibold w-full">
+                                <div className="flex flex-row items-center gap-3">
+                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                        <FaList className="text-2xl md:text-3xl" />
+                                    </div>
+                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                        Unit
+                                    </h2>
+                                </div>
+                                <div className="flex md:justify-start justify-center">
+                                    <button
+                                        className="bg-primary text-white px-6 py-2 rounded-md"
+                                        onClick={() => setSettingModal(true)}
+                                    >
+                                        Setting
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        {tab === "contract" && (
+                            <div className="flex items-center mb-4 text-lg md:text-xl font-semibold">
+                                <div className="flex flex-row items-center gap-3">
+                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                        <FaFileContract className="text-2xl md:text-3xl" />
+                                    </div>
+                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                        Contract
+                                    </h2>
+                                </div>
+                            </div>
+                        )}
+
+                        {tab === "classified" && (
+                            <div className="flex items-center mb-4 text-lg md:text-xl font-semibold">
+                                <div className="flex flex-row items-center gap-3">
+                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                        <FaFileContract className="text-2xl md:text-3xl" />
+                                    </div>
+                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                        Classified Contract
+                                    </h2>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+                        {isLoading && <LoadingSpinner />}
+                        {tab === "unit" && filteredUnits?.length > 0 ? (
+                            filteredUnits.map((item) => (
+                                <div
+                                    key={item?.id}
+                                    onClick={() => handleClick(item)}
+                                    className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm"
+                                >
+                                    {item?.unit?.unit}
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-400 italic">
+                                No Data available.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+            {/* <div className="w-full md:w-2/3 text-sm md:text-base">
                 <TableComponent
                     columns={columns}
                     data={data}
                     onRowClick={onRowClick}
                     title={"List of Clients"}
                 />
-            </div>
+            </div> */}
+            <SettingModal
+                // data={dailyReportSettingData}
+                clientData={filteredUnits?.clientData}
+                isModal={isSettingModal}
+                handleCloseModal={() => setSettingModal(false)}
+                handleConfirmSettings={handleConfirmSettings}
+            />
         </PageLayout>
+    );
+};
+
+const SettingModal = (props) => {
+    const {
+        isModal,
+        handleCloseModal,
+        handleConfirmSettings,
+        data,
+        clientData,
+    } = props;
+    const [formData, setFormData] = useState({});
+    const [decimalActive, setDecimalActive] = useState(false);
+    const [minMaxActive, setMinMaxActive] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const { addToast } = useToast();
+
+    useEffect(() => {
+        let defaultDecimalSetting = {};
+        let defaultMinMaxSetting = {};
+
+        formItems
+            .filter((item) => item.name !== "time")
+            .forEach((item) => {
+                if (item?.default?.decimalSetting) {
+                    defaultDecimalSetting[item.name] =
+                        item.default.decimalSetting;
+                }
+                if (item?.default?.minSetting || item?.default?.maxSetting) {
+                    defaultMinMaxSetting[item.name] = {
+                        min: item.default.minSetting,
+                        max: item.default.maxSetting,
+                    };
+                }
+            });
+
+        setFormData((prev) => ({
+            ...prev,
+            decimalSetting: data?.decimalSetting ?? defaultDecimalSetting,
+            minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
+        }));
+    }, []);
+
+    const handleChange = (settingType, field, value) => {
+        if (settingType === "decimalSetting") {
+            setFormData({
+                ...formData,
+                [settingType]: {
+                    ...formData[settingType],
+                    [field]: value,
+                },
+            });
+        } else if (settingType === "minMaxSetting") {
+            setFormData((prev) => ({
+                ...prev,
+                [settingType]: {
+                    ...prev[settingType],
+                    [field]: {
+                        ...prev[settingType]?.[field],
+                        ...value,
+                    },
+                },
+            }));
+        }
+    };
+    const handleSave = async () => {
+        let formattedDecimal = {};
+        try {
+            setSaving(true);
+            const resp = await axios.post(
+                route("daily.setting", { clientId: clientData?.clientId }),
+                formData
+            );
+            if (resp.status === 200 || resp.status === 302) {
+                addToast(resp.data);
+                setSaving(false);
+            } else {
+                setStatus("failed");
+                setSaving(false);
+            }
+        } catch (err) {
+            console.error("Error creating report:", err);
+            setSaving(false);
+        }
+        // for (const key in formData) {
+        //     const value = formData[key];
+        //     const maxDecimal = 1 / Math.pow(10, value);
+        //     formattedDecimal = {
+        //         ...formattedDecimal,
+        //         [key]: maxDecimal,
+        //     };
+        // }
+        // handleConfirmSettings(formData);
+    };
+    const options = [];
+    for (let i = 0; i <= 10; i++) {
+        options.push(
+            <option key={i} value={i}>
+                {i}
+            </option>
+        );
+    }
+    return (
+        <Modal
+            title={"Setting"}
+            handleCloseModal={handleCloseModal}
+            showModal={isModal}
+            size={"responsive"}
+        >
+            <Modal.Body>
+                <div className="flex flex-col gap-2">
+                    <div>
+                        <div className="mb-4">
+                            <div
+                                className="border-b-2 py-2 mb-4 md:mb-0 text-md md:text-lg flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                onClick={() => setDecimalActive(!decimalActive)}
+                            >
+                                <p className="font-semibold">
+                                    Decimal Settings
+                                </p>
+                                <FaAngleDown className="font-light" />
+                            </div>
+                            {decimalActive && (
+                                <div className="md:p-3 pt-1 flex flex-col gap-2">
+                                    {formItems
+                                        .filter((item) => item.name !== "time")
+                                        .map((item) => (
+                                            <div className="flex justify-between items-center mb-2">
+                                                <p className="md:w-1/2 font-semibold">
+                                                    {item.header}
+                                                </p>
+                                                <select
+                                                    className="py-1 md:w-[100px]"
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            "decimalSetting",
+                                                            item?.name,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={
+                                                        formData
+                                                            ?.decimalSetting?.[
+                                                            item.name
+                                                        ] || ""
+                                                    }
+                                                >
+                                                    {options.map((item) => (
+                                                        <>{item}</>
+                                                    ))}
+                                                </select>
+                                                {/* <input
+                                                    type="number"
+                                                    step={1}
+                                                    min={0}
+                                                    placeholder="? dibelakang koma"
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            "decimalSetting",
+                                                            item?.name,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={
+                                                        formData
+                                                            ?.decimalSetting?.[
+                                                            item.name
+                                                        ] || ""
+                                                    }
+                                                /> */}
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <div
+                                className="border-b-2 py-2 text-md md:text-lg mb-4 md:mb-0 flex justify-between items-center sticky top-0 left-0 bg-white cursor-pointer"
+                                onClick={() => setMinMaxActive(!minMaxActive)}
+                            >
+                                <p className="font-semibold">MinMax Settings</p>
+                                <FaAngleDown className="font-light" />
+                            </div>
+                            {minMaxActive && (
+                                <div className="md:p-3 pt-1 flex flex-col gap-2">
+                                    {formItems
+                                        .filter((item) => item.name !== "time")
+                                        .map((item) => (
+                                            <div className="flex flex-col justify-between items-center md:flex-row mb-4 md:mb-2">
+                                                <p className="mb-2 md:mb-0 font-semibold">
+                                                    {item.header}
+                                                </p>
+                                                <div className="flex flex-col md:flex-row gap-2">
+                                                    <input
+                                                        className="md:w-[100px]"
+                                                        type="number"
+                                                        step={1}
+                                                        placeholder="min."
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "minMaxSetting",
+                                                                item?.name,
+                                                                {
+                                                                    min: e
+                                                                        .target
+                                                                        .value,
+                                                                }
+                                                            )
+                                                        }
+                                                        value={
+                                                            formData
+                                                                ?.minMaxSetting?.[
+                                                                item.name
+                                                            ]?.min || ""
+                                                        }
+                                                    />
+                                                    <input
+                                                        className="md:w-[100px]"
+                                                        type="number"
+                                                        step={1}
+                                                        placeholder="max."
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "minMaxSetting",
+                                                                item?.name,
+                                                                {
+                                                                    max: e
+                                                                        .target
+                                                                        .value,
+                                                                }
+                                                            )
+                                                        }
+                                                        value={
+                                                            formData
+                                                                ?.minMaxSetting?.[
+                                                                item.name
+                                                            ]?.max || ""
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <button onClick={handleSave}>Simpan</button>
+            </Modal.Footer>
+        </Modal>
     );
 };
 
