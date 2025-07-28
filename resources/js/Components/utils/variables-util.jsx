@@ -11,6 +11,13 @@ export const formItems = [
         header: "Source Press.",
     },
     {
+        name: "dischargeHeaderPress",
+        default: {
+            decimalSetting: "1",
+        },
+        header: "Discharge Header Press.",
+    },
+    {
         name: "suctionPress",
         default: {
             decimalSetting: "1",

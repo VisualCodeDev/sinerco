@@ -4,16 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyReportSettings;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class DailyReportSettingsController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function setSetting(Request $request, $clientId)
+    public function index()
     {
+        return Inertia::render('Setting/UnitSetting');
+    }
 
+    public function setSetting(Request $request)
+    {
         $rules = [
+            'clientId' => 'required|array',
             'decimalSetting' => 'required|array',
             'minMaxSetting' => 'required|array',
         ];
@@ -28,28 +35,30 @@ class DailyReportSettingsController extends Controller
         }
 
         $validated = $request->validate($rules);
-        if ($validated) {
-            $send = DailyReportSettings::updateOrCreate(
+
+        $clientIds = $validated['clientId'];
+
+        foreach ((array) $clientIds as $clientId) {
+            DailyReportSettings::updateOrCreate(
                 ['clientId' => $clientId],
                 [
                     'decimalSetting' => $validated['decimalSetting'],
                     'minMaxSetting' => $validated['minMaxSetting'],
                 ]
             );
-            if ($send) {
-                return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
-            } else {
-                return response()->json(['text' => 'Failed to update settings', 'type' => 'error'], 500);
-            }
         }
+
+        return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
     }
+
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function getUnitSetting($clientId)
     {
-        //
+        $data = DailyReportSettings::where('clientId', $clientId)->first();
+        return response()->json($data);
     }
 
     /**

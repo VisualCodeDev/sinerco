@@ -446,40 +446,88 @@ export const getDateLists = (currDate) => {
     return dateList;
 };
 
+const excludeFields = [
+    "time",
+    "created_at",
+    "updated_at",
+    "date",
+    "id",
+    "requestId",
+    "request",
+];
+
+const getValidFields = (data) => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    const fields = Object.keys(data[0]);
+    return fields.filter((field) => !excludeFields.includes(field));
+};
+
 export const getAvg = (data) => {
     if (
-        !data ||
         !Array.isArray(data) ||
         data.length === 0 ||
         typeof data[0] !== "object"
     )
         return null;
 
-    const fields = Object.keys(data[0]);
-    const excludeFields = [
-        "time",
-        "created_at",
-        "updated_at",
-        "date",
-        "id",
-        "requestId",
-        "request",
-    ];
-
-    const fieldsToAvg = fields.filter(
-        (field) => !excludeFields.includes(field)
-    );
+    const fieldsToAvg = getValidFields(data);
 
     const averages = fieldsToAvg.reduce((acc, field) => {
         const sum = data.reduce((sumAcc, item) => {
             const value = parseFloat(item[field]);
             return sumAcc + (isNaN(value) ? 0 : value);
         }, 0);
-        acc[field] = (sum / data.length).toFixed(2) || "0.00";
+        acc[field] = (sum / data.length).toFixed(2);
         return acc;
     }, {});
 
     return averages;
+};
+
+export const getTotal = (data) => {
+    if (
+        !Array.isArray(data) ||
+        data.length === 0 ||
+        typeof data[0] !== "object"
+    )
+        return null;
+
+    const fieldsToTotal = getValidFields(data);
+
+    const totals = fieldsToTotal.reduce((acc, field) => {
+        const sum = data.reduce((sumAcc, item) => {
+            const value = parseFloat(item[field]);
+            return sumAcc + (isNaN(value) ? 0 : value);
+        }, 0);
+        acc[field] = sum.toFixed(2);
+        return acc;
+    }, {});
+
+    return totals;
+};
+
+export const getMinMax = (data) => {
+    if (
+        !Array.isArray(data) ||
+        data.length === 0 ||
+        typeof data[0] !== "object"
+    )
+        return null;
+
+    const fieldsToCheck = getValidFields(data);
+
+    const result = fieldsToCheck.reduce((acc, field) => {
+        const values = data
+            .map((item) => parseFloat(item[field]))
+            .filter((v) => !isNaN(v));
+        acc[field] = {
+            min: Math.min(...values).toFixed(2),
+            max: Math.max(...values).toFixed(2),
+        };
+        return acc;
+    }, {});
+
+    return result;
 };
 
 export const getFormattedDate = (value, format = "DD MMM YYYY") => {

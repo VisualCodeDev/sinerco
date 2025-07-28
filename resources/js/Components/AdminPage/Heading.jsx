@@ -12,6 +12,7 @@ import {
     FaMapPin,
     FaSearchLocation,
     FaHistory,
+    FaRegEdit,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -41,6 +42,11 @@ const Heading = ({ children }) => {
             icon: <FaMapPin />,
             label: "Area",
             href: route("areas"),
+        },
+        editUnit: {
+            icon: <FaRegEdit />,
+            label: "Unit Conf. Setting",
+            href: route("unit.setting"),
         },
         unitList: {
             icon: <FaList />,
@@ -106,6 +112,7 @@ const Heading = ({ children }) => {
             menu.home,
             menu.clientList,
             menu.area,
+            menu.editUnit,
             menu.unitList,
             menu.eventHistory,
             menu.allocation,

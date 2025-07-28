@@ -7,6 +7,7 @@ import { fetch } from "@/Components/utils/database-util";
 import tColumns from "@/Components/utils/User/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import { router } from "@inertiajs/react";
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
     FaAngleDown,
@@ -27,7 +28,6 @@ const ClientList = () => {
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
     const handleConfirmSettings = () => {};
-
     const tabs = [
         { key: "unit", label: "Unit" },
         { key: "contract", label: "Contracts" },
@@ -65,7 +65,7 @@ const ClientList = () => {
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
-                {/* Area List Desktop*/}
+                {/* Client List Desktop*/}
                 <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
                     <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
@@ -92,7 +92,7 @@ const ClientList = () => {
                     </div>
                 </div>
 
-                {/* Area List Mobile*/}
+                {/* Client List Mobile*/}
                 <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
                     <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
@@ -137,7 +137,7 @@ const ClientList = () => {
                     </div>
                 </div>
 
-                {/* Location List */}
+                {/* Unit Contract List */}
                 <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
                     <div className="flex gap-2">
                         {tabs.map(({ key, label }) => (
@@ -208,7 +208,7 @@ const ClientList = () => {
                                 <div
                                     key={item?.id}
                                     onClick={() => handleClick(item)}
-                                    className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm"
+                                    className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm cursor-pointer"
                                 >
                                     {item?.unit?.unit}
                                 </div>
@@ -231,7 +231,7 @@ const ClientList = () => {
             </div> */}
             <SettingModal
                 // data={dailyReportSettingData}
-                clientData={filteredUnits?.clientData}
+                clientData={selectedClient}
                 isModal={isSettingModal}
                 handleCloseModal={() => setSettingModal(false)}
                 handleConfirmSettings={handleConfirmSettings}
@@ -241,13 +241,10 @@ const ClientList = () => {
 };
 
 const SettingModal = (props) => {
-    const {
-        isModal,
-        handleCloseModal,
-        handleConfirmSettings,
-        data,
-        clientData,
-    } = props;
+    const { isModal, handleCloseModal, handleConfirmSettings, clientData } =
+        props;
+    const [loading, setLoading] = useState({});
+    const [settingData, setSettingData] = useState({});
     const [formData, setFormData] = useState({});
     const [decimalActive, setDecimalActive] = useState(false);
     const [minMaxActive, setMinMaxActive] = useState(false);
@@ -255,9 +252,25 @@ const SettingModal = (props) => {
     const { addToast } = useToast();
 
     useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const resp = await axios.get(
+                    route("unit.setting.get", clientData?.clientId)
+                );
+                setSettingData(resp.data)
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [clientData]);
+
+    useEffect(() => {
         let defaultDecimalSetting = {};
         let defaultMinMaxSetting = {};
-
         formItems
             .filter((item) => item.name !== "time")
             .forEach((item) => {
@@ -275,11 +288,11 @@ const SettingModal = (props) => {
 
         setFormData((prev) => ({
             ...prev,
-            decimalSetting: data?.decimalSetting ?? defaultDecimalSetting,
-            minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
+            decimalSetting:
+                settingData?.decimalSetting ?? defaultDecimalSetting,
+            minMaxSetting: settingData?.minMaxSetting ?? defaultMinMaxSetting,
         }));
-    }, []);
-
+    }, [settingData]);
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -307,7 +320,7 @@ const SettingModal = (props) => {
         try {
             setSaving(true);
             const resp = await axios.post(
-                route("daily.setting", { clientId: clientData?.clientId }),
+                route("daily.setting", { clientId: [clientData?.clientId] }),
                 formData
             );
             if (resp.status === 200 || resp.status === 302) {
@@ -346,6 +359,7 @@ const SettingModal = (props) => {
             showModal={isModal}
             size={"responsive"}
         >
+            {loading && <LoadingSpinner />}
             <Modal.Body>
                 <div className="flex flex-col gap-2">
                     <div>

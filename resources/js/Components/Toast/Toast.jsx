@@ -5,7 +5,7 @@ import { FaCheck, FaExclamationCircle } from "react-icons/fa";
 const Toast = ({ message, onClose }) => {
     return (
         <div
-            className={`flex items-center justify-center text-sm md:text-base gap-2 min-w-[280px] md:max-w-[400px] shadow-lg rounded-lg p-3 md:p-4 mb-4 text-white font-bold ${
+            className={`flex items-center justify-center text-sm md:text-base gap-2 min-w-[280px] md:max-w-[1000px] shadow-lg rounded-lg p-3 md:p-4 mb-4 text-white font-bold ${
                 message?.type === "success"
                     ? " bg-success"
                     : message?.type === "error"

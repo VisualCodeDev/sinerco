@@ -65,7 +65,9 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
 })->name('auth.user');
 
 Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
-    Route::post('/client/{clientId}/report-setting', 'setSetting')->name('daily.setting');
+    Route::get('/unit-configuration', 'index')->name('unit.setting');
+    Route::get('/fetch/unit-configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
+    Route::post('/client/report-setting', 'setSetting')->name('daily.setting');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
