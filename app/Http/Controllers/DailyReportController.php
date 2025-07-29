@@ -129,7 +129,9 @@ class DailyReportController extends Controller
         return back();
     }
 
-
+    public function editRepot(Request $request, $unitAreaLocationId) {
+        
+    }
     public function index($unitAreaLocationId)
     {
         $data = DailyReport::with('request')->where('unitAreaLocationId', $unitAreaLocationId)->get()->map(function ($item) {

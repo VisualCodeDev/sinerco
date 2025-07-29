@@ -16,6 +16,8 @@ import { FaPen, FaFileExport } from "react-icons/fa";
 import Modal from "../Modal";
 import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
+import axios from "axios";
+import LoadingSpinner from "../Loading";
 
 const DailyReport = (props) => {
     const { formData, unitData, user } = props;
@@ -54,6 +56,7 @@ const DailyReport = (props) => {
             }
         }
     }, [selectedDate]);
+
     useEffect(() => {
         if (dataAll) {
             const sortedData = sortedObjectByTime(dataAll);
@@ -193,12 +196,15 @@ const DailyReport = (props) => {
                                         {value?.request?.remarks || ""}
                                     </td>
                                     {user?.role === "super_admin" && (
-                                        <td
-                                            className="flex justify-center items-center px-4 py-2 cursor-pointer"
-                                            onClick={() => handleEdit(key)}
-                                        >
-                                            <FaPen />
-                                        </td>
+                                        <>
+                                            <td></td>
+                                            <td
+                                                className="flex justify-center items-center px-4 py-2 cursor-pointer"
+                                                onClick={() => handleEdit(key)}
+                                            >
+                                                <FaPen />
+                                            </td>
+                                        </>
                                     )}
                                 </tr>
                             ))}
@@ -403,6 +409,7 @@ const EditModal = (props) => {
         role,
     } = props;
     const [formDataState, setFormDataState] = useState(formData);
+    const [loading, setLoading] = useState(false);
     const handleChange = ([field], value) => {
         setFormDataState({ ...formDataState, [field]: value });
     };
@@ -411,17 +418,29 @@ const EditModal = (props) => {
         formData: formDataState,
         reportSettings: unitData?.daily_report_setting,
     });
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (formDataState) {
-            const updatedItems = data.map((item) =>
-                item.id === formDataState.id
-                    ? { ...item, ...formDataState }
-                    : item
-            );
-            setData(updatedItems);
+            setLoading(true);
+            try {
+                const resp = await axios.post(
+                    route("report.edit", unitData?.unitAreaLocationId, data)
+                );
+                const updatedItems = data.map((item) =>
+                    item.id === formDataState.id
+                        ? { ...item, ...formDataState }
+                        : item
+                );
+                setData(updatedItems);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
         }
     };
-
+    if (loading) {
+        return <LoadingSpinner text="Saving" />;
+    }
     return (
         <Modal
             title="Edit Report"

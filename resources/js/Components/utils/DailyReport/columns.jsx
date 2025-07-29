@@ -78,14 +78,15 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -119,7 +120,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -132,7 +134,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -166,7 +168,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -179,7 +182,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -213,7 +216,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -226,7 +230,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -260,7 +264,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -273,7 +278,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -307,7 +312,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -320,7 +326,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -354,7 +360,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -367,7 +374,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -401,7 +408,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -414,7 +422,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -448,7 +456,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -461,7 +470,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -495,7 +504,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -508,7 +518,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -557,14 +567,15 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                         <input
                                             required
                                             id={sub.name}
-                                            type="number"
+                                            type="text"
+                                            inputmode="numeric"
                                             name={sub.name}
                                             value={item[sub.name] || ""}
                                             step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],
-                                                    parseFloat(e.target.value),
+                                                    e.target.value,
                                                     minMaxSetting
                                                 )
                                             }
@@ -602,7 +613,8 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={
@@ -615,7 +627,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -649,14 +661,15 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
-                            type="number"
+                            type="text"
+                            inputmode="numeric"
                             name={name}
                             value={item[name] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    parseFloat(e.target.value),
+                                    e.target.value,
                                     minMaxSetting
                                 )
                             }
@@ -696,14 +709,15 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                                         <input
                                             required
                                             id={sub.name}
-                                            type="number"
+                                            type="text"
+                                            inputmode="numeric"
                                             name={sub.name}
                                             value={item[sub.name] || ""}
                                             step={decimalSetting}
                                             onChange={(e) =>
                                                 handleChange(
                                                     [e.target.name],
-                                                    parseFloat(e.target.value),
+                                                    e.target.value,
                                                     minMaxSetting
                                                 )
                                             }

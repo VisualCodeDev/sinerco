@@ -15,6 +15,7 @@ import Modal from "../Modal";
 import { FaAngleDown, FaCog } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
+import { useToast } from "../Toast/ToastProvider";
 
 const DailyReportForm = (props) => {
     const { unitData, formData, user } = props;
@@ -24,11 +25,12 @@ const DailyReportForm = (props) => {
     const [settings, setSettings] = useState();
     const [status, setStatus] = useState();
     const [saving, setSaving] = useState(false);
-
+    const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
         setConfirmationModal(true);
     };
+
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
@@ -42,19 +44,26 @@ const DailyReportForm = (props) => {
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
-                setStatus("failed");
                 setConfirmationModal(false);
                 setSaving(false);
             }
+            addToast({ type: "success", text: "Report Added" });
         } catch (err) {
             console.error("Error creating report:", err);
-            setStatus("error");
+            addToast({ type: "error", text: err.response.data.message });
             setConfirmationModal(false);
             setSaving(false);
         }
     };
     const handleChange = ([field], value, minMaxSetting) => {
         let warn = "";
+        if (field === "date" || field === "time") {
+            setData({
+                ...data,
+                [field]: value,
+            });
+            return;
+        }
         if (minMaxSetting) {
             if (minMaxSetting.min && value < minMaxSetting.min) {
                 warn = `Value for ${field} is ${value} (less than ${minMaxSetting.min})`;
@@ -63,13 +72,7 @@ const DailyReportForm = (props) => {
                 warn = `Value for ${field} is ${value} (greater than ${minMaxSetting.max})`;
             }
         }
-        if (field === "date" || field === "time") {
-            setData({
-                ...data,
-                [field]: value,
-            });
-            return;
-        }
+
         setData((prevData) => ({
             ...prevData,
             [field]: value,
@@ -111,31 +114,10 @@ const DailyReportForm = (props) => {
             return newData;
         });
     }, []);
-    console.log(data);
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving && <LoadingSpinner text="Saving..." />}
-            <div
-                className={`sticky top-0 left-0 ${
-                    status === "success"
-                        ? "bg-green-600 w-100"
-                        : "bg-red-600 border-red-500 w-100"
-                }`}
-            >
-                {status === "success" ? (
-                    <div className="text-white">
-                        <p>Success</p>
-                    </div>
-                ) : (
-                    (status === "failed" || status === "error") && (
-                        <div className="text-white">
-                            <p>Failed to Submit</p>
-                        </div>
-                    )
-                )}
-            </div>
-
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
                     <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
