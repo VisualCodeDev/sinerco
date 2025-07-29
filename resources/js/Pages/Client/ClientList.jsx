@@ -320,6 +320,8 @@ const SettingModal = (props) => {
     const { addToast } = useToast();
 
     useEffect(() => {
+        if (!clientData?.clientId) return;
+        console.log(clientData)
         const fetchData = async () => {
             setLoading(true);
             try {
