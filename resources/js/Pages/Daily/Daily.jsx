@@ -7,14 +7,19 @@ import LoadingSpinner from "@/Components/Loading";
 import { fetch } from "@/Components/utils/database-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { useState } from "react";
-import { FaRegFileAlt, FaRegCalendarAlt } from "react-icons/fa";
+import {
+    FaRegFileAlt,
+    FaRegCalendarAlt,
+    FaAngleDown,
+    FaAngleUp,
+} from "react-icons/fa";
 
 export default function Dashboard({ data, unitData }) {
     const { user, loading } = useAuth();
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
-
+    const [expanded, setExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
@@ -79,9 +84,44 @@ export default function Dashboard({ data, unitData }) {
                         {unitData && (
                             <>
                                 <div className="text-center w-full flex flex-col lg:md:gap-2 gap-1 lg:md:py-8 py-6 bg-primary text-white">
-                                    <p className="lg:md:text-2xl text-xl font-bold">
-                                        {unitData.unit?.unit}
-                                    </p>
+                                    <div className="text-xl lg:md:text-2xl font-bold bg-primary flex justify-center items-center">
+                                        <div
+                                            className="cursor-pointer flex items-center gap-2  relative"
+                                            onClick={() =>
+                                                setExpanded(!expanded)
+                                            }
+                                        >
+                                            {unitData?.unit?.unit}
+                                            {expanded ? (
+                                                <FaAngleUp />
+                                            ) : (
+                                                <FaAngleDown />
+                                            )}
+                                            <div
+                                                className={`absolute z-[100] bg-white text-gray-400 font-semibold text-start text-base w-full top-10 left-0 max-h-[20vh] overflow-y-auto ${
+                                                    expanded
+                                                        ? "block"
+                                                        : "hidden"
+                                                }`}
+                                            >
+                                                {allUnits.map((item) => (
+                                                    <p
+                                                        className="py-1 px-2"
+                                                        onClick={() =>
+                                                            router.visit(
+                                                                route(
+                                                                    "daily",
+                                                                    item?.unitAreaLocationId
+                                                                )
+                                                            )
+                                                        }
+                                                    >
+                                                        {item?.unit?.unit}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
                                     <p className="lg:md:text-sm text-xs">
                                         {unitData.area}
                                     </p>

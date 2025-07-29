@@ -13,6 +13,10 @@ import {
     FaSearchLocation,
     FaHistory,
     FaRegEdit,
+    FaNewspaper,
+    FaIdeal,
+    FaSign,
+    FaSignature,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -71,6 +75,16 @@ const Heading = ({ children }) => {
             label: "Event History",
             href: route("request"),
         },
+        classifiedContract: {
+            icon: <FaNewspaper />,
+            label: "Classified Contract",
+            href: route("daily.list"),
+        },
+        contract: {
+            icon: <FaSignature />,
+            label: "Contract",
+            href: route("daily.list"),
+        },
         allocation: {
             icon: <FaSearchLocation />,
             label: "User Settings",
@@ -111,7 +125,9 @@ const Heading = ({ children }) => {
         menuItems = [
             menu.home,
             menu.clientList,
-            menu.area,
+            menu.classifiedContract,
+            menu.contract,
+            // menu.area,
             menu.editUnit,
             menu.unitList,
             menu.eventHistory,

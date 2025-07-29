@@ -87,6 +87,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 });
 
 Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::get('/fetch/get-filtered-area-location', 'getFilteredAreaLocation')->name('area.filter.get');
     Route::get('/fetch/get-filtered-unit', 'clientDetail')->name('unit.filter.get');
     Route::get('/fetch/client', 'getAllClient')->name('client.get');
     Route::get('/client-list', 'index')->name('client.list');
@@ -116,6 +117,7 @@ Route::controller(ProfileController::class)->middleware(['auth', "roles:super_ad
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {
     Route::get('/area', 'index')->name('areas');
+
 });
 
 require __DIR__ . '/auth.php';

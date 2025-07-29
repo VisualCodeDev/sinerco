@@ -11,6 +11,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
     FaAngleDown,
+    FaCog,
     FaFileContract,
     FaList,
     FaUserFriends,
@@ -19,20 +20,14 @@ import {
 const ClientList = () => {
     // const columns = tColumns();
     const { data, loading, error } = fetch("client.get");
-    const [tab, setTab] = useState("unit");
     const [clients, setClients] = useState([]);
     const [expanded, setExpanded] = useState(false);
     const [selectedClient, setSelectedClients] = useState([]);
-    const [filteredUnits, setUnit] = useState([]);
+    const [filteredArea, setArea] = useState([]);
+    const [selectedLocation, setSelectedLocation] = useState();
     const [isLoading, setLoading] = useState(false);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
-    const handleConfirmSettings = () => {};
-    const tabs = [
-        { key: "unit", label: "Unit" },
-        { key: "contract", label: "Contracts" },
-        { key: "classified", label: "Classified Contracts" },
-    ];
 
     useEffect(() => {
         const fetchUnits = async () => {
@@ -42,7 +37,46 @@ const ClientList = () => {
                     const response = await axios.get(
                         route("unit.filter.get", selectedClient)
                     );
-                    setUnit(response.data);
+                    const data = response.data;
+
+                    const areaMap = new Map();
+
+                    for (const item of data) {
+                        const area = item.location.area;
+                        const location = item.location;
+                        const unit = {
+                            ...item.unit,
+                            unitAreaLocationId: item.unitAreaLocationId,
+                        };
+
+                        if (!areaMap.has(area.id)) {
+                            areaMap.set(area.id, {
+                                ...area,
+                                locations: new Map(),
+                            });
+                        }
+
+                        const currentArea = areaMap.get(area.id);
+
+                        if (!currentArea.locations.has(location.id)) {
+                            currentArea.locations.set(location.id, {
+                                ...location,
+                                units: [],
+                            });
+                        }
+
+                        currentArea.locations.get(location.id).units.push(unit);
+                    }
+
+                    const groupedAreas = Array.from(areaMap.values()).map(
+                        (areaObj) => ({
+                            ...areaObj,
+                            locations: Array.from(areaObj.locations.values()),
+                            isExpanded: false,
+                        })
+                    );
+
+                    setArea(groupedAreas);
                 } catch (err) {
                     console.error("Error fetching unit:", err);
                 } finally {
@@ -62,6 +96,15 @@ const ClientList = () => {
         router.visit(route("daily", item.unitAreaLocationId));
     };
 
+    const handleExpandArea = (item) => {
+        setArea((prevAreas) =>
+            prevAreas.map((area) =>
+                area.id === item.id
+                    ? { ...area, isExpanded: !area.isExpanded }
+                    : area
+            )
+        );
+    };
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
@@ -138,79 +181,53 @@ const ClientList = () => {
                 </div>
 
                 {/* Unit Contract List */}
-                <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
-                    <div className="flex gap-2">
-                        {tabs.map(({ key, label }) => (
-                            <div
-                                key={key}
-                                onClick={() => setTab(key)}
-                                className={`flex justify-center items-center px-4 py-2 cursor-pointer transition ${
-                                    tab === key
-                                        ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
-                                        : "text-gray-500"
-                                }`}
-                            >
-                                {label}
-                            </div>
-                        ))}
-                    </div>
+                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
                     <div className="flex gap-2 py-4">
-                        {tab === "unit" && (
-                            <div className="flex justify-between items-center mb-4 text-lg md:text-xl font-semibold w-full">
-                                <div className="flex flex-row items-center gap-3">
-                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                                        <FaList className="text-2xl md:text-3xl" />
-                                    </div>
-                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                                        Unit
-                                    </h2>
+                        <div className="flex justify-between items-center mb-4 text-lg md:text-xl font-semibold w-full">
+                            <div className="flex flex-row items-center gap-3">
+                                <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                    <FaList className="text-2xl md:text-3xl" />
                                 </div>
-                                <div className="flex md:justify-start justify-center">
-                                    <button
-                                        className="bg-primary text-white px-6 py-2 rounded-md"
-                                        onClick={() => setSettingModal(true)}
-                                    >
-                                        Setting
-                                    </button>
-                                </div>
+                                <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                    Area
+                                </h2>
                             </div>
-                        )}
-                        {tab === "contract" && (
-                            <div className="flex items-center mb-4 text-lg md:text-xl font-semibold">
-                                <div className="flex flex-row items-center gap-3">
-                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                                        <FaFileContract className="text-2xl md:text-3xl" />
-                                    </div>
-                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                                        Contract
-                                    </h2>
-                                </div>
-                            </div>
-                        )}
-
-                        {tab === "classified" && (
-                            <div className="flex items-center mb-4 text-lg md:text-xl font-semibold">
-                                <div className="flex flex-row items-center gap-3">
-                                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                                        <FaFileContract className="text-2xl md:text-3xl" />
-                                    </div>
-                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                                        Classified Contract
-                                    </h2>
-                                </div>
-                            </div>
-                        )}
+                        </div>
                     </div>
                     <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                         {isLoading && <LoadingSpinner />}
-                        {tab === "unit" && filteredUnits?.length > 0 ? (
-                            filteredUnits.map((item) => (
-                                <div
-                                    key={item?.id}
-                                    onClick={() => handleClick(item)}
-                                    className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm cursor-pointer"
-                                >
-                                    {item?.unit?.unit}
+                        {filteredArea?.length > 0 ? (
+                            filteredArea.map((area) => (
+                                <div className="flex flex-col gap-2">
+                                    <div
+                                        key={area}
+                                        onClick={() => handleExpandArea(area)}
+                                        className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm cursor-pointer"
+                                    >
+                                        {area?.area}
+                                    </div>
+                                    {area?.isExpanded &&
+                                        area?.locations?.map((loc) => (
+                                            <div className="flex gap-2">
+                                                <div className="w-4 border-e-4 border-primary" />
+                                                <div
+                                                    onClick={() =>
+                                                        setSelectedLocation({
+                                                            units: loc?.units,
+                                                            ...loc,
+                                                        })
+                                                    }
+                                                    className={`h-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 w-full cursor-pointer ${
+                                                        selectedLocation?.id ===
+                                                        loc?.id
+                                                            ? "bg-blue-100"
+                                                            : "bg-gray-100"
+                                                    }`}
+                                                >
+                                                    <p>{loc?.location}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                 </div>
                             ))
                         ) : (
@@ -220,21 +237,72 @@ const ClientList = () => {
                         )}
                     </div>
                 </div>
+
+                {/* UNIT LIST */}
+                {selectedLocation && selectedLocation?.units?.length > 0 && (
+                    <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
+                        <div className="flex flex-row justify-between items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                    <FaList className="text-2xl md:text-3xl" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                        Unit
+                                    </h2>
+                                    <p className="md:text-sm text-xs text-slate-400 font-normal">
+                                        ({selectedLocation?.location})
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex md:justify-start justify-center">
+                                <button
+                                    className="bg-primary text-white p-2 rounded-md text-base"
+                                    onClick={() => setSettingModal(true)}
+                                >
+                                    <FaCog />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+                            {selectedLocation?.units?.length > 0 ? (
+                                selectedLocation?.units?.map((item) => (
+                                    <div className="flex flex-col gap-2">
+                                        <div
+                                            key={item}
+                                            onClick={() => handleClick(item)}
+                                            className="flex justify-between items-center px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm cursor-pointer hover:bg-blue-100 transition duration-100"
+                                        >
+                                            <p>{item?.unit}</p>
+                                            <p
+                                                className={`text-xs w-max px-3 py-1 rounded-lg text-white ${
+                                                    item?.status === "stdby"
+                                                        ? "bg-yellow-500"
+                                                        : item?.status === "sd"
+                                                        ? "bg-red-500"
+                                                        : "bg-green-500"
+                                                }`}
+                                            >
+                                                {item?.status.toUpperCase()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-400 italic">
+                                    No Data available.
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-            {/* <div className="w-full md:w-2/3 text-sm md:text-base">
-                <TableComponent
-                    columns={columns}
-                    data={data}
-                    onRowClick={onRowClick}
-                    title={"List of Clients"}
-                />
-            </div> */}
             <SettingModal
                 // data={dailyReportSettingData}
                 clientData={selectedClient}
                 isModal={isSettingModal}
                 handleCloseModal={() => setSettingModal(false)}
-                handleConfirmSettings={handleConfirmSettings}
+                // handleConfirmSettings={handleConfirmSettings}
             />
         </PageLayout>
     );
@@ -258,7 +326,7 @@ const SettingModal = (props) => {
                 const resp = await axios.get(
                     route("unit.setting.get", clientData?.clientId)
                 );
-                setSettingData(resp.data)
+                setSettingData(resp.data);
             } catch (e) {
                 console.error(e);
             } finally {

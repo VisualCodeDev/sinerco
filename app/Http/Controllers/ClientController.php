@@ -24,12 +24,20 @@ class ClientController extends Controller
     public function clientDetail(Request $request)
     {
         $clientId = $request->clientId;
-        Log::debug(
-            $clientId
-        );
+
         $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
         $clientData = $data->first()?->client;
         $unitData = UnitAreaLocation::where('clientId', $clientId)->with(['client', 'unit', 'dailyReportSetting'])->first();
+        if ($data) {
+            return response()->json($data);
+            // return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
+        }
+    }
+
+    public function getFilteredAreaLocation(Request $request)
+    {
+        $clientId = $request->clientId;
+        $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
         if ($data) {
             return response()->json($data);
             // return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
