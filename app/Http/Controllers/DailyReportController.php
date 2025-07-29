@@ -43,6 +43,32 @@ class DailyReportController extends Controller
     public function setReport(Request $request, $unitAreaLocationId)
     {
         if ($unitAreaLocationId) {
+            $fieldsToNormalize = [
+                'sourcePress',
+                'suctionPress',
+                'dischargePress',
+                'speed',
+                'manifoldPress',
+                'oilPress',
+                'oilDiff',
+                'runningHours',
+                'voltage',
+                'waterTemp',
+                'befCooler',
+                'aftCooler',
+                'staticPress',
+                'diffPress',
+                'mscfd'
+            ];
+
+            foreach ($fieldsToNormalize as $field) {
+                if ($request->has($field)) {
+                    $request->merge([
+                        $field => str_replace(',', '.', $request->input($field))
+                    ]);
+                }
+            }
+
             $validatedData = $request->validate([
                 'date' => 'required|string',
                 'time' => 'required|string',
@@ -129,8 +155,9 @@ class DailyReportController extends Controller
         return back();
     }
 
-    public function editRepot(Request $request, $unitAreaLocationId) {
-        
+    public function editRepot(Request $request, $unitAreaLocationId)
+    {
+
     }
     public function index($unitAreaLocationId)
     {
@@ -159,8 +186,8 @@ class DailyReportController extends Controller
                 return collect($item)->except([
                     "created_at",
                     "updated_at",
-                    "approval1",
-                    "approval2",
+                    'remarks',
+                    'requestId',
                     "id",
                     "unitAreaLocationId"
                 ]);

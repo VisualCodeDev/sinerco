@@ -55,8 +55,10 @@ const DailyReportForm = (props) => {
             setSaving(false);
         }
     };
+
     const handleChange = ([field], value, minMaxSetting) => {
         let warn = "";
+        
         if (field === "date" || field === "time") {
             setData({
                 ...data,
