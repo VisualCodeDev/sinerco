@@ -62,12 +62,22 @@ export const TimeInput = ({
         [];
     let initTime =
         role === "operator"
-            ? time - 1
-            : (role === "super_admin" || role === "technician") && 1;
+            ? time === 0
+                ? 24
+                : time - 1
+            : role === "super_admin" || role === "technician"
+            ? 1
+            : null;
+
     let maxTime =
         role === "operator"
-            ? time
-            : (role === "super_admin" || role === "technician") && 23;
+            ? time === 0
+                ? 24
+                : time
+            : role === "super_admin" || role === "technician"
+            ? 23
+            : null;
+            
     for (let i = initTime; i <= maxTime; i++) {
         if (!filledFormTime?.includes(i)) {
             options.push(
