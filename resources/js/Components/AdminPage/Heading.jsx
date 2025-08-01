@@ -54,41 +54,51 @@ const Heading = ({ children }) => {
         },
         unitList: {
             icon: <FaList />,
-            label: "Unit List",
-            href: route("daily.list"),
-
-            // submenu: [
-            //     { label: "Data Unit", href: route("daily.list") },
-            //     {
-            //         condition: user?.role === "super_admin",
-            //         label: "Classified Contract",
-            //         href: route("daily.list"),
-            //     },
-            //     {
-            //         label: "Contract",
-            //         href: route("daily.list"),
-            //     },
-            // ],
+            label: "Unit",
+            // href: route("daily.list"),
+            submenu: [
+                { label: "Data Unit", href: route("daily.list") },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Unit Configuration",
+                    href: route("unit.setting"),
+                },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Classified Contract",
+                    href: route("daily.list"),
+                },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Contract",
+                    href: route("daily.list"),
+                },
+            ],
         },
         eventHistory: {
             icon: <FaTh />,
             label: "Event History",
             href: route("request"),
         },
-        classifiedContract: {
-            icon: <FaNewspaper />,
-            label: "Classified Contract",
-            href: route("daily.list"),
-        },
-        contract: {
-            icon: <FaSignature />,
-            label: "Contract",
-            href: route("daily.list"),
-        },
-        allocation: {
+        // classifiedContract: {
+        //     icon: <FaNewspaper />,
+        //     label: "Classified Contract",
+        //     href: route("daily.list"),
+        // },
+        // contract: {
+        //     icon: <FaSignature />,
+        //     label: "Contract",
+        //     href: route("daily.list"),
+        // },
+        user: {
             icon: <FaSearchLocation />,
-            label: "User Settings",
-            href: route("allocation.setting"),
+            label: "User",
+            submenu: [
+                {
+                    label: 'User List',
+                    href: route("allocation.setting"),
+                },
+            ],
         },
         profile: {
             icon: <FaUser />,
@@ -124,14 +134,12 @@ const Heading = ({ children }) => {
     if (user?.role === "super_admin") {
         menuItems = [
             menu.home,
-            menu.clientList,
-            menu.classifiedContract,
-            menu.contract,
-            // menu.area,
-            menu.editUnit,
+            menu.user,
             menu.unitList,
+            menu.clientList,
+            // menu.area,
+            // menu.editUnit,
             menu.eventHistory,
-            menu.allocation,
             menu.profile,
             menu.logHistory,
         ];

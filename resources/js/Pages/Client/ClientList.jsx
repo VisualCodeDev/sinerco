@@ -2,7 +2,10 @@ import LoadingSpinner from "@/Components/Loading";
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
 import { useToast } from "@/Components/Toast/ToastProvider";
-import { formItems } from "@/Components/utils/dashboard-util";
+import {
+    formItems,
+    getRequestTypeName,
+} from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
 import tColumns from "@/Components/utils/User/columns";
 import PageLayout from "@/Layouts/PageLayout";
@@ -283,7 +286,9 @@ const ClientList = () => {
                                                         : "bg-green-500"
                                                 }`}
                                             >
-                                                {item?.status.toUpperCase()}
+                                                {getRequestTypeName(
+                                                    item?.status
+                                                ).toUpperCase()}
                                             </p>
                                         </div>
                                     </div>
@@ -321,7 +326,7 @@ const SettingModal = (props) => {
 
     useEffect(() => {
         if (!clientData?.clientId) return;
-        console.log(clientData)
+        console.log(clientData);
         const fetchData = async () => {
             setLoading(true);
             try {

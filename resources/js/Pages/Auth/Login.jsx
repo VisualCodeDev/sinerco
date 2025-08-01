@@ -27,6 +27,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <div className="flex justify-center items-end md:items-center h-screen w-full bg-gradient-to-tr from-primary/75 to-secondary/75">
+            <Head title="Login" />
             <div className="hidden md:block bg-primary shadow-lg shadow-primary/70 w-1/4 h-1/2 p-10 -mr-10 z-20">
                 <img
                     className="w-14 h-14 mb-4"

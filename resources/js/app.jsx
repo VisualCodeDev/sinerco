@@ -17,7 +17,7 @@ if (csrfToken) {
 }
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${appName} ${title && `- ${title}`}`,
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,

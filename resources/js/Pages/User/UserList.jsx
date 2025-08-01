@@ -7,27 +7,30 @@ import { router } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
-const UserAllocation = ({ roles }) => {
+const UserList = ({ roles }) => {
     const [expanded, setExpanded] = useState(false);
-    const [selectedRole, setRole] = useState(1);
-    const [filteredUser, setFilteredUser] = useState();
+    const [selectedRole, setRole] = useState(null);
     const { data: users, loading, error } = fetch("user.get");
+    const [filteredUser, setFilteredUser] = useState();
     const onRowClick = (item) => {
         router.visit(route("allocation", item?.id));
     };
 
     useEffect(() => {
         if (loading) return;
-        const selectedFilterUser = users?.filter(
-            (item) => item?.role_id === selectedRole?.id
-        );
+        let selectedFilterUser = users;
+        if (selectedRole) {
+            selectedFilterUser = users?.filter(
+                (item) => item?.role_id === selectedRole?.id
+            );
+        }
         setFilteredUser(selectedFilterUser);
-    }, [selectedRole]);
+    }, [selectedRole, users]);
 
     if (loading) {
         return <LoadingSpinner />;
     }
-    
+
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
@@ -42,6 +45,14 @@ const UserAllocation = ({ roles }) => {
                         </h2>
                     </div>
                     <div className="space-y-2 max-h-[70vh] overflow-y-auto">
+                        <button
+                            onClick={() => setRole(null)}
+                            className={`capitalize w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                !selectedRole ? "bg-blue-100" : "bg-gray-100"
+                            }`}
+                        >
+                            All
+                        </button>
                         {roles
                             ?.filter((item) => item?.name != "super_admin")
                             .map((item, index) => (
@@ -75,7 +86,7 @@ const UserAllocation = ({ roles }) => {
                             className="flex justify-between items-center capitalize"
                             onClick={() => setExpanded(!expanded)}
                         >
-                            <div>{selectedRole?.name}</div>
+                            <div>{selectedRole?.name || 'All'}</div>
                             <FaAngleDown />
                         </div>
                         <div
@@ -83,6 +94,19 @@ const UserAllocation = ({ roles }) => {
                                 expanded ? "block" : "hidden"
                             }`}
                         >
+                            <button
+                                onClick={() => {
+                                    setRole(null);
+                                    setExpanded(false);
+                                }}
+                                className={`capitalize w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                    !selectedRole
+                                        ? "bg-blue-100"
+                                        : "bg-gray-100"
+                                }`}
+                            >
+                                All
+                            </button>
                             {roles
                                 ?.filter((item) => item?.name != "super_admin")
                                 .map((item) => (
@@ -129,11 +153,18 @@ const UserAllocation = ({ roles }) => {
                                 <div
                                     key={item?.email}
                                     onClick={() => onRowClick(item)}
-                                    className="px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 cursor-pointer text-blue-800 font-medium shadow-sm"
+                                    className="flex justify-between items-center px-4 py-2 rounded-md bg-blue-50 hover:bg-blue-100 cursor-pointer text-blue-800 font-medium shadow-sm"
                                 >
-                                    <p>{item?.name}</p>
-                                    <p className="md:text-sm text-xs text-slate-400">
-                                        {item?.email}
+                                    <div>
+                                        <p>{item?.name}</p>
+                                        <p className="md:text-sm text-xs text-slate-400">
+                                            {item?.email}
+                                        </p>
+                                    </div>
+                                    <p>
+                                        {item?.role === "super_admin"
+                                            ? "ADMIN"
+                                            : item?.role.toUpperCase()}
                                     </p>
                                 </div>
                             ))
@@ -149,4 +180,4 @@ const UserAllocation = ({ roles }) => {
     );
 };
 
-export default UserAllocation;
+export default UserList;

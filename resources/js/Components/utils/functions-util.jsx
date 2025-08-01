@@ -49,42 +49,55 @@ export const TimeInput = ({
     placeholder = "Enter time",
     value,
     disabled = false,
+    interval = 2,
 }) => {
     const dateTime = getCurrDateTime();
     const now = dateTime.now;
     const time = parseInt(now.format("HH"));
+    const minute = parseInt(now.format("mm"));
     const options = [];
+
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
                 ?.filter((data) => item?.date === data?.date)
                 .map((data) => parseInt(data?.time.split(":")[0]))) ||
         [];
-    let initTime =
-        role === "operator"
-            ? time === 0
-                ? 24
-                : time - 1
-            : role === "super_admin" || role === "technician"
-            ? 1
-            : null;
 
-    let maxTime =
-        role === "operator"
-            ? time === 0
-                ? 24
-                : time
-            : role === "super_admin" || role === "technician"
-            ? 23
-            : null;
-            
-    for (let i = initTime; i <= maxTime; i++) {
-        if (!filledFormTime?.includes(i)) {
-            options.push(
-                <option key={i} value={`${i.toString().padStart(2, "0")}:00`}>
-                    {i.toString().padStart(2, "0")}:00
-                </option>
-            );
+    // hanya untuk operator
+    if (role === "operator") {
+        for (let i = 0; i <= 24; i += interval) {
+            const isNow = i === time;
+            const isBeforeNow = i < time;
+            const isExpired = isNow && minute > 35;
+
+            const isNotYetTime = i > time;
+
+            const alreadyFilled = filledFormTime.includes(i);
+
+            if (isNow && minute <= 35 && !alreadyFilled) {
+                options.push(
+                    <option
+                        key={i}
+                        value={`${i.toString().padStart(2, "0")}:00`}
+                    >
+                        {i.toString().padStart(2, "0")}:00
+                    </option>
+                );
+            }
+        }
+    } else if (role === "super_admin" || role === "technician") {
+        for (let i = 1; i <= 24; i++) {
+            if (!filledFormTime.includes(i)) {
+                options.push(
+                    <option
+                        key={i}
+                        value={`${i.toString().padStart(2, "0")}:00`}
+                    >
+                        {i.toString().padStart(2, "0")}:00
+                    </option>
+                );
+            }
         }
     }
 
@@ -560,8 +573,9 @@ export const toCapitalizeFirstLetter = (str) => {
 
 export const splitCamelCase = (str) => {
     const result = str
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .replace(/^./, (c) => c.toUpperCase());
+        .replace(/([a-z])([A-Z])/g, "$1 $2") // camelCase → camel Case
+        .replace(/_/g, " ") // snake_case → snake case
+        .replace(/^./, (c) => c.toUpperCase()); // kapitalisasi huruf pertama
 
     return result;
 };

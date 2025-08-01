@@ -97,13 +97,15 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
 Route::controller(UserSettingController::class)
     ->middleware(['auth', 'roles:super_admin'])
     ->group(function () {
+        Route::get('/fetch/permitted/{userId}', 'getPermittedUnitData')->name('permittedUnitData.get');
         Route::get('/fetch/users', 'getAllUsers')->name('user.get');
-        Route::get('/setting/add-user', 'newUserIndex')->name('user.new');
-        Route::post('/setting/add-user/new', 'addNewUser')->name('user.add');
-        Route::get('/setting/user-allocation', 'index')->name('allocation.setting');
-        Route::get('/user-allocation/{userId}', 'allocationSettings')->name('allocation');
-        Route::post('/user-allocation/{userId}/add', 'allocationSettingsAdd')->name('allocation.add');
-        Route::post('/user-allocation/{userId}/remove', 'allocationSettingsRemove')->name('allocation.remove');
+        Route::get('/users/setting/add-user', 'newUserIndex')->name('user.new');
+        Route::post('/users//setting/add-user/new', 'addNewUser')->name('user.add');
+        Route::get('/users', 'index')->name('allocation.setting');
+        Route::get('/users/setting/{userId}/', 'allocationSettings')->name('allocation');
+        Route::post('/users/setting/{userId}/information/edit', 'editUser')->name('user.edit');
+        Route::post('/users/setting/{userId}/allocation/add', 'allocationSettingsAdd')->name('allocation.add');
+        Route::post('/users/setting/{userId}/allocationremove', 'allocationSettingsRemove')->name('allocation.remove');
     });
 
 

@@ -9,6 +9,7 @@ use App\Models\UserSetting;
 use Hash;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Log;
 
 class UserSettingController extends Controller
 {
@@ -28,10 +29,19 @@ class UserSettingController extends Controller
             ])
         );
     }
+
+    public function getPermittedUnitData($userId)
+    {
+        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit', 'unitArea.location.area')->get()->toArray();
+
+        Log::debug($permittedData);
+        return response()->json($permittedData);
+    }
+
     public function newUserIndex()
     {
         $roles = Role::all();
-        return Inertia::render('Setting/AddUser', ['roles' => $roles]);
+        return Inertia::render('User/AddUser', ['roles' => $roles]);
     }
 
     public function addNewUser(Request $request)
@@ -55,20 +65,17 @@ class UserSettingController extends Controller
         $roles = Role::all();
         // $technicianData = User::where('role', 'technician')->get();
         // $operatorData = User::where('role', 'operator')->get();
-        return Inertia::render('Setting/UserAllocation', ['roles' => $roles]);
+        return Inertia::render('User/UserList', ['roles' => $roles]);
     }
     public function allocationSettings($userId)
     {
-        $userData = User::where('id', $userId)->first();
-        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit', 'unitArea.location.area')->get()->toArray();
-
+        $userData = User::select(['id', 'name', 'email', 'role_id'])
+            ->where('id', $userId)
+            ->first();
+        $roleData = Role::all();
         $unitAreaData = [];
         $unitAreaData = UnitAreaLocation::with(['unit', 'client', 'location.area'])->get();
-        // if ($userData->role == 'operator') {
-        //     $unitAreaData = Client::all();
-        // }
-        ;
-        return Inertia::render('Setting/UserAllocationSetting', ['data' => $userData, 'permittedData' => $permittedData, 'unitAreaData' => $unitAreaData]);
+        return Inertia::render('User/UserAllocationSetting', ['data' => $userData, 'unitAreaData' => $unitAreaData, 'roleData'=>$roleData]);
     }
 
     public function allocationSettingsAdd(Request $request)
@@ -149,17 +156,25 @@ class UserSettingController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function editUser(Request $request, $userId)
     {
-        //
+        $request->validate([
+            'name'=> 'sometimes|string',
+            'role' => 'sometimes|numeric'
+        ]);
+        $user = User::find($userId);
+        Log::debug($userId);
+        Log::debug($user);
+        $user->update(['name'=> $request->name, 'role_id'=>$request->role]);
+        return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function getSelectedUser($userId)
     {
-        //
+        $user = User::where('id', $userId)->firstOrFail();
+        return response()->json($user);
     }
 
     /**

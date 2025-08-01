@@ -5,11 +5,22 @@ import PageLayout from "@/Layouts/PageLayout";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import UserInfo from "./UserInfo";
+import { fetch } from "@/Components/utils/database-util";
+import LoadingSpinner from "@/Components/Loading";
 
-const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
+const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
+    const {
+        data: permittedData,
+        loading,
+        error,
+    } = fetch("permittedUnitData.get", data?.id);
+    const [initialUser, setInitialUser] = useState(data);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [formData, setFormData] = useState({
         selectedRows: [],
     });
+
     const [unselectedUnitArea, setUnselectedUnitArea] = useState(
         unitAreaData || []
     );
@@ -18,30 +29,9 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
     );
     const { addToast } = useToast();
 
-    // const [client, setClient] = useState(null);
-
-    // useEffect(() => {
-    //     // if (data?.role === "technician") {
-    //     const uniqueClientsMap = new Map();
-
-    //     unitAreaData?.forEach((item) => {
-    //         const client = item.client;
-    //         if (!uniqueClientsMap.has(client?.clientId)) {
-    //             uniqueClientsMap.set(client?.clientId, client);
-    //         }
-    //     });
-
-    //     const uniqueClients = Array.from(uniqueClientsMap.values());
-
-    //     setClient(uniqueClients);
-    //     // } else {
-    //     //     setClient(unitAreaData);
-    //     // }
-    // }, []);
     useEffect(() => {
         if (permittedData?.length > 0) {
             const permitted = permittedData.map((item) => item?.unit_area);
-            console.log("permittedData", permitted);
             setPermittedUnitArea(permitted);
         }
     }, [permittedData]);
@@ -176,7 +166,7 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
                 item?.unitAreaLocationId
         );
         setPermittedUnitArea(updatedPermittedData);
-        
+
         const updatedUnselectedData = unitAreaData.filter(
             (item) =>
                 selectedData.includes(item.unitAreaLocationId) &&
@@ -209,8 +199,35 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
 
         setFormData({ selectedRows: [] });
     };
+
+    const saveUser = async (user) => {
+        if (!user) return;
+
+        const isUnchanged =
+            user.name === initialUser.name && user.role === initialUser.role_id;
+
+        if (isUnchanged) {
+            return;
+        }
+
+        try {
+            const resp = await axios.post(route("user.edit", initialUser?.id), user);
+            setInitialUser(user);
+            addToast(resp?.data);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    useEffect(() => {
+        const checkAdmin =
+            roleData?.find((item) => item?.id === data?.role_id)?.name ===
+            "super_admin";
+        setIsAdmin(checkAdmin);
+    }, [roleData]);
     return (
         <PageLayout>
+            {loading && <LoadingSpinner />}
             {/* <select onChange={(e) => handleSelect(e.target.value)}>
                 <option value={null}>---Select Branch Unit---</option>
                 {client?.map((item, index) => {
@@ -227,17 +244,44 @@ const UserAllocationSetting = ({ data, permittedData, unitAreaData }) => {
                         className="hover:underline aria-selected:bg-primary py-2 px-4 aria-selected:text-white rounded-t-2xl"
                         onClick={() => setFormData({ selectedRows: [] })}
                     >
-                        Permitted
+                        User Info
                     </Tab>
-                    <Tab
-                        className="hover:underline aria-selected:bg-primary py-2 px-4 aria-selected:text-white rounded-t-2xl"
-                        onClick={() => setFormData({ selectedRows: [] })}
-                    >
-                        Edit Permission
-                    </Tab>
+                    {!isAdmin && (
+                        <>
+                            <Tab
+                                className="hover:underline aria-selected:bg-primary py-2 px-4 aria-selected:text-white rounded-t-2xl"
+                                onClick={() =>
+                                    setFormData({ selectedRows: [] })
+                                }
+                            >
+                                Permitted
+                            </Tab>
+                            <Tab
+                                className="hover:underline aria-selected:bg-primary py-2 px-4 aria-selected:text-white rounded-t-2xl"
+                                onClick={() =>
+                                    setFormData({ selectedRows: [] })
+                                }
+                            >
+                                Edit Permission
+                            </Tab>
+                        </>
+                    )}
                 </TabList>
 
-                <TabPanels className={'p-5 bg-white border shadow-md'}>
+                <TabPanels className={"p-5 bg-white border shadow-md"}>
+                    <TabPanel>
+                        <UserInfo
+                            roleData={roleData}
+                            data={{
+                                name: initialUser?.name,
+                                email: initialUser?.email,
+                                role: initialUser?.role_id,
+                            }}
+                            onSave={(updatedData) => {
+                                saveUser(updatedData);
+                            }}
+                        />
+                    </TabPanel>
                     <TabPanel>
                         <TableComponent
                             title={"Permitted"}

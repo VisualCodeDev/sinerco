@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <link rel="icon" type="image/webp" href="/logo_sinerco.webp">
     <title inertia>{{ config('app.name', 'Sinerco') }}</title>
     <link rel="preload" as="image" href="/logo_sinerco.webp">
     <!-- Fonts -->

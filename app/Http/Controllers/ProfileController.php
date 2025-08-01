@@ -23,7 +23,7 @@ class ProfileController extends Controller
     {
         $technicianData = User::where('role', 'technician')->get();
         $operatorData = User::where('role', 'operator')->get();
-        return Inertia::render('Setting/UserAllocation', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
+        return Inertia::render('User/UserList', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
     }
     public function index($userId)
     {
