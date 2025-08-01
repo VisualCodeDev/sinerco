@@ -18,7 +18,7 @@ import {
 
 export default function Dashboard({ data, unitData }) {
     const { user, loading } = useAuth();
-    const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
+    const { data: allUnits, loading: isLoading, error } = fetch("unit.area.get");
     const [expanded, setExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"

@@ -50,7 +50,7 @@ const Heading = ({ children }) => {
         editUnit: {
             icon: <FaRegEdit />,
             label: "Unit Conf. Setting",
-            href: route("unit.setting"),
+            href: route("input.setting"),
         },
         unitList: {
             icon: <FaList />,
@@ -60,8 +60,13 @@ const Heading = ({ children }) => {
                 { label: "Data Unit", href: route("daily.list") },
                 {
                     condition: user?.role === "super_admin",
-                    label: "Unit Configuration",
-                    href: route("unit.setting"),
+                    label: "Input Field",
+                    href: route("unit.field"),
+                },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Input Configuration",
+                    href: route("input.setting"),
                 },
                 {
                     condition: user?.role === "super_admin",
@@ -75,10 +80,21 @@ const Heading = ({ children }) => {
                 },
             ],
         },
-        eventHistory: {
+        event: {
             icon: <FaTh />,
-            label: "Event History",
-            href: route("request"),
+            label: "Event",
+
+            submenu: [
+                {
+                    label: "Event History",
+                    href: route("request"),
+                },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Remarks",
+                    // href: route("remarks"),
+                },
+            ],
         },
         // classifiedContract: {
         //     icon: <FaNewspaper />,
@@ -95,7 +111,7 @@ const Heading = ({ children }) => {
             label: "User",
             submenu: [
                 {
-                    label: 'User List',
+                    label: "User List",
                     href: route("allocation.setting"),
                 },
             ],
@@ -139,30 +155,25 @@ const Heading = ({ children }) => {
             menu.clientList,
             // menu.area,
             // menu.editUnit,
-            menu.eventHistory,
+            menu.event,
             menu.profile,
             menu.logHistory,
         ];
     }
     if (user?.role === "technician") {
-        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+        menuItems = [menu.home, menu.unitList, menu.event];
     }
     if (user?.role === "operator") {
-        menuItems = [menu.unitList, menu.eventHistory];
+        menuItems = [menu.unitList, menu.event];
     }
     if (user?.role === "client") {
-        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+        menuItems = [menu.home, menu.unitList, menu.event];
     }
     if (user?.role === "workshop") {
         menuItems = [menu.home, menu.unitList];
     }
     if (user?.role === "management") {
-        menuItems = [
-            menu.home,
-            menu.clientList,
-            menu.unitList,
-            menu.eventHistory,
-        ];
+        menuItems = [menu.home, menu.clientList, menu.unitList, menu.event];
     }
     menuItems.push(menu.logout);
 

@@ -43,6 +43,13 @@ class DataUnitController extends Controller
 
     public function getAllUnit(Request $request)
     {
+        $units = DataUnit::all();
+
+        return response()->json($units->values(), 200);
+    }
+
+    public function getAllUnitAreaLocation(Request $request)
+    {
         $filterStatus = $request->query('status');
 
         $units = self::getPermittedUnit();
@@ -96,9 +103,9 @@ class DataUnitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function inputField()
     {
-        //
+        return Inertia::render('Unit/InputField');
     }
 
     /**

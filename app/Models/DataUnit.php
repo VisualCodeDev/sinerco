@@ -12,4 +12,14 @@ class DataUnit extends Model
     public $fillable = [
         'status',
     ];
+
+    public function inputFields()
+    {
+        return $this->belongsToMany(
+            ReportInputField::class,
+            'data_unit_field', 
+            'unit_id',
+            'field_id'
+        );
+    }
 }

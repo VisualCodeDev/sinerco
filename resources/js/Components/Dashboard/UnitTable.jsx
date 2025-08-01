@@ -24,7 +24,7 @@ const UnitTable = (props) => {
         router.visit(route("daily", item.unitAreaLocationId));
     };
     if (!propsData) {
-        const { data, loading, error } = fetch("unit.get");
+        const { data, loading, error } = fetch("unit.area.get");
         if (loading) {
             return <LoadingSpinner />;
         }

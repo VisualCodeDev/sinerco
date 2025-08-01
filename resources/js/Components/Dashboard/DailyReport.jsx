@@ -18,25 +18,33 @@ import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
 import axios from "axios";
 import LoadingSpinner from "../Loading";
+import { fetch } from "../utils/database-util";
 
 const DailyReport = (props) => {
     const { formData, unitData, user } = props;
+    const { data: unitFieldData, loading } = fetch(
+        "field.unit.get",
+        unitData?.unitId
+    );
+
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
     );
+    const [columnList, setColumnList] = useState([]);
     const [isClicked, setClick] = useState(false);
     const [isEditModal, setEditModal] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
     const [dataAll, setData] = useState(formData);
-
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
+
     const handleSelectDate = (e) => {
         const newSelectedDate = e.target.value;
         setSelectedDate(newSelectedDate);
     };
+
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .filter(([, value]) => value.date === selectedDate)
@@ -48,6 +56,7 @@ const DailyReport = (props) => {
             });
         return sortedItemByTime;
     };
+
     useEffect(() => {
         if (dataAll) {
             if (selectedDate) {
@@ -64,12 +73,17 @@ const DailyReport = (props) => {
         }
     }, [dataAll]);
 
+    useEffect(() => {
+        if (!unitFieldData) return;
+        setColumnList(unitFieldData?.input_fields);
+    }, [unitFieldData]);
+
     const handleEdit = (key) => {
         const data = dataAll[key];
         setEditModal(true);
         setSelectedData(data);
     };
-
+    
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -104,14 +118,18 @@ const DailyReport = (props) => {
                 <table className="min-w-[900px] w-full table-auto border-collapse">
                     <thead className="bg-primary text-white text-center">
                         <tr>
-                            {formItems?.map((item, index) => (
+                            {columnList?.map((item, index) => (
                                 <th
                                     key={index}
                                     className="px-4 py-2 text-sm font-semibold border border-black text-center"
-                                    rowSpan={!item.subheader ? 2 : undefined}
-                                    colSpan={item.subheader?.length}
+                                    rowSpan={
+                                        !item.has_subfields
+                                            ? item.subfields?.length
+                                            : undefined
+                                    }
+                                    colSpan={item.subfields?.length}
                                 >
-                                    {item.header}
+                                    {item.field_name}
                                 </th>
                             ))}
                             {user?.role === "super_admin" && (
@@ -124,20 +142,20 @@ const DailyReport = (props) => {
                             )}
                         </tr>
                         <tr>
-                            {formItems?.map((item) =>
-                                item.subheader?.map((sub, index) => (
+                            {columnList?.map((item) =>
+                                item.subfields?.map((sub, index) => (
                                     <th
                                         key={index}
                                         className="px-4 py-2 text-sm font-semibold border border-black text-left"
                                     >
-                                        {sub.sub}
+                                        {sub.subfield_name}
                                     </th>
                                 ))
                             )}
                         </tr>
                     </thead>
                     <tbody>
-                        {currData &&
+                        {/* {currData &&
                             Object.entries(currData).map(([key, value]) => (
                                 <tr
                                     key={key}
@@ -234,7 +252,7 @@ const DailyReport = (props) => {
                                     <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
                                 )}
                             </tr>
-                        )}
+                        )} */}
                     </tbody>
                 </table>
             </div>
