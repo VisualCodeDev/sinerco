@@ -69,10 +69,12 @@ const TableComponent = (props) => {
     };
 
     const containsQuery = (value, query) => {
+        console.log(value, query)
         if (typeof value === "string") {
             return value.toLowerCase().includes(query);
         }
         if (typeof value === "object" && value !== null) {
+            
             return Object.values(value).some((val) =>
                 containsQuery(val, query)
             );
@@ -100,10 +102,12 @@ const TableComponent = (props) => {
             return setFilteredData(filterData);
         }
         filterData = sortedData?.filter((item) => {
+            console.log(item, query);
             return containsQuery(item, query);
         });
-        setFilteredData(sortedData);
-    }, [filterConfig, sortConfig?.key]);
+
+        setFilteredData(filterData);
+    }, [filterConfig, sortConfig?.key, query]);
 
     return (
         <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg">
