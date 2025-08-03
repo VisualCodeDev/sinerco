@@ -49,7 +49,7 @@ export const TimeInput = ({
     placeholder = "Enter time",
     value,
     disabled = false,
-    interval = 2,
+    interval = 1,
 }) => {
     const dateTime = getCurrDateTime();
     const now = dateTime.now;

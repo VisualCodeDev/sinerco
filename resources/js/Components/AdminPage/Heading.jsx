@@ -50,7 +50,7 @@ const Heading = ({ children }) => {
         editUnit: {
             icon: <FaRegEdit />,
             label: "Unit Conf. Setting",
-            href: route("unit.setting"),
+            href: route("input.setting"),
         },
         unitList: {
             icon: <FaList />,
@@ -60,8 +60,13 @@ const Heading = ({ children }) => {
                 { label: "Data Unit", href: route("daily.list") },
                 {
                     condition: user?.role === "super_admin",
-                    label: "Unit Configuration",
-                    href: route("unit.setting"),
+                    label: "Unit Input Setting",
+                    href: route("unit.interval.setting"),
+                },
+                {
+                    condition: user?.role === "super_admin",
+                    label: "Input Validation",
+                    href: route("input.setting"),
                 },
                 {
                     condition: user?.role === "super_admin",

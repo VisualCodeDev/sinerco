@@ -30,7 +30,6 @@ const DailyReportForm = (props) => {
         e.preventDefault();
         setConfirmationModal(true);
     };
-
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
@@ -58,7 +57,7 @@ const DailyReportForm = (props) => {
 
     const handleChange = ([field], value, minMaxSetting) => {
         let warn = "";
-        
+
         if (field === "date" || field === "time") {
             setData({
                 ...data,
@@ -87,6 +86,7 @@ const DailyReportForm = (props) => {
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
+        interval: unitData?.unit?.input_interval,
     });
 
     useEffect(() => {

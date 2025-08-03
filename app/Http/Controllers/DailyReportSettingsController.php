@@ -14,7 +14,7 @@ class DailyReportSettingsController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Unit/UnitSetting');
+        return Inertia::render('Unit/InputValidationSetting');
     }
 
     public function setSetting(Request $request)
