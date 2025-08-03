@@ -65,11 +65,6 @@ const Heading = ({ children }) => {
                 },
                 {
                     condition: user?.role === "super_admin",
-                    label: "Input Validation",
-                    href: route("input.setting"),
-                },
-                {
-                    condition: user?.role === "super_admin",
                     label: "Classified Contract",
                     href: route("daily.list"),
                 },
