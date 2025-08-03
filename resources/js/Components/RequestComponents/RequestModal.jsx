@@ -70,8 +70,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     }, [showModal]);
 
     useEffect(() => {
-        const location = unitData.find((item) => item?.unitId === data?.unitId);
-        handleChange(["locationId"], location?.id);
+        const areaLocation = unitData.find((item) => item?.unitId === data?.unitId);
+        console.log(areaLocation?.location)
+        handleChange(["locationId"], areaLocation?.location?.id);
     }, [data?.unitId]);
 
     return (

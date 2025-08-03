@@ -579,3 +579,50 @@ export const splitCamelCase = (str) => {
 
     return result;
 };
+
+function ExcelImport() {
+    const [users, setUsers] = useState([]);
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (evt) => {
+            const bstr = evt.target.result;
+            const workbook = XLSX.read(bstr, { type: "binary" });
+
+            // Ambil sheet pertama
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+
+            // Convert ke JSON
+            const data = XLSX.utils.sheet_to_json(sheet);
+
+            // Contoh hasil [{ email: "", password: "", role: "" }, ...]
+            console.log("Parsed data:", data);
+            setUsers(data);
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
+    return (
+        <div>
+            <input
+                type="file"
+                accept=".xlsx, .xls, .csv"
+                onChange={handleFileUpload}
+            />
+            <h3>Imported Users:</h3>
+            <ul>
+                {users.map((user, idx) => (
+                    <li key={idx}>
+                        {user.email} | {user.password} | {user.role}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+export default ExcelImport;
