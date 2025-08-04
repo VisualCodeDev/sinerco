@@ -70,13 +70,11 @@ export const TimeInput = ({
             const isNow = i === time;
             const isBeforeNow = i < time;
             const isExpired = isNow && minute > 35;
-            console.log(isNow, time, interval);
-            console.log(minute <= 35);
             const isNotYetTime = i > time;
 
             const alreadyFilled = filledFormTime.includes(i);
 
-            if (isNow && minute <= 35 && !alreadyFilled) {
+            if (isExpired && !alreadyFilled) {
                 options.push(
                     <option
                         key={i}
