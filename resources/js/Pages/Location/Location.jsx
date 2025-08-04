@@ -21,7 +21,6 @@ const Location = ({ data }) => {
                 item?.area?.id === (selectedAreas?.id || uniqueAreas[0]?.id)
         );
         setLocations(filteredLocation);
-        console.log(selectedAreas);
     }, [data, selectedAreas]);
 
     console.log;

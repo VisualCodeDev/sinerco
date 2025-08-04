@@ -317,7 +317,6 @@ const ExportModal = (props) => {
 
     const handleGenerate = () => {
         const range = getDateRange(selectedDate.start, selectedDate.end);
-        console.log(range);
         generateExcel("Report.xlsx", data, range);
     };
 

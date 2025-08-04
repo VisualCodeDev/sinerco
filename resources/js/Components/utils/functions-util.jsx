@@ -69,9 +69,7 @@ export const TimeInput = ({
         for (let i = 0; i <= 24; i += interval) {
             const isNow = i === time;
             const isBeforeNow = i < time;
-            const isExpired = isNow && minute > 35;
-            const isNotYetTime = i > time;
-
+            const isExpired = isNow && minute <= 35;
             const alreadyFilled = filledFormTime.includes(i);
 
             if (isExpired && !alreadyFilled) {

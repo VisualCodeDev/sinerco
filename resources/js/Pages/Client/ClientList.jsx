@@ -326,7 +326,6 @@ const SettingModal = (props) => {
 
     useEffect(() => {
         if (!clientData?.clientId) return;
-        console.log(clientData);
         const fetchData = async () => {
             setLoading(true);
             try {

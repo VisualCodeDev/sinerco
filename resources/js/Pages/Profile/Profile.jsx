@@ -22,7 +22,6 @@ const Profile = ({ data, permissionData, requestList }) => {
         selectedRows: [],
     });
 
-    console.log(requestList);
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row h-screen md:gap-20">

@@ -71,7 +71,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     useEffect(() => {
         const areaLocation = unitData.find((item) => item?.unitId === data?.unitId);
-        console.log(areaLocation?.location)
         handleChange(["locationId"], areaLocation?.location?.id);
     }, [data?.unitId]);
 

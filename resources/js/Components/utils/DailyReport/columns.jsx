@@ -32,7 +32,6 @@ const list = ({ handleChange, formData, reportSettings, role, interval }) => {
             name: "time",
             header: "Time",
             Cell: ({ item, header, name }) => {
-                console.log();
                 return (
                     <div className="flex flex-col">
                         <label
