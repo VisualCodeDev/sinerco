@@ -65,13 +65,15 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator") {
-        console.log(time, minute);
         for (let i = 0; i <= 24; i += interval) {
             const isNow = i === time;
             const isBeforeNow = i < time;
             const isExpired = isNow && minute <= 35;
             const alreadyFilled = filledFormTime.includes(i);
 
+            console.log(time, minute);
+            console.log(isExpired, alreadyFilled);
+            console.log(isExpired && !alreadyFilled);
             if (isExpired && !alreadyFilled) {
                 options.push(
                     <option
