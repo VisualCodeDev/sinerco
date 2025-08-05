@@ -58,7 +58,7 @@ export default function MultiSelectDropdown({
                         return (
                             <span
                                 key={value}
-                                className="bg-primary text-white text-sm px-2 py-1 rounded-full cursor-pointer"
+                                className="bg-primary text-white text-sm px-3 py-1.5 rounded-full cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     toggleOption(value);

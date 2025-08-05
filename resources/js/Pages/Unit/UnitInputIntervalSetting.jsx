@@ -79,7 +79,7 @@ const UnitInputIntervalSetting = () => {
             </h2>
 
             {/* Selection Mode */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
                 <label className="text-base text-gray-600 font-medium">
                     Selection Mode
                 </label>
@@ -94,7 +94,7 @@ const UnitInputIntervalSetting = () => {
             </div>
 
             {/* Unit Selection */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
                 <label className="text-base text-gray-600 font-medium">
                     Select Unit
                 </label>
@@ -121,7 +121,7 @@ const UnitInputIntervalSetting = () => {
             </div>
 
             {/* Numeric Input */}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
                 <label className="text-base text-gray-600 font-medium">
                     Input Interval (Hour(s))
                 </label>
@@ -139,10 +139,10 @@ const UnitInputIntervalSetting = () => {
                     ))}
                 </select>
             </div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center mb-10">
                 <button
                     onClick={handleSave}
-                    className="bg-primary text-white px-6 py-2 rounded-xl mt-10 text-xl"
+                    className="bg-primary text-white border-2 border-white px-10 py-2 rounded-lg mt-10 text-xl transition ease-in-out hover:bg-transparent hover:text-primary hover:border-primary hover:scale-90"
                 >
                     Save
                 </button>
