@@ -56,7 +56,6 @@ export const TimeInput = ({
     const time = parseInt(now.format("HH"));
     const minute = parseInt(now.format("mm"));
     const options = [];
-
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
@@ -66,6 +65,7 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator") {
+        console.log(time, minute);
         for (let i = 0; i <= 24; i += interval) {
             const isNow = i === time;
             const isBeforeNow = i < time;

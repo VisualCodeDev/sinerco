@@ -69,7 +69,6 @@ const TableComponent = (props) => {
     };
 
     const containsQuery = (value, query) => {
-        console.log(value, query)
         if (typeof value === "string") {
             return value.toLowerCase().includes(query);
         }
@@ -102,7 +101,6 @@ const TableComponent = (props) => {
             return setFilteredData(filterData);
         }
         filterData = sortedData?.filter((item) => {
-            console.log(item, query);
             return containsQuery(item, query);
         });
 
