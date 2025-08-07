@@ -1,13 +1,17 @@
-import { splitCamelCase, toCapitalizeFirstLetter } from "@/Components/utils/dashboard-util";
+import {
+    splitCamelCase,
+    toCapitalizeFirstLetter,
+} from "@/Components/utils/dashboard-util";
 import { useState } from "react";
 
 export default function UserInfo({ data, onSave, roleData }) {
     const [name, setName] = useState(data?.name || "");
     const [role, setRole] = useState(data?.role || "");
+    const [password, setPassword] = useState(data?.password || "");
     const [isEditing, setIsEditing] = useState(false);
     const handleSave = () => {
         setIsEditing(false);
-        onSave({ name, role });
+        onSave({ name, role, password });
     };
     const labelStyle = "text-sm font-medium text-zinc-700";
     const inputBaseStyle =
@@ -15,7 +19,7 @@ export default function UserInfo({ data, onSave, roleData }) {
     const inputReadOnly = "bg-zinc-100 border-primary text-zinc-500";
     const inputEditable =
         "border-primary focus:border-black focus:ring-1 focus:ring-blue-500 bg-white";
-
+    console.log(data);
     return (
         <div className="max-w-lg space-y-5">
             <div className="space-y-1">
@@ -33,7 +37,9 @@ export default function UserInfo({ data, onSave, roleData }) {
                 <input
                     type="text"
                     value={name}
-                    onChange={(e) => setName(toCapitalizeFirstLetter(e.target.value))}
+                    onChange={(e) =>
+                        setName(toCapitalizeFirstLetter(e.target.value))
+                    }
                     readOnly={!isEditing}
                     className={`${inputBaseStyle} ${
                         isEditing ? inputEditable : inputReadOnly
@@ -57,6 +63,19 @@ export default function UserInfo({ data, onSave, roleData }) {
                         </option>
                     ))}
                 </select>
+            </div>
+
+            <div className="space-y-1">
+                <label className={labelStyle}>New Password</label>
+                <input
+                    type={isEditing ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    readOnly={!isEditing}
+                    className={`${inputBaseStyle} ${
+                        isEditing ? inputEditable : inputReadOnly
+                    }`}
+                />
             </div>
 
             <div className="flex gap-3 pt-2">

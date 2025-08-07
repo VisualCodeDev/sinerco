@@ -160,12 +160,11 @@ class UserSettingController extends Controller
     {
         $request->validate([
             'name'=> 'sometimes|string',
-            'role' => 'sometimes|numeric'
+            'role' => 'sometimes|numeric',
+            'password' => 'sometimes|string|min:8'
         ]);
         $user = User::find($userId);
-        Log::debug($userId);
-        Log::debug($user);
-        $user->update(['name'=> $request->name, 'role_id'=>$request->role]);
+        $user->update(['name'=> $request->name, 'role_id'=>$request->role, 'password'=>$request->password ? Hash::make($request->password) : $user->password]);
         return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
     /**

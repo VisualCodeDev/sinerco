@@ -204,7 +204,8 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
         if (!user) return;
 
         const isUnchanged =
-            user.name === initialUser.name && user.role === initialUser.role_id;
+            user.name === initialUser.name && user.role === initialUser.role_id &&
+            user.password === initialUser.password;
 
         if (isUnchanged) {
             return;

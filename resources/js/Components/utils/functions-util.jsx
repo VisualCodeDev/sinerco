@@ -56,6 +56,8 @@ export const TimeInput = ({
     const time = parseInt(now.format("HH"));
     const minute = parseInt(now.format("mm"));
     const options = [];
+    let permittedTime = time % interval === 0 ? time : time + (time % interval);
+
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
@@ -67,11 +69,10 @@ export const TimeInput = ({
     if (role === "operator") {
         for (let i = 0; i <= 24; i += parseInt(interval)) {
             const isNow = i === time;
-            const isBeforeNow = i < time;
-            const isExpired = isNow && minute <= 35;
+            const isPermitted = isNow && minute <= 35;
             const alreadyFilled = filledFormTime.includes(i);
-
-            if (isExpired && !alreadyFilled) {
+            if (isPermitted && !alreadyFilled) {
+                permittedTime = i;
                 options.push(
                     <option
                         key={i}
@@ -108,17 +109,7 @@ export const TimeInput = ({
             >
                 {options}
             </select>
-            {/* <input
-                value={value}
-                required
-                name="time"
-                type="time"
-                onChange={onChange}
-                min={min}
-                max={max}
-                placeholder={placeholder}
-                className="border rounded p-2"
-            /> */}
+           <span className="text-sm text-slate-400">Available from {permittedTime}:00 to {permittedTime}:35</span>
         </>
     );
 };
