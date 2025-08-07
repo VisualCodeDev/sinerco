@@ -62,15 +62,17 @@ export const TimeInput = ({
             setNow(now);
             setTime(hour);
             setMinute(minute);
-    console.log(now, hour, minute);
-
         };
 
         fetchTime();
     }, []);
     const options = [];
-    let permittedTime = time % interval === 0 ? time : time + (time % interval);
 
+    let permittedTime = time % interval === 0 ? time : time + (time % interval);
+    if (minute > 35) {
+        permittedTime = permittedTime + interval;
+        if (permittedTime > 24) permittedTime = 0;
+    }
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
@@ -84,8 +86,8 @@ export const TimeInput = ({
             const isNow = i === time;
             const isPermitted = isNow && minute <= 35;
             const alreadyFilled = filledFormTime.includes(i);
+
             if (isPermitted && !alreadyFilled) {
-                permittedTime = i;
                 options.push(
                     <option
                         key={i}
