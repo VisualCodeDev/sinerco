@@ -20,10 +20,8 @@ import { useToast } from "../Toast/ToastProvider";
 const DailyReportForm = (props) => {
     const { unitData, formData, user } = props;
     const [data, setData] = useState({});
-    const [isSettingModal, setSettingModal] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
-    const [settings, setSettings] = useState();
-    const [status, setStatus] = useState();
     const [saving, setSaving] = useState(false);
     const { addToast } = useToast();
     const handleSubmit = async (e) => {
@@ -90,8 +88,9 @@ const DailyReportForm = (props) => {
     });
 
     useEffect(() => {
-        setData((prevData) => {
-            const dateTime = getCurrDateTime();
+        const fetchData = async () => {
+            setLoading(true);
+            const dateTime = await getCurrDateTime();
             const now = dateTime.now;
             const filledFormTime = Array.isArray(formData)
                 ? formData
@@ -108,18 +107,24 @@ const DailyReportForm = (props) => {
 
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
-            const newData = {
+
+            console.log(date);
+
+            setData((prevData) => ({
                 ...prevData,
                 time,
                 date,
-            };
-            return newData;
-        });
+            }));
+
+            setLoading(false);
+        };
+
+        fetchData();
     }, []);
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
-            {saving && <LoadingSpinner text="Saving..." />}
+            {saving || (loading && <LoadingSpinner text="Saving..." />)}
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
                     <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">

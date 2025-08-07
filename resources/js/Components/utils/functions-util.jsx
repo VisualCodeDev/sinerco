@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useEffect, useState } from "react";
 
 export const getRequestTypeName = (value) => {
     if (!value) return "";
@@ -51,10 +52,22 @@ export const TimeInput = ({
     disabled = false,
     interval = 1,
 }) => {
-    const dateTime = getCurrDateTime();
-    const now = dateTime.now;
-    const time = parseInt(now.format("HH"));
-    const minute = parseInt(now.format("mm"));
+    const [now, setNow] = useState(null);
+    const [time, setTime] = useState(0);
+    const [minute, setMinute] = useState(0);
+
+    useEffect(() => {
+        const fetchTime = async () => {
+            const { minute, hour, now } = await getCurrDateTime();
+            setNow(now);
+            setTime(hour);
+            setMinute(minute);
+    console.log(now, hour, minute);
+
+        };
+
+        fetchTime();
+    }, []);
     const options = [];
     let permittedTime = time % interval === 0 ? time : time + (time % interval);
 
@@ -109,7 +122,9 @@ export const TimeInput = ({
             >
                 {options}
             </select>
-           <span className="text-sm text-slate-400">Available from {permittedTime}:00 to {permittedTime}:35</span>
+            <span className="text-sm text-slate-400">
+                Available from {permittedTime}:00 to {permittedTime}:35
+            </span>
         </>
     );
 };
@@ -544,13 +559,28 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
     if (!value) return;
     return dayjs(value).format(format);
 };
+export const getCurrDateTime = async () => {
+    try {
+        const res = await fetch("/get/server-time");
+        const { server_time } = await res.json();
+        const now = dayjs(server_time);
+        const rawTime = now.add(7, "hour");
+        const date = rawTime.format("YYYY-MM-DD");
+        const time = rawTime.format("HH:mm");
+        const hour = parseInt(rawTime.hour());
+        const minute = parseInt(rawTime.minute());
 
-export const getCurrDateTime = () => {
-    const now = dayjs();
+        return { date, time, now, hour, minute };
+    } catch (error) {
+        console.error("Gagal ambil waktu server:", error);
 
-    const date = now.format("YYYY-MM-DD");
-    const time = now.format("HH:mm");
-    return { date, time, now };
+        const now = dayjs();
+        return {
+            date: now.format("YYYY-MM-DD"),
+            time: now.format("HH:mm"),
+            now,
+        };
+    }
 };
 
 export const toCapitalizeFirstLetter = (str) => {

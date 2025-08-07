@@ -68,14 +68,14 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
 Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/input-validation', 'index')->name('input.setting');
     Route::get('/fetch/unit-configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
-    
+
     Route::post('/client/report-setting', 'setSetting')->name('daily.setting');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/get-request', 'getRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
-   
+
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
     Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
@@ -90,6 +90,10 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 
     Route::post('/unit-setting/set', 'setInterval')->name('unit.interval.set');
 });
+
+Route::get('/get/server-time', function () {
+    return response()->json(['server_time' => now()->toDateTimeString()]);
+})->name('server.time');
 
 Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/fetch/get-filtered-area-location', 'getFilteredAreaLocation')->name('area.filter.get');

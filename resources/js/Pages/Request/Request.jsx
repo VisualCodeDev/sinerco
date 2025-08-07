@@ -103,9 +103,16 @@ const EditItem = ({
         }
     }, [selectedItem]);
 
-    const handleChange = (field, value) => {
+    const handleChange = async (field, value) => {
+        let currDateTime = null;
+
+        if (field === "status" && value === "End") {
+            currDateTime = await getCurrDateTime();
+        }
+
         setData((prevData) => {
             const updatedData = { ...prevData, [field]: value };
+
             if (field === "status") {
                 if (value !== "End" && prevData.endTime && prevData.endDate) {
                     updatedData.endTime = "";
@@ -113,9 +120,9 @@ const EditItem = ({
                 } else if (
                     value === "End" &&
                     !prevData.endTime &&
-                    !prevData.endDate
+                    !prevData.endDate &&
+                    currDateTime
                 ) {
-                    const currDateTime = getCurrDateTime();
                     updatedData.endTime = currDateTime.time;
                     updatedData.endDate = currDateTime.date;
                 }
