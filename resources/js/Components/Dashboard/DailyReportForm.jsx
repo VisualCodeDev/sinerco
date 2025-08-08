@@ -92,6 +92,7 @@ const DailyReportForm = (props) => {
             setLoading(true);
             const dateTime = await getCurrDateTime();
             const now = dateTime.now;
+            console.log(now.format("HH"))
             const filledFormTime = Array.isArray(formData)
                 ? formData
                       .filter((data) => dateTime?.date === data?.date)
@@ -104,7 +105,7 @@ const DailyReportForm = (props) => {
                 currentHour = currentHour - 1;
                 if (currentHour < 0) currentHour = 23;
             }
-
+            console.log("Current Hour:", currentHour);
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
 

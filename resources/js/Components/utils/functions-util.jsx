@@ -88,6 +88,7 @@ export const TimeInput = ({
             const alreadyFilled = filledFormTime.includes(i);
 
             if (isPermitted && !alreadyFilled) {
+                console.log(i);
                 options.push(
                     <option
                         key={i}
@@ -572,7 +573,7 @@ export const getCurrDateTime = async () => {
         const hour = parseInt(rawTime.hour());
         const minute = parseInt(rawTime.minute());
 
-        return { date, time, now, hour, minute };
+        return { date, time, now: rawTime, hour, minute };
     } catch (error) {
         console.error("Gagal ambil waktu server:", error);
 
