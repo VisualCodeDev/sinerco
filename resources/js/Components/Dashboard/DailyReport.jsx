@@ -63,13 +63,11 @@ const DailyReport = (props) => {
             setCurrData(sortedData);
         }
     }, [dataAll]);
-
-    const handleEdit = (key) => {
-        const data = dataAll[key];
+    const handleEdit = (id) => {
+        const data = dataAll.find((item) => item?.id === id);
         setEditModal(true);
         setSelectedData(data);
     };
-    console.log(currData);
 
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
@@ -143,27 +141,33 @@ const DailyReport = (props) => {
                                 <tr
                                     key={key}
                                     className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
-                                    onClick={() => handleEdit(key)}
+                                    onClick={() => handleEdit(value.id)}
                                 >
-                                    {formItems?.filter(item=> item?.name != 'remarks').map((item) =>
-                                        item?.subheader?.length > 0 ? (
-                                            item.subheader.map((sub) => (
-                                                <td className="px-4 py-2 border text-center">
-                                                    {value?.[sub?.name]}
-                                                </td>
-                                            ))
-                                        ) : (
-                                            <td className="px-4 py-2 border text-center">
-                                                {value?.[item?.name]}
-                                            </td>
+                                    {formItems
+                                        ?.filter(
+                                            (item) => item?.name != "remarks"
                                         )
-                                    )}
+                                        .map((item) =>
+                                            item?.subheader?.length > 0 ? (
+                                                item.subheader.map((sub) => (
+                                                    <td className="px-4 py-2 border text-center">
+                                                        {value?.[sub?.name]}
+                                                    </td>
+                                                ))
+                                            ) : (
+                                                <td className="px-4 py-2 border text-center">
+                                                    {value?.[item?.name]}
+                                                </td>
+                                            )
+                                        )}
                                     {user?.role === "super_admin" && (
                                         <>
                                             <td></td>
                                             <td
                                                 className="flex justify-center items-center px-4 py-2 cursor-pointer"
-                                                onClick={() => handleEdit(key)}
+                                                onClick={() =>
+                                                    handleEdit(value.id)
+                                                }
                                             >
                                                 <FaPen />
                                             </td>
