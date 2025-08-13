@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
+import InputField from "@/Pages/Unit/InputField";
 
 const Heading = ({ children }) => {
     const [isLoading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ const Heading = ({ children }) => {
             icon: <FaList />,
             label: "Unit List",
             href: route("daily.list"),
-            submenu: [
+            // submenu: [
                 // { label: "Data Unit", href: route("daily.list") },
                 // {
                 //     condition: user?.role === "super_admin",
@@ -63,45 +64,25 @@ const Heading = ({ children }) => {
                 //     label: "Input Validation",
                 //     href: route("input.setting"),
                 // },
-                // {
-                //     condition: user?.role === "super_admin",
-                //     label: "Classified Contract",
-                //     href: route("daily.list"),
-                // },
-                // {
-                //     condition: user?.role === "super_admin",
-                //     label: "Contract",
-                //     href: route("daily.list"),
-                // },
-            ],
+            // ],
         },
         inputSetting: {
-            icon: <FaCog/>,
+            icon: <FaCog />,
             condition: user?.role === "super_admin",
             label: "Input Setting",
             href: route("unit.interval.setting"),
         },
-        inputSetting: {
-            icon: <FaCog/>,
+        InputField: {
+            icon: <FaCog />,
             condition: user?.role === "super_admin",
-            label: "Input Setting",
-            href: route("unit.interval.setting"),
+            label: "Input Field",
+            href: route("unit.field"),
         },
         eventHistory: {
             icon: <FaCalendarAlt />,
             label: "Event History",
             href: route("request"),
         },
-        // classifiedContract: {
-        //     icon: <FaNewspaper />,
-        //     label: "Classified Contract",
-        //     href: route("daily.list"),
-        // },
-        // contract: {
-        //     icon: <FaSignature />,
-        //     label: "Contract",
-        //     href: route("daily.list"),
-        // },
         accountList: {
             icon: <FaUserFriends />,
             label: "Account list",
@@ -151,6 +132,7 @@ const Heading = ({ children }) => {
             menu.eventHistory,
             menu.unitList,
             menu.inputSetting,
+            menu.InputField,
             menu.accountList,
             menu.logHistory,
             // menu.area,
@@ -159,19 +141,19 @@ const Heading = ({ children }) => {
         ];
     }
     if (user?.role === "technician") {
-        menuItems = [menu.home, menu.unitList, menu.event];
+        menuItems = [menu.home, menu.unitList, menu.eventHistory];
     }
     if (user?.role === "operator") {
-        menuItems = [menu.unitList, menu.event];
+        menuItems = [menu.unitList, menu.eventHistory];
     }
     if (user?.role === "client") {
-        menuItems = [menu.home, menu.unitList, menu.event];
+        menuItems = [menu.home, menu.unitList, menu.eventHistory];
     }
     if (user?.role === "workshop") {
         menuItems = [menu.home, menu.unitList];
     }
     if (user?.role === "management") {
-        menuItems = [menu.home, menu.clientList, menu.unitList, menu.event];
+        menuItems = [menu.home, menu.clientList, menu.unitList, menu.eventHistory];
     }
     menuItems.push(menu.logout);
 
@@ -191,11 +173,11 @@ const Heading = ({ children }) => {
                 <div className="flex flex-col items-center py-4 space-y-4">
                     <img src="/logo_sinerco.webp" alt="Logo" className="h-8" />
                     <div className="w-full mt-4">
-                        {menuItems.map((item, index) => (
+                        {menuItems && menuItems?.length > 0 && menuItems.map((item, index) => (
                             <div key={index} className="w-full">
                                 {/* Item utama */}
                                 <a
-                                    href={item.href}
+                                    href={item?.href || ''}
                                     key={index}
                                     className="flex items-center justify-between w-full mb-2 gap-4 px-4 py-2 hover:bg-gray-100 cursor-pointer transition"
                                     onClick={() => {
@@ -204,13 +186,13 @@ const Heading = ({ children }) => {
                                     }}
                                 >
                                     <span className="text-sm text-gray-700 font-bold">
-                                        {item.label}
+                                        {item?.label}
                                     </span>
-                                    <div className="text-xl">{item.icon}</div>
+                                    <div className="text-xl">{item?.icon}</div>
                                 </a>
 
                                 {/* Submenu */}
-                                {Array.isArray(item.submenu) &&
+                                {Array.isArray(item?.submenu) &&
                                     item.submenu.length > 0 &&
                                     openIndex === index && (
                                         <div className="pl-6 font-semibold">
@@ -220,11 +202,11 @@ const Heading = ({ children }) => {
                                                     null ? null : (
                                                     <a
                                                         key={subIndex}
-                                                        href={sub.href}
+                                                        href={sub?.href}
                                                         className="flex items-center justify-between w-full mb-1 gap-3 px-3 py-1 hover:bg-gray-50 cursor-pointer transition"
                                                     >
                                                         <span className="text-sm text-gray-600">
-                                                            {sub.label}
+                                                            {sub?.label}
                                                         </span>
                                                     </a>
                                                 )

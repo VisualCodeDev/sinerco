@@ -8,7 +8,12 @@ class ReportInputField extends Model
 {
     public function dataUnits()
     {
-        return $this->belongsToMany(DataUnit::class, 'data_unit_field');
+        return $this->belongsToMany(
+            DataUnit::class,
+            'data_unit_field', 
+            'field_id',
+            'unit_id'
+        );
     }
 
     public function subFields()

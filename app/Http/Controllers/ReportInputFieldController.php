@@ -6,6 +6,7 @@ use App\Models\DataUnit;
 use App\Models\ReportInputField;
 use App\Models\ReportSubField;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Str;
 
 class ReportInputFieldController extends Controller
@@ -27,7 +28,7 @@ class ReportInputFieldController extends Controller
     {
         $val = $request->validate([
             'fieldId' => 'required',
-            'subfield_name' => 'string|required'
+            'subfield_name' => 'string|required',
         ]);
 
         $subfield = new ReportSubField();
@@ -42,15 +43,33 @@ class ReportInputFieldController extends Controller
     public function setField(Request $request)
     {
         $val = $request->validate([
-            'field_name' => 'string|required'
+            'field_name' => 'string|required',
+            'unitId' => 'array|required'
         ]);
 
         $field = new ReportInputField();
         $field->field_name = $val['field_name'];
         $field->field_value = Str::slug($val['field_name'], '_');
-        $field->save();
+        $field->save(); 
+
+        $field->dataUnits()->attach($val['unitId']);
 
         return response()->json(['text' => 'Field added', 'type' => 'success'], 200);
+    }
+
+
+    public function updateField(Request $request)
+    {
+        $val = $request->validate([
+            'fieldId' => 'required',
+            'field_name' => 'string|required'
+        ]);
+        $field = ReportInputField::find($val['fieldId']);
+        $field->field_name = $val['field_name'];
+        $field->field_value = Str::slug($val['field_name'], '_');
+        $field->save();
+
+        return response()->json(['text' => 'Field updated', 'type' => 'success'], 200);
     }
 
     /**

@@ -14,6 +14,9 @@ class DataUnitController extends Controller
     /**
      * Display a listing of the resource.
      */
+     public function inputField() { 
+         return Inertia::render('Unit/InputField');
+     }
     public static function getPermittedUnit()
     {
         $user = Auth::user()->load('roleData');

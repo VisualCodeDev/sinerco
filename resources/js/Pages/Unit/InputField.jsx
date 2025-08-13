@@ -15,12 +15,7 @@ const InputField = () => {
     const [selectedType, setSelectedType] = useState("");
     const [fields, setFields] = useState([]);
     const { data, loading } = fetch("unit.area.get");
-    const { data: fieldsData } = fetch("input.all.get");
     const { addToast } = useToast();
-    useEffect(() => {
-        if (!fieldsData || fieldsData?.length === 0) return;
-        setFields(fieldsData);
-    }, [fieldsData]);
 
     useEffect(() => {
         if (!data || data?.length === 0) return;
@@ -32,6 +27,19 @@ const InputField = () => {
 
         setUnitOptions(unitData);
     }, [data]);
+
+    useEffect(() => {
+        if (!selectedUnit || selectedUnit?.length === 0) return;
+        const fetchData = async () => {
+            const { data } = await axios.get(
+                route("field.unit.get", { unitId: selectedUnit[0] })
+            );
+            console.log(data);
+            setFields(data?.input_fields);
+        };
+
+        fetchData();
+    }, [selectedUnit]);
 
     const handleSubField = (type, item) => {
         setSelectedField(item);
@@ -48,6 +56,7 @@ const InputField = () => {
     const handleAddNew = async (type, value, fieldId) => {
         if (type === "subfield") {
             if (!fieldId) return;
+            console.log(fieldId)
             try {
                 const resp = await axios.post(route("subfield.add"), {
                     subfield_name: value,
@@ -80,13 +89,14 @@ const InputField = () => {
             }
         } else if (type === "field") {
             const formattedValue = {
-                id: fields?.length + 1,
+                id: fields[fields?.length - 1]?.id ,
                 field_name: value,
             };
 
             try {
                 const resp = await axios.post(route("field.add"), {
                     field_name: value,
+                    unitId: selectedUnit,
                 });
 
                 if (resp?.status === 200 || resp?.status === 201) {
@@ -111,53 +121,58 @@ const InputField = () => {
                 selected={selectedUnit}
                 setSelected={setSelectedUnit}
             />
-            <div className="flex overflow-x-auto">
-                {fields?.map((main, index) => (
-                    <div
-                        key={index}
-                        className="border whitespace-nowrap bg-primary text-white flex flex-col justify-center items-center"
-                    >
-                        <div className="h-full text-center flex items-center px-10 py-2">
-                            <p>{main?.field_name}</p>
-                        </div>
-                        {main.has_subfields ? (
-                            <div className="w-full h-full text-center flex flex-nowrap whitespace-nowrap">
-                                {main?.sub_fields?.map((sub, index) => (
-                                    <div className="text-center border w-max h-full p-2 min-w-[100px]">
-                                        {(sub?.subfield_name != "" ||
-                                            sub?.subfield_name) && (
-                                            <p>{sub?.subfield_name}</p>
-                                        )}
-                                    </div>
-                                ))}
+            {selectedUnit?.length > 0 && (
+                <div className="flex overflow-x-auto">
+                    {fields?.map((main, index) => (
+                        <div
+                            key={index}
+                            className="border whitespace-nowrap bg-primary text-white flex flex-col justify-center items-center"
+                        >
+                            <div className="h-full text-center flex items-center px-10 py-2">
+                                <p>{main?.field_name}</p>
+                            </div>
+                            {main.has_subfields ? (
+                                <div className="w-full h-full text-center flex flex-nowrap whitespace-nowrap">
+                                    {main?.subfields?.map((sub, index) => (
+                                        <div className="text-center border w-max h-full p-2 min-w-[100px]">
+                                            {(sub?.subfield_name != "" ||
+                                                sub?.subfield_name) && (
+                                                <p>{sub?.subfield_name}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button
+                                        onClick={() =>
+                                            handleSubField("subfield", main)
+                                        }
+                                        className="text-center border w-full h-full p-2 flex items-center justify-center"
+                                    >
+                                        <FaPlus className="text-white" />
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
                                     onClick={() =>
                                         handleSubField("subfield", main)
                                     }
-                                    className="text-center border w-full h-full p-2 flex items-center justify-center"
+                                    className="text-center border w-full h-full py-2 flex items-center justify-center"
                                 >
                                     <FaPlus className="text-white" />
                                 </button>
-                            </div>
-                        ) : (
-                            <button
-                                onClick={() => handleSubField("subfield", main)}
-                                className="text-center border w-full h-full py-2 flex items-center justify-center"
-                            >
-                                <FaPlus className="text-white" />
-                            </button>
-                        )}
+                            )}
+                        </div>
+                    ))}
+                    <div className="whitespace-nowrap bg-primary text-white flex flex-col justify-center items-center">
+                        <button
+                            onClick={() => handleField("field")}
+                            className="border w-full h-full text-center flex items-center px-10 py-2"
+                        >
+                            <FaPlus className="text-white" />
+                        </button>
                     </div>
-                ))}
-                <div className="whitespace-nowrap bg-primary text-white flex flex-col justify-center items-center">
-                    <button
-                        onClick={() => handleField("field")}
-                        className="border w-full h-full text-center flex items-center px-10 py-2"
-                    >
-                        <FaPlus className="text-white" />
-                    </button>
                 </div>
-            </div>
+            )}
+
             {openModal && (
                 <FieldMenu
                     setOpenModal={setOpenModal}
