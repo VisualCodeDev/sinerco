@@ -100,11 +100,11 @@ const InputValidationSetting = (props) => {
         label: client.name,
     }));
     return (
-        <div className="flex flex-col gap-6 ">
+        <div className="flex flex-col gap-6 p-5">
             <h2 className="text-xl font-semibold text-gray-800">
                 Input Validation Settings
             </h2>
-            <div className="">
+            <div className="flex flex-col gap-2">
                 <p className="text-base">Client: </p>
                 <MultiSelectDropdown
                     options={clientOptions}
@@ -113,7 +113,7 @@ const InputValidationSetting = (props) => {
                 />
             </div>
 
-            <div className="max-h-[50vh] overflow-y-auto">
+            <div className="overflow-y-auto">
                 <table className="w-full table-fixed">
                     <thead className="sticky top-0 bg-primary text-white z-10">
                         <tr className="">
@@ -141,14 +141,14 @@ const InputValidationSetting = (props) => {
                                     return (
                                         <tr
                                             key={field.name + idx}
-                                            className="border-b border-primary"
+                                            className="border-b border-[#e5e7eb]"
                                         >
-                                            <td className="py-3 px-4 font-semibold">
+                                            <td className="py-10 md:py-6 px-4 font-semibold">
                                                 {field.header || field.sub}
                                             </td>
                                             <td>
                                                 <select
-                                                    className="py-1 md:w-[100px]"
+                                                    className="py-1 md:w-[150px] rounded-lg border-[#e8edfc]"
                                                     onChange={(e) =>
                                                         handleChange(
                                                             "decimalSetting",
@@ -169,7 +169,7 @@ const InputValidationSetting = (props) => {
                                             <td>
                                                 <div className="flex flex-col md:flex-row gap-2">
                                                     <input
-                                                        className="md:w-[100px]"
+                                                        className="md:w-[150px] rounded-lg border-[#e8edfc]"
                                                         type="number"
                                                         placeholder="min."
                                                         onChange={(e) =>
@@ -191,7 +191,7 @@ const InputValidationSetting = (props) => {
                                                         }
                                                     />
                                                     <input
-                                                        className="md:w-[100px]"
+                                                        className="md:w-[150px] rounded-lg border-[#e8edfc]"
                                                         type="number"
                                                         placeholder="max."
                                                         onChange={(e) =>
@@ -222,10 +222,10 @@ const InputValidationSetting = (props) => {
                 </table>
             </div>
 
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center mb-10">
                 <button
                     onClick={handleSave}
-                    className="bg-primary text-white px-6 py-2 rounded-xl mt-10 text-xl"
+                    className="bg-primary text-white border-2 border-white px-10 py-2 rounded-lg mt-10 text-xl transition ease-in-out hover:bg-transparent hover:text-primary hover:border-primary hover:scale-90"
                 >
                     Save
                 </button>
