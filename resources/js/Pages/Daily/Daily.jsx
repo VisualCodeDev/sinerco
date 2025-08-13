@@ -14,6 +14,8 @@ import {
     FaRegCalendarAlt,
     FaAngleDown,
     FaAngleUp,
+    FaFileContract,
+    FaLock,
 } from "react-icons/fa";
 
 export default function Dashboard({ data, unitData }) {
@@ -45,6 +47,16 @@ export default function Dashboard({ data, unitData }) {
             key: "gasComposition",
             label: "Gas Composition",
             icon: <FaRegCalendarAlt className="mr-2" />,
+        },
+        {
+            key: "contract",
+            label: "Contract",
+            icon: <FaFileContract className="mr-2" />,
+        },
+        {
+            key: "classifiedContract",
+            label: "Classified Contract",
+            icon: <FaLock className="mr-2" />,
         },
     ];
 

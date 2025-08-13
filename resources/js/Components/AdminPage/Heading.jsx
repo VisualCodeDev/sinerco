@@ -1,22 +1,17 @@
 import React, { useState } from "react";
 import {
     FaHome,
-    FaTh,
     FaUser,
-    FaLock,
     FaAddressBook,
     FaList,
     FaSignInAlt,
     FaSignOutAlt,
-    FaBell,
     FaMapPin,
-    FaSearchLocation,
     FaHistory,
     FaRegEdit,
-    FaNewspaper,
-    FaIdeal,
-    FaSign,
-    FaSignature,
+    FaUserFriends,
+    FaCalendarAlt,
+    FaCog,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -54,34 +49,40 @@ const Heading = ({ children }) => {
         },
         unitList: {
             icon: <FaList />,
-            label: "Unit",
-            // href: route("daily.list"),
+            label: "Unit List",
+            href: route("daily.list"),
             submenu: [
-                { label: "Data Unit", href: route("daily.list") },
-                {
-                    condition: user?.role === "super_admin",
-                    label: "Unit Input Setting",
-                    href: route("unit.interval.setting"),
-                },
+                // { label: "Data Unit", href: route("daily.list") },
+                // {
+                //     condition: user?.role === "super_admin",
+                //     label: "Unit Input Setting",
+                //     href: route("unit.interval.setting"),
+                // },
                 // {
                 //     condition: user?.role === "super_admin",
                 //     label: "Input Validation",
                 //     href: route("input.setting"),
                 // },
-                {
-                    condition: user?.role === "super_admin",
-                    label: "Classified Contract",
-                    href: route("daily.list"),
-                },
-                {
-                    condition: user?.role === "super_admin",
-                    label: "Contract",
-                    href: route("daily.list"),
-                },
+                // {
+                //     condition: user?.role === "super_admin",
+                //     label: "Classified Contract",
+                //     href: route("daily.list"),
+                // },
+                // {
+                //     condition: user?.role === "super_admin",
+                //     label: "Contract",
+                //     href: route("daily.list"),
+                // },
             ],
         },
+        inputSetting: {
+            icon: <FaCog/>,
+            condition: user?.role === "super_admin",
+            label: "Input Setting",
+            href: route("unit.interval.setting"),
+        },
         eventHistory: {
-            icon: <FaTh />,
+            icon: <FaCalendarAlt />,
             label: "Event History",
             href: route("request"),
         },
@@ -95,15 +96,16 @@ const Heading = ({ children }) => {
         //     label: "Contract",
         //     href: route("daily.list"),
         // },
-        user: {
-            icon: <FaSearchLocation />,
-            label: "User",
-            submenu: [
-                {
-                    label: 'User List',
-                    href: route("allocation.setting"),
-                },
-            ],
+        accountList: {
+            icon: <FaUserFriends />,
+            label: "Account list",
+            href: route("allocation.setting"),
+            // submenu: [
+            //     {
+            //         label: "User List",
+            //         href: route("allocation.setting"),
+            //     },
+            // ],
         },
         profile: {
             icon: <FaUser />,
@@ -139,14 +141,15 @@ const Heading = ({ children }) => {
     if (user?.role === "super_admin") {
         menuItems = [
             menu.home,
-            menu.user,
-            menu.unitList,
             menu.clientList,
+            menu.eventHistory,
+            menu.unitList,
+            menu.inputSetting,
+            menu.accountList,
+            menu.logHistory,
             // menu.area,
             // menu.editUnit,
-            menu.eventHistory,
             menu.profile,
-            menu.logHistory,
         ];
     }
     if (user?.role === "technician") {
