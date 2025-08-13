@@ -29,9 +29,16 @@
 
     <!-- Scripts -->
     @routes
-    @viteReactRefresh
-    @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+
+    @production
+        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+    @else
+        @viteReactRefresh
+        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
+    @endproduction
+
     @inertiaHead
+
 </head>
 
 <body class="font-manrope antialiased">

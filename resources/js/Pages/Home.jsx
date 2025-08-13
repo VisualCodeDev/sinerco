@@ -106,7 +106,7 @@ export default function Home() {
             {/* <UnitTable /> */}
             <div className="flex flex-col gap-6 md:gap-10">
                 <div className="flex flex-col-reverse md:flex-row w-full gap-4 md:gap-10">
-                    {/* <div className="flex justify-between items-center md:items-stretch shadow-xl p-4 md:p-8 bg-gradient-to-tr from-primary to-primary/75 md:w-2/3 rounded-lg md:rounded-3xl">
+                    {/* <div className="flex justify-between items-center md:items-stretch shadow-md p-4 md:p-8 bg-gradient-to-tr from-primary to-primary/75 md:w-2/3 rounded-lg">
                         <div className="flex flex-col justify-between">
                             <div className="flex items-center mb-6 md:mb-0 gap-2 rounded-md md:rounded-xl bg-primary p-2.5 text-white text-xs md:text-base font-semibold w-fit">
                                 <FaCalendarWeek />
@@ -128,7 +128,7 @@ export default function Home() {
                         </div>
                     </div> */}
                     {/* PIECHART */}
-                    <div className="flex md:flex-row flex-col justify-between items-center gap-4 bg-white p-4 md:p-10 md:py-6 rounded-lg md:rounded-3xl shadow-xl md:w-3/4">
+                    <div className="flex md:flex-row flex-col justify-between items-center gap-20 border border-[#dadee3] bg-white p-4 md:p-10 md:py-6 rounded-lg shadow-md md:w-3/4">
                         <div className="md:w-1/3">
                             <PieChart
                                 stroke={20}
@@ -155,7 +155,7 @@ export default function Home() {
                         </div>
                     </div>
                     {/* ADMIN INFO */}
-                    <div className="flex items-center md:w-1/4 bg-white shadow-xl p-4 md:p-8 rounded-lg md:rounded-3xl">
+                    <div className="flex items-center md:w-1/4 border border-[#dadee3] bg-white shadow-md p-4 md:p-8 rounded-lg">
                         <div className="flex items-center justify-center gap-5">
                             <div className="text-6xl md:text-[5rem] text-primary">
                                 <FaUserCircle />
@@ -176,7 +176,7 @@ export default function Home() {
 
                 {/* UNIT TABLE */}
                 <div>
-                    <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[400px] overflow-auto">
+                    <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[400px] overflow-auto border border-[#dadee3]">
                         <table class="w-full text-sm text-left rtl:text-right">
                             <thead class="text-xs text-white uppercase bg-primary">
                                 <tr>
@@ -290,7 +290,7 @@ export default function Home() {
                     </div>
                 </div>
                 <div className="flex md:flex-row flex-col w-full md:gap-10 gap-5 justify-between items-center">
-                    {/* <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg md:rounded-3xl shadow-xl">
+                    {/* <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg shadow-md">
                         <MultiRingChart
                             data={multiData}
                             size={180}

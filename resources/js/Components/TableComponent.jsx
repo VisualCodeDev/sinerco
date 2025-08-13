@@ -73,6 +73,7 @@ const TableComponent = (props) => {
             return value.toLowerCase().includes(query);
         }
         if (typeof value === "object" && value !== null) {
+            
             return Object.values(value).some((val) =>
                 containsQuery(val, query)
             );
@@ -102,8 +103,9 @@ const TableComponent = (props) => {
         filterData = sortedData?.filter((item) => {
             return containsQuery(item, query);
         });
-        setFilteredData(sortedData);
-    }, [filterConfig, sortConfig?.key]);
+
+        setFilteredData(filterData);
+    }, [filterConfig, sortConfig?.key, query]);
 
     return (
         <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg">

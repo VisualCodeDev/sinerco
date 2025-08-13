@@ -22,10 +22,9 @@ const Profile = ({ data, permissionData, requestList }) => {
         selectedRows: [],
     });
 
-    console.log(requestList);
     return (
         <PageLayout>
-            <div className="flex flex-col md:flex-row h-screen md:gap-20">
+            <div className="flex flex-col md:flex-row h-screen md:gap-10">
                 <section className="flex flex-col items-center md:w-1/3 bg-primary text-white p-8 md:p-10 rounded-lg text-center">
                     <div>
                         <h2 className="text-lg md:text-xl font-bold mb-10">
@@ -65,7 +64,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                         </div>
                     </div>
                 </section>
-                <section className="md:w-1/2 bg-white p-8 md:p-10 rounded-lg">
+                <section className="md:w-2/3 bg-white p-8 md:p-10 rounded-lg">
                     {/* <div className="mt-8">
                     <h2 className="text-xl font-bold mb-4">Unit Areas</h2>
                     {unitArea.length > 0 ? (
@@ -100,7 +99,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                             {permission?.unit?.unit}
                                         </p>
                                         <a
-                                            className="bg-primary text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded text-sm md:text-md hover:bg-primary/10 hover:border-primary border-2 hover:text-primary transition ease-in-out delay-75"
+                                            className="bg-primary text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded text-sm md:text-md hover:scale-90 hover:bg-transparent hover:border-primary border-2 hover:text-primary transition ease-in-out delay-75"
                                             href={route(
                                                 "daily",
                                                 permission?.unitAreaLocationId

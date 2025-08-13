@@ -77,9 +77,8 @@ const DailyReport = (props) => {
         if (!unitFieldData) return;
         setColumnList(unitFieldData?.input_fields);
     }, [unitFieldData]);
-
-    const handleEdit = (key) => {
-        const data = dataAll[key];
+    const handleEdit = (id) => {
+        const data = dataAll.find((item) => item?.id === id);
         setEditModal(true);
         setSelectedData(data);
     };
@@ -160,65 +159,33 @@ const DailyReport = (props) => {
                                 <tr
                                     key={key}
                                     className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
-                                    onClick={() => handleEdit(key)}
+                                    onClick={() => handleEdit(value.id)}
                                 >
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.time}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.sourcePress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.suctionPress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.dischargePress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.speed}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.manifoldPress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.oilPress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.oilDiff}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.runningHours}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.voltage}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.waterTemp}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.befCooler}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.aftCooler}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.staticPress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.diffPress}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value.mscfd}
-                                    </td>
-                                    <td className="px-4 py-2 border text-center">
-                                        {value?.request?.remarks || ""}
-                                    </td>
+                                    {formItems
+                                        ?.filter(
+                                            (item) => item?.name != "remarks"
+                                        )
+                                        .map((item) =>
+                                            item?.subheader?.length > 0 ? (
+                                                item.subheader.map((sub) => (
+                                                    <td className="px-4 py-2 border text-center">
+                                                        {value?.[sub?.name]}
+                                                    </td>
+                                                ))
+                                            ) : (
+                                                <td className="px-4 py-2 border text-center">
+                                                    {value?.[item?.name]}
+                                                </td>
+                                            )
+                                        )}
                                     {user?.role === "super_admin" && (
                                         <>
                                             <td></td>
                                             <td
                                                 className="flex justify-center items-center px-4 py-2 cursor-pointer"
-                                                onClick={() => handleEdit(key)}
+                                                onClick={() =>
+                                                    handleEdit(value.id)
+                                                }
                                             >
                                                 <FaPen />
                                             </td>
@@ -335,7 +302,6 @@ const ExportModal = (props) => {
 
     const handleGenerate = () => {
         const range = getDateRange(selectedDate.start, selectedDate.end);
-        console.log(range);
         generateExcel("Report.xlsx", data, range);
     };
 

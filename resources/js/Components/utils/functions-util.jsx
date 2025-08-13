@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { useEffect, useState } from "react";
 
 export const getRequestTypeName = (value) => {
     if (!value) return "";
@@ -49,14 +50,29 @@ export const TimeInput = ({
     placeholder = "Enter time",
     value,
     disabled = false,
-    interval = 2,
+    interval = 1,
 }) => {
-    const dateTime = getCurrDateTime();
-    const now = dateTime.now;
-    const time = parseInt(now.format("HH"));
-    const minute = parseInt(now.format("mm"));
+    const [now, setNow] = useState(null);
+    const [time, setTime] = useState(0);
+    const [minute, setMinute] = useState(0);
+
+    useEffect(() => {
+        const fetchTime = async () => {
+            const { minute, hour, now } = await getCurrDateTime();
+            setNow(now);
+            setTime(hour);
+            setMinute(minute);
+        };
+
+        fetchTime();
+    }, []);
     const options = [];
 
+    let permittedTime = time % interval === 0 ? time : time + (time % interval);
+    if (minute > 35) {
+        permittedTime = permittedTime + interval;
+        if (permittedTime > 24) permittedTime = 0;
+    }
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
@@ -66,16 +82,13 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator") {
-        for (let i = 0; i <= 24; i += interval) {
+        for (let i = 0; i <= 24; i += parseInt(interval)) {
             const isNow = i === time;
-            const isBeforeNow = i < time;
-            const isExpired = isNow && minute > 35;
-
-            const isNotYetTime = i > time;
-
+            const isPermitted = isNow && minute <= 35;
             const alreadyFilled = filledFormTime.includes(i);
 
-            if (isNow && minute <= 35 && !alreadyFilled) {
+            if (isPermitted && !alreadyFilled) {
+                console.log(i);
                 options.push(
                     <option
                         key={i}
@@ -112,17 +125,9 @@ export const TimeInput = ({
             >
                 {options}
             </select>
-            {/* <input
-                value={value}
-                required
-                name="time"
-                type="time"
-                onChange={onChange}
-                min={min}
-                max={max}
-                placeholder={placeholder}
-                className="border rounded p-2"
-            /> */}
+            <span className="text-sm text-slate-400">
+                Available from {permittedTime}:00 to {permittedTime}:35
+            </span>
         </>
     );
 };
@@ -557,13 +562,28 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
     if (!value) return;
     return dayjs(value).format(format);
 };
+export const getCurrDateTime = async () => {
+    try {
+        const res = await fetch("/get/server-time");
+        const { server_time } = await res.json();
+        const now = dayjs(server_time);
+        const rawTime = now.add(7, "hour");
+        const date = rawTime.format("YYYY-MM-DD");
+        const time = rawTime.format("HH:mm");
+        const hour = parseInt(rawTime.hour());
+        const minute = parseInt(rawTime.minute());
 
-export const getCurrDateTime = () => {
-    const now = dayjs();
+        return { date, time, now: rawTime, hour, minute };
+    } catch (error) {
+        console.error("Gagal ambil waktu server:", error);
 
-    const date = now.format("YYYY-MM-DD");
-    const time = now.format("HH:mm");
-    return { date, time, now };
+        const now = dayjs();
+        return {
+            date: now.format("YYYY-MM-DD"),
+            time: now.format("HH:mm"),
+            now,
+        };
+    }
 };
 
 export const toCapitalizeFirstLetter = (str) => {
@@ -579,3 +599,50 @@ export const splitCamelCase = (str) => {
 
     return result;
 };
+
+function ExcelImport() {
+    const [users, setUsers] = useState([]);
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (evt) => {
+            const bstr = evt.target.result;
+            const workbook = XLSX.read(bstr, { type: "binary" });
+
+            // Ambil sheet pertama
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+
+            // Convert ke JSON
+            const data = XLSX.utils.sheet_to_json(sheet);
+
+            // Contoh hasil [{ email: "", password: "", role: "" }, ...]
+            console.log("Parsed data:", data);
+            setUsers(data);
+        };
+
+        reader.readAsBinaryString(file);
+    };
+
+    return (
+        <div>
+            <input
+                type="file"
+                accept=".xlsx, .xls, .csv"
+                onChange={handleFileUpload}
+            />
+            <h3>Imported Users:</h3>
+            <ul>
+                {users.map((user, idx) => (
+                    <li key={idx}>
+                        {user.email} | {user.password} | {user.role}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+export default ExcelImport;

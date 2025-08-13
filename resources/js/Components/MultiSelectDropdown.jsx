@@ -57,18 +57,19 @@ export default function MultiSelectDropdown({
                         const label = options.find(
                             (o) => o.value === value
                         )?.label;
+                        if (label)
                         return (
-                            <span
-                                key={value}
-                                className="bg-primary text-white text-sm px-2 py-1 rounded-full cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleOption(value);
-                                }}
-                            >
-                                {label} 🗙
-                            </span>
-                        );
+                                <span
+                                    key={value}
+                                    className="bg-primary text-white text-sm px-3 py-1.5 rounded-full cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleOption(value);
+                                    }}
+                                >
+                                    {label} 🗙
+                                </span>
+                            );
                     })}
 
                 {selected && selected?.length > 0 && (

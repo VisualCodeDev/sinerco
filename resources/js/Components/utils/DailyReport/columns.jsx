@@ -1,6 +1,6 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const list = ({ handleChange, formData, reportSettings, role }) => {
+const list = ({ handleChange, formData, reportSettings, role, interval }) => {
     const colItem = [
         {
             name: "date",
@@ -46,6 +46,7 @@ const list = ({ handleChange, formData, reportSettings, role }) => {
                             role={role}
                             id={name}
                             name={name}
+                            interval={interval}
                             value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)

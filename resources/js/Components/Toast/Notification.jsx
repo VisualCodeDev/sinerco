@@ -19,22 +19,36 @@ const Notification = ({ message }) => {
         <div
             className={`${
                 message.requestType === "stdby"
-                    ? "bg-warning/80"
-                    : message.requestType === "sd" && "bg-danger/80"
-            } border shadow-lg rounded-md px-6 py-4 mb-2 transition-all
+                    ? "bg-yellow-100 border-yellow-400"
+                    : message.requestType === "sd" &&
+                      "bg-red-100 border-red-400"
+            } border shadow-lg rounded-md px-6 py-4 mb-3 transition-all flex items-center gap-3 min-w-[25vw]
             ${animate === "slideIn" ? "animate-slideIn" : "animate-slideOut"}`}
         >
-            <p>
-                <strong>{getRequestTypeName(message.requestType)}</strong>{" "}
-                <span className="text-xs">({message?.status})</span> Request
-                Available{" "}
+            {/* Icon */}
+            <div className="text-2xl">
+                {message.requestType === "stdby" ? "⚠️" : "🚨"}
+            </div>
+
+            {/* Content */}
+            <div className="text-sm text-gray-800 leading-snug flex justify-between items-center w-full">
+                <p className="font-semibold text-base text-gray-900">
+                    {getRequestTypeName(message.requestType)}{" "}
+                    <span className="ml-1">Alert!!</span>
+                </p>
+
                 <a
                     href={route("request") + "#" + message.id}
-                    className={`${message?.requestType === 'stdby' ? "text-yellow-500": 'text-red-500'} ms-2 p-1 underline font-semibold font-xs bg-white`}
+                    className={`inline-block mt-1 text-xs font-semibold underline px-2 py-1 rounded 
+                    ${
+                        message?.requestType === "stdby"
+                            ? "text-yellow-800 bg-yellow-200"
+                            : "text-red-800 bg-red-200"
+                    } hover:bg-opacity-80 transition`}
                 >
-                    (View Request)
+                    View Request
                 </a>
-            </p>
+            </div>
         </div>
     );
 };

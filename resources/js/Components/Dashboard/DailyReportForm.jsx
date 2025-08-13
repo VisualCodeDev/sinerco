@@ -20,17 +20,14 @@ import { useToast } from "../Toast/ToastProvider";
 const DailyReportForm = (props) => {
     const { unitData, formData, user } = props;
     const [data, setData] = useState({});
-    const [isSettingModal, setSettingModal] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
-    const [settings, setSettings] = useState();
-    const [status, setStatus] = useState();
     const [saving, setSaving] = useState(false);
     const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
         setConfirmationModal(true);
     };
-
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
@@ -58,7 +55,7 @@ const DailyReportForm = (props) => {
 
     const handleChange = ([field], value, minMaxSetting) => {
         let warn = "";
-        
+
         if (field === "date" || field === "time") {
             setData({
                 ...data,
@@ -87,12 +84,15 @@ const DailyReportForm = (props) => {
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
+        interval: unitData?.unit?.input_interval,
     });
 
     useEffect(() => {
-        setData((prevData) => {
-            const dateTime = getCurrDateTime();
+        const fetchData = async () => {
+            setLoading(true);
+            const dateTime = await getCurrDateTime();
             const now = dateTime.now;
+            console.log(now.format("HH"))
             const filledFormTime = Array.isArray(formData)
                 ? formData
                       .filter((data) => dateTime?.date === data?.date)
@@ -105,21 +105,27 @@ const DailyReportForm = (props) => {
                 currentHour = currentHour - 1;
                 if (currentHour < 0) currentHour = 23;
             }
-
+            console.log("Current Hour:", currentHour);
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
-            const newData = {
+
+            console.log(date);
+
+            setData((prevData) => ({
                 ...prevData,
                 time,
                 date,
-            };
-            return newData;
-        });
+            }));
+
+            setLoading(false);
+        };
+
+        fetchData();
     }, []);
 
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
-            {saving && <LoadingSpinner text="Saving..." />}
+            {saving || (loading && <LoadingSpinner text="Saving..." />)}
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
                     <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">

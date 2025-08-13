@@ -20,7 +20,7 @@ class DataUnitController extends Controller
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $data = $user->unitAreaLocations()->with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status']);
+                    $q->select(['unitId', 'unit', 'status', 'input_interval']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
@@ -30,7 +30,7 @@ class DataUnitController extends Controller
         } else {
             $data = UnitAreaLocation::with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status']);
+                    $q->select(['unitId', 'unit', 'status', 'input_interval']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
@@ -89,9 +89,6 @@ class DataUnitController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function getUnitStatus()
     {
         $data = $this->getPermittedUnit()->map(function ($item) {
@@ -103,17 +100,26 @@ class DataUnitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function inputField()
+    public function unitSetting(Request $request)
     {
-        return Inertia::render('Unit/InputField');
+        return Inertia::render('Unit/UnitSetting');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(DataUnit $dataUnit)
+    public function setInterval(Request $request)
     {
-        //
+        $val = $request->validate([
+            'selected' => 'required|array',
+            'input_interval' => 'required|integer|between:1,24',
+        ]);
+
+        // Update all matching DataUnit records
+        DataUnit::whereIn('unitId', $val['selected'])
+            ->update(['input_interval' => $val['input_interval']]);
+
+        return response()->json(['type' => 'success', 'text' => 'Input Interval updated!']);
     }
 
     /**

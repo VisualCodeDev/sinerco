@@ -67,14 +67,16 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
 })->name('auth.user');
 
 Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
-    Route::get('/unit-configuration', 'index')->name('input.setting');
+    Route::get('/input-validation', 'index')->name('input.setting');
     Route::get('/fetch/unit-configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
+
     Route::post('/client/report-setting', 'setSetting')->name('daily.setting');
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
     Route::get('/get-request', 'getRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
+
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
     Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
@@ -82,12 +84,19 @@ Route::controller(StatusRequestController::class)->group(function () {
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
     Route::get('/input-field', 'inputField')->name('unit.field');
+    Route::get('/unit-setting', 'unitSetting')->name('unit.interval.setting');
     Route::get('/unit-list', 'unitList')->name('daily.list');
     Route::get('/fetch/get-all-unit', 'getAllUnit')->name('unit.get');
     Route::get('/fetch/get-all-unit-area-location', 'getAllUnitAreaLocation')->name('unit.area.get');
     Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
+
+    Route::post('/unit-setting/set', 'setInterval')->name('unit.interval.set');
 });
+
+Route::get('/get/server-time', function () {
+    return response()->json(['server_time' => now()->toDateTimeString()]);
+})->name('server.time');
 
 Route::controller(ClientController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/fetch/get-filtered-area-location', 'getFilteredAreaLocation')->name('area.filter.get');
@@ -122,7 +131,13 @@ Route::controller(ProfileController::class)->middleware(['auth', "roles:super_ad
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {
     Route::get('/area', 'index')->name('areas');
+});
 
+Route::controller(ReportInputFieldController::class)->middleware(['auth'])->group(function () {
+    Route::get('/fetch/input-fields/{unitId}', 'getUnitField')->name('field.unit.get');
+    Route::post('/input-fields/add/sub', 'setSubfield')->name('subfield.add');
+    Route::post('/input-fields/add/field', 'setField')->name('field.add');
+    Route::get('/fetch/input-fields', 'getAllInputFields')->name('input.all.get');
 });
 
 Route::controller(ReportInputFieldController::class)->middleware(['auth'])->group(function () {
