@@ -45,7 +45,6 @@ const InputField = () => {
             const { data } = await axios.get(
                 route("field.unit.get", { unitId: selectedUnit[0] })
             );
-            console.log(data);
             setFields(data?.input_fields);
         };
 
