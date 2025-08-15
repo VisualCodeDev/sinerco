@@ -20,7 +20,15 @@ import {
 
 export default function Dashboard({ data, unitData }) {
     const { user, loading } = useAuth();
-    const { data: allUnits, loading: isLoading, error } = fetch("unit.area.get");
+    const { data: unitFieldData, loading: isLoadingUnitField } = fetch(
+        "field.unit.get",
+        unitData?.unitId
+    );
+    const {
+        data: allUnits,
+        loading: isLoading,
+        error,
+    } = fetch("unit.area.get");
     const [expanded, setExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
@@ -145,6 +153,7 @@ export default function Dashboard({ data, unitData }) {
                         )}
                         {activeTab === "form" && (
                             <DailyReportForm
+                                unitFieldData={unitFieldData}
                                 user={user}
                                 unitData={unitData}
                                 formData={data}
@@ -153,6 +162,7 @@ export default function Dashboard({ data, unitData }) {
 
                         {activeTab === "report" && (
                             <DailyReport
+                                unitFieldData={unitFieldData}
                                 formData={data}
                                 unitData={unitData}
                                 user={user}

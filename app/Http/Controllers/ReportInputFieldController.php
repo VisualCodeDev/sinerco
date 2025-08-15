@@ -37,7 +37,7 @@ class ReportInputFieldController extends Controller
         $subfield->subfield_value = Str::slug($val['subfield_name'], '_');
         $subfield->save();
 
-        return response()->json(['text' => 'Subfield added', 'type' => 'success'], 200);
+        return response()->json(['text' => 'Subfield added', 'type' => 'success', 'newSubfield' => $subfield], 200);
     }
 
     public function setField(Request $request)
@@ -46,15 +46,17 @@ class ReportInputFieldController extends Controller
             'field_name' => 'string|required',
             'unitId' => 'array|required'
         ]);
-
-        $field = new ReportInputField();
-        $field->field_name = $val['field_name'];
-        $field->field_value = Str::slug($val['field_name'], '_');
-        $field->save(); 
+        $field = ReportInputField::where('field_name', $val['field_name'])->first();
+        if (!$field) {
+            $field = new ReportInputField();
+            $field->field_name = $val['field_name'];
+            $field->field_value = Str::slug($val['field_name'], '_');
+            $field->save();
+        }
 
         $field->dataUnits()->attach($val['unitId']);
 
-        return response()->json(['text' => 'Field added', 'type' => 'success'], 200);
+        return response()->json(['text' => 'Field added', 'type' => 'success', 'newField' => $field], 200);
     }
 
 
@@ -62,14 +64,20 @@ class ReportInputFieldController extends Controller
     {
         $val = $request->validate([
             'fieldId' => 'required',
-            'field_name' => 'string|required'
+            'field_name' => 'string|required',
+            'subfields' => 'array|sometimes',
         ]);
         $field = ReportInputField::find($val['fieldId']);
         $field->field_name = $val['field_name'];
         $field->field_value = Str::slug($val['field_name'], '_');
         $field->save();
 
-        return response()->json(['text' => 'Field updated', 'type' => 'success'], 200);
+        $subfields = $request->input('subfields', []);
+        $field->subfields()->delete();
+        foreach ($subfields as $subfield) {
+            $field->subfields()->create($subfield);
+        }
+        return response()->json(['text' => 'Field updated', 'type' => 'success', 'newField' => $field], 200);
     }
 
     /**
@@ -84,9 +92,25 @@ class ReportInputFieldController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ReportInputField $reportInputField)
+    public function deleteField(Request $request)
     {
-        //
+        $unitId = $request->input('unitId');
+        $fieldId = $request->input('fieldId');
+
+        $unit = DataUnit::find($unitId);
+
+        if (!$unit) {
+            return response()->json(['text' => 'Unit not found', 'type' => 'error'], 404);
+        }
+
+        // Cek apakah field ada di unit ini
+        if (!$unit->inputFields()->where('field_id', $fieldId)->exists()) {
+            return response()->json(['text' => 'Field not found in this unit', 'type' => 'error'], 404);
+        }
+
+        $unit->inputFields()->detach($fieldId);
+
+        return response()->json(['text' => 'Field detached successfully', 'type' => 'success'], 200);
     }
 
     /**

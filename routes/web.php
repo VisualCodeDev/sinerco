@@ -137,14 +137,10 @@ Route::controller(ReportInputFieldController::class)->middleware(['auth'])->grou
     Route::get('/fetch/input-fields/{unitId}', 'getUnitField')->name('field.unit.get');
     Route::post('/input-fields/add/sub', 'setSubfield')->name('subfield.add');
     Route::post('/input-fields/add/field', 'setField')->name('field.add');
+    Route::delete('/input-fields/delete', 'deleteField')->name('field.delete');
+    Route::post('/input-fields/edit', 'updateField')->name('field.edit');
     Route::get('/fetch/input-fields', 'getAllInputFields')->name('input.all.get');
 });
 
-Route::controller(ReportInputFieldController::class)->middleware(['auth'])->group(function () {
-    Route::get('/fetch/input-fields/{unitId}', 'getUnitField')->name('field.unit.get');
-    Route::post('/input-fields/add/sub', 'setSubfield')->name('subfield.add');
-    Route::post('/input-fields/add/field', 'setField')->name('field.add');
-    Route::get('/fetch/input-fields', 'getAllInputFields')->name('input.all.get');
-});
 
 require __DIR__ . '/auth.php';

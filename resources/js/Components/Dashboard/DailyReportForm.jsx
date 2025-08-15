@@ -18,8 +18,9 @@ import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 
 const DailyReportForm = (props) => {
-    const { unitData, formData, user } = props;
+    const { unitData, formData, user, unitFieldData } = props;
     const [data, setData] = useState({});
+    const [fields, setFields] = useState(unitFieldData?.input_fields || []);
     const [loading, setLoading] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -33,7 +34,7 @@ const DailyReportForm = (props) => {
             setSaving(true);
             const resp = await axios.post(
                 route("daily.add", unitData?.unitAreaLocationId),
-                data
+                { data: data, fields: fields }
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
@@ -92,7 +93,7 @@ const DailyReportForm = (props) => {
             setLoading(true);
             const dateTime = await getCurrDateTime();
             const now = dateTime.now;
-            console.log(now.format("HH"))
+            console.log(now.format("HH"));
             const filledFormTime = Array.isArray(formData)
                 ? formData
                       .filter((data) => dateTime?.date === data?.date)
@@ -122,14 +123,156 @@ const DailyReportForm = (props) => {
 
         fetchData();
     }, []);
-
+    console.log(data);
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving || (loading && <LoadingSpinner text="Saving..." />)}
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
                     <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
-                        {formList.map((item) => (
+                        <div className="flex w-full col-span-2  lg:md:gap-x-10 gap-x-4">
+                            <div className="flex flex-col w-full">
+                                <label
+                                    htmlFor={"name"}
+                                    className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+                                >
+                                    Date
+                                </label>
+                                <DateInput
+                                    id={"date"}
+                                    className="w-full bg-[#F4F5F9]"
+                                    name={"date"}
+                                    value={data["date"] || ""}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            [e.target.name],
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="flex flex-col w-full">
+                                <label
+                                    htmlFor={"name"}
+                                    className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+                                >
+                                    Time
+                                </label>
+                                <TimeInput
+                                    formData={formData}
+                                    item={data}
+                                    role={user?.role}
+                                    id={"time"}
+                                    name={"time"}
+                                    interval={unitFieldData?.input_interval}
+                                    value={data["time"] || ""}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            [e.target.name],
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
+                        </div>
+                        {fields?.length > 0 &&
+                            fields
+                                .filter((item) => item?.field_value != "time")
+                                .map((item, index) => (
+                                    <div key={index} className="mb-4">
+                                        <label className="block text-sm font-medium mb-1">
+                                            {item.field_name}
+                                        </label>
+                                        <div className="flex flex-row gap-4">
+                                            {item?.has_subfields ? (
+                                                item.subfields.map((sub) => {
+                                                    const reportSettings =
+                                                        unitData?.daily_report_setting ||
+                                                        {};
+                                                    const minMaxSetting =
+                                                        reportSettings
+                                                            .minMaxSetting?.[
+                                                            sub.subfield_name
+                                                        ] || {};
+                                                    const decimalSetting =
+                                                        1 /
+                                                            Math.pow(
+                                                                10,
+                                                                reportSettings
+                                                                    .decimalSetting?.[
+                                                                    sub
+                                                                        .subfield_name
+                                                                ] || 0
+                                                            ) || 1;
+
+                                                    return (
+                                                        <div
+                                                            key={
+                                                                sub.subfield_name
+                                                            }
+                                                            className="flex flex-col w-full"
+                                                        >
+                                                            <label className="text-sm">
+                                                                {
+                                                                    sub.subfield_name
+                                                                }
+                                                            </label>
+                                                            <input
+                                                                required
+                                                                id={
+                                                                    sub.subfield_name
+                                                                }
+                                                                name={sub.name}
+                                                                type="number"
+                                                                value={
+                                                                    data[
+                                                                        sub
+                                                                            .subfield_value
+                                                                    ] || ""
+                                                                }
+                                                                step={
+                                                                    decimalSetting
+                                                                }
+                                                                placeholder={
+                                                                    decimalSetting
+                                                                }
+                                                                className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+                                                                onChange={(e) =>
+                                                                    handleChange(
+                                                                        [
+                                                                            sub.subfield_value,
+                                                                        ],
+                                                                        e.target
+                                                                            .value
+                                                                        // minMaxSetting
+                                                                    )
+                                                                }
+                                                            />
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <input
+                                                    required
+                                                    type={item.type}
+                                                    value={
+                                                        data[
+                                                            item.field_value
+                                                        ] || ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            [item.field_value],
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm w-full"
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                        {/* {formList.map((item) => (
                             <div
                                 key={item.header}
                                 style={{
@@ -147,7 +290,7 @@ const DailyReportForm = (props) => {
                                       )
                                     : item.Cell}
                             </div>
-                        ))}
+                        ))} */}
                     </div>
                     <div className="mb-32 md:mb-0 flex place-self-center w-fit mt-10 items-center justify-center gap-2 bg-secondary/90 hover:bg-secondary text-white py-2 px-8 rounded-full transition ease-in-out delay-75 hover:scale-95">
                         <button className="font-bold w-full h-full">

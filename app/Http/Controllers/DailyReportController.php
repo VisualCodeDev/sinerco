@@ -6,6 +6,7 @@ use App\Models\DailyReport;
 use App\Models\UnitAreaLocation;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
+use Arr;
 use Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -43,23 +44,7 @@ class DailyReportController extends Controller
     public function setReport(Request $request, $unitAreaLocationId)
     {
         if ($unitAreaLocationId) {
-            $fieldsToNormalize = [
-                'sourcePress',
-                'suctionPress',
-                'dischargePress',
-                'speed',
-                'manifoldPress',
-                'oilPress',
-                'oilDiff',
-                'runningHours',
-                'voltage',
-                'waterTemp',
-                'befCooler',
-                'aftCooler',
-                'staticPress',
-                'diffPress',
-                'mscfd'
-            ];
+            $fieldsToNormalize = Arr::except($request->fields, ['date', 'time']);
 
             foreach ($fieldsToNormalize as $field) {
                 if ($request->has($field)) {
@@ -69,25 +54,29 @@ class DailyReportController extends Controller
                 }
             }
 
-            $validatedData = $request->validate([
-                'date' => 'required|string',
-                'time' => 'required|string',
-                'sourcePress' => 'required|numeric',
-                'suctionPress' => 'required|numeric',
-                'dischargePress' => 'required|numeric',
-                'speed' => 'required|numeric',
-                'manifoldPress' => 'required|numeric',
-                'oilPress' => 'required|numeric',
-                'oilDiff' => 'required|numeric',
-                'runningHours' => 'required|numeric',
-                'voltage' => 'required|numeric',
-                'waterTemp' => 'required|numeric',
-                'befCooler' => 'required|numeric',
-                'aftCooler' => 'required|numeric',
-                'staticPress' => 'required|numeric',
-                'diffPress' => 'required|numeric',
-                'mscfd' => 'required|numeric',
-            ]);
+            $rules = [];
+
+            $rules = [
+                'data.date' => 'required|string',
+                'data.time' => 'required|string',
+            ];
+
+            // Loop semua field dari $request->data
+            foreach ($request->data as $key => $value) {
+                if (!in_array($key, ['date', 'time', 'warn'])) {
+                    $rules["data.$key"] = 'required|numeric';
+                }
+            }
+
+            // Kalau mau validasi warn.* biar optional numeric juga
+            if (!empty($request->data['warn'])) {
+                foreach ($request->data['warn'] as $warnKey => $warnValue) {
+                    $rules["data.warn.$warnKey"] = 'nullable|numeric';
+                }
+            }
+
+            $validatedData = $request->validate($rules);
+
             if ($validatedData) {
                 $data = collect($validatedData)
                     ->mapWithKeys(function ($field, $key) {
@@ -126,23 +115,24 @@ class DailyReportController extends Controller
 
                 $report = new DailyReport();
                 $report->unitAreaLocationId = $unitAreaLocationId;
-                $report->date = $data['date'];
-                $report->time = $data['time'];
-                $report->sourcePress = $data['sourcePress'];
-                $report->suctionPress = $data['suctionPress'];
-                $report->dischargePress = $data['dischargePress'];
-                $report->speed = $data['speed'];
-                $report->manifoldPress = $data['manifoldPress'];
-                $report->oilPress = $data['oilPress'];
-                $report->oilDiff = $data['oilDiff'];
-                $report->runningHours = $data['runningHours'];
-                $report->voltage = $data['voltage'];
-                $report->waterTemp = $data['waterTemp'];
-                $report->befCooler = $data['befCooler'];
-                $report->aftCooler = $data['aftCooler'];
-                $report->staticPress = $data['staticPress'];
-                $report->diffPress = $data['diffPress'];
-                $report->mscfd = $data['mscfd'];
+                $report->data = $data['data'];
+                $report->date = $request->data['date'];
+                $report->time = $request->data['time'];
+                // $report->sourcePress = $data['sourcePress'];
+                // $report->suctionPress = $data['suctionPress'];
+                // $report->dischargePress = $data['dischargePress'];
+                // $report->speed = $data['speed'];
+                // $report->manifoldPress = $data['manifoldPress'];
+                // $report->oilPress = $data['oilPress'];
+                // $report->oilDiff = $data['oilDiff'];
+                // $report->runningHours = $data['runningHours'];
+                // $report->voltage = $data['voltage'];
+                // $report->waterTemp = $data['waterTemp'];
+                // $report->befCooler = $data['befCooler'];
+                // $report->aftCooler = $data['aftCooler'];
+                // $report->staticPress = $data['staticPress'];
+                // $report->diffPress = $data['diffPress'];
+                // $report->mscfd = $data['mscfd'];
                 $report->save();
                 // $report->unitAreaLocationId = $unitAreaLocationId;
                 // $report->fill($data)->save();

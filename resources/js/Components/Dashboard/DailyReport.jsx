@@ -21,12 +21,7 @@ import LoadingSpinner from "../Loading";
 import { fetch } from "../utils/database-util";
 
 const DailyReport = (props) => {
-    const { formData, unitData, user } = props;
-    const { data: unitFieldData, loading } = fetch(
-        "field.unit.get",
-        unitData?.unitId
-    );
-
+    const { formData, unitData, user, unitFieldData } = props;
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
@@ -39,14 +34,13 @@ const DailyReport = (props) => {
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
-
     const handleSelectDate = (e) => {
         const newSelectedDate = e.target.value;
         setSelectedDate(newSelectedDate);
     };
 
     const sortedObjectByTime = (obj) => {
-        const sortedItemByTime = Object.entries(dataAll)
+        const sortedItemByTime = Object.entries(obj)
             .filter(([, value]) => value.date === selectedDate)
             .map(([, value]) => value)
             .sort((a, b) => {
@@ -60,18 +54,19 @@ const DailyReport = (props) => {
     useEffect(() => {
         if (dataAll) {
             if (selectedDate) {
-                const sortedData = sortedObjectByTime(dataAll);
+                const reportData = formData.map((item) => {
+                    return {
+                        ...item?.data,
+                        time: item.time,
+                        date: item.date,
+                    };
+                });
+                const sortedData = sortedObjectByTime(reportData);
                 setCurrData(sortedData);
             }
         }
-    }, [selectedDate]);
-
-    useEffect(() => {
-        if (dataAll) {
-            const sortedData = sortedObjectByTime(dataAll);
-            setCurrData(sortedData);
-        }
-    }, [dataAll]);
+    }, [selectedDate, dataAll]);
+    console.log("currData", currData);
 
     useEffect(() => {
         if (!unitFieldData) return;
@@ -83,7 +78,7 @@ const DailyReport = (props) => {
         setEditModal(true);
         setSelectedData(data);
     };
-    console.log(unitFieldData);
+
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -132,14 +127,6 @@ const DailyReport = (props) => {
                                     {item.field_name}
                                 </th>
                             ))}
-                            {user?.role === "super_admin" && (
-                                <th
-                                    rowSpan={2}
-                                    className="px-4 py-2 text-sm font-semibold border border-black text-left text-center"
-                                >
-                                    Edit
-                                </th>
-                            )}
                         </tr>
                         <tr>
                             {columnList?.map((item) =>
@@ -155,57 +142,44 @@ const DailyReport = (props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {/* {currData &&
-                            Object.entries(currData).map(([key, value]) => (
-                                <tr
-                                    key={key}
-                                    className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
-                                    onClick={() => handleEdit(value.id)}
-                                >
-                                    {formItems
-                                        ?.filter(
-                                            (item) => item?.name != "remarks"
-                                        )
-                                        .map((item) =>
-                                            item?.subheader?.length > 0 ? (
-                                                item.subheader.map((sub) => (
-                                                    <td className="px-4 py-2 border text-center">
-                                                        {value?.[sub?.name]}
-                                                    </td>
-                                                ))
-                                            ) : (
-                                                <td className="px-4 py-2 border text-center">
-                                                    {value?.[item?.name]}
-                                                </td>
-                                            )
-                                        )}
-                                    {user?.role === "super_admin" && (
-                                        <>
-                                            <td></td>
+                        {currData &&
+                            currData.map((item, index) => (
+                                <tr key={index} onClick={() => handleEdit(item.id)} className="cursor-pointer hover:bg-gray-100">
+                                    {columnList?.map((col) =>
+                                        col.subfields?.length === 0 ? (
                                             <td
-                                                className="flex justify-center items-center px-4 py-2 cursor-pointer"
-                                                onClick={() =>
-                                                    handleEdit(value.id)
-                                                }
+                                                key={col.id}
+                                                className="px-4 py-2 border text-center"
                                             >
-                                                <FaPen />
+                                                {item[col.field_value]}
                                             </td>
-                                        </>
+                                        ) : (
+                                            col?.subfields.map(
+                                                (sub, subIndex) => (
+                                                    <td
+                                                        key={subIndex}
+                                                        className="px-4 py-2 border text-center"
+                                                    >
+                                                        {
+                                                            item[
+                                                                sub
+                                                                    .subfield_value
+                                                            ]
+                                                        }
+                                                    </td>
+                                                )
+                                            )
+                                        )
                                     )}
                                 </tr>
                             ))}
+
                         {averages && (
                             <tr className="bg-slate-100 sticky bottom-0 left-0 z-10 w-full">
                                 <th className="px-4 py-2 border">Average</th>
                                 {Object.keys(averages).map((field, index) =>
                                     [
-                                        "time",
-                                        "created_at",
-                                        "updated_at",
-                                        "date",
-                                        "requestId",
-                                        "request",
-                                        "id",
+                                        "warn",
                                     ].includes(field) ? null : (
                                         <th
                                             key={index}
@@ -215,12 +189,8 @@ const DailyReport = (props) => {
                                         </th>
                                     )
                                 )}
-                                <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
-                                {user?.role === "super_admin" && (
-                                    <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
-                                )}
                             </tr>
-                        )} */}
+                        )}
                     </tbody>
                 </table>
             </div>

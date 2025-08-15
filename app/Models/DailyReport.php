@@ -34,4 +34,8 @@ class DailyReport extends Model
         'mscfd',
         'requestId'
     ];
+
+    protected $casts = [
+        'data' => 'array',
+    ];
 }
