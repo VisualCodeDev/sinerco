@@ -193,15 +193,15 @@ const InputField = () => {
                     setSelected={setSelectedUnit}
                 />
                 {selectedUnit?.length > 0 && (
-                    <div className="flex w-full h-full">
+                    <div className="flex lg:md:flex-row flex-col w-full h-full">
                         {/* Left Panel */}
-                        <div className="flex flex-col overflow-x-auto min-w-[50%] bg-white border-r border-gray-200">
+                        <div className="flex flex-col overflow-x-auto lg:md:min-w-[50%] bg-white border-r border-gray-200">
                             {fields
                                 ?.filter(
                                     (field) => field.field_value !== "time"
                                 )
                                 .map((main, index) => (
-                                    <div
+                                    <a href={`#${main.id}`}
                                         key={index}
                                         onClick={() => {
                                             setSelectedField(main);
@@ -229,15 +229,15 @@ const InputField = () => {
                                             }}
                                             className="text-red-400 text-end text-lg cursor-pointer"
                                         />
-                                    </div>
+                                    </a>
                                 ))}
 
                             {/* Add New Field Button */}
                             <button
                                 onClick={() => handleField("field")}
-                                className="ml-[2.8rem] flex items-center justify-center px-6 py-3 bg-primary text-white hover:bg-primary/90 transition rounded-md"
+                                className="flex items-center justify-center px-6 py-3 bg-primary text-white hover:bg-primary/90 transition rounded-md"
                             >
-                                <FaPlus className="text-white text-sm" />
+                                New Field
                             </button>
                         </div>
 
@@ -248,7 +248,7 @@ const InputField = () => {
                                     {selectedField?.field_name}
                                 </p>
 
-                                <div className="flex flex-col gap-2">
+                                <div className="flex flex-col gap-2" id={`${tempField.id}`}>
                                     <label className="text-sm font-medium text-gray-600">
                                         Field Name
                                     </label>

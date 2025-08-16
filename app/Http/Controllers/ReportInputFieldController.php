@@ -69,7 +69,7 @@ class ReportInputFieldController extends Controller
         ]);
         $field = ReportInputField::find($val['fieldId']);
         $field->field_name = $val['field_name'];
-        $field->field_value = Str::slug($val['field_name'], '_');
+        // $field->field_value = Str::slug($val['field_name'], '_');
         $field->save();
 
         $subfields = $request->input('subfields', []);
