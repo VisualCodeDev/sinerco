@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('data_units', function (Blueprint $table) {
+        Schema::table('clients', function (Blueprint $table) {
             $table->integer('input_interval')->default(1);
+            $table->integer('input_duration')->default(35);
         });
     }
 

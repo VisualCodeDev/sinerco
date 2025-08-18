@@ -1,14 +1,100 @@
 import PageLayout from "@/Layouts/PageLayout";
-import React from "react";
+import React, { useState } from "react";
 import InputValidationSetting from "./InputValidationSetting";
 import UnitInputIntervalSetting from "./UnitInputIntervalSetting";
 import { FaClipboardCheck, FaStopwatch } from "react-icons/fa";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
+import TableComponent from "@/Components/TableComponent";
+import tColumns from "@/Components/utils/UnitSetting/columns";
+import { fetch } from "@/Components/utils/database-util";
+import LoadingSpinner from "@/Components/Loading";
+import { useToast } from "@/Components/Toast/ToastProvider";
+import axios from "axios";
+
 const UnitSetting = () => {
+    const { data: clienData, loading } = fetch("client.get");
+    const [formData, setFormData] = useState({
+        selectedRows: [],
+        clients: {},
+    });
+    const { addToast } = useToast();
+    const handleSelectAll = (currData) => {
+        const currentIds = currData.map((item) => item.clientId.toString());
+        const selected = formData.selectedRows || [];
+        const isAllSelected = currentIds.every((id) => selected.includes(id));
+        let updated;
+        if (isAllSelected) {
+            updated = selected.filter((id) => !currentIds.includes(id));
+        } else {
+            updated = [...selected];
+
+            currentIds.forEach((id) => {
+                if (!updated.includes(id)) {
+                    updated.push(id);
+                }
+            });
+        }
+        setFormData({ selectedRows: updated });
+    };
+
+    const handleCheckItem = (value) => {
+        const selected = formData?.selectedRows || [];
+        const stringId = value;
+        let updated;
+        if (selected.includes(stringId)) {
+            updated = selected.filter((clientId) => clientId !== stringId);
+        } else {
+            updated = [...selected, stringId];
+        }
+        setFormData({
+            ...formData,
+            selectedRows: updated,
+        });
+    };
+
+    const handleChange = (name, client, value) => {
+        setFormData({
+            ...formData,
+            clientSettings: {
+                ...formData?.clientSettings,
+                [client]: {
+                    ...formData?.clientSettings?.[client],
+                    [name]: value,
+                },
+            },
+        });
+    };
+    const columns = tColumns(
+        "checkbox",
+        { ...formData },
+        { ...clienData },
+        handleSelectAll,
+        handleChange,
+        handleCheckItem
+    );
+
+    const handleClientSetting = async (e) => {
+        e.preventDefault();
+
+        try {
+            const resp = await axios.post(
+                route("client.settings", {
+                    clientSettings: formData?.clientSettings,
+                })
+            );  
+            console.log(resp)
+            addToast(resp?.data);
+        } catch (e) {
+            console.log(e);
+            addToast({ type: "error", text: e.response.data.message });
+        }
+    };
+
     return (
         <PageLayout>
-            <TabGroup>
+            {loading && <LoadingSpinner />}
+            {/* <TabGroup>
                 <TabList>
                     <Tab className=" aria-selected:bg-primary py-4 px-6 aria-selected:text-white rounded-t-md text-gray-500 font-semibold ">
                         <div className="flex justify-center items-center gap-2">
@@ -31,7 +117,19 @@ const UnitSetting = () => {
                         <UnitInputIntervalSetting />
                     </TabPanel>
                 </TabPanels>
-            </TabGroup>
+            </TabGroup> */}
+
+            <TableComponent
+                title={"Unit Setting"}
+                subtitle={"Set interval and duration for each client"}
+                isForm
+                height="55vh"
+                submitPlaceholder="Apply Settings"
+                handleSubmit={handleClientSetting}
+                columns={columns}
+                data={clienData}
+            />
+            <InputValidationSetting selectedClients={formData?.selectedRows} />
         </PageLayout>
     );
 };

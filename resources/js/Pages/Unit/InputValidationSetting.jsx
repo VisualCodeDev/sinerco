@@ -7,13 +7,16 @@ import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
 
 const InputValidationSetting = (props) => {
-    const { data, clientData } = props;
-    const [selectedClients, setSelectedClients] = useState([]);
-    const [formData, setFormData] = useState({});
+    const { data, clientData, selectedClients } = props;
+    const [formData, setFormData] = useState(null);
     const [saving, setSaving] = useState(false);
     const { addToast } = useToast();
-    const { data: clients, loading, error } = fetch("client.get");
-
+    // const { data: clients, loading, error } = fetch("client.get");
+    // const [selectedClients, setSelectedClients] = useState([]);
+   // const clientOptions = clients.map((client) => ({
+    //     value: client.clientId,
+    //     label: client.name,
+    // }));
     useEffect(() => {
         let defaultDecimalSetting = {};
         let defaultMinMaxSetting = {};
@@ -39,7 +42,7 @@ const InputValidationSetting = (props) => {
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
         }));
     }, []);
-
+    
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -92,16 +95,13 @@ const InputValidationSetting = (props) => {
             </option>
         );
     }
-    if (loading) {
+    if (!formData) {
         return <LoadingSpinner />;
     }
-    const clientOptions = clients.map((client) => ({
-        value: client.clientId,
-        label: client.name,
-    }));
+ 
     return (
         <div className="flex flex-col gap-6 p-5">
-            <h2 className="text-xl font-semibold text-gray-800">
+            {/* <h2 className="text-xl font-semibold text-gray-800">
                 Input Validation Settings
             </h2>
             <div className="flex flex-col gap-2">
@@ -111,7 +111,7 @@ const InputValidationSetting = (props) => {
                     selected={selectedClients}
                     setSelected={setSelectedClients}
                 />
-            </div>
+            </div> */}
 
             <div className="overflow-y-auto">
                 <table className="w-full table-fixed">

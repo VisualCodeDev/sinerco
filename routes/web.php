@@ -58,6 +58,8 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::post('/unit/daily/{unitAreaLocationId}/edit', 'editRepot')->name('daily.edit')->middleware('auth');
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
     Route::get('/unit/daily/{unitAreaLocationId}', 'index')->name('daily')->middleware('auth');
+    
+    Route::get('/fetch/unit/daily', 'getDataReportBasedOnDate')->name('getDataReportBasedOnDate')->middleware('auth');
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
@@ -86,6 +88,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/unit-list', 'unitList')->name('daily.list');
     Route::get('/fetch/get-all-unit', 'getAllUnit')->name('unit.get');
     Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
+    Route::get('/api/get-selected-unit-data', 'getSelectedUnit')->name('getSelectedUnit');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
 
     Route::post('/unit-setting/set', 'setInterval')->name('unit.interval.set');
@@ -99,8 +102,12 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/fetch/get-filtered-area-location', 'getFilteredAreaLocation')->name('area.filter.get');
     Route::get('/fetch/get-filtered-unit', 'clientDetail')->name('unit.filter.get');
     Route::get('/fetch/client', 'getAllClient')->name('client.get');
+    Route::get('/fetch/selected-client', 'getSelectedClient')->name('client.selected.get');
+
     Route::get('/client-list', 'index')->name('client.list');
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
+    
+    Route::post('/client/settings', 'setSettings')->name('client.settings');
 });
 
 Route::controller(UserSettingController::class)

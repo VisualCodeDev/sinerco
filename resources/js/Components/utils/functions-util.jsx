@@ -51,6 +51,7 @@ export const TimeInput = ({
     value,
     disabled = false,
     interval = 1,
+    duration = 35,
 }) => {
     const [now, setNow] = useState(null);
     const [time, setTime] = useState(0);
@@ -67,7 +68,6 @@ export const TimeInput = ({
         fetchTime();
     }, []);
     const options = [];
-
     let permittedTime = time % interval === 0 ? time : time + (time % interval);
     if (minute > 35) {
         permittedTime = permittedTime + interval;
@@ -84,7 +84,7 @@ export const TimeInput = ({
     if (role === "operator") {
         for (let i = 0; i <= 24; i += parseInt(interval)) {
             const isNow = i === time;
-            const isPermitted = isNow && minute <= 35;
+            const isPermitted = isNow && minute <= duration;
             const alreadyFilled = filledFormTime.includes(i);
 
             if (isPermitted && !alreadyFilled) {
@@ -126,7 +126,7 @@ export const TimeInput = ({
                 {options}
             </select>
             <span className="text-sm text-slate-400">
-                Available from {permittedTime}:00 to {permittedTime}:35
+                Available from {permittedTime}:00 to {permittedTime}:{duration}
             </span>
         </>
     );

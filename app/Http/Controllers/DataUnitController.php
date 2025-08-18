@@ -20,7 +20,7 @@ class DataUnitController extends Controller
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $data = $user->unitAreaLocations()->with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status', 'input_interval']);
+                    $q->select(['unitId', 'unit', 'status']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
@@ -30,7 +30,7 @@ class DataUnitController extends Controller
         } else {
             $data = UnitAreaLocation::with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status', 'input_interval']);
+                    $q->select(['unitId', 'unit', 'status']);
                 },
                 'client' => function ($q) {
                     $q->select(['clientId', 'name']);
@@ -118,9 +118,10 @@ class DataUnitController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DataUnit $dataUnit)
+    public function getSelectedUnit(Request $request)
     {
-        //
+        $data = UnitAreaLocation::where('unitAreaLocationId', $request->unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting'])->first();
+        return response()->json($data);
     }
 
     /**

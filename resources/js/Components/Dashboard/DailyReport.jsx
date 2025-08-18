@@ -20,11 +20,9 @@ import axios from "axios";
 import LoadingSpinner from "../Loading";
 
 const DailyReport = (props) => {
-    const { formData, unitData, user } = props;
+    const { formData, unitData, user, setSelectedDate, selectedDate } = props;
     const currDate = new Date();
-    const [selectedDate, setSelectedDate] = useState(
-        getDDMMYYDate(currDate, "YYYY-MM-DD")
-    );
+
     const [isClicked, setClick] = useState(false);
     const [isEditModal, setEditModal] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
@@ -33,13 +31,9 @@ const DailyReport = (props) => {
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
-    const handleSelectDate = (e) => {
-        const newSelectedDate = e.target.value;
-        setSelectedDate(newSelectedDate);
-    };
+
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
-            .filter(([, value]) => value.date === selectedDate)
             .map(([, value]) => value)
             .sort((a, b) => {
                 const hourA = parseInt(a.time.split(":")[0]);
@@ -48,14 +42,6 @@ const DailyReport = (props) => {
             });
         return sortedItemByTime;
     };
-    useEffect(() => {
-        if (dataAll) {
-            if (selectedDate) {
-                const sortedData = sortedObjectByTime(dataAll);
-                setCurrData(sortedData);
-            }
-        }
-    }, [selectedDate]);
 
     useEffect(() => {
         if (dataAll) {
@@ -69,6 +55,10 @@ const DailyReport = (props) => {
         setSelectedData(data);
     };
 
+    useEffect(() => {
+        setCurrData(formData);
+    }, [formData]);
+    
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -78,7 +68,7 @@ const DailyReport = (props) => {
                         className="rounded-full py-1 px-3"
                         type="date"
                         value={selectedDate}
-                        onChange={(e) => handleSelectDate(e)}
+                        onChange={(e) => setSelectedDate(e.target.value)}
                     />
                     {/* <select
                         onChange={(e) => handleSelectDate(e)}

@@ -18,7 +18,7 @@ import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 
 const DailyReportForm = (props) => {
-    const { unitData, formData, user } = props;
+    const { unitData, formData, user, clientData } = props;
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -78,21 +78,21 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
-
     const formList = list({
         handleChange: handleChange,
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
-        interval: unitData?.unit?.input_interval,
+        interval: clientData?.input_interval,
+        duration: clientData?.input_duration,
     });
+
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
             const dateTime = await getCurrDateTime();
             const now = dateTime.now;
-            console.log(now.format("HH"))
             const filledFormTime = Array.isArray(formData)
                 ? formData
                       .filter((data) => dateTime?.date === data?.date)
@@ -105,11 +105,8 @@ const DailyReportForm = (props) => {
                 currentHour = currentHour - 1;
                 if (currentHour < 0) currentHour = 23;
             }
-            console.log("Current Hour:", currentHour);
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
-
-            console.log(date);
 
             setData((prevData) => ({
                 ...prevData,

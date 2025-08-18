@@ -44,4 +44,33 @@ class ClientController extends Controller
         }
     }
 
+    public function setSettings(Request $request)
+    {
+        $request->validate([
+            'clientSettings' => 'required|array',
+        ]);
+
+        foreach ($request->clientSettings as $clientId => $settings) {
+            $client = Client::where('clientId', $clientId)->first();
+
+            if ($client) {
+                $client->update([
+                    'input_interval' => $settings['input_interval'] ?? $client->input_interval,
+                    'input_duration' => $settings['input_duration'] ?? $client->input_duration,
+                ]);
+            } else {
+                return response()->json(['type' => 'error', 'text' => 'Client not found']);
+            }
+        }
+
+        return response()->json(['type' => 'success', 'text' => 'Settings updated']);
+    }
+
+    public function getSelectedClient(Request $request)
+    {
+        $data = Client::where('clientId', $request->clientId)->first();
+
+        Log::debug($data);
+        return response()->json($data);
+    }
 }

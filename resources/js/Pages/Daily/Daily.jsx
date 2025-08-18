@@ -4,11 +4,13 @@ import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
 import UnitTable from "@/Components/Dashboard/UnitTable";
 import LoadingSpinner from "@/Components/Loading";
+import { getDDMMYYDate } from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
 import { Head, router, usePage } from "@inertiajs/react";
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import {
     FaRegFileAlt,
     FaRegCalendarAlt,
@@ -18,15 +20,25 @@ import {
     FaLock,
 } from "react-icons/fa";
 
-export default function Dashboard({ data, unitData }) {
-    const { user, loading } = useAuth();
+export default function Dashboard({ unitAreaLocationId }) {
+    const { user, loading: userLoding } = useAuth();
+    const currDate = new Date();
+    const [selectedDate, setSelectedDate] = useState(
+        getDDMMYYDate(currDate, "YYYY-MM-DD")
+    );
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState();
+    const [unitData, setUnitData] = useState();
+    const [clientData, setClientData] = useState();
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
+
     const [expanded, setExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
             : "report"
     );
+
     const tabs = [
         {
             key: "report",
@@ -60,11 +72,56 @@ export default function Dashboard({ data, unitData }) {
         },
     ];
 
-    if (loading || isLoading) {
-        return <LoadingSpinner />;
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            const reportData = await axios.get(
+                route("getDataReportBasedOnDate", {
+                    unitAreaLocationId: unitAreaLocationId,
+                    date: selectedDate,
+                })
+            );
+
+            const unit = await axios.get(
+                route("getSelectedUnit", {
+                    unitAreaLocationId: unitAreaLocationId,
+                })
+            );
+
+            setUnitData(unit?.data);
+            setData(reportData?.data);
+            setClientData(unit?.data?.client);
+            setLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        const changeReportData = async () => {
+            setLoading(true);
+            const reportData = await axios.get(
+                route("getDataReportBasedOnDate", {
+                    unitAreaLocationId: unitAreaLocationId,
+                    date: selectedDate,
+                })
+            );
+
+            setData(reportData?.data);
+            setLoading(false);
+        };
+        changeReportData();
+    }, [selectedDate]);
+
+
     return (
         <PageLayout>
+            {userLoding ||
+                isLoading ||
+                !data ||
+                !unitData ||
+                !clientData ||
+                (loading && <LoadingSpinner />)}
             <div className="flex">
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
@@ -145,6 +202,7 @@ export default function Dashboard({ data, unitData }) {
                         )}
                         {activeTab === "form" && (
                             <DailyReportForm
+                                clientData={clientData}
                                 user={user}
                                 unitData={unitData}
                                 formData={data}
@@ -153,6 +211,8 @@ export default function Dashboard({ data, unitData }) {
 
                         {activeTab === "report" && (
                             <DailyReport
+                                selectedDate={selectedDate}
+                                setSelectedDate={setSelectedDate}
                                 formData={data}
                                 unitData={unitData}
                                 user={user}

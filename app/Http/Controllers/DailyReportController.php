@@ -173,8 +173,7 @@ class DailyReportController extends Controller
         if ($unitAreaLocationId) {
             $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting'])->first();
             return Inertia::render('Daily/Daily', [
-                'data' => $data,
-                'unitData' => $unitData,
+                'unitAreaLocationId' => $unitAreaLocationId
             ]);
         }
         return redirect()->route('dashboard');
@@ -189,6 +188,21 @@ class DailyReportController extends Controller
                     'remarks',
                     'requestId',
                     "id",
+                    "unitAreaLocationId"
+                ]);
+            });
+        return response()->json($data);
+    }
+
+    public function getDataReportBasedOnDate(Request $request)
+    {
+        $data = DailyReport::with('request')->where('unitAreaLocationId', $request->unitAreaLocationId)
+            ->where('date', $request->date)->get()->map(function ($item) {
+                return collect($item)->except([
+                    "created_at",
+                    "updated_at",
+                    "approval1",
+                    "approval2",
                     "unitAreaLocationId"
                 ]);
             });
