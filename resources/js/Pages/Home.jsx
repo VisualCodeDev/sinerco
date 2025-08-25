@@ -218,11 +218,11 @@ export default function Home() {
                                                 class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                                             >
                                                 <div class="md:text-base font-semibold">
-                                                    {item?.unit?.unit}
+                                                    {item?.unit_area_location?.unit?.unit}
                                                 </div>
                                             </th>
                                             <td class="px-6 py-4">
-                                                {item?.location?.location}
+                                                {item?.unit_area_location?.location?.location}
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center whitespace-nowrap gap-2">

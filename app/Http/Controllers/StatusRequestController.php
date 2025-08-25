@@ -123,7 +123,7 @@ class StatusRequestController extends Controller
 
         $unitIds = collect($permissionData)->pluck('unitAreaLocationId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitAreaLocationId', $unitIds)->with('unit', 'user', 'location.area', 'pic')->get();
+        $requestList = StatusRequest::whereIn('unitAreaLocationId', $unitIds)->with('unitAreaLocation', 'user', 'location.area', 'pic')->get();
         $requestList = collect($requestList)
             ->values()
             ->toArray();

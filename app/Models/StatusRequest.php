@@ -32,7 +32,7 @@ class StatusRequest extends Model
     public function unitAreaLocation()
     {
         return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId')
-            ->with('unit');
+            ->with('unit', 'location');
     }
 
     public function user()
