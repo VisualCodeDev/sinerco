@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
+use App\Models\StatusRequest;
 use App\Models\UnitAreaLocation;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
@@ -88,6 +89,19 @@ class DailyReportController extends Controller
                 'diffPress' => 'required|numeric',
                 'mscfd' => 'required|numeric',
             ]);
+
+            $validatedTime = $validatedData['time'];
+            $oneHourBefore = \Carbon\Carbon::createFromFormat('H:i', $validatedTime)
+                ->subHour()
+                ->format('H:i');
+
+            $statusRequest = StatusRequest::where('unitAreaLocationId', $unitAreaLocationId)
+                ->where('startDate', $validatedData['date'])
+                ->whereBetween('startTime', [$oneHourBefore, $validatedTime])
+                ->first();
+
+            Log::debug('status ' . $statusRequest);
+
             if ($validatedData) {
                 $data = collect($validatedData)
                     ->mapWithKeys(function ($field, $key) {
@@ -143,6 +157,10 @@ class DailyReportController extends Controller
                 $report->staticPress = $data['staticPress'];
                 $report->diffPress = $data['diffPress'];
                 $report->mscfd = $data['mscfd'];
+
+                if ($statusRequest) {
+                    $report->requestId = $statusRequest->requestId;
+                }
                 $report->save();
                 // $report->unitAreaLocationId = $unitAreaLocationId;
                 // $report->fill($data)->save();

@@ -58,7 +58,7 @@ const DailyReport = (props) => {
     useEffect(() => {
         setCurrData(formData);
     }, [formData]);
-    
+
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -150,9 +150,11 @@ const DailyReport = (props) => {
                                                 </td>
                                             )
                                         )}
+                                    <td className="px-4 py-2 border text-center">
+                                        {value?.request && value?.request?.remarks}
+                                    </td>
                                     {user?.role === "super_admin" && (
                                         <>
-                                            <td></td>
                                             <td
                                                 className="flex justify-center items-center px-4 py-2 cursor-pointer"
                                                 onClick={() =>

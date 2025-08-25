@@ -48,30 +48,36 @@ class StatusRequestController extends Controller
             ->where('time', $formatted)
             ->first();
 
-        if (!$unit) {
-            return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
-        }
+        $unitAreaLocation = UnitAreaLocation::where('unitId', $val['unitId'])->where('locationId', $val['locationId'])->first();
+
+        // if (!$unit) {
+        //     return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+        // }
 
         $user = auth()->user();
         $status = new StatusRequest();
-        $status->unitId = $val['unitId'];
+        $status->unitAreaLocationId = $unitAreaLocation->unitAreaLocationId;
         $status->startDate = $val['startDate'];
         $status->startTime = $val['startTime'];
         $status->requestType = $val['requestType'];
         $status->remarks = $val['remarks'];
         $status->status = 'Ongoing';
         $status->requestedBy = $user->id;
-        $status->locationId = $val['locationId'];
+        // $status->locationId = $val['locationId'];
         $status->save();
 
-        $unit->update(['requestId' => $status->requestId]);
+        if ($unit) {
+            $unit->update(['requestId' => $status->requestId]);
 
-        $unit->load(['request', 'unitAreaLocation.unit']);
-        if ($unit->request && $unit->unitAreaLocation && $unit->unitAreaLocation->unit) {
-            $unit->unitAreaLocation->unit->update([
-                'status' => $unit->request->requestType
-            ]);
+            $unit->load(['request', 'unitAreaLocation.unit']);
+            if ($unit->request && $unit->unitAreaLocation && $unit->unitAreaLocation->unit) {
+                $unit->unitAreaLocation->unit->update([
+                    'status' => $unit->request->requestType
+                ]);
+            }
+            // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
         }
+
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {
@@ -100,9 +106,9 @@ class StatusRequestController extends Controller
     {
         $permissionData = DataUnitController::getPermittedUnit();
 
-        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+        $unitIds = collect($permissionData)->pluck('unitAreaLocationId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'pic')->get();
+        $requestList = StatusRequest::whereIn('unitAreaLocationId', $unitIds)->with('unitAreaLocation', 'user', 'pic')->get();
         $requestList = collect($requestList)
             ->values()
             ->toArray();
@@ -115,9 +121,9 @@ class StatusRequestController extends Controller
     {
         $permissionData = DataUnitController::getPermittedUnit();
 
-        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+        $unitIds = collect($permissionData)->pluck('unitAreaLocationId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit', 'user', 'location.area', 'pic')->get();
+        $requestList = StatusRequest::whereIn('unitAreaLocationId', $unitIds)->with('unit', 'user', 'location.area', 'pic')->get();
         $requestList = collect($requestList)
             ->values()
             ->toArray();
@@ -127,7 +133,7 @@ class StatusRequestController extends Controller
     public function updateRequest(Request $request)
     {
         $val = $request->validate([
-            'unitId' => 'required|string',
+            'unitAreaLocationId' => 'required|string',
             'startDate' => 'nullable|string',
             'startTime' => 'nullable|string',
             'requestId' => 'required|string',
@@ -136,7 +142,7 @@ class StatusRequestController extends Controller
             'endDate' => 'nullable|string',
             'remarks' => 'nullable|string',
         ]);
-        $status = StatusRequest::with('unit')->where('requestId', $request->requestId)->first();
+        $status = StatusRequest::with('unitAreaLocation')->where('requestId', $request->requestId)->first();
 
         if ($val['startTime'] || $val['startDate']) {
             $startTime = $val['startTime'] ?? $status->startTime;
@@ -149,7 +155,7 @@ class StatusRequestController extends Controller
                 $start->minute(0)->second(0);
             }
             $formatted = $start->format('H:i');
-            $unit = DailyReport::whereRelation('unitAreaLocation', 'unitId', $val['unitId'])->where('date', $startDate)->where('time', $formatted)->first();
+            $unit = DailyReport::whereRelation('unitAreaLocation', 'unitAreaLocationId', $val['unitAreaLocationId'])->where('date', $startDate)->where('time', $formatted)->first();
             if (!$unit) {
                 return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
             }

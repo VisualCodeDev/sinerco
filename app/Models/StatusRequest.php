@@ -29,10 +29,10 @@ class StatusRequest extends Model
         });
     }
 
-    public function unit()
+    public function unitAreaLocation()
     {
-        return $this->belongsTo(DataUnit::class, 'unitId', 'unitId')
-            ->select('unitId', 'status', 'unit');
+        return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId')
+            ->with('unit');
     }
 
     public function user()
@@ -62,6 +62,7 @@ class StatusRequest extends Model
         'timeEnd',
         'seenStatus',
         'seenTime',
-        'seenBy'
+        'seenBy',
+        'unitAreaLocationId'
     ];
 }

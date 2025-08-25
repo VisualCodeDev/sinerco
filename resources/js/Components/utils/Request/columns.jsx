@@ -25,10 +25,10 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             cellClassName: "",
             sortable: false,
             width: "15%",
-            Cell: ({ unit }) => {
+            Cell: ({ unit_area_location }) => {
                 return (
                     <>
-                        <div>{unit?.unit}</div>
+                        <div>{unit_area_location?.unit?.unit}</div>
                     </>
                 );
             },
