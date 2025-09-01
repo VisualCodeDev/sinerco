@@ -48,7 +48,7 @@ class StatusRequestController extends Controller
             ->where('time', $formatted)
             ->first();
 
-        $unitAreaLocation = UnitAreaLocation::where('unitId', $val['unitId'])->where('locationId', $val['locationId'])->first();
+        $unitAreaLocation = UnitAreaLocation::where('unitId', $val['unitId'])->where('locationId', $val['locationId'])->with('unit')->first();
 
         // if (!$unit) {
         //     return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
@@ -66,6 +66,7 @@ class StatusRequestController extends Controller
         // $status->locationId = $val['locationId'];
         $status->save();
 
+        $unitAreaLocation->unit->update(['status' => $val['requestType']]);
         if ($unit) {
             $unit->update(['requestId' => $status->requestId]);
 
@@ -85,7 +86,7 @@ class StatusRequestController extends Controller
                 })
                 ->get();
 
-            $unitData = DataUnit::where('unitId', $val['unitId'])->first();
+            $unitData = $unitAreaLocation->unit;
             $numbers = $technicians
                 ->filter(fn($tech) => !empty($tech->user->whatsAppNum))
                 ->map(fn($tech) => $tech->user->whatsAppNum)
@@ -142,25 +143,26 @@ class StatusRequestController extends Controller
             'endDate' => 'nullable|string',
             'remarks' => 'nullable|string',
         ]);
-        $status = StatusRequest::with('unitAreaLocation')->where('requestId', $request->requestId)->first();
+        // $status = StatusRequest::with('unitAreaLocation')->where('requestId', $request->requestId)->first();
 
-        if ($val['startTime'] || $val['startDate']) {
-            $startTime = $val['startTime'] ?? $status->startTime;
-            $startDate = $val['startDate'] ?? $status->startDate;
+        // if ($val['startTime'] || $val['startDate']) {
+        //     $startTime = $val['startTime'] ?? $status->startTime;
+        //     $startDate = $val['startDate'] ?? $status->startDate;
 
-            $start = Carbon::parse($startTime);
-            if ($start->minute > 0) {
-                $start->addHour()->minute(0)->second(0);
-            } else {
-                $start->minute(0)->second(0);
-            }
-            $formatted = $start->format('H:i');
-            $unit = DailyReport::whereRelation('unitAreaLocation', 'unitAreaLocationId', $val['unitAreaLocationId'])->where('date', $startDate)->where('time', $formatted)->first();
-            if (!$unit) {
-                return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
-            }
-        }
+        //     $start = Carbon::parse($startTime);
+        //     if ($start->minute > 0) {
+        //         $start->addHour()->minute(0)->second(0);
+        //     } else {
+        //         $start->minute(0)->second(0);
+        //     }
+        //     $formatted = $start->format('H:i');
+        //     $unit = DailyReport::whereRelation('unitAreaLocation', 'unitAreaLocationId', $val['unitAreaLocationId'])->where('date', $startDate)->where('time', $formatted)->first();
+        //     if (!$unit) {
+        //         return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+        //     }
+        // }
 
+        $status = StatusRequest::with('unitAreaLocation.unit')->where('requestId', $request->requestId)->first();
 
         if (!$status) {
             return back()->with('status', 'Request not found.');
@@ -173,7 +175,8 @@ class StatusRequestController extends Controller
         $status->remarks = $request->remarks ?? $status->remarks;
 
         // Handle unit status updates if the relationship is loaded
-        if ($status->unit) {
+        $unitData = $status->unitAreaLocation->unit;
+        if ($unitData) {
             $newUnitStatus = match ($status->status) {
                 'Ongoing' => $status->requestType,
                 'End' => 'running',
@@ -181,7 +184,7 @@ class StatusRequestController extends Controller
             };
 
             if ($newUnitStatus) {
-                $status->unit->update(['status' => $newUnitStatus]);
+                $unitData->update(['status' => $newUnitStatus]);
             }
         }
 
