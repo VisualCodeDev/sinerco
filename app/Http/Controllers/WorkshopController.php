@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Workshop;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Log;
 
 class WorkshopController extends Controller
 {
@@ -12,23 +14,25 @@ class WorkshopController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('Workshop/WorkshopList');
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function getAllWorkshops()
     {
-        //
+        $allData = Workshop::with('units')->get();
+        return response()->json($allData);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function getSelectedWorkshops(Request $request)
     {
-        //
+        $data = Workshop::find($request);
+        return response()->json($data);
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\UserSettingController;
 use App\Http\Controllers\UserUnitController;
+use App\Http\Controllers\WorkshopController;
 use App\Models\AdminNotification;
 use App\Models\DailyReportSettings;
 use Illuminate\Foundation\Application;
@@ -69,7 +70,7 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
 
 Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/input-validation', 'index')->name('input.setting');
-    Route::get('/fetch/unit-configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
+    Route::get('/fetch/unit/configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
 
     Route::post('/client/report-setting', 'setSetting')->name('daily.setting');
 });
@@ -84,14 +85,16 @@ Route::controller(StatusRequestController::class)->group(function () {
 });
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
-    Route::get('/unit-setting', 'unitSetting')->name('unit.interval.setting');
-    Route::get('/unit-list', 'unitList')->name('daily.list');
+    Route::get('/unit/setting', 'unitSetting')->name('unit.interval.setting');
+    Route::get('/unit/location/setting', 'unitLocation')->name('unit.location.setting');
+    Route::get('/unit/list', 'unitList')->name('daily.list');
     Route::get('/fetch/get-all-unit', 'getAllUnit')->name('unit.get');
     Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
     Route::get('/api/get-selected-unit-data', 'getSelectedUnit')->name('getSelectedUnit');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
 
-    Route::post('/unit-setting/set', 'setInterval')->name('unit.interval.set');
+    Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
+    Route::post('/unit/location/add', 'addUnitLocation')->name('unit.location.add');
 });
 
 Route::get('/get/server-time', function () {
@@ -104,7 +107,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/fetch/client', 'getAllClient')->name('client.get');
     Route::get('/fetch/selected-client', 'getSelectedClient')->name('client.selected.get');
 
-    Route::get('/client-list', 'index')->name('client.list');
+    Route::get('/client/list', 'index')->name('client.list');
     Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
     
     Route::post('/client/settings', 'setSettings')->name('client.settings');
@@ -137,4 +140,8 @@ Route::controller(LocationController::class)->middleware('auth')->group(function
     Route::get('/area', 'index')->name('areas');
 });
 
+Route::controller(WorkshopController::class)->group(function() {
+    Route::get('/workshop/list', 'index')->name('workshops');
+    Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
+});
 require __DIR__ . '/auth.php';

@@ -32,7 +32,9 @@ class ProfileController extends Controller
 
         $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unitId', $unitIds)->with('unit')->get();
+        $requestList = StatusRequest::whereHas('unitAreaLocation', function ($query) use ($unitIds) {
+            $query->whereIn('unitId', $unitIds);
+        })->with('unitAreaLocation.unit')->get();
         $requestList = collect($requestList)
             ->filter(fn($item) => $item->status !== 'End')
             ->values()

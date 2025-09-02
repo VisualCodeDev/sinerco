@@ -23,13 +23,12 @@ const UnitInputIntervalSetting = () => {
         data.forEach((item) => {
             if (item.unit) {
                 const formattedItem = {
-                    label: item?.unit?.unit,
-                    value: item?.unit?.unitId,
+                    label: item?.unit,
+                    value: item?.unitId,
                 };
                 allUnit.push(formattedItem);
             }
         });
-
         setUnitData(allUnit);
     }, [data]);
 

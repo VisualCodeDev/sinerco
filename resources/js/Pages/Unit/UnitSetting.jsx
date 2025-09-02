@@ -19,6 +19,7 @@ const UnitSetting = () => {
         clients: {},
     });
     const { addToast } = useToast();
+    
     const handleSelectAll = (currData) => {
         const currentIds = currData.map((item) => item.clientId.toString());
         const selected = formData.selectedRows || [];

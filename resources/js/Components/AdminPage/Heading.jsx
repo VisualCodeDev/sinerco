@@ -12,9 +12,11 @@ import {
     FaUserFriends,
     FaCalendarAlt,
     FaCog,
+    FaWarehouse,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
+import { IoMap } from "react-icons/io5";
 
 const Heading = ({ children }) => {
     const [isLoading, setLoading] = useState(false);
@@ -47,6 +49,16 @@ const Heading = ({ children }) => {
             label: "Unit Conf. Setting",
             href: route("input.setting"),
         },
+        workshopList: {
+            icon: <FaWarehouse />,
+            label: "Workshop List",
+            href: route("workshops"),
+        },
+        unitLocationSetting: {
+            icon: <IoMap />,
+            label: "Unit Location Set.",
+            href: route("unit.location.setting"),
+        },
         unitList: {
             icon: <FaList />,
             label: "Unit List",
@@ -76,7 +88,7 @@ const Heading = ({ children }) => {
             ],
         },
         inputSetting: {
-            icon: <FaCog/>,
+            icon: <FaCog />,
             condition: user?.role === "super_admin",
             label: "Input Setting",
             href: route("unit.interval.setting"),
@@ -141,9 +153,11 @@ const Heading = ({ children }) => {
     if (user?.role === "super_admin") {
         menuItems = [
             menu.home,
+            menu.workshopList,
             menu.clientList,
             menu.eventHistory,
             menu.unitList,
+            menu.unitLocationSetting,
             menu.inputSetting,
             menu.accountList,
             menu.logHistory,
@@ -175,7 +189,7 @@ const Heading = ({ children }) => {
     menuItems.push(menu.logout);
 
     return (
-        <div className="h-screen w-screen overflow-x-hidden relative">
+        <div className="max-h-screen w-screen overflow-x-hidden relative">
             {/* DESKTOP Sidebar */}
             <div
                 className={`bg-white h-full w-48 z-[100] transition-all duration-300 fixed top-0 left-0 shadow-md lg:md:block hidden ${
@@ -326,9 +340,9 @@ const Heading = ({ children }) => {
             </div>
 
             {/* Main Area */}
-            <div className="flex-1 flex flex-col w-full relative lg:ps-10">
+            <div className="flex-1 flex flex-col w-full relative lg:ps-10 h-screen">
                 {/* Top Header */}
-                <div className="bg-white flex items-center justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10">
+                <div className="bg-white flex items-center justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10 h-[10%]">
                     <div className="h-8">
                         <img
                             src="/logo_horizontal.webp"
@@ -343,7 +357,7 @@ const Heading = ({ children }) => {
                 </div>
 
                 {/* Page Content */}
-                <main className="p-0 md:py-10 md:px-10 overflow-y-auto bg-[#e8edfc]/50 min-h-screen">
+                <main className="p-0 md:py-10 md:px-10 overflow-y-auto bg-[#e8edfc]/50 h-[90%]">
                     {children}
                 </main>
             </div>

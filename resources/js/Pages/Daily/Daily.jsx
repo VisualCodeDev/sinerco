@@ -113,7 +113,6 @@ export default function Dashboard({ unitAreaLocationId }) {
         changeReportData();
     }, [selectedDate]);
 
-
     return (
         <PageLayout>
             {userLoding ||
@@ -152,7 +151,7 @@ export default function Dashboard({ unitAreaLocationId }) {
                     <div className="flex flex-col border-t-2 border-t-primary shadow-xl">
                         {unitData && (
                             <>
-                                <div className="text-center w-full flex flex-col lg:md:gap-2 gap-1 lg:md:py-8 py-6 bg-primary text-white">
+                                <div className="text-center w-full flex flex-col lg:md:gap-1 gap-1 lg:md:py-8 py-6 bg-primary text-white">
                                     <div className="text-xl lg:md:text-2xl font-bold bg-primary flex justify-center items-center">
                                         <div
                                             className="cursor-pointer flex items-center gap-2  relative"
@@ -185,18 +184,20 @@ export default function Dashboard({ unitAreaLocationId }) {
                                                             )
                                                         }
                                                     >
-                                                        {item?.unit?.unit}
+                                                        {item?.unit}
                                                     </p>
                                                 ))}
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="lg:md:text-sm text-xs">
-                                        {unitData.area}
-                                    </p>
-                                    <p className="lg:md:text-sm text-xs">
-                                        {unitData.location}
-                                    </p>
+                                    <div className="">
+                                        <p className="lg:md:text-base text-xs font-semibold">
+                                            {unitData?.location?.area?.area}
+                                        </p>
+                                        <p className="lg:md:text-sm text-xs m-0 p-0">
+                                            {unitData.location?.location}
+                                        </p>
+                                    </div>
                                 </div>
                             </>
                         )}

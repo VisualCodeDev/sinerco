@@ -135,10 +135,11 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             cellClassName: "",
             sortable: false,
             width: "17%",
-            Cell: ({ endDate }) => {
+            Cell: ({ endDate, endTime }) => {
                 return (
                     <>
                         <div>{getFormattedDate(endDate)}</div>
+                        <div>{endTime}</div>
                     </>
                 );
             },

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DataUnit;
 use App\Models\UnitAreaLocation;
+use App\Models\Workshop;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -28,15 +30,24 @@ class DataUnitController extends Controller
                 'location.area'
             ])->get()->makeHidden(['created_at', 'updated_at']);
         } else {
-            $data = UnitAreaLocation::with([
-                'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status']);
-                },
-                'client' => function ($q) {
+            $temp = DataUnit::with([
+                'unitAreaLocations.client' => function ($q) {
                     $q->select(['clientId', 'name']);
                 },
-                'location.area'
-            ])->get()->makeHidden(['created_at', 'updated_at']);
+                'unitAreaLocations.location.area'
+            ])->select(['unitId', 'unit', 'status'])->get();
+
+            $data = $temp->map(function ($unit) {
+                return [
+                    'unitId' => $unit->unitId,
+                    'unit' => $unit->unit,
+                    'status' => $unit->status,
+                    'client' => $unit->unitAreaLocations?->client->name,
+                    'location' => $unit->unitAreaLocations?->location->location,
+                    'area' => $unit->unitAreaLocations?->location->area->area,
+                    'unitAreaLocationId' => $unit->unitAreaLocations?->unitAreaLocationId,
+                ];
+            });
         }
         return $data;
     }
@@ -85,7 +96,7 @@ class DataUnitController extends Controller
     public function getUnitStatus()
     {
         $data = $this->getPermittedUnit()->map(function ($item) {
-            return $item->unit;
+            return $item;
         });
         return response()->json($data);
     }
@@ -120,23 +131,40 @@ class DataUnitController extends Controller
      */
     public function getSelectedUnit(Request $request)
     {
-        $data = UnitAreaLocation::where('unitAreaLocationId', $request->unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting'])->first();
+        $data = UnitAreaLocation::where('unitAreaLocationId', $request->unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting', 'location.area'])->first();
         return response()->json($data);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, DataUnit $dataUnit)
+    public function unitLocation()
     {
-        //
+        return Inertia::render('Unit/UnitLocationSetting');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DataUnit $dataUnit)
+    public function addUnitLocation(Request $request)
     {
-        //
+        $val = $request->validate([
+            'workshop_id' => 'required',
+            'unit_ids' => 'required|array'
+        ]);
+
+        $data = collect($val['unit_ids'])->map(function ($unitId) use ($val) {
+            return [
+                'unit_id' => $unitId,
+                'workshop_id' => $val['workshop_id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        })->toArray();
+
+        DB::table('workshop_units')->insertOrIgnore($data);
+
+        return response()->json(['type' => 'success', 'text' => 'Units added successfully']);
     }
+
 }

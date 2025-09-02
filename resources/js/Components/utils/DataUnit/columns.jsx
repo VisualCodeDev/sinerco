@@ -174,9 +174,86 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
         },
     ];
 
+    const dataUnitItem = [
+        {
+            name: "id",
+            header: "NO.",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-center",
+            sortable: false,
+            width: "1%",
+            Cell: ({ index }) => {
+                return (
+                    <>
+                        <div>{index + 1}</div>
+                    </>
+                );
+            },
+        },
+        {
+            name: "user",
+            header: "User",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "17%",
+            Cell: ({ client }) => {
+                return <div className="flex flex-col">{client}</div>;
+            },
+        },
+        {
+            name: "unit",
+            header: "Unit",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "20%",
+            Cell: ({ unit }) => {
+                return <div className="flex flex-col">{unit}</div>;
+            },
+        },
+        {
+            name: "status",
+            header: "Status",
+            headerClassName:
+                "bg-primary text-white text-center flex items-center justify-center",
+            sortable: true,
+            width: "20%",
+            Cell: ({ status }) => {
+                return (
+                    <div className="flex flex-col text-center px-20">
+                        <p
+                            className={`px-2 py-2 rounded-lg text-white ${
+                                status === "stdby"
+                                    ? "bg-yellow-500"
+                                    : status === "sd"
+                                    ? "bg-red-500"
+                                    : "bg-green-500"
+                            }`}
+                        >
+                            {toCapitalizeFirstLetter(
+                                getRequestTypeName(status)
+                            )}
+                        </p>
+                    </div>
+                );
+            },
+        },
+        {
+            name: "location",
+            header: "Location",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "20%",
+            Cell: ({ location }) => {
+                return <div className="flex flex-col">{location}</div>;
+            },
+        },
+    ];
+
     switch (type) {
         case "checkbox":
             return dataListCheckbox;
+        case "unitList":
+            return dataUnitItem;
         default:
             return colItem;
     }

@@ -17,6 +17,7 @@ const TableComponent = (props) => {
         submitPlaceholder,
         height,
         filterStatus = false,
+        filterUserLocation = false,
         isForm = false,
         columns,
         data,
@@ -110,10 +111,9 @@ const TableComponent = (props) => {
 
         setFilteredData(filterData);
     }, [filterConfig, sortConfig?.direction, query]);
-
-    return (
-        <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg">
-            <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
+        return (
+        <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto">
+            <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b sticky top-0 left-0 bg-white z-10">
                 {title && (
                     <div className="flex md:justify-center items-center">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-2.5 rounded-md">
@@ -133,6 +133,25 @@ const TableComponent = (props) => {
                 <div className="flex justify-start md:justify-center items-center gap-4">
                     <div className="flex md:justify-end flex-col md:flex-row">
                         {filterStatus && (
+                            <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
+                                <FaFilter />
+                                <select
+                                    className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
+                                    onChange={(e) =>
+                                        setFilterConfig(e.target.value)
+                                    }
+                                >
+                                    <option value="">-- Semua Status --</option>
+                                    {unitStatus.map((item, i) => (
+                                        <option key={i} value={item.value}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {filterUserLocation && (
                             <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
                                 <FaFilter />
                                 <select

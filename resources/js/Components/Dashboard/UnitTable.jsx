@@ -16,7 +16,7 @@ import { fetch } from "../utils/database-util";
 
 const UnitTable = (props) => {
     const { data: propsData } = props;
-    const columns = tColumns();
+    const columns = tColumns("unitList");
     const data = propsData ?? fetchedData;
 
     const handleClick = (item) => {
@@ -39,6 +39,7 @@ const UnitTable = (props) => {
             />
         );
     }
+
     return (
         <TableComponent
             filterStatus={true}
@@ -47,6 +48,7 @@ const UnitTable = (props) => {
             title={"List of Unit"}
             onRowClick={handleClick}
         />
+        // <></>
     );
 };
 
