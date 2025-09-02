@@ -55,10 +55,10 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::controller(DailyReportController::class)->group(function () {
-    Route::post('/unit/daily/{unitAreaLocationId}/add', 'setReport')->name('daily.add')->middleware('auth');
-    Route::post('/unit/daily/{unitAreaLocationId}/edit', 'editRepot')->name('daily.edit')->middleware('auth');
+    Route::post('/unit/daily/{unit_position_id}/add', 'setReport')->name('daily.add')->middleware('auth');
+    Route::post('/unit/daily/{unit_position_id}/edit', 'editRepot')->name('daily.edit')->middleware('auth');
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
-    Route::get('/unit/daily/{unitAreaLocationId}', 'index')->name('daily')->middleware('auth');
+    Route::get('/unit/daily/{unit_position_id}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
     
     Route::get('/fetch/unit/daily', 'getDataReportBasedOnDate')->name('getDataReportBasedOnDate')->middleware('auth');
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
