@@ -67,6 +67,9 @@ export const TimeInput = ({
 
         fetchTime();
     }, []);
+
+    console.log(time)
+
     const options = [];
     let permittedTime = time % interval === 0 ? time : time + (time % interval);
     if (minute > 35) {
@@ -86,9 +89,9 @@ export const TimeInput = ({
             const isNow = i === time;
             const isPermitted = isNow && minute <= duration;
             const alreadyFilled = filledFormTime.includes(i);
-
+            console.log(time, isPermitted)
             if (isPermitted && !alreadyFilled) {
-                console.log(i);
+                console.log(i)
                 options.push(
                     <option
                         key={i}
@@ -159,7 +162,6 @@ export const generateExcel = (fileName, formData, checkedItems) => {
         const formattedDate = getDDMMYYDate(date, "YYYY-MM-DD");
         return checkedItems.includes(formattedDate);
     });
-    console.log(filteredData);
     const dataByDate = filteredData.reduce((acc, curr) => {
         const date = curr.date;
         if (!acc[date]) acc[date] = [];
@@ -480,7 +482,7 @@ const excludeFields = [
     "updated_at",
     "date",
     "id",
-    "requestId",
+    "request_id",
     "request",
 ];
 
@@ -567,7 +569,7 @@ export const getCurrDateTime = async () => {
         const res = await fetch("/get/server-time");
         const { server_time } = await res.json();
         const now = dayjs(server_time);
-        const rawTime = now.add(7, "hour");
+        const rawTime = now;
         const date = rawTime.format("YYYY-MM-DD");
         const time = rawTime.format("HH:mm");
         const hour = parseInt(rawTime.hour());
@@ -619,7 +621,6 @@ function ExcelImport() {
             const data = XLSX.utils.sheet_to_json(sheet);
 
             // Contoh hasil [{ email: "", password: "", role: "" }, ...]
-            console.log("Parsed data:", data);
             setUsers(data);
         };
 

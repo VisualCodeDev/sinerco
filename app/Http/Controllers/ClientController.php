@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
-use App\Models\UnitAreaLocation;
+use App\Models\UnitPosition;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
@@ -23,11 +23,11 @@ class ClientController extends Controller
 
     public function clientDetail(Request $request)
     {
-        $clientId = $request->clientId;
+        $client_id = $request->client_id;
 
-        $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
+        $data = UnitPosition::where('client_id', $client_id)->with('client', 'unit', 'location.area')->get();
         $clientData = $data->first()?->client;
-        $unitData = UnitAreaLocation::where('clientId', $clientId)->with(['client', 'unit', 'dailyReportSetting'])->first();
+        $unitData = UnitPosition::where('client_id', $client_id)->with(['client', 'unit', 'dailyReportSetting'])->first();
         if ($data) {
             return response()->json($data);
             // return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
@@ -36,8 +36,8 @@ class ClientController extends Controller
 
     public function getFilteredAreaLocation(Request $request)
     {
-        $clientId = $request->clientId;
-        $data = UnitAreaLocation::where('clientId', $clientId)->with('client', 'unit', 'location.area')->get();
+        $client_id = $request->client_id;
+        $data = UnitPosition::where('client_id', $client_id)->with('client', 'unit', 'location.area')->get();
         if ($data) {
             return response()->json($data);
             // return Inertia::render('Client/ClientDetail', ['data' => $data, 'clientData' => $clientData, 'unitData' => $unitData]);
@@ -50,8 +50,8 @@ class ClientController extends Controller
             'clientSettings' => 'required|array',
         ]);
 
-        foreach ($request->clientSettings as $clientId => $settings) {
-            $client = Client::where('clientId', $clientId)->first();
+        foreach ($request->clientSettings as $client_id => $settings) {
+            $client = Client::where('client_id', $client_id)->first();
 
             if ($client) {
                 $client->update([
@@ -68,7 +68,7 @@ class ClientController extends Controller
 
     public function getSelectedClient(Request $request)
     {
-        $data = Client::where('clientId', $request->clientId)->first();
+        $data = Client::where('client_id', $request->client_id)->first();
 
         Log::debug($data);
         return response()->json($data);

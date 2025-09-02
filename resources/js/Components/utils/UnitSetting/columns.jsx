@@ -40,11 +40,11 @@ const columns = (
             headerClassName: "bg-primary text-white",
             sortable: false,
             width: "17%",
-            Cell: ({ input_interval, clientId }) => {
+            Cell: ({ input_interval, client_id }) => {
                 return (
                     <select
                         value={
-                            formData?.clientSettings?.[clientId]?.input_interval ||
+                            formData?.clientSettings?.[client_id]?.input_interval ||
                             input_interval ||
                             1
                         }
@@ -52,7 +52,7 @@ const columns = (
                         onChange={(e) => {
                             handleChange(
                                 "input_interval",
-                                clientId,
+                                client_id,
                                 e.target.value
                             );
                         }}
@@ -72,11 +72,11 @@ const columns = (
             headerClassName: "bg-primary text-white",
             sortable: false,
             width: "17%",
-            Cell: ({ input_duration, clientId }) => {
+            Cell: ({ input_duration, client_id }) => {
                 return (
                     <select
                         value={
-                            formData?.clientSettings?.[clientId]?.input_duration ||
+                            formData?.clientSettings?.[client_id]?.input_duration ||
                             input_duration ||
                             35
                         }
@@ -84,7 +84,7 @@ const columns = (
                         onChange={(e) => {
                             handleChange(
                                 "input_duration",
-                                clientId,
+                                client_id,
                                 e.target.value
                             );
                         }}
@@ -118,16 +118,16 @@ const columns = (
             sortable: false,
             cellClassName: "text-center",
             width: "20%",
-            Cell: ({ clientId }) => {
+            Cell: ({ client_id }) => {
                 return (
                     <input
                         type="checkbox"
                         checked={formData?.selectedRows?.includes(
-                            clientId.toString()
+                            client_id.toString()
                         )}
                         onChange={(e) => {
                             e.stopPropagation();
-                            handleCheckItem(clientId)
+                            handleCheckItem(client_id)
                         }}
                     />
                 );

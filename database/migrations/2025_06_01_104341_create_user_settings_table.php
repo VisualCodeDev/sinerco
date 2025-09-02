@@ -12,13 +12,14 @@ return new class extends Migration {
     {
         Schema::create('user_settings', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('userId');
-            $table->string('unitAreaLocationId', 50);
+            $table->string('user_id', 10);
+
+            $table->unsignedBigInteger('unit_position_id');
             $table->timestamps();
 
-            $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('unitAreaLocationId')->references('unitAreaLocationId')->on('unit_area_locations')->onDelete('cascade');
-            $table->unique(['userId', 'unitAreaLocationId'], 'user_unit_unique');
+            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            $table->foreign('unit_position_id')->references('id')->on('unit_positions')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->unique(['user_id', 'unit_position_id'], 'user_unit_unique');
         });
     }
 

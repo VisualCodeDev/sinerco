@@ -27,8 +27,11 @@ export default function Home() {
     }, []);
 
     const fetchData = async () => {
-        const response = await axios.get(route("getUnitStatus"));
-        const respUnitData = await axios.get(route("getRequestUnitStatus"));
+        const [response, respUnitData] = await Promise.all([
+            axios.get(route("getUnitStatus")),
+            axios.get(route("getRequestUnitStatus")),
+        ]);
+        
         if (respUnitData.data) {
             const filteredData = respUnitData?.data?.filter(
                 (item) => item.status === "Ongoing"
@@ -86,17 +89,19 @@ export default function Home() {
         return <LoadingSpinner />;
     }
 
-    const getDuration = (startDate, startTime) => {
-        const start = new Date(`${startDate}T${startTime}`);
+    const getDuration = (start_date, start_time) => {
+        const start = new Date(`${start_date}T${start_time}`);
         const diffMs = dateTime - start;
 
         const diffSec = Math.floor(diffMs / 1000);
         const hours = Math.floor(diffSec / 3600);
         const minutes = Math.floor((diffSec % 3600) / 60);
 
-        const formatted = `${hours.toString().padStart(2, "0")} ${hours > 0 ? 'hours' : 'hour'}  ${minutes
-            .toString()
-            .padStart(2, "0")} ${minutes > 0 ? 'minutes' :'minute'}`;
+        const formatted = `${hours.toString().padStart(2, "0")} ${
+            hours > 0 ? "hours" : "hour"
+        }  ${minutes.toString().padStart(2, "0")} ${
+            minutes > 0 ? "minutes" : "minute"
+        }`;
 
         return formatted;
     };
@@ -218,11 +223,15 @@ export default function Home() {
                                                 class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                                             >
                                                 <div class="md:text-base font-semibold">
-                                                    {item?.unit_area_location?.unit?.unit}
+                                                    {
+                                                        item?.unit
+                                                    }
                                                 </div>
                                             </th>
                                             <td class="px-6 py-4">
-                                                {item?.unit_area_location?.location?.location}
+                                                {
+                                                    item?.location
+                                                }
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center whitespace-nowrap gap-2">
@@ -237,17 +246,17 @@ export default function Home() {
                                                     <div className="flex flex-col text-center">
                                                         <p
                                                             className={`px-2 py-2 rounded-lg text-white capitalize ${
-                                                                item?.requestType ===
+                                                                item?.request_type ===
                                                                 "stdby"
                                                                     ? "bg-yellow-500"
-                                                                    : item?.requestType ===
+                                                                    : item?.request_type ===
                                                                       "sd"
                                                                     ? "bg-red-500"
                                                                     : "bg-green-500"
                                                             }`}
                                                         >
                                                             {getRequestTypeName(
-                                                                item?.requestType
+                                                                item?.request_type
                                                             )}
                                                         </p>
                                                     </div>
@@ -256,22 +265,22 @@ export default function Home() {
                                             <td class="px-6 py-4">
                                                 <p>
                                                     {getFormattedDate(
-                                                        item?.startDate
+                                                        item?.start_date
                                                     ) || "-"}
                                                 </p>
-                                                <p>{item?.startTime}</p>
+                                                <p>{item?.start_time}</p>
                                             </td>
                                             <td class="px-6 py-4">
                                                 {item?.remarks || "-"}
                                             </td>
                                             <td class="px-6 py-4">
                                                 {getDuration(
-                                                    item?.startDate,
-                                                    item?.startTime
+                                                    item?.start_date,
+                                                    item?.start_time
                                                 )}
                                             </td>
                                             <td class="px-6 py-4">
-                                                {item?.pic?.name}
+                                                {item?.pic}
                                             </td>
                                         </tr>
                                     ))

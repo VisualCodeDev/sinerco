@@ -176,7 +176,7 @@ const DailyReport = (props) => {
                                         "created_at",
                                         "updated_at",
                                         "date",
-                                        "requestId",
+                                        "request_id",
                                         "request",
                                         "id",
                                     ].includes(field) ? null : (

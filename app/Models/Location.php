@@ -8,6 +8,6 @@ class Location extends Model
 {
     public function area()
     {
-        return $this->belongsTo(Area::class, 'areaId', 'id');
+        return $this->belongsTo(Area::class, 'area_id', 'id');
     }
 }

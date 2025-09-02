@@ -17,6 +17,22 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    public $incrementing = false;
+    protected $keyType = 'string';
+    protected $primaryKey = 'user_id';
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->user_id)) {
+                $lastId = User::orderBy('user_id', 'desc')->first()?->user_id;
+                $number = $lastId ? (int) substr($lastId, 3) + 1 : 1;
+                $model->user_id = 'USR' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            }
+        });
+    }
     protected $fillable = [
         'name',
         'email',
@@ -51,15 +67,15 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    public function unitAreaLocations()
+    public function UnitPositions()
     {
         return $this->belongsToMany(
-            UnitAreaLocation::class,
+            UnitPosition::class,
             'user_settings',         // Pivot table
-            'userId',                   // foreign key on pivot to User
-            'unitAreaLocationId',       // foreign key on pivot to UnitAreaLocation
-            'id',                       // local key on User (primary key)
-            'unitAreaLocationId'        // local key on UnitAreaLocation
+            'user_id',                   // foreign key on pivot to User
+            'unit_position_id',       // foreign key on pivot to UnitPosition
+            'user_id',                       // local key on User (primary key)
+            'id'        // local key on UnitPosition
         );
     }
 }

@@ -8,9 +8,9 @@ import LoadingSpinner from "../Loading";
 
 export const RequestModal = ({ handleCloseModal, showModal }) => {
     const { data, setData, post } = useForm({
-        requestType: "",
-        startDate: "",
-        startTime: "",
+        request_type: "",
+        start_date: "",
+        start_time: "",
     });
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
@@ -21,10 +21,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const newErrors = {};
 
         if (
-            !requestType.some((item) => item.value === data?.requestType) ||
-            !data?.requestType
+            !requestType.some((item) => item.value === data?.request_type) ||
+            !data?.request_type
         ) {
-            newErrors.requestType = "Please choose a valid request type";
+            newErrors.request_type = "Please choose a valid request type";
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -39,7 +39,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
-            addToast(error?.response?.data);
+            addToast({type: 'error', text: "Failed to make request"});
             console.log(error);
         } finally {
             handleCloseModal();
@@ -53,7 +53,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             [field]: value,
         }));
     };
-
     const fetchDataUnit = async () => {
         const response = await axios.get(route("getUnitAreaLocation"));
         setUnitData(response.data);
@@ -63,8 +62,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const dataDateTime = await getCurrDateTime();
         setData((prevData) => ({
             ...prevData,
-            startDate: dataDateTime.date,
-            startTime: dataDateTime.time,
+            start_date: dataDateTime.date,
+            start_time: dataDateTime.time,
         }));
         setLoading(false);
     };
@@ -78,10 +77,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     useEffect(() => {
         const areaLocation = unitData.find(
-            (item) => item?.unitId === data?.unitId
+            (item) => item?.unit_id === data?.unit_id
         );
-        handleChange(["locationId"], areaLocation?.location?.id);
-    }, [data?.unitId]);
+        handleChange(["unit_position_id"], areaLocation?.unit_position_id);
+    }, [data?.unit_id]);
+    console.log(data)
     return (
         <>
             {loading && <LoadingSpinner />}
@@ -109,10 +109,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     className="text-sm md:text-base"
                                     required
                                     id="unit"
-                                    value={data?.unitId || ""}
+                                    value={data?.unit_id || ""}
                                     onChange={(e) => {
                                         handleChange(
-                                            ["unitId"],
+                                            ["unit_id"],
                                             e.target.value
                                         );
                                     }}
@@ -122,10 +122,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     </option>
                                     {unitData?.map((item, index) => (
                                         <option
-                                            value={item?.unit?.unitId}
+                                            value={item?.unit_id}
                                             key={index}
                                         >
-                                            {item?.unit?.unit}
+                                            {item?.unit}
                                         </option>
                                     ))}
                                 </select>
@@ -148,10 +148,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     className="md:text-base text-sm"
                                     required
                                     id="request"
-                                    value={data.requestType || ""}
+                                    value={data.request_type || ""}
                                     onChange={(e) =>
                                         handleChange(
-                                            ["requestType"],
+                                            ["request_type"],
                                             e.target.value
                                         )
                                     }
@@ -165,9 +165,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                         </option>
                                     ))}
                                 </select>
-                                {errors.requestType && (
+                                {errors.request_type && (
                                     <p className="text-red-500 text-sm mt-1">
-                                        {errors.requestType}
+                                        {errors.request_type}
                                     </p>
                                 )}
                             </div>
@@ -181,12 +181,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             </label>
                             <DateTimeInput
                                 value={{
-                                    date: data?.startDate,
-                                    time: data?.startTime,
+                                    date: data?.start_date,
+                                    time: data?.start_time,
                                 }}
                                 name={{
-                                    date: "startDate",
-                                    time: "startTime",
+                                    date: "start_date",
+                                    time: "start_time",
                                 }}
                                 handleChange={handleChange}
                             />

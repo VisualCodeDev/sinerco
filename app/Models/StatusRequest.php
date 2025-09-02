@@ -8,6 +8,7 @@ use Str;
 class StatusRequest extends Model
 {
     //
+    public $primaryKey = 'request_id';
     public $incrementing = false;
     protected $keyType = 'string';
 
@@ -15,54 +16,54 @@ class StatusRequest extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            $model->requestId = (string) Str::uuid();
+            $model->request_id = (string) Str::uuid();
         });
 
         static::created(function ($statusRequest) {
             AdminNotification::create([
-                'requestId' => $statusRequest->requestId,
-                'date' => $statusRequest->startDate,
-                'time' => $statusRequest->startTime,
-                'requestType' => $statusRequest->requestType,
+                'request_id' => $statusRequest->request_id,
+                'date' => $statusRequest->start_date,
+                'time' => $statusRequest->start_time,
+                'request_type' => $statusRequest->request_type,
                 'status' => $statusRequest->status,
             ]);
         });
     }
 
-    public function unitAreaLocation()
+    public function unitPosition()
     {
-        return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId')
+        return $this->belongsTo(UnitPosition::class, 'unit_position_id', 'id')
             ->with('unit', 'location');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'requestedBy', 'id')
-            ->select('id', 'name');
+        return $this->belongsTo(User::class, 'requested_by', 'user_id')
+            ->select('user_id', 'name');
 
     }
 
     public function pic()
     {
-        return $this->belongsTo(User::class, 'seenBy', 'id')
-            ->select('id', 'name');
+        return $this->belongsTo(User::class, 'seen_by', 'user_id')
+            ->select('user_id', 'name');
     }
 
     public function location()
     {
-        return $this->belongsTo(Location::class, 'locationId', 'id');
+        return $this->belongsTo(Location::class, 'location_id', 'id');
     }
 
     protected $fillable = [
         'date',
-        'requestType',
-        'timeStart',
+        'request_type',
+        'time_start',
         'status',
-        'requestId',
-        'timeEnd',
-        'seenStatus',
-        'seenTime',
-        'seenBy',
-        'unitAreaLocationId'
+        'request_id',
+        'time_end',
+        'seen_status',
+        'seen_time',
+        'seen_by',
+        'unit_position_id'
     ];
 }

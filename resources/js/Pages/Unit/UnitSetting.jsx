@@ -21,7 +21,7 @@ const UnitSetting = () => {
     const { addToast } = useToast();
     
     const handleSelectAll = (currData) => {
-        const currentIds = currData.map((item) => item.clientId.toString());
+        const currentIds = currData.map((item) => item.client_id.toString());
         const selected = formData.selectedRows || [];
         const isAllSelected = currentIds.every((id) => selected.includes(id));
         let updated;
@@ -44,7 +44,7 @@ const UnitSetting = () => {
         const stringId = value;
         let updated;
         if (selected.includes(stringId)) {
-            updated = selected.filter((clientId) => clientId !== stringId);
+            updated = selected.filter((client_id) => client_id !== stringId);
         } else {
             updated = [...selected, stringId];
         }

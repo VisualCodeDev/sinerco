@@ -12,12 +12,12 @@ return new class extends Migration {
     {
         Schema::create('daily_report_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('clientId', 50)->unique();
+            $table->string('client_id', 10)->unique();
             $table->json('decimalSetting');
             $table->json('minMaxSetting');
             $table->timestamps();
 
-            $table->foreign('clientId')->references('clientId')->on('clients')->onDelete('cascade');
+            $table->foreign('client_id')->references('client_id')->on('clients')->onDelete('cascade');
         });
     }
 

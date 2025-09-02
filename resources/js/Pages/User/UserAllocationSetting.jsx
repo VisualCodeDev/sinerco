@@ -14,7 +14,7 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
         data: permittedData,
         loading,
         error,
-    } = fetch("permittedUnitData.get", data?.id);
+    } = fetch("permittedUnitData.get", data?.user_id);
     const [initialUser, setInitialUser] = useState(data);
     const [isAdmin, setIsAdmin] = useState(false);
     const [formData, setFormData] = useState({
@@ -32,27 +32,30 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
     useEffect(() => {
         if (permittedData?.length > 0) {
             const permitted = permittedData.map((item) => item?.unit_area);
-            setPermittedUnitArea(permitted);
+            setPermittedUnitArea(permittedData);
         }
     }, [permittedData]);
 
     useEffect(() => {
         if (unselectedUnitArea?.length > 0) {
+            console.log('masuk')
             const unselectedItem = unitAreaData.filter((item) =>
                 permittedUnitArea?.every(
                     (permittedItem) =>
-                        item?.unitAreaLocationId !==
-                        permittedItem?.unitAreaLocationId
+                        item?.unit_position_id !==
+                        permittedItem?.unit_position_id
                 )
             );
+            console.log(permittedUnitArea)
             // Filter out items that are already in permittedUnitArea
             setUnselectedUnitArea(unselectedItem);
         }
     }, [permittedUnitArea]);
 
+
     const handleSelectAll = (currData) => {
         const currentIds = currData.map((item) =>
-            item.unitAreaLocationId.toString()
+            item.unit_position_id.toString()
         );
         const selected = formData.selectedRows || [];
         const isAllSelected = currentIds.every((id) => selected.includes(id));
@@ -73,11 +76,11 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
 
     const handleCheckItem = (value) => {
         const selected = formData?.selectedRows || [];
-        const stringId = value?.unitAreaLocationId.toString();
+        const stringId = value?.unit_position_id.toString();
         let updated;
         if (selected.includes(stringId)) {
             updated = selected.filter(
-                (unitAreaLocationId) => unitAreaLocationId !== stringId
+                (unit_position_id) => unit_position_id !== stringId
             );
         } else {
             updated = [...selected, stringId];
@@ -99,15 +102,15 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
         const selectedRows = formData.selectedRows || [];
         const selectedData = unselectedUnitArea
             .filter((item) =>
-                selectedRows.includes(item.unitAreaLocationId.toString())
+                selectedRows.includes(item.unit_position_id.toString())
             )
-            .map((item) => item?.unitAreaLocationId);
+            .map((item) => item?.unit_position_id);
         try {
             const resp = await axios.post(
-                route("allocation.add", { userId: data?.id }),
+                route("allocation.add", { user_id: data?.user_id }),
                 {
-                    unitAreaLocationId: selectedData,
-                    userId: data?.id,
+                    unit_position_id: selectedData,
+                    user_id: data?.user_id,
                 }
             );
             if (resp?.data?.isSuccess) {
@@ -116,7 +119,7 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
                     text: "Permissions updated successfully!",
                 });
                 handleAfterAdd(selectedData);
-                // setPermittedUnitArea(updatedPermittedData);
+                setPermittedUnitArea(updatedPermittedData);
             }
         } catch (error) {
             console.error("Error updating permitted data:", error);
@@ -132,15 +135,15 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
         const selectedRows = formData.selectedRows || [];
         const selectedData = permittedUnitArea
             .filter((item) =>
-                selectedRows.includes(item.unitAreaLocationId.toString())
+                selectedRows.includes(item.unit_position_id.toString())
             )
-            .map((item) => item?.unitAreaLocationId);
+            .map((item) => item?.unit_position_id);
         try {
             const resp = await axios.post(
-                route("allocation.remove", { userId: data?.id }),
+                route("allocation.remove", { user_id: data?.user_id }),
                 {
-                    unitAreaLocationId: selectedData,
-                    userId: data?.id,
+                    unit_position_id: selectedData,
+                    user_id: data?.user_id,
                 }
             );
             if (resp?.data?.isSuccess) {
@@ -162,15 +165,15 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
     const handleAfterRemove = (selectedData) => {
         const updatedPermittedData = permittedUnitArea.filter(
             (item) =>
-                !selectedData.includes(item.unitAreaLocationId) &&
-                item?.unitAreaLocationId
+                !selectedData.includes(item.unit_position_id) &&
+                item?.unit_position_id
         );
         setPermittedUnitArea(updatedPermittedData);
 
         const updatedUnselectedData = unitAreaData.filter(
             (item) =>
-                selectedData.includes(item.unitAreaLocationId) &&
-                item?.unitAreaLocationId
+                selectedData.includes(item.unit_position_id) &&
+                item?.unit_position_id
         );
         setUnselectedUnitArea([
             ...unselectedUnitArea,
@@ -182,8 +185,8 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
     const handleAfterAdd = (selectedData) => {
         const updatedUnselectedData = unselectedUnitArea.filter(
             (item) =>
-                !selectedData.includes(item.unitAreaLocationId) &&
-                item?.unitAreaLocationId
+                !selectedData.includes(item.unit_position_id) &&
+                item?.unit_position_id
         );
         setUnselectedUnitArea([
             ...unselectedUnitArea,
@@ -192,8 +195,8 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
 
         const updatedPermittedData = unitAreaData.filter(
             (item) =>
-                selectedData.includes(item.unitAreaLocationId) &&
-                item?.unitAreaLocationId
+                selectedData.includes(item.unit_position_id) &&
+                item?.unit_position_id
         );
         setPermittedUnitArea([...permittedUnitArea, ...updatedPermittedData]);
 
@@ -226,6 +229,7 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
             "super_admin";
         setIsAdmin(checkAdmin);
     }, [roleData]);
+
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}

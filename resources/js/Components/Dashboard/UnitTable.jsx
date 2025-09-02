@@ -18,10 +18,9 @@ const UnitTable = (props) => {
     const { data: propsData } = props;
     const columns = tColumns("unitList");
     const data = propsData ?? fetchedData;
-
     const handleClick = (item) => {
-        if (!item.unitAreaLocationId) return;
-        router.visit(route("daily", item.unitAreaLocationId));
+        if (!item.unit_position_id) return;
+        router.visit(route("daily", item.unit_position_id));
     };
     if (!propsData) {
         const { data, loading, error } = fetch("unit.get");

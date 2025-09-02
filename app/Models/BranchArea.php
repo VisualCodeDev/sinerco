@@ -12,6 +12,6 @@ class BranchArea extends Model
     ];
 
     protected $hidden = [
-        'userId',
+        'user_id',
     ];
 }

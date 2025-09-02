@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('daily_reports', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('unitAreaLocationId', 50);
+            $table->unsignedBigInteger('unit_position_id');
             $table->date('date');
             $table->string('time');
             $table->float('sourcePress');
@@ -31,11 +31,11 @@ return new class extends Migration {
             $table->float('staticPress');
             $table->float('diffPress');
             $table->float('mscfd');
-            $table->string('requestId')->nullable();
-            $table->unique(['date', 'time', 'unitAreaLocationId']);
+            $table->string('request_id')->nullable();
+            $table->unique(['date', 'time', 'unit_position_id']);
 
-            $table->foreign('requestId')->references('requestId')->on('status_requests')->onDelete('cascade');
-            $table->foreign('unitAreaLocationId')->references('unitAreaLocationId')->on('unit_area_locations')->onDelete('cascade');
+            $table->foreign('request_id')->references('request_id')->on('status_requests')->onDelete('cascade');
+            $table->foreign('unit_position_id')->references('id')->on('unit_positions')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
     }
 

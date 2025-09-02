@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\DataUnit;
 use App\Models\Location;
 use App\Models\UnitAreaLocation;
+use App\Models\UnitPosition;
 use Illuminate\Database\Seeder;
 use Str;
 
@@ -74,8 +75,8 @@ class UnitAreaLocationSeeder extends Seeder
                 'MPI 7114' => ['GNK', 'SP. GNK'],
             ],
         ];
-        $userData = Client::select('clientId', 'name')->get()->toArray();
-        $unitData = DataUnit::select('unitId', 'unit')->get()->toArray();
+        $userData = Client::select('client_id', 'name')->get()->toArray();
+        $unitData = DataUnit::select('unit_id', 'unit')->get()->toArray();
 
         foreach ($userData as $user) {
             foreach ($unitData as $unit) {
@@ -89,7 +90,7 @@ class UnitAreaLocationSeeder extends Seeder
                     if (!$area)
                         continue;
 
-                    $location = Location::where('areaId', $area->id)
+                    $location = Location::where('area_id', $area->id)
                         ->where('location', $locationName)
                         ->first();
 
@@ -97,14 +98,13 @@ class UnitAreaLocationSeeder extends Seeder
                         continue;
                     }
 
-                    UnitAreaLocation::updateOrCreate(
+                    UnitPosition::updateOrCreate(
                         [
-                            'clientId' => $user['clientId'],
-                            'unitId' => $unit['unitId'],
+                            'client_id' => $user['client_id'],
+                            'unit_id' => $unit['unit_id'],
                         ],
                         [
-                            'unitAreaLocationId' => Str::uuid7(),
-                            'locationId' => $location->id,
+                            'location_id' => $location->id,
                         ]
                     );
                 }

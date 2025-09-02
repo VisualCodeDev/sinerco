@@ -62,7 +62,7 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user()?->load('roleData');
 
         return response()->json([
-            'id' => $user->id,
+            'id' => $user->user_id,
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->roleData?->name,

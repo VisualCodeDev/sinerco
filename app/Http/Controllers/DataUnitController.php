@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataUnit;
-use App\Models\UnitAreaLocation;
+use App\Models\UnitPosition;
 use App\Models\Workshop;
 use DB;
 use Illuminate\Http\Request;
@@ -20,32 +20,45 @@ class DataUnitController extends Controller
     {
         $user = Auth::user()->load('roleData');
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
-            $data = $user->unitAreaLocations()->with([
+            $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unitId', 'unit', 'status']);
+                    $q->select(['unit_id', 'unit', 'status']);
                 },
                 'client' => function ($q) {
-                    $q->select(['clientId', 'name']);
+                    $q->select(['client_id', 'name']);
                 },
                 'location.area'
             ])->get()->makeHidden(['created_at', 'updated_at']);
+            $data = $temp->map(function ($pos) {
+                return [
+                    'unit_id' => $pos->unit->unit_id,
+                    'unit' => $pos->unit->unit,
+                    'status' => $pos->unit->status,
+                    'client' => $pos->client?->name,
+                    'location' => $pos->location?->location,
+                    'location_id' => $pos->location_id,
+                    'area' => $pos->location?->area?->area,
+                    'unit_position_id' => $pos->id,
+                ];
+            });
         } else {
             $temp = DataUnit::with([
-                'unitAreaLocations.client' => function ($q) {
-                    $q->select(['clientId', 'name']);
+                'UnitPositions.client' => function ($q) {
+                    $q->select(['client_id', 'name']);
                 },
-                'unitAreaLocations.location.area'
-            ])->select(['unitId', 'unit', 'status'])->get();
+                'UnitPositions.location.area'
+            ])->select(['unit_id', 'unit', 'status'])->get();
 
             $data = $temp->map(function ($unit) {
                 return [
-                    'unitId' => $unit->unitId,
+                    'unit_id' => $unit->unit_id,
                     'unit' => $unit->unit,
                     'status' => $unit->status,
-                    'client' => $unit->unitAreaLocations?->client->name,
-                    'location' => $unit->unitAreaLocations?->location->location,
-                    'area' => $unit->unitAreaLocations?->location->area->area,
-                    'unitAreaLocationId' => $unit->unitAreaLocations?->unitAreaLocationId,
+                    'client' => $unit->UnitPositions?->client->name,
+                    'location_id' => $unit->location_id,
+                    'location' => $unit->UnitPositions?->location->location,
+                    'area' => $unit->UnitPositions?->location->area->area,
+                    'unit_position_id' => $unit->UnitPositions?->id,
                 ];
             });
         }
@@ -80,7 +93,7 @@ class DataUnitController extends Controller
         }
 
         return Inertia::render('Daily/DailyList', [
-            'data' => $units->values(), // reset index
+            'data' => $units->values(),
             'filters' => [
                 'status' => $status,
             ],
@@ -120,7 +133,7 @@ class DataUnitController extends Controller
         ]);
 
         // Update all matching DataUnit records
-        DataUnit::whereIn('unitId', $val['selected'])
+        DataUnit::whereIn('unit_id', $val['selected'])
             ->update(['input_interval' => $val['input_interval']]);
 
         return response()->json(['type' => 'success', 'text' => 'Input Interval updated!']);
@@ -131,7 +144,21 @@ class DataUnitController extends Controller
      */
     public function getSelectedUnit(Request $request)
     {
-        $data = UnitAreaLocation::where('unitAreaLocationId', $request->unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting', 'location.area'])->first();
+        $unit = UnitPosition::with(['client', 'unit', 'dailyReportSetting', 'location.area'])
+            ->where('id', $request->unit_position_id)->first();
+
+        $data = [
+            'unit_id' => $unit->unit_id ?? null,
+            'daily_report_setting' => $unit->dailyReportSetting ?? null,
+            'unit' => $unit->unit->unit ?? null,
+            'status' => $unit->unit->status ?? null,
+            'client' => $unit->client?->name ?? null,
+            'location' => $unit->location?->location ?? null,
+            'area' => $unit->location?->area?->area ?? null,
+            'unit_position_id' => $unit->id ?? null,
+        ];
+
+
         return response()->json($data);
     }
 
@@ -153,9 +180,9 @@ class DataUnitController extends Controller
             'unit_ids' => 'required|array'
         ]);
 
-        $data = collect($val['unit_ids'])->map(function ($unitId) use ($val) {
+        $data = collect($val['unit_ids'])->map(function ($unit_id) use ($val) {
             return [
-                'unit_id' => $unitId,
+                'unit_id' => $unit_id,
                 'workshop_id' => $val['workshop_id'],
                 'created_at' => now(),
                 'updated_at' => now(),

@@ -13,13 +13,13 @@ return new class extends Migration {
         Schema::create('admin_notifications', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('requestId');
+            $table->string('request_id');
             $table->string('date');
             $table->string('time');
-            $table->string('requestType');
+            $table->string('request_type');
             $table->string('status');
 
-            $table->foreign('requestId')->references('requestId')->on('status_requests')->onUpdate('CASCADE')->onDelete('CASCADE');
+            $table->foreign('request_id')->references('request_id')->on('status_requests')->onUpdate('CASCADE')->onDelete('CASCADE');
         });
 
     }

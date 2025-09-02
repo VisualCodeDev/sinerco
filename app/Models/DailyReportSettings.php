@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class DailyReportSettings extends Model
 {
     protected $fillable = [
-        'clientId',
+        'client_id',
         'decimalSetting',
         'minMaxSetting',
     ];
@@ -18,8 +18,8 @@ class DailyReportSettings extends Model
         'minMaxSetting' => 'array',
     ];
 
-     public function unitAreaLocations()
+     public function unitPositions()
     {
-        return $this->hasMany(UnitAreaLocation::class, 'userDataUnitId', 'userDataUnitId');
+        return $this->hasMany(UnitPosition::class, 'client_id', 'client_id');
     }
 }

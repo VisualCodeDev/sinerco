@@ -9,13 +9,13 @@ class AdminNotification extends Model
     //
     public function Request()
     {
-        return $this->hasMany(StatusRequest::class, 'requestId', 'requestId');
+        return $this->hasMany(StatusRequest::class, 'request_id', 'request_id');
     }
     protected $fillable = [
         'date',
         'time',
-        'requestType',
+        'request_type',
         'status',
-        'requestId',
+        'request_id',
     ];
 }

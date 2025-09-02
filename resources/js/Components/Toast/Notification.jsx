@@ -18,22 +18,22 @@ const Notification = ({ message }) => {
     return (
         <div
             className={`${
-                message.requestType === "stdby"
+                message.request_type === "stdby"
                     ? "bg-yellow-100 border-yellow-400"
-                    : message.requestType === "sd" &&
+                    : message.request_type === "sd" &&
                       "bg-red-100 border-red-400"
             } border shadow-lg rounded-md px-6 py-4 mb-3 transition-all flex items-center gap-3 min-w-[25vw]
             ${animate === "slideIn" ? "animate-slideIn" : "animate-slideOut"}`}
         >
             {/* Icon */}
             <div className="text-2xl">
-                {message.requestType === "stdby" ? "⚠️" : "🚨"}
+                {message.request_type === "stdby" ? "⚠️" : "🚨"}
             </div>
 
             {/* Content */}
             <div className="text-sm text-gray-800 leading-snug flex justify-between items-center w-full">
                 <p className="font-semibold text-base text-gray-900">
-                    {getRequestTypeName(message.requestType)}{" "}
+                    {getRequestTypeName(message.request_type)}{" "}
                     <span className="ml-1">Alert!!</span>
                 </p>
 

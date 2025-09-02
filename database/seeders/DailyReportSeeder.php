@@ -66,7 +66,7 @@ class DailyReportSeeder extends Seeder
                 'staticPress' => $row[13],
                 'diffPress' => $row[14],
                 'mscfd' => $row[15],
-                'requestId' => null,
+                'request_id' => null,
             ]);
         }
 
@@ -110,7 +110,7 @@ class DailyReportSeeder extends Seeder
                 'staticPress' => $row[13],
                 'diffPress' => $row[14],
                 'mscfd' => $row[15],
-                'requestId' => null,
+                'request_id' => null,
             ]);
         }
     }

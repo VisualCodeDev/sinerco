@@ -28,16 +28,17 @@ const DailyReportForm = (props) => {
         e.preventDefault();
         setConfirmationModal(true);
     };
+
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
             const resp = await axios.post(
-                route("daily.add", unitData?.unitAreaLocationId),
+                route("daily.add", unitData?.unit_position_id),
                 data
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
-                route("daily", unitData?.unitAreaLocationId);
+                route("daily", unitData?.unit_position_id);
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
@@ -86,7 +87,6 @@ const DailyReportForm = (props) => {
         interval: clientData?.input_interval,
         duration: clientData?.input_duration,
     });
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -156,7 +156,7 @@ const DailyReportForm = (props) => {
                         unitData={{
                             area: unitData?.area,
                             location: unitData?.location,
-                            unit: unitData?.unit?.unit,
+                            unit: unitData?.unit,
                         }}
                         isModal={isConfirmationModal}
                         handleCloseModal={() => setConfirmationModal(false)}
@@ -183,12 +183,12 @@ const ConfirmationModal = (props) => {
                     <div className="border-2 lg:md:p-4 p-2 lg:md:text-lg w-full text-sm mb-4 md:mb-6">
                         {unitData &&
                             Object.entries(unitData)
-                                .filter(([key]) => key !== "UnitAreaLocationId")
+                                .filter(([key]) => key !== "unit_position_id")
                                 .map(([key, value]) => (
                                     <div className="flex justify-between font-bold capitalize">
                                         <p>{splitCamelCase(key)} </p>
                                         <p className="text-primary">
-                                            {value?.unit || value}
+                                            {value}
                                         </p>
                                     </div>
                                 ))}

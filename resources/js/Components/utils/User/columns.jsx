@@ -7,10 +7,10 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
             cellClassName: "text-start",
             sortable: false,
             width: "1%",
-            Cell: ({ id }) => {
+            Cell: ({ id, index }) => {
                 return (
                     <>
-                        <div>{id}</div>
+                        <div>{index + 1}</div>
                     </>
                 );
             },

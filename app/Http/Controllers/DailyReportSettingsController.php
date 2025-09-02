@@ -20,7 +20,7 @@ class DailyReportSettingsController extends Controller
     public function setSetting(Request $request)
     {
         $rules = [
-            'clientId' => 'required|array',
+            'client_id' => 'required|array',
             'decimalSetting' => 'required|array',
             'minMaxSetting' => 'required|array',
         ];
@@ -36,11 +36,11 @@ class DailyReportSettingsController extends Controller
 
         $validated = $request->validate($rules);
 
-        $clientIds = $validated['clientId'];
+        $client_ids = $validated['client_id'];
 
-        foreach ((array) $clientIds as $clientId) {
+        foreach ((array) $client_ids as $client_id) {
             DailyReportSettings::updateOrCreate(
-                ['clientId' => $clientId],
+                ['client_id' => $client_id],
                 [
                     'decimalSetting' => $validated['decimalSetting'],
                     'minMaxSetting' => $validated['minMaxSetting'],
@@ -55,9 +55,9 @@ class DailyReportSettingsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function getUnitSetting($clientId)
+    public function getUnitSetting($client_id)
     {
-        $data = DailyReportSettings::where('clientId', $clientId)->first();
+        $data = DailyReportSettings::where('client_id', $client_id)->first();
         return response()->json($data);
     }
 

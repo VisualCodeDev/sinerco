@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('data_units', function (Blueprint $table) {
-            $table->string('unitId', 50)->unique()->primary();
+            $table->string('unit_id', 10)->primary();
             $table->string('unit');
             $table->enum('status', ['stdby', 'sd', 'running'])->default('running');
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
 use App\Models\StatusRequest;
-use App\Models\UnitAreaLocation;
+use App\Models\UnitPosition;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
 use Auth;
@@ -14,36 +14,36 @@ use Log;
 
 class DailyReportController extends Controller
 {
-    public function unitList()
-    {
-        $user = Auth::user();
-        // dd($user->role);
-        if ($user->role == 'technician' || $user->role == 'operator') {
-            $data = $user->unitAreaLocations()->with([
-                'unit' => function ($q) {
-                    $q->select(['unitId', 'unit']);
-                },
-                'client' => function ($q) {
-                    $q->select(['clientId', 'name']);
-                }
-            ])->get()->makeHidden(['created_at', 'updated_at']);
-        } else {
-            $data = UnitAreaLocation::with([
-                'unit' => function ($q) {
-                    $q->select(['unitId', 'unit']);
-                },
-                'client' => function ($q) {
-                    $q->select(['clientId', 'name']);
-                }
-            ])->get()->makeHidden(['created_at', 'updated_at']);
-        }
-        ;
+    // public function unitList()
+    // {
+    //     $user = Auth::user();
+    //     // dd($user->role);
+    //     if ($user->role == 'technician' || $user->role == 'operator') {
+    //         $data = $user->UnitPositions()->with([
+    //             'unit' => function ($q) {
+    //                 $q->select(['unit_id', 'unit']);
+    //             },
+    //             'client' => function ($q) {
+    //                 $q->select(['client_id', 'name']);
+    //             }
+    //         ])->get()->makeHidden(['created_at', 'updated_at']);
+    //     } else {
+    //         $data = UnitPosition::with([
+    //             'unit' => function ($q) {
+    //                 $q->select(['unit_id', 'unit']);
+    //             },
+    //             'client' => function ($q) {
+    //                 $q->select(['client_id', 'name']);
+    //             }
+    //         ])->get()->makeHidden(['created_at', 'updated_at']);
+    //     }
+    //     ;
 
-        return Inertia::render('Daily/DailyList', ['data' => $data]);
-    }
-    public function setReport(Request $request, $unitAreaLocationId)
+    //     return Inertia::render('Daily/DailyList', ['data' => $data]);
+    // }
+    public function setReport(Request $request, $unit_position_id)
     {
-        if ($unitAreaLocationId) {
+        if ($unit_position_id) {
             $fieldsToNormalize = [
                 'sourcePress',
                 'suctionPress',
@@ -95,9 +95,9 @@ class DailyReportController extends Controller
                 ->subHour()
                 ->format('H:i');
 
-            $statusRequest = StatusRequest::where('unitAreaLocationId', $unitAreaLocationId)
-                ->where('startDate', $validatedData['date'])
-                ->whereBetween('startTime', [$oneHourBefore, $validatedTime])
+            $statusRequest = StatusRequest::where('unit_position_id', $unit_position_id)
+                ->where('start_date', $validatedData['date'])
+                ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
                 ->first();
 
             Log::debug('status ' . $statusRequest);
@@ -116,14 +116,15 @@ class DailyReportController extends Controller
                     return !empty($message);
                 });
                 if ($warnings->isNotEmpty()) {
-                    $unit = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->first()->load('unit');
+                    $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
+
                     $warningMessage = "⚠️ Input Warning Detected on \nDate: {$data['date']},\n📍Unit: {$unit->unit->unit}:\n";
 
                     foreach ($warnings as $field => $message) {
                         $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
                     }
                     $technicians = UserSetting::with('user')
-                        ->where('unitAreaLocationId', $unitAreaLocationId)
+                        ->where('unit_position_id', $unit_position_id)
                         ->get()
                         ->filter(fn($allocation) => $allocation->user?->role === 'technician');
 
@@ -139,7 +140,7 @@ class DailyReportController extends Controller
                 }
 
                 $report = new DailyReport();
-                $report->unitAreaLocationId = $unitAreaLocationId;
+                $report->unit_position_id = $unit_position_id;
                 $report->date = $data['date'];
                 $report->time = $data['time'];
                 $report->sourcePress = $data['sourcePress'];
@@ -159,10 +160,10 @@ class DailyReportController extends Controller
                 $report->mscfd = $data['mscfd'];
 
                 if ($statusRequest) {
-                    $report->requestId = $statusRequest->requestId;
+                    $report->request_id = $statusRequest->request_id;
                 }
                 $report->save();
-                // $report->unitAreaLocationId = $unitAreaLocationId;
+                // $report->unit_position_id = $unit_position_id;
                 // $report->fill($data)->save();
             }
 
@@ -173,25 +174,25 @@ class DailyReportController extends Controller
         return back();
     }
 
-    public function editRepot(Request $request, $unitAreaLocationId)
+    public function editRepot(Request $request, $unit_position_id)
     {
 
     }
-    public function index($unitAreaLocationId)
+    public function index($unit_position_id)
     {
-        $data = DailyReport::with('request')->where('unitAreaLocationId', $unitAreaLocationId)->get()->map(function ($item) {
+        DailyReport::with('request')->where('unit_position_id', $unit_position_id)->get()->map(function ($item) {
             return collect($item)->except([
                 "created_at",
                 "updated_at",
                 "approval1",
                 "approval2",
-                "unitAreaLocationId"
+                "unit_position_id"
             ]);
         });
-        if ($unitAreaLocationId) {
-            $unitData = UnitAreaLocation::where('unitAreaLocationId', $unitAreaLocationId)->with(['client', 'unit', 'dailyReportSetting'])->first();
+        if ($unit_position_id) {
+            $unitData = UnitPosition::find( $unit_position_id)->with(['client', 'unit', 'dailyReportSetting'])->first();
             return Inertia::render('Daily/Daily', [
-                'unitAreaLocationId' => $unitAreaLocationId
+                'unit_position_id' => $unit_position_id
             ]);
         }
         return redirect()->route('dashboard');
@@ -204,9 +205,9 @@ class DailyReportController extends Controller
                     "created_at",
                     "updated_at",
                     'remarks',
-                    'requestId',
+                    'request_id',
                     "id",
-                    "unitAreaLocationId"
+                    "unit_position_id"
                 ]);
             });
         return response()->json($data);
@@ -214,14 +215,14 @@ class DailyReportController extends Controller
 
     public function getDataReportBasedOnDate(Request $request)
     {
-        $data = DailyReport::with('request')->where('unitAreaLocationId', $request->unitAreaLocationId)
+        $data = DailyReport::with('request')->where('unit_position_id', $request->unit_position_id)
             ->where('date', $request->date)->get()->map(function ($item) {
                 return collect($item)->except([
                     "created_at",
                     "updated_at",
                     "approval1",
                     "approval2",
-                    "unitAreaLocationId"
+                    "unit_position_id"
                 ]);
             });
         return response()->json($data);

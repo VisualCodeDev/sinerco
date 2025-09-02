@@ -182,20 +182,20 @@ export const requestStatus = [
 export const editRequestItems = [
     {
         name: "Start Date Time",
-        value: { date: "startDate", time: "startTime" },
+        value: { date: "start_date", time: "start_time" },
         type: "dateTime",
         isInput: true,
     },
     {
         name: "Request",
-        value: "requestType",
+        value: "request_type",
         type: "text",
         isInput: false,
     },
 
     {
         name: "End Date Time",
-        value: { date: "endDate", time: "endTime" },
+        value: { date: "end_date", time: "end_time" },
         type: "dateTime",
         isInput: true,
     },

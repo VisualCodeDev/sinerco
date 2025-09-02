@@ -6,13 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyReport extends Model
 {
-    public function unitAreaLocation()
+    public function unitPosition()
     {
-        return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId');
+        return $this->belongsTo(UnitPosition::class, 'unit_position_id', 'id');
     }
     public function request()
     {
-        return $this->belongsTo(StatusRequest::class, 'requestId', 'requestId');
+        return $this->belongsTo(StatusRequest::class, 'request_id', 'request_id');
     }
     protected $fillable = [
         'date',
@@ -32,6 +32,6 @@ class DailyReport extends Model
         'staticPress',
         'diffPress',
         'mscfd',
-        'requestId'
+        'request_id'
     ];
 }

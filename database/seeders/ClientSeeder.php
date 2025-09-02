@@ -30,7 +30,6 @@ class ClientSeeder extends Seeder
         foreach ($clients as $client) {
             Client::updateOrCreate(
                 ['name' => $client],
-                ['clientId' => (string) Str::uuid7()]
             );
         }
     }

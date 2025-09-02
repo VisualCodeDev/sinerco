@@ -12,18 +12,18 @@ return new class extends Migration {
     {
         Schema::create('workshop_units', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('workshop_id');
-            $table->string('unit_id', 50);
+            $table->string('workshop_id', 10);
+            $table->string('unit_id', 10);
             $table->timestamps();
 
             $table->unique(['workshop_id', 'unit_id']);
 
             $table->foreign('workshop_id')
-                ->references('id')->on('workshops')
+                ->references('workshop_id')->on('workshops')
                 ->onDelete('cascade');
 
             $table->foreign('unit_id')
-                ->references('unitId')->on('data_units')
+                ->references('unit_id')->on('data_units')
                 ->onDelete('cascade');
         });
 

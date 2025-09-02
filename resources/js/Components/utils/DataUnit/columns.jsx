@@ -101,7 +101,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "17%",
             Cell: ({ client }) => {
-                return <div className="flex flex-col">{client?.name}</div>;
+                return <div className="flex flex-col">{client}</div>;
             },
         },
         {
@@ -110,9 +110,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "20%",
-            Cell: ({ location }) => {
+            Cell: ({ area }) => {
                 return (
-                    <div className="flex flex-col">{location?.area?.area}</div>
+                    <div className="flex flex-col">{area}</div>
                 );
             },
         },
@@ -123,7 +123,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ unit }) => {
-                return <div className="flex flex-col">{unit?.unit}</div>;
+                return <div className="flex flex-col">{unit}</div>;
             },
         },
         {
@@ -134,7 +134,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             width: "20%",
             Cell: ({ location }) => {
                 return (
-                    <div className="flex flex-col">{location?.location}</div>
+                    <div className="flex flex-col">{location}</div>
                 );
             },
         },
@@ -158,12 +158,12 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: false,
             cellClassName: "text-center",
             width: "20%",
-            Cell: ({ unitAreaLocationId }) => {
+            Cell: ({ unit_position_id }) => {
                 return (
                     <input
                         type="checkbox"
                         checked={formData?.selectedRows?.includes(
-                            unitAreaLocationId.toString()
+                            unit_position_id.toString()
                         )}
                         onChange={(e) => {
                             e.stopPropagation();

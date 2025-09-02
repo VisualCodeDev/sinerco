@@ -52,7 +52,7 @@ class AreaSeeder extends Seeder
                 foreach ($areaLocations[$areaName] as $locationName) {
                     Location::updateOrCreate(
                         [
-                            'areaId' => $area->id,
+                            'area_id' => $area->id,
                             'location' => $locationName
                         ]
                     );

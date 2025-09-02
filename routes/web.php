@@ -70,7 +70,7 @@ Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
 
 Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/input-validation', 'index')->name('input.setting');
-    Route::get('/fetch/unit/configuration/{clientId}', 'getUnitSetting')->name('unit.setting.get');
+    Route::get('/fetch/unit/configuration/{client_id}', 'getUnitSetting')->name('unit.setting.get');
 
     Route::post('/client/report-setting', 'setSetting')->name('daily.setting');
 });
@@ -108,7 +108,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/fetch/selected-client', 'getSelectedClient')->name('client.selected.get');
 
     Route::get('/client/list', 'index')->name('client.list');
-    Route::get('/client/{clientId}', 'clientDetail')->name('client.detail');
+    Route::get('/client/{client_id}', 'clientDetail')->name('client.detail');
     
     Route::post('/client/settings', 'setSettings')->name('client.settings');
 });
@@ -116,15 +116,15 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
 Route::controller(UserSettingController::class)
     ->middleware(['auth', 'roles:super_admin'])
     ->group(function () {
-        Route::get('/fetch/permitted/{userId}', 'getPermittedUnitData')->name('permittedUnitData.get');
+        Route::get('/fetch/permitted/{user_id}', 'getPermittedUnitData')->name('permittedUnitData.get');
         Route::get('/fetch/users', 'getAllUsers')->name('user.get');
         Route::get('/users/setting/add-user', 'newUserIndex')->name('user.new');
         Route::post('/users//setting/add-user/new', 'addNewUser')->name('user.add');
         Route::get('/users', 'index')->name('allocation.setting');
-        Route::get('/users/setting/{userId}/', 'allocationSettings')->name('allocation');
-        Route::post('/users/setting/{userId}/information/edit', 'editUser')->name('user.edit');
-        Route::post('/users/setting/{userId}/allocation/add', 'allocationSettingsAdd')->name('allocation.add');
-        Route::post('/users/setting/{userId}/allocationremove', 'allocationSettingsRemove')->name('allocation.remove');
+        Route::get('/users/setting/{user_id}/', 'allocationSettings')->name('allocation');
+        Route::post('/users/setting/{user_id}/information/edit', 'editUser')->name('user.edit');
+        Route::post('/users/setting/{user_id}/allocation/add', 'allocationSettingsAdd')->name('allocation.add');
+        Route::post('/users/setting/{user_id}/allocationremove', 'allocationSettingsRemove')->name('allocation.remove');
     });
 
 
@@ -133,7 +133,7 @@ Route::controller(AdminNotificationController::class)->group(function () {
 });
 
 Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
-    Route::get('/profile/{userId}/', 'index')->name('profile');
+    Route::get('/profile/{user_id}/', 'index')->name('profile');
 });
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {

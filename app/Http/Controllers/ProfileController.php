@@ -25,15 +25,15 @@ class ProfileController extends Controller
         $operatorData = User::where('role', 'operator')->get();
         return Inertia::render('User/UserList', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
     }
-    public function index($userId)
+    public function index($user_id)
     {
-        $userData = User::where('id', $userId)->first();
+        $userData = User::where('user_id', $user_id)->first();
         $permissionData = DataUnitController::getPermittedUnit(); // returns an array
 
-        $unitIds = collect($permissionData)->pluck('unitId')->unique()->filter();
+        $unitIds = collect($permissionData)->pluck('unit_id')->unique()->filter();
 
         $requestList = StatusRequest::whereHas('unitAreaLocation', function ($query) use ($unitIds) {
-            $query->whereIn('unitId', $unitIds);
+            $query->whereIn('unit_id', $unitIds);
         })->with('unitAreaLocation.unit')->get();
         $requestList = collect($requestList)
             ->filter(fn($item) => $item->status !== 'End')

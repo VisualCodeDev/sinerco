@@ -104,7 +104,7 @@ const SettingModal = (props) => {
         try {
             setSaving(true);
             const resp = await axios.post(
-                route("daily.setting", { clientId: clientData?.clientId }),
+                route("daily.setting", { client_id: clientData?.client_id }),
                 formData
             );
             if (resp.status === 200 || resp.status === 302) {

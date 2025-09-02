@@ -13,10 +13,11 @@ const UserList = ({ roles }) => {
     const [selectedRole, setRole] = useState(null);
     const { data: users, loading, error } = fetch("user.get");
     const [filteredUser, setFilteredUser] = useState();
+
     const onRowClick = (item) => {
         router.visit(route("allocation", item?.id));
     };
-
+    
     useEffect(() => {
         if (loading) return;
         let selectedFilterUser = users;

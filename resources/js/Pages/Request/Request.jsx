@@ -27,6 +27,7 @@ const Request = ({ data }) => {
         setModal(true);
         setItem(itemData);
     };
+    console.log(data)
     const { user, loading } = useAuth();
     const { addToast } = useToast();
     if (loading) {
@@ -40,7 +41,7 @@ const Request = ({ data }) => {
                 addToast(resp.data);
                 setAllData((prev) =>
                     prev.map((item) =>
-                        item.requestId === id
+                        item.request_id === id
                             ? {
                                   ...item,
                                   seenStatus: !item.seenStatus,
@@ -114,17 +115,17 @@ const EditItem = ({
             const updatedData = { ...prevData, [field]: value };
 
             if (field === "status") {
-                if (value !== "End" && prevData.endTime && prevData.endDate) {
-                    updatedData.endTime = "";
-                    updatedData.endDate = "";
+                if (value !== "End" && prevData.end_time && prevData.end_date) {
+                    updatedData.end_time = "";
+                    updatedData.end_date = "";
                 } else if (
                     value === "End" &&
-                    !prevData.endTime &&
-                    !prevData.endDate &&
+                    !prevData.end_time &&
+                    !prevData.end_date &&
                     currDateTime
                 ) {
-                    updatedData.endTime = currDateTime.time;
-                    updatedData.endDate = currDateTime.date;
+                    updatedData.end_time = currDateTime.time;
+                    updatedData.end_date = currDateTime.date;
                 }
             }
 
@@ -135,7 +136,7 @@ const EditItem = ({
     const handleSave = async () => {
         if (
             formData?.status === "End" &&
-            (!formData?.endDate || !formData?.endTime)
+            (!formData?.end_date || !formData?.end_time)
         ) {
             return alert("Please fill all the fields");
         }
@@ -159,7 +160,7 @@ const EditItem = ({
             });
         } finally {
             const newData = allData.map((item) => {
-                if (item.requestId === formData.requestId) {
+                if (item.request_id === formData.request_id) {
                     return { ...item, ...formData };
                 }
                 return item;
@@ -168,6 +169,7 @@ const EditItem = ({
             setSaving(false);
         }
     };
+
     return (
         <Modal
             title="Edit Request"

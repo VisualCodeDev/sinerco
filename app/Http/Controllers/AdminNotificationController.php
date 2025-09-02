@@ -15,13 +15,13 @@ class AdminNotificationController extends Controller
         $permissionData = DataUnitController::getPermittedUnit();
 
         $unitIds = collect($permissionData)
-            ->pluck('unitAreaLocationId')
+            ->pluck('unit_position_id')
             ->unique()
             ->filter();
 
         $requestList = AdminNotification::where('status', '!=', 'End')
             ->whereHas('request', function ($query) use ($unitIds) {
-                $query->whereIn('unitAreaLocationId', $unitIds);
+                $query->whereIn('unit_position_id', $unitIds);
             })
             ->with(['request'])
             ->get();

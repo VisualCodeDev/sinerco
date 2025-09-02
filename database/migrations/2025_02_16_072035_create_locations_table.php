@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->unsignedBigInteger('areaId');
+            $table->unsignedBigInteger('area_id');
             $table->string('location');
 
-            $table->foreign('areaId')->references('id')->on('areas')->onDelete('cascade');
+            $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
         });
     }
 

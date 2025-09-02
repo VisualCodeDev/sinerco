@@ -20,7 +20,7 @@ import {
     FaLock,
 } from "react-icons/fa";
 
-export default function Dashboard({ unitAreaLocationId }) {
+export default function Dashboard({ unit_position_id }) {
     const { user, loading: userLoding } = useAuth();
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
@@ -75,18 +75,20 @@ export default function Dashboard({ unitAreaLocationId }) {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const reportData = await axios.get(
-                route("getDataReportBasedOnDate", {
-                    unitAreaLocationId: unitAreaLocationId,
-                    date: selectedDate,
-                })
-            );
 
-            const unit = await axios.get(
-                route("getSelectedUnit", {
-                    unitAreaLocationId: unitAreaLocationId,
-                })
-            );
+            const [reportData, unit] = await Promise.all([
+                axios.get(
+                    route("getDataReportBasedOnDate", {
+                        unit_position_id: unit_position_id,
+                        date: selectedDate,
+                    })
+                ),
+                axios.get(
+                    route("getSelectedUnit", {
+                        unit_position_id: unit_position_id,
+                    })
+                ),
+            ]);
 
             setUnitData(unit?.data);
             setData(reportData?.data);
@@ -102,7 +104,7 @@ export default function Dashboard({ unitAreaLocationId }) {
             setLoading(true);
             const reportData = await axios.get(
                 route("getDataReportBasedOnDate", {
-                    unitAreaLocationId: unitAreaLocationId,
+                    unit_position_id: unit_position_id,
                     date: selectedDate,
                 })
             );
@@ -112,15 +114,16 @@ export default function Dashboard({ unitAreaLocationId }) {
         };
         changeReportData();
     }, [selectedDate]);
-
+    
     return (
         <PageLayout>
-            {userLoding ||
+            {(userLoding ||
                 isLoading ||
                 !data ||
+                !allUnits ||
                 !unitData ||
                 !clientData ||
-                (loading && <LoadingSpinner />)}
+                loading) && <LoadingSpinner />}
             <div className="flex">
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
@@ -159,7 +162,7 @@ export default function Dashboard({ unitAreaLocationId }) {
                                                 setExpanded(!expanded)
                                             }
                                         >
-                                            {unitData?.unit?.unit}
+                                            {unitData?.unit}
                                             {expanded ? (
                                                 <FaAngleUp />
                                             ) : (
@@ -179,7 +182,7 @@ export default function Dashboard({ unitAreaLocationId }) {
                                                             router.visit(
                                                                 route(
                                                                     "daily",
-                                                                    item?.unitAreaLocationId
+                                                                    item?.unit_position_id
                                                                 )
                                                             )
                                                         }
@@ -192,10 +195,10 @@ export default function Dashboard({ unitAreaLocationId }) {
                                     </div>
                                     <div className="">
                                         <p className="lg:md:text-base text-xs font-semibold">
-                                            {unitData?.location?.area?.area}
+                                            {unitData?.area}
                                         </p>
                                         <p className="lg:md:text-sm text-xs m-0 p-0">
-                                            {unitData.location?.location}
+                                            {unitData.location}
                                         </p>
                                     </div>
                                 </div>

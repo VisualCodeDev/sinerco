@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\UnitAreaLocation;
+use App\Models\UnitPosition;
 use App\Models\User;
 use App\Models\UserSetting;
 use Hash;
@@ -21,7 +22,7 @@ class UserSettingController extends Controller
         $users = User::with('roleData')->get();
         return response()->json(
             $users->map(fn($user) => [
-                'id' => $user->id,
+                'id' => $user->user_id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'role' => $user->roleData?->name,
@@ -30,13 +31,26 @@ class UserSettingController extends Controller
         );
     }
 
-    public function getPermittedUnitData($userId)
+    public function getPermittedUnitData($user_id)
     {
-        $permittedData = UserSetting::where('userId', $userId)->with('unitArea.client', 'unitArea.unit', 'unitArea.location.area')->get()->toArray();
+        $permittedData = UserSetting::where('user_id', $user_id)
+            ->with('unitArea.client', 'unitArea.unit', 'unitArea.location.area')
+            ->get();
 
-        Log::debug($permittedData);
-        return response()->json($permittedData);
+        $data = $permittedData->map(function ($item) {
+            return [
+                'unit_id' => $item?->unitArea->unit_id,
+                'unit' => $item?->unitArea->unit?->unit,
+                'client' => $item?->unitArea->client?->name,
+                'location' => $item?->unitArea->location?->location,
+                'area' => $item?->unitArea->location?->area?->area,
+                'unit_position_id' => $item->unit_position_id,
+            ];
+        });
+
+        return response()->json($data);
     }
+
 
     public function newUserIndex()
     {
@@ -67,43 +81,56 @@ class UserSettingController extends Controller
         // $operatorData = User::where('role', 'operator')->get();
         return Inertia::render('User/UserList', ['roles' => $roles]);
     }
-    public function allocationSettings($userId)
+    public function allocationSettings($user_id)
     {
-        $userData = User::select(['id', 'name', 'email', 'role_id'])
-            ->where('id', $userId)
+        $userData = User::select(['user_id', 'name', 'email', 'role_id'])
+            ->where('user_id', $user_id)
             ->first();
         $roleData = Role::all();
         $unitAreaData = [];
-        $unitAreaData = UnitAreaLocation::with(['unit', 'client', 'location.area'])->get();
-        return Inertia::render('User/UserAllocationSetting', ['data' => $userData, 'unitAreaData' => $unitAreaData, 'roleData'=>$roleData]);
+        $unitAreaData = UnitPosition::with(['unit', 'client', 'location.area'])->get();
+
+        $data = $unitAreaData->map(function ($item) {
+            return [
+                'unit_id' => $item?->unit_id,
+                'unit' => $item->unit?->unit,
+                'client' => $item->client?->name,
+                'location' => $item->location?->location,
+                'area' => $item->location?->area?->area,
+                'unit_position_id' => $item->id,
+            ];
+        });
+
+
+        return Inertia::render('User/UserAllocationSetting', ['data' => $userData, 'unitAreaData' => $data, 'roleData' => $roleData]);
     }
 
     public function allocationSettingsAdd(Request $request)
     {
         $validate = $request->validate([
-            'userId' => 'required|exists:users,id',
-            'unitAreaLocationId' => 'required|array',
-            'unitAreaLocationId.*' => 'exists:unit_area_locations,unitAreaLocationId',
+            'user_id' => 'required|exists:users,user_id',
+            'unit_position_id' => 'required|array',
+            'unit_position_id.*' => 'exists:unit_positions,id',
         ]);
-        $userId = $validate['userId'];
-        $unitAreaLocationIds = $validate['unitAreaLocationId'];
+        $user_id = $validate['user_id'];
+        $unit_position_ids = $validate['unit_position_id'];
 
-        if (!is_array($unitAreaLocationIds)) {
+        if (!is_array($unit_position_ids)) {
             return response()->json(['isSuccess' => false], 400);
         }
 
         $added = [];
         $skipped = [];
 
-        foreach ($unitAreaLocationIds as $unitId) {
-            $exists = UserSetting::where('userId', $userId)
-                ->where('unitAreaLocationId', $unitId)
+        foreach ($unit_position_ids as $unitId) {
+            $exists = UserSetting::where('user_id', $user_id)
+                ->where('unit_position_id', $unitId)
                 ->exists();
 
             if (!$exists) {
                 UserSetting::create([
-                    'userId' => $userId,
-                    'unitAreaLocationId' => $unitId,
+                    'user_id' => $user_id,
+                    'unit_position_id' => $unitId,
                 ]);
                 $added[] = $unitId;
             } else {
@@ -121,21 +148,21 @@ class UserSettingController extends Controller
     public function allocationSettingsRemove(Request $request)
     {
         $validate = $request->validate([
-            'userId' => 'required|exists:users,id',
-            'unitAreaLocationId' => 'required|array',
-            'unitAreaLocationId.*' => 'exists:unit_area_locations,unitAreaLocationId',
+            'user_id' => 'required|exists:users,user_id',
+            'unit_position_id' => 'required|array',
+            'unit_position_id.*' => 'exists:unit_positions,id',
         ]);
-        $userId = $validate['userId'];
-        $unitAreaLocationIds = $validate['unitAreaLocationId'];
+        $user_id = $validate['user_id'];
+        $unit_position_ids = $validate['unit_position_id'];
 
-        if (!is_array($unitAreaLocationIds)) {
+        if (!is_array($unit_position_ids)) {
             return response()->json(['isSuccess' => false], 400);
         }
 
 
-        foreach ($unitAreaLocationIds as $unitId) {
-            $allocation = UserSetting::where('userId', $userId)
-                ->where('unitAreaLocationId', $unitId)
+        foreach ($unit_position_ids as $unitId) {
+            $allocation = UserSetting::where('user_id', $user_id)
+                ->where('unit_position_id', $unitId)
                 ->first();
 
             if ($allocation) {
@@ -143,7 +170,7 @@ class UserSettingController extends Controller
             } else {
                 return response()->json([
                     'isSuccess' => false,
-                    'message' => "Data with unitAreaLocationId $unitId not found for this user.",
+                    'message' => "Data with unit_position_id $unitId not found for this user.",
                 ], 404);
             }
         }
@@ -156,23 +183,23 @@ class UserSettingController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function editUser(Request $request, $userId)
+    public function editUser(Request $request, $user_id)
     {
         $request->validate([
-            'name'=> 'sometimes|string',
+            'name' => 'sometimes|string',
             'role' => 'sometimes|numeric',
             'password' => 'sometimes|string|min:8'
         ]);
-        $user = User::find($userId);
-        $user->update(['name'=> $request->name, 'role_id'=>$request->role, 'password'=>$request->password ? Hash::make($request->password) : $user->password]);
+        $user = User::where($user_id);
+        $user->update(['name' => $request->name, 'role_id' => $request->role, 'password' => $request->password ? Hash::make($request->password) : $user->password]);
         return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
     /**
      * Store a newly created resource in storage.
      */
-    public function getSelectedUser($userId)
+    public function getSelectedUser($user_id)
     {
-        $user = User::where('id', $userId)->firstOrFail();
+        $user = User::where('id', $user_id)->firstOrFail();
         return response()->json($user);
     }
 

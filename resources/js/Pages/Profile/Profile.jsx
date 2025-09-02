@@ -127,7 +127,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                     {requestList.map((request) => (
                                         <a
                                             href={route("request")}
-                                            key={request.requestId}
+                                            key={request.request_id}
                                             className="md:p-4 border-b border-gray-200 flex justify-between hover:bg-gray-100 transition-all"
                                         >
                                             <div>

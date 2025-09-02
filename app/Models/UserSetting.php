@@ -8,15 +8,15 @@ class UserSetting extends Model
 {
     public function user()
     {
-        return $this->belongsTo(User::class, 'userId', 'id');
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     public function unitArea()
     {
-        return $this->belongsTo(UnitAreaLocation::class, 'unitAreaLocationId', 'unitAreaLocationId');
+        return $this->belongsTo(UnitPosition::class, 'unit_position_id', 'id');
     }
     protected $fillable = [
-        'userId',
-        'unitAreaLocationId',
+        'user_id',
+        'unit_position_id',
     ];
 }

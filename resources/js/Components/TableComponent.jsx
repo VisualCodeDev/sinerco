@@ -41,7 +41,7 @@ const TableComponent = (props) => {
         const getNestedValue = (obj, key) => {
             if (key === "user") return obj.user?.user?.toLowerCase() || "";
             if (key === "unit") return obj.unit?.unit?.toLowerCase() || "";
-            if (key === "userId") return obj.unit?.unit?.toLowerCase() || "";
+            if (key === "user_id") return obj.unit?.unit?.toLowerCase() || "";
             if (key === "status")
                 return getRequestStatus(obj.unit?.status).toLowerCase() || "";
             if (key === "location") return obj?.location?.location || "";

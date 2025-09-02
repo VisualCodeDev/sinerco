@@ -25,10 +25,10 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             cellClassName: "",
             sortable: false,
             width: "15%",
-            Cell: ({ unit_area_location }) => {
+            Cell: ({ unit }) => {
                 return (
                     <>
-                        <div>{unit_area_location?.unit?.unit}</div>
+                        <div>{unit}</div>
                     </>
                 );
             },
@@ -41,20 +41,20 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             cellClassName: "",
             sortable: false,
             width: "10%",
-            Cell: ({ requestType }) => {
+            Cell: ({ request_type }) => {
                 return (
                     <>
                         <div
                             className={`flex gap-2 items-center text-white justify-center px-3 py-2 rounded-lg
                                     ${
-                                        requestType === "stdby"
+                                        request_type === "stdby"
                                             ? "bg-yellow-500"
                                             : "bg-red-500"
                                     }
                                 `}
                         >
                             {" "}
-                            <p>{getRequestTypeName(requestType)}</p>
+                            <p>{getRequestTypeName(request_type)}</p>
                         </div>
                     </>
                 );
@@ -68,27 +68,27 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             cellClassName: "",
             sortable: false,
             width: "10%",
-            Cell: ({ requestId, seenStatus, pic }) => {
+            Cell: ({ request_id, seen_status, pic }) => {
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (
-                            !seenStatus ? (
+                            !seen_status ? (
                                 <button
                                     className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        handleSeen(requestId);
+                                        handleSeen(request_id);
                                     }}
                                 >
                                     Confirm
                                 </button>
                             ) : (
-                                seenStatus && (
+                                seen_status && (
                                     <button
                                         className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleSeen(requestId);
+                                            handleSeen(request_id);
                                         }}
                                     >
                                         Undo
@@ -97,9 +97,9 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                             )
                         ) : (
                             <div>
-                                {seenStatus ? (
+                                {seen_status ? (
                                     <p className="flex justify-center items-center text-center px-2 py-1 rounded-lg text-sm font-medium whitespace-nowrap">
-                                        <p>{pic?.name}</p>
+                                        <p>{pic}</p>
                                     </p>
                                 ) : (
                                     <p className="text-slate-400 text-center">
@@ -113,33 +113,33 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             },
         },
         {
-            name: "startTime",
+            name: "start_time",
             header: "Start Time",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
             width: "17%",
-            Cell: ({ startDate, startTime }) => {
+            Cell: ({ start_date, start_time }) => {
                 return (
                     <>
-                        <div>{getFormattedDate(startDate)}</div>
-                        <div>{startTime}</div>
+                        <div>{getFormattedDate(start_date)}</div>
+                        <div>{start_time}</div>
                     </>
                 );
             },
         },
         {
-            name: "endDate",
+            name: "end_date",
             header: "End Date",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
             width: "17%",
-            Cell: ({ endDate, endTime }) => {
+            Cell: ({ end_date, end_time }) => {
                 return (
                     <>
-                        <div>{getFormattedDate(endDate)}</div>
-                        <div>{endTime}</div>
+                        <div>{getFormattedDate(end_date)}</div>
+                        <div>{end_time}</div>
                     </>
                 );
             },
