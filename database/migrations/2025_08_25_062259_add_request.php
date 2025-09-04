@@ -25,8 +25,8 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('status_requests', function (Blueprint $table) {
-            $table->unsignedBigInteger('locationId');
-            $table->string('unitId', 50);
+            $table->unsignedBigInteger('location_id');
+            $table->string('unit_id', 50);
 
         });
     }

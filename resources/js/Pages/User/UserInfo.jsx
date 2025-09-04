@@ -19,7 +19,7 @@ export default function UserInfo({ data, onSave, roleData }) {
     const inputReadOnly = "bg-zinc-100 border-primary text-zinc-500";
     const inputEditable =
         "border-primary focus:border-black focus:ring-1 focus:ring-blue-500 bg-white";
-    console.log(data);
+
     return (
         <div className="max-w-lg space-y-5">
             <div className="space-y-1">

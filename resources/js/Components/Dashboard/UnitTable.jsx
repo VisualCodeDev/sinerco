@@ -22,6 +22,8 @@ const UnitTable = (props) => {
         if (!item.unit_position_id) return;
         router.visit(route("daily", item.unit_position_id));
     };
+    console.log(data);
+    
     if (!propsData) {
         const { data, loading, error } = fetch("unit.get");
         if (loading) {

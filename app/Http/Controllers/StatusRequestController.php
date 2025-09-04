@@ -172,7 +172,7 @@ class StatusRequestController extends Controller
             'start_date' => 'nullable|string',
             'start_time' => 'nullable|string',
             'request_id' => 'required|string',
-            'status' => 'required|string',
+            // 'status' => 'required|string',
             'end_time' => 'nullable|string',
             'end_date' => 'nullable|string',
             'remarks' => 'nullable|string',
@@ -203,7 +203,9 @@ class StatusRequestController extends Controller
         }
 
         // Update status and end time
-        $status->status = $request->status;
+        if($status->status === "End") {
+            $status->status = "Ongoing";
+        };
         $status->end_time = $request->end_time ?? null;
         $status->end_date = $request->end_date ?? null;
         $status->remarks = $request->remarks ?? $status->remarks;
@@ -214,7 +216,7 @@ class StatusRequestController extends Controller
             $newUnitStatus = match ($status->status) {
                 'Ongoing' => $status->request_type,
                 'End' => 'running',
-                default => null,
+                default => "null",
             };
 
             if ($newUnitStatus) {

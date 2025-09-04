@@ -18,18 +18,25 @@ export const getRequestStatus = (value) => {
     return found ? found : value;
 };
 
-export const DateTimeInput = ({ value, name, handleChange }) => {
+export const DateTimeInput = ({
+    value,
+    name,
+    handleChange,
+    required = false,
+}) => {
     return (
         <div className="flex items-center flex-wrap w-full">
             <input
-                className="text-sm md:text-base"
+                required={required}
+                className="text-sm md:text-base w-3/5"
                 type="date"
                 name={name?.date}
                 value={value?.date}
                 onChange={(e) => handleChange([e.target.name], e.target.value)}
             />
             <input
-                className="text-sm md:text-base"
+                required={required}
+                className="text-sm md:text-base w-2/5"
                 type="time"
                 name={name?.time}
                 value={value?.time}
@@ -68,7 +75,7 @@ export const TimeInput = ({
         fetchTime();
     }, []);
 
-    console.log(time)
+    console.log(time);
 
     const options = [];
     let permittedTime = time % interval === 0 ? time : time + (time % interval);
@@ -89,9 +96,9 @@ export const TimeInput = ({
             const isNow = i === time;
             const isPermitted = isNow && minute <= duration;
             const alreadyFilled = filledFormTime.includes(i);
-            console.log(time, isPermitted)
+            console.log(time, isPermitted);
             if (isPermitted && !alreadyFilled) {
-                console.log(i)
+                console.log(i);
                 options.push(
                     <option
                         key={i}
@@ -129,7 +136,8 @@ export const TimeInput = ({
                 {options}
             </select>
             <span className="text-sm text-slate-400">
-                Available from {permittedTime}:00 to {permittedTime}:{duration}
+                Available from {permittedTime}:00 to {permittedTime}:
+                {String(duration).padStart(2, "0")}
             </span>
         </>
     );

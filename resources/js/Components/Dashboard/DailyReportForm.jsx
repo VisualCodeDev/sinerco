@@ -18,7 +18,14 @@ import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 
 const DailyReportForm = (props) => {
-    const { unitData, formData, user, clientData } = props;
+    const {
+        unitData,
+        formData,
+        user,
+        interval,
+        duration,
+        isDown = true,
+    } = props;
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(false);
     const [isConfirmationModal, setConfirmationModal] = useState(false);
@@ -79,13 +86,15 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
+
     const formList = list({
         handleChange: handleChange,
+        isDown: isDown,
         formData: formData,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
-        interval: clientData?.input_interval,
-        duration: clientData?.input_duration,
+        interval: interval,
+        duration: duration,
     });
 
     useEffect(() => {
@@ -187,9 +196,7 @@ const ConfirmationModal = (props) => {
                                 .map(([key, value]) => (
                                     <div className="flex justify-between font-bold capitalize">
                                         <p>{splitCamelCase(key)} </p>
-                                        <p className="text-primary">
-                                            {value}
-                                        </p>
+                                        <p className="text-primary">{value}</p>
                                     </div>
                                 ))}
                     </div>

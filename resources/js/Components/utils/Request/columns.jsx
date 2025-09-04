@@ -1,5 +1,6 @@
 import { FaClock, FaPowerOff } from "react-icons/fa";
 import { getFormattedDate, getRequestTypeName } from "../dashboard-util";
+import StatusPill from "@/Components/StatusPill";
 
 const columns = ({ handleSelect, user, handleSeen }) => {
     const colItem = [
@@ -44,18 +45,7 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             Cell: ({ request_type }) => {
                 return (
                     <>
-                        <div
-                            className={`flex gap-2 items-center text-white justify-center px-3 py-2 rounded-lg
-                                    ${
-                                        request_type === "stdby"
-                                            ? "bg-yellow-500"
-                                            : "bg-red-500"
-                                    }
-                                `}
-                        >
-                            {" "}
-                            <p>{getRequestTypeName(request_type)}</p>
-                        </div>
+                        <StatusPill request_type={request_type}/>
                     </>
                 );
             },

@@ -19,7 +19,8 @@ class UserSettingController extends Controller
      */
     public function getAllUsers()
     {
-        $users = User::with('roleData')->get();
+        $users = User::with('roleData', 'UnitPositions')->get();
+
         return response()->json(
             $users->map(fn($user) => [
                 'id' => $user->user_id,
@@ -27,6 +28,10 @@ class UserSettingController extends Controller
                 'email' => $user->email,
                 'role' => $user->roleData?->name,
                 'role_id' => $user->roleData?->id,
+                'areas' => $user->unitPositions
+                    ->pluck('location.area.area')
+                    ->unique()
+                    ->implode(', '),
             ])
         );
     }
@@ -188,10 +193,10 @@ class UserSettingController extends Controller
         $request->validate([
             'name' => 'sometimes|string',
             'role' => 'sometimes|numeric',
-            'password' => 'sometimes|string|min:8'
+            'password' => 'nullable|string|min:8'
         ]);
-        $user = User::where($user_id);
-        $user->update(['name' => $request->name, 'role_id' => $request->role, 'password' => $request->password ? Hash::make($request->password) : $user->password]);
+        $user = User::find($user_id);
+        $user->update(['name' => $request->name, 'role_id' => $request->role, 'password' => $request->password != '' ? Hash::make($request->password) : $user->password]);
         return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
     /**

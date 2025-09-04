@@ -10,4 +10,9 @@ class Location extends Model
     {
         return $this->belongsTo(Area::class, 'area_id', 'id');
     }
+
+    public function unitPositions()
+    {
+        return $this->hasMany(UnitPosition::class, 'location_id', 'id');
+    }
 }

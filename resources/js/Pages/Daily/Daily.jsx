@@ -4,6 +4,7 @@ import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
 import UnitTable from "@/Components/Dashboard/UnitTable";
 import LoadingSpinner from "@/Components/Loading";
+import StatusPill from "@/Components/StatusPill";
 import { getDDMMYYDate } from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
@@ -29,6 +30,7 @@ export default function Dashboard({ unit_position_id }) {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState();
     const [unitData, setUnitData] = useState();
+    const [isUnitRunning, setIsUnitRunning] = useState(true);
     const [clientData, setClientData] = useState();
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
 
@@ -114,7 +116,13 @@ export default function Dashboard({ unit_position_id }) {
         };
         changeReportData();
     }, [selectedDate]);
-    
+
+    useEffect(() => {
+        if (!unitData?.status) return;
+        const status = unitData?.status === "running" ? true : false;
+        setIsUnitRunning(status);
+    }, [unitData]);
+
     return (
         <PageLayout>
             {(userLoding ||
@@ -154,7 +162,7 @@ export default function Dashboard({ unit_position_id }) {
                     <div className="flex flex-col border-t-2 border-t-primary shadow-xl">
                         {unitData && (
                             <>
-                                <div className="text-center w-full flex flex-col lg:md:gap-1 gap-1 lg:md:py-8 py-6 bg-primary text-white">
+                                <div className="text-center w-full flex flex-col items-center lg:md:gap-1 gap-1 lg:md:py-8 py-6 bg-primary text-white">
                                     <div className="text-xl lg:md:text-2xl font-bold bg-primary flex justify-center items-center">
                                         <div
                                             className="cursor-pointer flex items-center gap-2  relative"
@@ -163,6 +171,13 @@ export default function Dashboard({ unit_position_id }) {
                                             }
                                         >
                                             {unitData?.unit}
+                                            <div className="text-xs">
+                                                <StatusPill
+                                                    request_type={
+                                                        unitData?.status
+                                                    }
+                                                />
+                                            </div>
                                             {expanded ? (
                                                 <FaAngleUp />
                                             ) : (
@@ -176,8 +191,8 @@ export default function Dashboard({ unit_position_id }) {
                                                 }`}
                                             >
                                                 {allUnits.map((item) => (
-                                                    <p
-                                                        className="py-1 px-2"
+                                                    <div
+                                                        className="py-1 px-2 flex items-center justify-between text-xs"
                                                         onClick={() =>
                                                             router.visit(
                                                                 route(
@@ -187,12 +202,14 @@ export default function Dashboard({ unit_position_id }) {
                                                             )
                                                         }
                                                     >
-                                                        {item?.unit}
-                                                    </p>
+                                                        <p className="text-base">{item?.unit}</p>
+                                                        <StatusPill request_type={item?.status} />
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
                                     </div>
+
                                     <div className="">
                                         <p className="lg:md:text-base text-xs font-semibold">
                                             {unitData?.area}
@@ -206,7 +223,10 @@ export default function Dashboard({ unit_position_id }) {
                         )}
                         {activeTab === "form" && (
                             <DailyReportForm
+                                isDown={!isUnitRunning}
                                 clientData={clientData}
+                                interval={unitData?.input_interval}
+                                duration={unitData?.input_duration}
                                 user={user}
                                 unitData={unitData}
                                 formData={data}

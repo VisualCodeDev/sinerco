@@ -47,7 +47,8 @@ const UnitLocationSetting = () => {
         setSelectedWorkshop(item);
 
         const filtered = unitData.filter(
-            (unit) => !item?.units?.some((wUnit) => wUnit?.id === unit?.unitId)
+            (unit) => !item?.units?.some((wUnit) => wUnit?.id === unit?.unit_id
+        )
         );
 
         setFilteredUnitData(filtered);
@@ -55,7 +56,8 @@ const UnitLocationSetting = () => {
     };
 
     const handleSelectAll = (currData) => {
-        const currentIds = currData.map((item) => item.unitId.toString());
+        const currentIds = currData.map((item) => item.unit_id
+        .toString());
         const selected = formData.add || [];
         const isAllSelected = currentIds.every((id) => selected.includes(id));
         let updated;
@@ -75,10 +77,13 @@ const UnitLocationSetting = () => {
 
     const handleCheckItem = (item) => {
         const selected = formData?.add || [];
-        const stringId = item?.unitId;
+        const stringId = item?.unit_id;
         let updated;
         if (selected.includes(stringId)) {
-            updated = selected.filter((unitId) => unitId !== stringId);
+            updated = selected.filter((unit_id
+
+            ) => unit_id
+             !== stringId);
         } else {
             updated = [...selected, stringId];
         }
@@ -87,16 +92,17 @@ const UnitLocationSetting = () => {
             add: updated,
         });
     };
-
     const handleAdd = async () => {
         if (Array.isArray(formData.add) && formData?.add?.length === 0) return;
 
         const finalFilteredUnit = unitData.filter(
-            (unit) => !formData?.add?.some((wUnit) => wUnit === unit?.unitId)
+            (unit) => !formData?.add?.some((wUnit) => wUnit === unit?.unit_id
+        )
         );
 
         const selectedWorkshopUnit = unitData.filter((unit) =>
-            formData?.add?.some((wUnit) => wUnit === unit?.unitId)
+            formData?.add?.some((wUnit) => wUnit === unit?.unit_id
+    )
         );
 
         const finalWorkshopUnit = [...selectedWorkshopUnits, ...formData?.add];
@@ -104,7 +110,7 @@ const UnitLocationSetting = () => {
         try {
             const resp = await axios.post(
                 route("unit.location.add", {
-                    workshop_id: selectedWorkshop?.id,
+                    workshop_id: selectedWorkshop?.workshop_id,
                     unit_ids: [...formData?.add],
                 })
             );

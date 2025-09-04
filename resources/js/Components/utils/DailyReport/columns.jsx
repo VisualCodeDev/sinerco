@@ -1,6 +1,14 @@
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const list = ({ handleChange, formData, reportSettings, role, interval, duration }) => {
+const list = ({
+    handleChange,
+    formData,
+    reportSettings,
+    role,
+    interval,
+    duration,
+    isDown,
+}) => {
     const colItem = [
         {
             name: "date",
@@ -16,6 +24,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                             {header}{" "}
                         </label>
                         <DateInput
+                            disabled={isDown}
                             id={name}
                             className="w-full bg-[#F4F5F9]"
                             name={name}
@@ -41,6 +50,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                             {header}{" "}
                         </label>
                         <TimeInput
+                            disabled={isDown}
                             formData={formData}
                             item={item}
                             role={role}
@@ -77,6 +87,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -119,6 +130,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -167,6 +179,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -215,6 +228,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -263,6 +277,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -311,6 +326,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -359,6 +375,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -407,6 +424,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -455,6 +473,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -503,6 +522,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -612,6 +632,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}
@@ -660,6 +681,7 @@ const list = ({ handleChange, formData, reportSettings, role, interval, duration
                         </label>
                         <input
                             required
+                            disabled={isDown}
                             // min={minMaxSetting.min}
                             // max={minMaxSetting.max}
                             id={name}

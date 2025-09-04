@@ -119,7 +119,6 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
                     text: "Permissions updated successfully!",
                 });
                 handleAfterAdd(selectedData);
-                setPermittedUnitArea(updatedPermittedData);
             }
         } catch (error) {
             console.error("Error updating permitted data:", error);
@@ -215,11 +214,12 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
         }
 
         try {
-            const resp = await axios.post(route("user.edit", initialUser?.id), user);
+            const resp = await axios.post(route("user.edit", initialUser?.user_id), user);
             setInitialUser(user);
             addToast(resp?.data);
         } catch (e) {
             console.error(e);
+            addToast({'type': 'error', 'text': 'Failed to save data'})
         }
     };
 

@@ -46,8 +46,8 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
             },
         },
         {
-            name: "field",
-            header: "field",
+            name: "areas",
+            header: "Field",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "text-start text-lg",
             sortable: true,
@@ -55,7 +55,7 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
             Cell: (items) => {
                 return (
                     <>
-                        <div>{items?.email}</div>
+                        <div>{items?.areas || '-'}</div>
                     </>
                 );
             },
@@ -120,7 +120,7 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
                         checked={formData?.selectedRows?.includes(
                             id?.toString()
                         )}
-                        onChange={(e) => {
+                        onClick={(e) => {
                             e.stopPropagation();
                             handleCheckItem(id?.toString());
                         }}

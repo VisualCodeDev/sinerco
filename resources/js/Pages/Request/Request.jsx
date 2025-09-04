@@ -17,6 +17,7 @@ import { useToast } from "@/Components/Toast/ToastProvider";
 import { useAuth } from "@/Components/Auth/auth";
 import axios from "axios";
 import LoadingSpinner from "@/Components/Loading";
+import StatusPill from "@/Components/StatusPill";
 
 const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
@@ -27,7 +28,7 @@ const Request = ({ data }) => {
         setModal(true);
         setItem(itemData);
     };
-    console.log(data)
+
     const { user, loading } = useAuth();
     const { addToast } = useToast();
     if (loading) {
@@ -96,8 +97,15 @@ const EditItem = ({
         ...selectedItem,
     });
     const { addToast } = useToast();
+    const [type, setType] = useState("Edit");
+
     useEffect(() => {
         if (selectedItem) {
+            setType(
+                selectedItem?.status === "End"
+                    ? "Set to Ongoing Request"
+                    : "End Request"
+            );
             setData({
                 ...selectedItem,
             });
@@ -135,7 +143,7 @@ const EditItem = ({
 
     const handleSave = async () => {
         if (
-            formData?.status === "End" &&
+            formData?.status != "End" &&
             (!formData?.end_date || !formData?.end_time)
         ) {
             return alert("Please fill all the fields");
@@ -172,7 +180,7 @@ const EditItem = ({
 
     return (
         <Modal
-            title="Edit Request"
+            title={type}
             handleCloseModal={() => setModal(false)}
             showModal={isModal}
             size="responsive"
@@ -184,7 +192,7 @@ const EditItem = ({
                               .filter(
                                   (item) =>
                                       item?.name === "Request" ||
-                                      item?.name === "Status" ||
+                                      item?.name === "Remarks" ||
                                       item?.name === "End Date Time"
                               )
                               .map((item, index) => {
@@ -198,20 +206,26 @@ const EditItem = ({
                                               {item?.name}
                                           </div>
                                           {!itemInputType ? (
-                                              <div>
+                                              <>
                                                   {item?.name ===
-                                                  "Start Date Time"
-                                                      ? getFormattedDate(
-                                                            formData[
-                                                                item?.value
-                                                            ]
-                                                        )
-                                                      : getRequestTypeName(
-                                                            formData[
-                                                                item?.value
-                                                            ]
-                                                        )}
-                                              </div>
+                                                  "Start Date Time" ? (
+                                                      <div>
+                                                          {getFormattedDate(
+                                                              formData[
+                                                                  item?.value
+                                                              ]
+                                                          )}
+                                                      </div>
+                                                  ) : (
+                                                      <StatusPill
+                                                          request_type={
+                                                              formData[
+                                                                  item?.value
+                                                              ]
+                                                          }
+                                                      />
+                                                  )}
+                                              </>
                                           ) : itemInputType &&
                                             item?.type != "option" &&
                                             item?.type != "dateTime" ? (
@@ -239,6 +253,7 @@ const EditItem = ({
                                                       date: item?.value?.date,
                                                       time: item?.value?.time,
                                                   }}
+                                                  required={formData?.status != "End"}
                                                   handleChange={handleChange}
                                               />
                                           ) : (
@@ -360,7 +375,7 @@ const EditItem = ({
             </Modal.Body>
             <Modal.Footer>
                 <div className="flex items-center justify-end">
-                    <button onClick={() => handleSave()}>Save</button>
+                    <button onClick={() => handleSave()}>{type}</button>
                 </div>
             </Modal.Footer>
         </Modal>

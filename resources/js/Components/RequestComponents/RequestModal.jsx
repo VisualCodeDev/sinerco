@@ -11,14 +11,20 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         request_type: "",
         start_date: "",
         start_time: "",
+        unit_position_id: "",
     });
+    const [isUnitDown, setIsUnitDown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [unitData, setUnitData] = useState([]);
     const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const newErrors = {};
+        const newErrors = {};   
+        if(isUnitDown) {
+            addToast({type: "error", text: "The Unit is Already Reported, Please End the Previous Report"})
+            return;
+        }
 
         if (
             !requestType.some((item) => item.value === data?.request_type) ||
@@ -39,7 +45,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
-            addToast({type: 'error', text: "Failed to make request"});
+            addToast({ type: "error", text: "Failed to make request" });
             console.log(error);
         } finally {
             handleCloseModal();
@@ -53,10 +59,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             [field]: value,
         }));
     };
+
     const fetchDataUnit = async () => {
         const response = await axios.get(route("getUnitAreaLocation"));
         setUnitData(response.data);
     };
+
     const fetchTime = async () => {
         setLoading(true);
         const dataDateTime = await getCurrDateTime();
@@ -79,9 +87,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const areaLocation = unitData.find(
             (item) => item?.unit_id === data?.unit_id
         );
+        console.log(areaLocation?.status != "running")
+        setIsUnitDown(areaLocation?.status != "running")
         handleChange(["unit_position_id"], areaLocation?.unit_position_id);
     }, [data?.unit_id]);
-    console.log(data)
+
     return (
         <>
             {loading && <LoadingSpinner />}
@@ -104,9 +114,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             >
                                 Unit:{" "}
                             </label>
-                            <div>
+                            <div className="md:w-3/5 w-full">
                                 <select
-                                    className="text-sm md:text-base"
+                                    className="text-sm md:text-base w-full"
                                     required
                                     id="unit"
                                     value={data?.unit_id || ""}
@@ -143,9 +153,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             >
                                 Request:{" "}
                             </label>
-                            <div>
+                            <div className="md:w-3/5 w-full">
                                 <select
-                                    className="md:text-base text-sm"
+                                    className="md:text-base text-sm w-full"
                                     required
                                     id="request"
                                     value={data.request_type || ""}
@@ -179,17 +189,19 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             >
                                 Date Time:{" "}
                             </label>
-                            <DateTimeInput
-                                value={{
-                                    date: data?.start_date,
-                                    time: data?.start_time,
-                                }}
-                                name={{
-                                    date: "start_date",
-                                    time: "start_time",
-                                }}
-                                handleChange={handleChange}
-                            />
+                            <div className="md:w-3/5 w-full">
+                                <DateTimeInput
+                                    value={{
+                                        date: data?.start_date,
+                                        time: data?.start_time,
+                                    }}
+                                    name={{
+                                        date: "start_date",
+                                        time: "start_time",
+                                    }}
+                                    handleChange={handleChange}
+                                />
+                            </div>
                             {/* <input
                             required
                             id="date"
@@ -221,20 +233,22 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                             >
                                 Remarks:{" "}
                             </label>
-                            <input
-                                className="md:text-base text-sm"
-                                required
-                                id="remarks"
-                                name="remarks"
-                                type="text"
-                                value={data.remarks || ""}
-                                onChange={(e) =>
-                                    handleChange(
-                                        [e.target.name],
-                                        e.target.value
-                                    )
-                                }
-                            />
+                            <div className="md:w-3/5 w-full">
+                                <input
+                                    className="md:text-base text-sm w-full"
+                                    required
+                                    id="remarks"
+                                    name="remarks"
+                                    type="text"
+                                    value={data.remarks || ""}
+                                    onChange={(e) =>
+                                        handleChange(
+                                            [e.target.name],
+                                            e.target.value
+                                        )
+                                    }
+                                />
+                            </div>
                         </div>
                     </Modal.Body>
                     <Modal.Footer>

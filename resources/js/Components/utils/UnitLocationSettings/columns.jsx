@@ -75,11 +75,11 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
             sortable: false,
             cellClassName: "text-center",
             width: "20%",
-            Cell: ({ unitId }) => {
+            Cell: ({ unit_id }) => {
                 return (
                     <input
                         type="checkbox"
-                        checked={formData?.add?.includes(unitId.toString())}
+                        checked={formData?.add?.includes(unit_id?.toString())}
                         onChange={(e) => {
                             e.stopPropagation();
                         }}
@@ -133,11 +133,11 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
             sortable: false,
             cellClassName: "text-center",
             width: "20%",
-            Cell: ({ unitId }) => {
+            Cell: ({ unit_id }) => {
                 return (
                     <input
                         type="checkbox"
-                        checked={formData?.add?.includes(unitId.toString())}
+                        checked={formData?.add?.includes(unit_id?.toString())}
                         onChange={(e) => {
                             e.stopPropagation();
                         }}

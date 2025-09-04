@@ -8,7 +8,7 @@ import { router } from "@inertiajs/react";
 import React, { useEffect, useState } from "react";
 import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
-const UserList = ({ roles }) => {
+const UserList = () => {
     const [formData, setFormData] = useState({});
     const [selectedRole, setRole] = useState(null);
     const { data: users, loading, error } = fetch("user.get");
