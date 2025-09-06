@@ -24,7 +24,9 @@ class DataUnit extends Model
         });
     }
 
-    public $fillable = [
+    protected $fillable = [
+        'unit_id',
+        'unit',
         'status',
     ];
     protected $appends = ['client', 'location'];
@@ -35,10 +37,10 @@ class DataUnit extends Model
     }
     public function getClientAttribute()
     {
-        return $this->unitPosition?->client;
+        return $this->unitPositions?->client;
     }
     public function getLocationAttribute()
     {
-        return $this->unitPosition?->location;
+        return $this->unitPositions?->location;
     }
 }

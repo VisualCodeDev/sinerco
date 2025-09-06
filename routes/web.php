@@ -82,6 +82,10 @@ Route::controller(StatusRequestController::class)->group(function () {
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
     Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
+
+    Route::post('/request/move-to-history', 'moveToHistory')
+        ->name('request.moveToHistory')
+        ->middleware('auth');
 });
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
@@ -95,6 +99,9 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.location.add');
+
+    Route::get('/unit/list/add', 'create')->name('unit.add.page')->middleware('roles:super_admin');
+    Route::post('/unit/list/add', 'addNewUnit')->name('unit.add')->middleware('roles:super_admin');
 });
 
 Route::get('/get/server-time', function () {

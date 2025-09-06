@@ -9,8 +9,9 @@ class UnitPosition extends Model
     protected $fillable = [
         'unit_id',
         'client_id',
-        'area',
-        'location',
+        'location_id',
+        'position_type',
+        'workshop_id',
     ];
 
     public function dailyReportSetting()

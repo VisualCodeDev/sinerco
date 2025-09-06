@@ -48,7 +48,7 @@ const columns = (
                             input_interval ||
                             1
                         }
-                        className="flex flex-col"
+                        className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
                         onChange={(e) => {
                             handleChange(
                                 "input_interval",
@@ -80,7 +80,7 @@ const columns = (
                             input_duration ||
                             35
                         }
-                        className="flex flex-col"
+                        className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
                         onChange={(e) => {
                             handleChange(
                                 "input_duration",
@@ -122,6 +122,7 @@ const columns = (
                 return (
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={formData?.selectedRows?.includes(
                             client_id.toString()
                         )}

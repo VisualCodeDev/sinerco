@@ -156,7 +156,7 @@ const DailyReportForm = (props) => {
                         ))}
                     </div>
                     <div className="mb-32 md:mb-0 flex place-self-center w-fit mt-10 items-center justify-center gap-2 bg-secondary/90 hover:bg-secondary text-white py-2 px-8 rounded-full transition ease-in-out delay-75 hover:scale-95">
-                        <button className="font-bold w-full h-full">
+                        <button className="font-semibold w-full h-full">
                             Simpan
                         </button>
                     </div>
@@ -194,7 +194,7 @@ const ConfirmationModal = (props) => {
                             Object.entries(unitData)
                                 .filter(([key]) => key !== "unit_position_id")
                                 .map(([key, value]) => (
-                                    <div className="flex justify-between font-bold capitalize">
+                                    <div className="flex justify-between font-semibold capitalize">
                                         <p>{splitCamelCase(key)} </p>
                                         <p className="text-primary">{value}</p>
                                     </div>

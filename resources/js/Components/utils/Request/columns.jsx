@@ -2,7 +2,13 @@ import { FaClock, FaPowerOff } from "react-icons/fa";
 import { getFormattedDate, getRequestTypeName } from "../dashboard-util";
 import StatusPill from "@/Components/StatusPill";
 
-const columns = ({ handleSelect, user, handleSeen }) => {
+const columns = ({
+    user,
+    handleSeen,
+    handleSelectAll,
+    selectedRows,
+    handleCheckItem,
+}) => {
     const colItem = [
         {
             name: "no",
@@ -45,7 +51,7 @@ const columns = ({ handleSelect, user, handleSeen }) => {
             Cell: ({ request_type }) => {
                 return (
                     <>
-                        <StatusPill request_type={request_type}/>
+                        <StatusPill request_type={request_type} />
                     </>
                 );
             },
@@ -147,6 +153,43 @@ const columns = ({ handleSelect, user, handleSeen }) => {
                     <>
                         <div>{remarks}</div>
                     </>
+                );
+            },
+        },
+
+        {
+            name: "checkbox",
+            header: () => (
+                <div className="text-center">
+                    <input
+                        type="checkbox"
+                        checked={
+                            selectedRows.length === allData.length &&
+                            allData.length > 0
+                        }
+                        onChange={() => handleSelectAll()}
+                    />
+                </div>
+            ),
+            headerClassName: "bg-primary text-white text-center",
+            cellClassName: "text-center",
+            sortable: false,
+            width: "5%",
+            Cell: (rowData) => {
+                const request_id = rowData.request_id;
+                return (
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <input
+                            type="checkbox"
+                            checked={selectedRows.includes(
+                                request_id.toString()
+                            )}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                handleCheckItem(request_id.toString());
+                            }}
+                        />
+                    </div>
                 );
             },
         },

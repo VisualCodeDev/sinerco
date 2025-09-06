@@ -117,7 +117,7 @@ const ClientList = () => {
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaUserFriends className="text-2xl md:text-3xl" />
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                        <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                             Client
                         </h2>
                     </div>
@@ -191,7 +191,7 @@ const ClientList = () => {
                                 <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                                     <FaList className="text-2xl md:text-3xl" />
                                 </div>
-                                <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                                     Area
                                 </h2>
                             </div>
@@ -250,7 +250,7 @@ const ClientList = () => {
                                     <FaList className="text-2xl md:text-3xl" />
                                 </div>
                                 <div className="flex flex-col">
-                                    <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                    <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                                         Unit
                                     </h2>
                                     <p className="md:text-sm text-xs text-slate-400 font-normal">

@@ -17,6 +17,7 @@ export default {
                 roboto: ["Roboto", "sans-serif"],
                 lato: ["Lato", "sans-serif"],
                 manrope: ["Manrope", "sans-serif"],
+                poppins: ["Poppins", "sans-serif"],
             },
             colors: {
                 success: "#5cb85c",
