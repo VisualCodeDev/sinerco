@@ -63,10 +63,11 @@ const UnitLocationSetting = () => {
                 {workshopData &&
                     workshopData.length > 0 &&
                     workshopData.map((item) => (
-                        <div className="flex w-full">
+                        <div className="flex w-full gap-4">
                             <div className="w-1/2">
                                 <TableComponent
                                     data={workshopData || []}
+                                    height="55vh"
                                     columns={columns}
                                     onRowClick={handleSelectItem}
                                     title={"Workshops"}
@@ -75,7 +76,8 @@ const UnitLocationSetting = () => {
                             <div className="w-1/2">
                                 <TableComponent
                                     data={clientData || []}
-                                    columns={columns}
+                                    height="55vh"
+                                    columns={columns} 
                                     onRowClick={handleSelectItem}
                                     title={"Clients"}
                                 />

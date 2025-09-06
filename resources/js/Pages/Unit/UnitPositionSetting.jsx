@@ -38,14 +38,15 @@ const UnitPositionSetting = ({ data }) => {
 
     useEffect(() => {
         if (unitData.length === 0) return;
-        console.log(selectedItemUnits)
+        console.log(selectedItemUnits);
         const filtered = unitData.filter(
             (unit) =>
-                !selectedItemUnits?.some((wUnit) => wUnit?.unit_id === unit?.unit_id)
+                !selectedItemUnits?.some(
+                    (wUnit) => wUnit?.unit_id === unit?.unit_id
+                )
         );
         setFilteredUnitData([...filtered]);
     }, [selectedItemUnits, unitData]);
-
 
     const handleSelectAll = (currData) => {
         const currentIds = currData.map((item) => item.unit_id.toString());
@@ -84,8 +85,8 @@ const UnitPositionSetting = ({ data }) => {
     const handleAdd = async () => {
         if (Array.isArray(formData.add) && formData?.add?.length === 0) return;
 
-        const finalFilteredUnit = unitData.filter(
-            (unit) => formData?.add?.some((wUnit) => wUnit === unit?.unit_id)
+        const finalFilteredUnit = unitData.filter((unit) =>
+            formData?.add?.some((wUnit) => wUnit === unit?.unit_id)
         );
 
         const finalWorkshopUnit = [...selectedItemUnits, ...finalFilteredUnit];
@@ -125,23 +126,25 @@ const UnitPositionSetting = ({ data }) => {
         <PageLayout>
             {loading && <LoadingSpinner />}
             <div className="flex gap-4 relative w-full">
-                <div className="w-1/2">
+                <div className="w-1/2 relative">
                     <TableComponent
                         data={selectedItemUnits || []}
                         columns={workshopColumns}
+                        height="55vh"
                         title={selectedItem?.name}
                         onRowClick={handleCheckItem}
                         submitPlaceholder="Remove"
                     />
                 </div>
-                <div className="w-1/2">
+                <div className="w-1/2 relative">
                     {filteredUnitData && filteredUnitData?.length > 0 && (
                         <TableComponent
                             data={filteredUnitData || []}
                             columns={unitColumns}
+                            height="55vh"
                             title={"Unit"}
                             onRowClick={handleCheckItem}
-                            isForm={true}
+                            isForm
                             submitPlaceholder="Add"
                             handleSubmit={handleAdd}
                         />
