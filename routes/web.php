@@ -86,7 +86,8 @@ Route::controller(StatusRequestController::class)->group(function () {
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
     Route::get('/unit/setting', 'unitSetting')->name('unit.interval.setting');
-    Route::get('/unit/location/setting', 'unitLocation')->name('unit.location.setting');
+    Route::get('/unit/location', 'unitLocation')->name('unit.position');
+    Route::get('/unit/location/setting', 'unitLocationSetting')->name('unit.position.setting');
     Route::get('/unit/list', 'unitList')->name('daily.list');
     Route::get('/fetch/get-all-unit', 'getAllUnit')->name('unit.get');
     Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
@@ -94,7 +95,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
-    Route::post('/unit/location/add', 'addUnitLocation')->name('unit.location.add');
+    Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
 });
 
 Route::get('/get/server-time', function () {
@@ -105,6 +106,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/fetch/get-filtered-area-location', 'getFilteredAreaLocation')->name('area.filter.get');
     Route::get('/fetch/get-filtered-unit', 'clientDetail')->name('unit.filter.get');
     Route::get('/fetch/client', 'getAllClient')->name('client.get');
+    Route::get('/fetch/client/units', 'getAllClientAndUnits')->name('client.unit.get');
     Route::get('/fetch/selected-client', 'getSelectedClient')->name('client.selected.get');
 
     Route::get('/client/list', 'index')->name('client.list');

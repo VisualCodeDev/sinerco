@@ -50,6 +50,7 @@ const WorkshopList = () => {
             )
         );
     };
+
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
@@ -142,38 +143,15 @@ const WorkshopList = () => {
                     <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                         {isLoading && <LoadingSpinner />}
 
-                        {filteredArea?.length > 0 ? (
-                            filteredArea.map((area) => (
+                        {selectedWorkshop?.units?.length > 0 ? (
+                            selectedWorkshop?.units.map((item) => (
                                 <div className="flex flex-col gap-2">
                                     <div
-                                        key={area}
-                                        onClick={() => handleExpandArea(area)}
+                                        key={item?.unit_id}
                                         className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm cursor-pointer"
                                     >
-                                        {area?.area}
+                                        {item?.unit}
                                     </div>
-                                    {area?.isExpanded &&
-                                        area?.locations?.map((loc) => (
-                                            <div className="flex gap-2">
-                                                <div className="w-4 border-e-4 border-primary" />
-                                                <div
-                                                    onClick={() =>
-                                                        setSelectedLocation({
-                                                            units: loc?.units,
-                                                            ...loc,
-                                                        })
-                                                    }
-                                                    className={`h-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 w-full cursor-pointer ${
-                                                        selectedLocation?.id ===
-                                                        loc?.id
-                                                            ? "bg-blue-100"
-                                                            : "bg-gray-100"
-                                                    }`}
-                                                >
-                                                    <p>{loc?.location}</p>
-                                                </div>
-                                            </div>
-                                        ))}
                                 </div>
                             ))
                         ) : (

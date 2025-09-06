@@ -32,4 +32,8 @@ class UnitPosition extends Model
     {
         return $this->belongsTo(Client::class, 'client_id', 'client_id');
     }
+
+    public function workshop() {
+        return $this->belongsTo(Workshop::class, 'workshop_id', 'workshop_id');
+    }
 }

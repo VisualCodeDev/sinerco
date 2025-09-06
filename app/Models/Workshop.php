@@ -26,7 +26,7 @@ class Workshop extends Model
     }
     public function units()
     {
-        return $this->belongsToMany(DataUnit::class, 'workshop_units', 'workshop_id', 'unit_id');
+        return $this->belongsToMany(DataUnit::class, 'unit_positions', 'workshop_id', 'unit_id');
     }
 }
 

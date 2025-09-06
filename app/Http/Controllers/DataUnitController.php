@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\DataUnit;
 use App\Models\UnitPosition;
 use App\Models\Workshop;
@@ -27,6 +28,9 @@ class DataUnitController extends Controller
                 'client' => function ($q) {
                     $q->select(['client_id', 'name']);
                 },
+                'workshop' => function ($q) {
+                    $q->select(['workshop_id', 'name']);
+                },
                 'location.area'
             ])->get()->makeHidden(['created_at', 'updated_at']);
             $data = $temp->map(function ($pos) {
@@ -34,10 +38,10 @@ class DataUnitController extends Controller
                     'unit_id' => $pos->unit->unit_id,
                     'unit' => $pos->unit->unit,
                     'status' => $pos->unit->status,
-                    'client' => $pos->client?->name,
-                    'location' => $pos->location?->location,
-                    'location_id' => $pos->location_id,
-                    'area' => $pos->location?->area?->area,
+                    'client' => $pos->client?->name ?? $pos->workshop?->name,
+                    'location' => $pos->location?->location ?? null,
+                    'location_id' => $pos->location_id ?? null,
+                    'area' => $pos->location?->area?->area ?? null,
                     'unit_position_id' => $pos->id,
                 ];
             });
@@ -46,7 +50,10 @@ class DataUnitController extends Controller
                 'UnitPositions.client' => function ($q) {
                     $q->select(['client_id', 'name']);
                 },
-                'UnitPositions.location.area'
+                'UnitPositions.location.area',
+                'UnitPositions.workshop' => function ($q) {
+                    $q->select(['workshop_id', 'name']);
+                },
             ])->select(['unit_id', 'unit', 'status'])->get();
 
             $data = $temp->map(function ($unit) {
@@ -54,11 +61,11 @@ class DataUnitController extends Controller
                     'unit_id' => $unit->unit_id,
                     'unit' => $unit->unit,
                     'status' => $unit->status,
-                    'client' => $unit->UnitPositions?->client->name,
+                    'client' => $unit->UnitPositions?->client->name ?? $unit->UnitPositions?->workshop->name,
                     'location_id' => $unit->location_id,
-                    'location' => $unit->UnitPositions?->location->location,
-                    'area' => $unit->UnitPositions?->location->area->area,
-                    'unit_position_id' => $unit->UnitPositions?->id,
+                    'location' => $unit->UnitPositions?->location->location ?? null,
+                    'area' => $unit->UnitPositions?->location->area->area ?? null,
+                    'unit_position_id' => $unit->UnitPositions?->id ?? null,
                 ];
             });
         }
@@ -169,7 +176,26 @@ class DataUnitController extends Controller
      */
     public function unitLocation()
     {
-        return Inertia::render('Unit/UnitLocationSetting');
+        return Inertia::render('Unit/Positions');
+    }
+
+    public function unitLocationSetting(Request $request)
+    {
+        $request->validate([
+            'workshop_id' => 'nullable|exists:workshops,workshop_id|required_without:client_id',
+            'client_id' => 'nullable|exists:clients,client_id|required_without:workshop_id',
+        ]);
+        $data = [];
+        if ($request->workshop_id) {
+            $data = Workshop::with(['units'])
+                ->where('workshop_id', $request->workshop_id)->first();
+        } elseif ($request->client_id) {
+            $data = Client::with(['units'])
+                ->where('client_id', $request->client_id)->first();
+        }
+        return Inertia::render('Unit/UnitPositionSetting', [
+            'data' => $data
+        ]);
     }
 
     /**
@@ -178,22 +204,28 @@ class DataUnitController extends Controller
     public function addUnitLocation(Request $request)
     {
         $val = $request->validate([
-            'workshop_id' => 'required',
-            'unit_ids' => 'required|array'
+            'workshop_id' => 'nullable|exists:workshops,workshop_id|required_without:client_id',
+            'client_id' => 'nullable|exists:clients,client_id|required_without:workshop_id',
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:data_units,unit_id',
         ]);
 
-        $data = collect($val['unit_ids'])->map(function ($unit_id) use ($val) {
-            return [
-                'unit_id' => $unit_id,
-                'workshop_id' => $val['workshop_id'],
-                'created_at' => now(),
+        $workshopId = $val['workshop_id'] ?? null;
+        $clientId = $val['client_id'] ?? null;
+        UnitPosition::whereIn('unit_id', $val['unit_ids'])
+            ->update([
+                'workshop_id' => $workshopId,
+                'client_id' => $clientId,
+                'position_type' => $workshopId ? 'workshop' : 'client',
                 'updated_at' => now(),
-            ];
-        })->toArray();
+            ]);
 
-        DB::table('workshop_units')->insertOrIgnore($data);
-
-        return response()->json(['type' => 'success', 'text' => 'Units added successfully']);
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Units added successfully',
+            // 'inserted' => count($newData),
+            // 'skipped' => count($existing),
+        ]);
     }
 
 }

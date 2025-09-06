@@ -24,6 +24,10 @@ class Client extends Model
             }
         });
     }
+
+    public function units() {
+        return $this->belongsToMany(DataUnit::class, 'unit_positions', 'client_id', 'unit_id');
+    }
     protected $fillable = [
         'client_id',
         'name',

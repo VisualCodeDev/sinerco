@@ -57,7 +57,7 @@ const Heading = ({ children }) => {
         unitLocationSetting: {
             icon: <IoMap />,
             label: "Unit Location Set.",
-            href: route("unit.location.setting"),
+            href: route("unit.position"),
         },
         unitList: {
             icon: <FaList />,

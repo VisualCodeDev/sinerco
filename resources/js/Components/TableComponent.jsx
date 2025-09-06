@@ -62,7 +62,6 @@ const TableComponent = (props) => {
         }
         return 0;
     });
-
     const handleSort = (key) => {
         setSortConfig((prev) => {
             if (prev.key === key) {
@@ -111,7 +110,8 @@ const TableComponent = (props) => {
         });
 
         setFilteredData(filterData);
-    }, [filterConfig, sortConfig?.direction, query]);
+    }, [data, filterConfig, sortConfig?.direction, query]);
+    
     return (
         <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto">
             <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b sticky top-0 left-0 bg-white z-10">
@@ -197,7 +197,7 @@ const TableComponent = (props) => {
                 <table className="table-auto w-full relative rounded-3xl overflow-x-scroll">
                     <thead className="bg-[#f5f7f9] sticky top-0 left-0">
                         <tr className="text-[#0F111C] font-semibold bg-primary">
-                            {columns.map((col, index) => (
+                            {columns?.map((col, index) => (
                                 <th
                                     key={index}
                                     className={

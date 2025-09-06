@@ -1,6 +1,39 @@
 import { getRequestTypeName, toCapitalizeFirstLetter } from "../dashboard-util";
 
 const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
+    const list = [
+        {
+            name: "id",
+            header: "NO.",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-center",
+            sortable: false,
+            width: "1%",
+            Cell: ({ index }) => {
+                return (
+                    <>
+                        <div>{index + 1}</div>
+                    </>
+                );
+            },
+        },
+        {
+            name: "position",
+            header: "Position",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-start",
+            sortable: false,
+            width: "99%",
+            Cell: ({ name }) => {
+                return (
+                    <>
+                        <div>{name}</div>
+                    </>
+                );
+            },
+        },
+    ];
+
     const unit = [
         {
             name: "id",
@@ -115,7 +148,7 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
                 return <div className="flex flex-col">{unit}</div>;
             },
         },
-        
+
         {
             name: "checkbox",
             Header: (data) => {
@@ -152,6 +185,8 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
             return unit;
         case "workshopUnit":
             return workshopUnit;
+        default:
+            return list;
     }
 };
 export default columns;

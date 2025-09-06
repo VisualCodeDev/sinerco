@@ -21,6 +21,12 @@ class ClientController extends Controller
         return response()->json($allData);
     }
 
+    public function getAllClientAndUnits()
+    {
+        $allData = Client::with('units')->get();
+        return response()->json($allData);
+    }
+
     public function clientDetail(Request $request)
     {
         $client_id = $request->client_id;
