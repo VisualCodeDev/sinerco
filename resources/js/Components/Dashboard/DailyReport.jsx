@@ -18,6 +18,7 @@ import DailyReportForm from "./DailyReportForm";
 import list from "../utils/DailyReport/columns";
 import axios from "axios";
 import LoadingSpinner from "../Loading";
+import { useToast } from "../Toast/ToastProvider";
 
 const DailyReport = (props) => {
     const { formData, unitData, user, setSelectedDate, selectedDate } = props;
@@ -151,7 +152,8 @@ const DailyReport = (props) => {
                                             )
                                         )}
                                     <td className="px-4 py-2 border text-center">
-                                        {value?.request && value?.request?.remarks}
+                                        {value?.request &&
+                                            value?.request?.remarks}
                                     </td>
                                     {user?.role === "super_admin" && (
                                         <>
@@ -368,29 +370,44 @@ const EditModal = (props) => {
     } = props;
     const [formDataState, setFormDataState] = useState(formData);
     const [loading, setLoading] = useState(false);
+
+    const { addToast } = useToast();
+
     const handleChange = ([field], value) => {
         setFormDataState({ ...formDataState, [field]: value });
     };
+
     const formList = list({
         handleChange: handleChange,
         formData: formDataState,
         reportSettings: unitData?.daily_report_setting,
     });
+
     const handleSubmit = async () => {
         if (formDataState) {
             setLoading(true);
             try {
+                console.log(formDataState);
                 const resp = await axios.post(
-                    route("report.edit", unitData?.unitAreaLocationId, data)
+                    route("daily.edit", { ...formDataState })
                 );
-                const updatedItems = data.map((item) =>
-                    item.id === formDataState.id
-                        ? { ...item, ...formDataState }
-                        : item
-                );
-                setData(updatedItems);
+                if (resp.status === 200) {
+                    addToast(resp.data);
+                    const updatedItems = data.map((item) =>
+                        item.id === formDataState.id
+                            ? { ...item, ...formDataState }
+                            : item
+                    );
+                    setData(updatedItems);
+                    setEditModal(false);
+                }
             } catch (err) {
                 console.error(err);
+                addToast({
+                    type: "error",
+                    text:
+                        err.response?.data?.message || "Error updating report",
+                });
             } finally {
                 setLoading(false);
             }

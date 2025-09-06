@@ -174,9 +174,35 @@ class DailyReportController extends Controller
         return back();
     }
 
-    public function editRepot(Request $request, $unit_position_id)
+    public function editReport(Request $request)
     {
+        $val = $request->validate([
+            'id' => 'required|exists:daily_reports,id',
+            'date' => 'required|string',
+            'time' => 'required|string',
+            'sourcePress' => 'required|numeric',
+            'suctionPress' => 'required|numeric',
+            'dischargePress' => 'required|numeric',
+            'speed' => 'required|numeric',
+            'manifoldPress' => 'required|numeric',
+            'oilPress' => 'required|numeric',
+            'oilDiff' => 'required|numeric',
+            'runningHours' => 'required|numeric',
+            'voltage' => 'required|numeric',
+            'waterTemp' => 'required|numeric',
+            'befCooler' => 'required|numeric',
+            'aftCooler' => 'required|numeric',
+            'staticPress' => 'required|numeric',
+            'diffPress' => 'required|numeric',
+            'mscfd' => 'required|numeric',
+        ]);
+        if(!$val) {
+            return response()->json(['type' => 'error', 'text' => 'Validation failed'], 422);
+        }
+        $report = DailyReport::find($request->id);
+        $report->update($request->all());
 
+        return response()->json(['type' => 'success', 'text' => 'Report updated successfully'], 200);
     }
     public function index($unit_position_id)
     {
@@ -190,7 +216,7 @@ class DailyReportController extends Controller
             ]);
         });
         if ($unit_position_id) {
-            $unitData = UnitPosition::find( $unit_position_id)->with(['client', 'unit', 'dailyReportSetting'])->first();
+            $unitData = UnitPosition::find($unit_position_id)->with(['client', 'unit', 'dailyReportSetting'])->first();
             return Inertia::render('Daily/Daily', [
                 'unit_position_id' => $unit_position_id
             ]);

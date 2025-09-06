@@ -75,8 +75,6 @@ export const TimeInput = ({
         fetchTime();
     }, []);
 
-    console.log(time);
-
     const options = [];
     let permittedTime = time % interval === 0 ? time : time + (time % interval);
     if (minute > 35) {
@@ -96,9 +94,7 @@ export const TimeInput = ({
             const isNow = i === time;
             const isPermitted = isNow && minute <= duration;
             const alreadyFilled = filledFormTime.includes(i);
-            console.log(time, isPermitted);
             if (isPermitted && !alreadyFilled) {
-                console.log(i);
                 options.push(
                     <option
                         key={i}
