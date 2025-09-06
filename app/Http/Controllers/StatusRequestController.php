@@ -64,13 +64,12 @@ class StatusRequestController extends Controller
         $status->status = 'Ongoing';
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
-        $status->save();
 
         $unitPosition->unit->update(['status' => $val['request_type']]);
         if ($unit) {
             $unit->update(['request_id' => $status->request_id]);
 
-            $unit->load(['request', 'unit_position.unit']);
+            $unit->load(['request', 'unitPosition.unit']);
             if ($unit->request && $unit->unit_position && $unit->unit_position->unit) {
                 $unit->unit_position->unit->update([
                     'status' => $unit->request->request_type
@@ -78,6 +77,7 @@ class StatusRequestController extends Controller
             }
             // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
         }
+        $status->save();
 
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
@@ -201,11 +201,16 @@ class StatusRequestController extends Controller
         if (!$status) {
             return back()->with('status', 'Request not found.');
         }
-
+        $currStatus = $status->status;
         // Update status and end time
-        if($status->status === "End") {
+        if ($currStatus === "End") {
             $status->status = "Ongoing";
-        };
+        }
+        ;
+        if ($currStatus === "Ongoing") {
+            $status->status = "End";
+        }
+        ;
         $status->end_time = $request->end_time ?? null;
         $status->end_date = $request->end_date ?? null;
         $status->remarks = $request->remarks ?? $status->remarks;

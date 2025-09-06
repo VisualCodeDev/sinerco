@@ -79,20 +79,20 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
                 );
             },
         },
-        {
-            name: "action",
-            header: "Action",
-            headerClassName: "text-center bg-primary text-white",
-            cellClassName: "text-start text-lg",
-            width: "19.8%",
-            Cell: (items) => {
-                return (
-                    <>
-                        <button>Reset</button>
-                    </>
-                );
-            },
-        },
+        // {
+        //     name: "action",
+        //     header: "Action",
+        //     headerClassName: "text-center bg-primary text-white",
+        //     cellClassName: "text-start text-lg",
+        //     width: "19.8%",
+        //     Cell: (items) => {
+        //         return (
+        //             <>
+        //                 <button>Edit</button>
+        //             </>
+        //         );
+        //     },
+        // },
         {
             name: "checkbox",
             width: "19.8%",

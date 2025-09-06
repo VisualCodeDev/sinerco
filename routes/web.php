@@ -125,6 +125,8 @@ Route::controller(UserSettingController::class)
         Route::post('/users/setting/{user_id}/information/edit', 'editUser')->name('user.edit');
         Route::post('/users/setting/{user_id}/allocation/add', 'allocationSettingsAdd')->name('allocation.add');
         Route::post('/users/setting/{user_id}/allocationremove', 'allocationSettingsRemove')->name('allocation.remove');
+
+        Route::post('/users/bulk-delete', 'delete')->name('user.bulkDelete');
     });
 
 

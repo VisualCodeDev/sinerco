@@ -1,23 +1,25 @@
 import LoadingSpinner from "@/Components/Loading";
 import TableComponent from "@/Components/TableComponent";
+import { useToast } from "@/Components/Toast/ToastProvider";
 import { fetch } from "@/Components/utils/database-util";
 // import columns from "@/Components/utils/Setting/columns";
 import tColumns from "@/Components/utils/User/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import { router } from "@inertiajs/react";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
 const UserList = () => {
     const [formData, setFormData] = useState({});
     const [selectedRole, setRole] = useState(null);
+    const [editUserLocation, setEditUserLocation] = useState(false);
     const { data: users, loading, error } = fetch("user.get");
     const [filteredUser, setFilteredUser] = useState();
 
     const onRowClick = (item) => {
         router.visit(route("allocation", item?.id));
     };
-    
+
     useEffect(() => {
         if (loading) return;
         let selectedFilterUser = users;
@@ -68,9 +70,37 @@ const UserList = () => {
     }
 
     const columns = tColumns({ formData, handleSelectAll, handleCheckItem });
+    const { addToast } = useToast();
+    const handleSubmit = async ({ type }) => {
+        try {
+            let resp;
+            if (type === "edit") {
+                setEditUserLocation(true);
+            }
+            if (type === "delete") {
+                resp = await axios.post(route("user.bulkDelete"), {
+                    users: formData.selectedRows,
+                });
+                console.log(resp);
+            }
+
+            if (type === "reset") {
+                resp = await axios.post(route("user.bulkDelete"), {
+                    ...formData,
+                });
+            }
+            addToast(resp?.data);
+        } catch (e) {
+            console.log(e);
+            addToast({'type': 'error', 'text': e.response.data.message });
+        }
+    };
+
     return (
         <PageLayout>
             <TableComponent
+                isUserList={true}
+                handleSubmit={handleSubmit}
                 columns={columns}
                 data={users}
                 filterUserLocation={true}

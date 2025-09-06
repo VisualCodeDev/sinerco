@@ -13,6 +13,7 @@ import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
+        isUserList = false,
         maxItemPerPage,
         submitPlaceholder,
         height,
@@ -111,7 +112,7 @@ const TableComponent = (props) => {
 
         setFilteredData(filterData);
     }, [filterConfig, sortConfig?.direction, query]);
-        return (
+    return (
         <div className="bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto">
             <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b sticky top-0 left-0 bg-white z-10">
                 {title && (
@@ -275,7 +276,7 @@ const TableComponent = (props) => {
                     </tbody>
                 </table>
             </div>
-            {isForm && (
+            {isForm && !isUserList && (
                 <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
                     <tr>
                         <th>
@@ -287,6 +288,47 @@ const TableComponent = (props) => {
                                     {submitPlaceholder
                                         ? submitPlaceholder
                                         : "Submit"}
+                                </button>
+                            </div>
+                        </th>
+                    </tr>
+                </div>
+            )}
+
+            {isUserList && (
+                <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <tr>
+                        <th className="flex gap-4">
+                            <div className=" py-3 text-sm font-medium w-full relative">
+                                <button
+                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                    onClick={() =>
+                                        handleSubmit({ type: "edit" })
+                                    }
+                                >
+                                    Edit
+                                </button>
+                            </div>
+
+                            <div className=" py-3 text-sm font-medium w-full relative">
+                                <button
+                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                    onClick={() =>
+                                        handleSubmit({ type: "delete" })
+                                    }
+                                >
+                                    Delete
+                                </button>
+                            </div>
+
+                            <div className="pe-8 py-3 text-sm font-medium w-full relative">
+                                <button
+                                    className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                    onClick={() =>
+                                        handleSubmit({ type: "reset" })
+                                    }
+                                >
+                                    Reset
                                 </button>
                             </div>
                         </th>

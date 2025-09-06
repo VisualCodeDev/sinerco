@@ -25,7 +25,7 @@ class CheckUnitAccess
             ->where('unit_position_id', $unitPositionId)
             ->exists();
 
-        if (!$hasAccess) {
+        if (!$hasAccess && $user->roleData->name !== 'super_admin') {
             // Kalau tidak punya akses
             return response()->json(['error' => 'Unauthorized access to this unit'], 403);
             // Atau bisa redirect:

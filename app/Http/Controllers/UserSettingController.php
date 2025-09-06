@@ -211,9 +211,25 @@ class UserSettingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(UserAllocation $userAllocation)
+    public function delete(Request $request)
     {
-        //
+        $request->validate([
+            'users' => 'required|array',
+            'users.*' => 'exists:users,user_id',
+        ]);
+
+        $userIds = $request->input('users');
+
+        // Prevent deletion of the currently authenticated user
+        $currentUserId = auth()->id();
+        if (in_array($currentUserId, $userIds)) {
+            return response()->json(['message' => 'You cannot delete your own account.'], 400);
+        }
+
+        // Delete users in bulk
+        User::whereIn('user_id', $userIds)->delete();
+
+        return response()->json(['type' => 'success', 'text' => 'Users deleted successfully.'], 200);
     }
 
     /**
