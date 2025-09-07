@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\UnitAreaLocation;
+use App\Models\unitPosition;
 use App\Models\User;
 use App\Models\UserAlocation;
 use App\Models\Client;
@@ -32,9 +32,9 @@ class ProfileController extends Controller
 
         $unitIds = collect($permissionData)->pluck('unit_id')->unique()->filter();
 
-        $requestList = StatusRequest::whereHas('unitAreaLocation', function ($query) use ($unitIds) {
+        $requestList = StatusRequest::whereHas('unitPosition', function ($query) use ($unitIds) {
             $query->whereIn('unit_id', $unitIds);
-        })->with('unitAreaLocation.unit')->get();
+        })->with('unitPosition.unit')->get();
         $requestList = collect($requestList)
             ->filter(fn($item) => $item->status !== 'End')
             ->values()

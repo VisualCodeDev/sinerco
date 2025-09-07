@@ -32,7 +32,7 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
         },
         {
             name: "email",
-            header: "E-mail",
+            header: "Email",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "text-start text-lg",
             sortable: true,

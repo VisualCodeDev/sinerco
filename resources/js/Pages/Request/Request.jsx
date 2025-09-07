@@ -22,6 +22,7 @@ import StatusPill from "@/Components/StatusPill";
 const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
     const [selectedItem, setItem] = useState(false);
+    const [selectedRows, setSelectedRows] = useState([]);
     const [saving, setSaving] = useState(false);
     const [allData, setAllData] = useState(data);
     const handleSelect = (itemData) => {
@@ -34,6 +35,7 @@ const Request = ({ data }) => {
     if (loading) {
         return <LoadingSpinner />;
     }
+
     const handleSeen = async (id) => {
         if (!id) return;
         try {
@@ -56,7 +58,78 @@ const Request = ({ data }) => {
             addToast(e.response.data || e.response.data.message);
         }
     };
-    const columns = tColumns({ handleSelect, user, handleSeen });
+
+    const handleCheckItem = (id) => {
+        setSelectedRows((prev) =>
+            prev.includes(id)
+                ? prev.filter((item) => item !== id)
+                : [...prev, id]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectedRows.length === allData.length) {
+            // Unselect all
+            setSelectedRows([]);
+        } else {
+            // Select all
+            setSelectedRows(allData.map((item) => item.request_id));
+        }
+    };
+
+    const handleMoveToHistory = async () => {
+        if (selectedRows.length === 0) {
+            return addToast({ type: "error", message: "No rows selected" });
+        }
+
+        try {
+            // Only allow rows where status === "End"
+            const validIds = allData
+                .filter(
+                    (item) =>
+                        selectedRows.includes(item.request_id) &&
+                        item.status === "End"
+                )
+                .map((item) => item.request_id);
+
+            if (validIds.length === 0) {
+                return addToast({
+                    type: "error",
+                    text: "Only ended requests can be deleted.",
+                });
+            } else {
+                const resp = await axios.post(route("request.moveToHistory"), {
+                    ids: validIds,
+                });
+
+                addToast(resp.data);
+
+                // Remove only valid (moved) items from the table
+                setAllData((prev) =>
+                    prev.filter((item) => !validIds.includes(item.request_id))
+                );
+
+                // Clear selected rows
+                setSelectedRows([]);
+                
+                window.location.reload();
+            }
+            console.log(validIds);
+        } catch (e) {
+            console.error(e);
+            addToast(e.response?.data?.message || "Something went wrong");
+        }
+    };
+
+    const columns = tColumns({
+        handleSelect,
+        user,
+        handleSeen,
+        handleSelectAll,
+        selectedRows,
+        handleCheckItem,
+        allData,
+    });
     return (
         <PageLayout>
             <TableComponent
@@ -65,6 +138,8 @@ const Request = ({ data }) => {
                 columns={columns}
                 data={allData}
                 onRowClick={handleSelect}
+                handleMoveToHistory={handleMoveToHistory}
+                isRequestList={true}
             />
             <EditItem
                 user={user}
@@ -253,7 +328,9 @@ const EditItem = ({
                                                       date: item?.value?.date,
                                                       time: item?.value?.time,
                                                   }}
-                                                  required={formData?.status != "End"}
+                                                  required={
+                                                      formData?.status != "End"
+                                                  }
                                                   handleChange={handleChange}
                                               />
                                           ) : (

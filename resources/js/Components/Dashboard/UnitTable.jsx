@@ -13,17 +13,19 @@ import TableComponent from "../TableComponent";
 import { router } from "@inertiajs/react";
 import LoadingSpinner from "../Loading";
 import { fetch } from "../utils/database-util";
+import { useAuth } from "../Auth/auth";
 
 const UnitTable = (props) => {
     const { data: propsData } = props;
     const columns = tColumns("unitList");
     const data = propsData ?? fetchedData;
+    const { user } = useAuth();
+
     const handleClick = (item) => {
         if (!item.unit_position_id) return;
         router.visit(route("daily", item.unit_position_id));
     };
-    console.log(data);
-    
+
     if (!propsData) {
         const { data, loading, error } = fetch("unit.get");
         if (loading) {
@@ -37,6 +39,8 @@ const UnitTable = (props) => {
                 columns={columns}
                 title={"List of Unit"}
                 onRowClick={handleClick}
+                addNewItem={true}
+                handleSubmit={handleSubmit}
             />
         );
     }
@@ -48,6 +52,8 @@ const UnitTable = (props) => {
             columns={columns}
             title={"List of Unit"}
             onRowClick={handleClick}
+            addNewItem={user && user.role === "super_admin" ? true : false}
+            handleNew={route("unit.add")}
         />
         // <></>
     );

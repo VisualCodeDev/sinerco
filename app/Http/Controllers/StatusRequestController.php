@@ -103,6 +103,7 @@ class StatusRequestController extends Controller
             return response()->json(['type' => 'error', 'text' => $e->getMessage()], 500);
         }
     }
+
     public function getRequest()
     {
         $permissionData = DataUnitController::getPermittedUnit();
@@ -287,4 +288,48 @@ class StatusRequestController extends Controller
             'text' => 'Request seen status updated.',
         ]);
     }
+
+
+    // MOVE TO HISTORY
+
+    public function moveToHistory(Request $request)
+    {
+        $ids = $request->ids; // array of selected request IDs
+
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'No requests selected'], 400);
+        }
+
+        $requests = StatusRequest::whereIn('request_id', $ids)->get();
+
+        foreach ($requests as $req) {
+            // Ensure requested_by exists in users table
+            $requestedBy = \DB::table('users')->where('user_id', $req->requested_by)->exists()
+                ? $req->requested_by
+                : null; // or some default user ID
+
+            // Insert into history table
+            DB::table('history_status_requests')->insert([
+                'request_id' => $req->request_id,
+                'action' => $req->action,
+                'end_date' => $req->end_date,
+                'end_time' => $req->end_time,
+                'remarks' => $req->remarks,
+                'request_type' => $req->request_type,
+                'requested_by' => $requestedBy,
+                'seen_status' => $req->seen_status,
+                'start_date' => $req->start_date,
+                'start_time' => $req->start_time,
+                'status' => $req->status,
+                'unit_position_id' => $req->unit_position_id,
+                'trashed_at' => now(),
+            ]);
+
+            // Delete from original table
+            $req->delete();
+        }
+
+        return response()->json(['type' => 'success', 'text' => 'Request trashed!']);
+    }
+
 }

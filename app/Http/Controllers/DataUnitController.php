@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\DataUnit;
+use App\Models\Client;
+use App\Models\Location;
+use App\Models\Area;
 use App\Models\UnitPosition;
 use App\Models\Workshop;
 use DB;
@@ -106,6 +109,7 @@ class DataUnitController extends Controller
             ],
         ]);
     }
+
     public function getUnit()
     {
         $data = $this->getPermittedUnit();
@@ -169,6 +173,78 @@ class DataUnitController extends Controller
 
 
         return response()->json($data);
+    }
+
+    // ADD NEW UNIT
+
+    public function create()
+    {
+        $clients = Client::all();
+        $locations = Location::all();
+        $areas = Area::all();
+
+        return inertia('Unit/UnitAddNew', [
+            'clients' => $clients,
+            'locations' => $locations,
+            'areas' => $areas,
+        ]);
+    }
+
+    public function addNewUnit(Request $request)
+    {
+        $val = $request->validate([
+            'unit' => 'required',
+            'status' => 'required',
+            'client_id' => 'nullable|exists:clients,client_id',
+
+            // Either existing or new Area
+            'area_id' => 'nullable|exists:areas,id',
+            'area_name' => 'nullable|string',
+
+            // Either existing or new Location
+            'location_id' => 'nullable|exists:locations,id',
+            'location_name' => 'nullable|string',
+        ]);
+
+        DB::transaction(function () use ($val) {
+            // 1. Handle Area
+            if (!empty($val['area_id'])) {
+                $areaId = $val['area_id'];
+            } else {
+                $area = Area::create([
+                    'area' => $val['area_name'],
+                ]);
+                $areaId = $area->id;
+            }
+
+            // 2. Handle Location
+            if (!empty($val['location_id'])) {
+                $locationId = $val['location_id'];
+            } else {
+                $location = Location::create([
+                    'area_id' => $areaId,
+                    'location' => $val['location_name'],
+                ]);
+                $locationId = $location->id;
+            }
+
+            // 3. Create Unit
+            $unit = DataUnit::create([
+                'unit' => $val['unit'],
+                'status' => $val['status'],
+            ]);
+
+            // 4. Attach Unit → Position
+            $unit->UnitPositions()->create([
+                'client_id' => $val['client_id'],
+                'location_id' => $locationId,
+                'position_type' => 'client',
+            ]);
+
+            return $unit;
+        });
+
+        return response()->json(['type' => 'success', 'text' => 'Unit added successfully']);
     }
 
     /**

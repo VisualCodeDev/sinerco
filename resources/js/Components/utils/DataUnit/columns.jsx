@@ -46,9 +46,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             width: "25%",
             Cell: ({ unit }) => {
                 return (
-                    <div className="flex flex-col text-center px-20">
+                    <div className="flex flex-col text-center">
                         <p
-                            className={`px-2 py-2 rounded-lg text-white ${
+                            className={`px-2 py-2 rounded-lg text-white md:mx-10 ${
                                 unit?.status === "stdby"
                                     ? "bg-yellow-500"
                                     : unit?.status === "sd"
@@ -219,9 +219,9 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             width: "20%",
             Cell: ({ status }) => {
                 return (
-                    <div className="flex flex-col text-center px-20">
+                    <div className="flex flex-col text-center">
                         <p
-                            className={`px-2 py-2 rounded-lg text-white ${
+                            className={`px-2 py-2 rounded-lg text-white md:mx-10 ${
                                 status === "stdby"
                                     ? "bg-yellow-500"
                                     : status === "sd"

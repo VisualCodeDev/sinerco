@@ -348,7 +348,7 @@ const ExportModal = (props) => {
                 <Card.Footer>
                     <button
                         onClick={() => setClick(false)}
-                        className="font-bold w-full h-full text-white"
+                        className="font-semibold w-full h-full text-white"
                     >
                         Tutup
                     </button>
@@ -493,7 +493,7 @@ const EditModal = (props) => {
             </Modal.Body>
             <Modal.Footer>
                 <button
-                    className="bg-primary text-white font-bold w-full h-full"
+                    className="bg-primary text-white font-semibold w-full h-full"
                     onClick={handleSubmit}
                 >
                     Simpan

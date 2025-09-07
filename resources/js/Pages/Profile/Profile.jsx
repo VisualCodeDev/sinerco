@@ -27,7 +27,7 @@ const Profile = ({ data, permissionData, requestList }) => {
             <div className="flex flex-col md:flex-row h-screen md:gap-10">
                 <section className="flex flex-col items-center md:w-1/3 bg-primary text-white p-8 md:p-10 rounded-lg text-center">
                     <div>
-                        <h2 className="text-lg md:text-xl font-bold mb-10">
+                        <h2 className="text-lg md:text-xl font-semibold mb-10">
                             Account Information
                         </h2>
                     </div>
@@ -66,7 +66,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                 </section>
                 <section className="md:w-2/3 bg-white p-8 md:p-10 rounded-lg">
                     {/* <div className="mt-8">
-                    <h2 className="text-xl font-bold mb-4">Unit Areas</h2>
+                    <h2 className="text-xl font-semibold mb-4">Unit Areas</h2>
                     {unitArea.length > 0 ? (
                         <TableComponent
                             data={unitArea}
@@ -80,7 +80,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                     <div>
                         <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl">
                             <FaKey />
-                            <h2 className="font-bold">
+                            <h2 className="font-semibold">
                                 Permissions ({permissionData?.length})
                             </h2>
                         </div>
@@ -91,18 +91,18 @@ const Profile = ({ data, permissionData, requestList }) => {
                                         key={index}
                                         href={route(
                                             "daily",
-                                            permission?.unitAreaLocationId
+                                            permission?.unit_position_id
                                         )}
                                         className="flex justify-between items-center border-b border-gray-200 p-4 hover:bg-gray-100 transition-all"
                                     >
-                                        <p className="text-md md:text-lg font-semibold">
-                                            {permission?.unit?.unit}
+                                        <p className="text-md md:text-lg font-medium">
+                                            {permission?.unit}
                                         </p>
                                         <a
                                             className="bg-primary text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 rounded text-sm md:text-md hover:scale-90 hover:bg-transparent hover:border-primary border-2 hover:text-primary transition ease-in-out delay-75"
                                             href={route(
                                                 "daily",
-                                                permission?.unitAreaLocationId
+                                                permission?.unit_position_id
                                             )}
                                         >
                                             Daily Form
@@ -117,7 +117,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                     <div className="mt-8">
                         <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl">
                             <FaFileSignature />
-                            <h2 className="font-bold">
+                            <h2 className="font-semibold">
                                 Request ({requestList.length})
                             </h2>
                         </div>
@@ -131,7 +131,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                             className="md:p-4 border-b border-gray-200 flex justify-between hover:bg-gray-100 transition-all"
                                         >
                                             <div>
-                                                <p className="font-semibold text-base md:text-lg">
+                                                <p className="font-medium text-base md:text-lg">
                                                     {request?.unit?.unit} -{" "}
                                                     {getRequestTypeName(
                                                         request.requestType
@@ -153,7 +153,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                             </div>
                                             <div className="text-end">
                                                 <p
-                                                    className={`text-base md:text-lg font-bold ${
+                                                    className={`text-base md:text-lg font-semibold ${
                                                         request.unit.status ===
                                                         "running"
                                                             ? "text-green-600"

@@ -216,7 +216,7 @@ const Heading = ({ children }) => {
                                         item?.onClick && item?.onClick();
                                     }}
                                 >
-                                    <span className="text-sm text-gray-700 font-bold">
+                                    <span className="text-sm text-gray-700 font-medium">
                                         {item.label}
                                     </span>
                                     <div className="text-xl">{item.icon}</div>
