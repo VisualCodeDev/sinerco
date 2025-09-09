@@ -43,4 +43,11 @@ class DataUnit extends Model
     {
         return $this->unitPositions?->location;
     }
+
+    public function workshopUnits()
+    {
+        return $this->belongsToMany(Workshop::class, 'workshop_units', 'unit_id', 'workshop_id')
+            ->withTimestamps();
+    }
+
 }

@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Workshop extends Model
 {
-    protected $fillable = ['name'];
     public $incrementing = false;
     protected $keyType = 'string';
     protected $primaryKey = 'workshop_id';
+
+    protected $fillable = [
+        'name',
+        'workshop_id',
+    ];
 
     protected static function boot()
     {
