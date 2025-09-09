@@ -11,10 +11,26 @@ import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
 const UserList = () => {
     const [formData, setFormData] = useState({});
-    const [selectedRole, setRole] = useState(null);
+    const [selectedRole, setSelectedRole] = useState(null);
+    const [roles, setRoles] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [editUserLocation, setEditUserLocation] = useState(false);
-    const { data: users, loading, error } = fetch("user.get");
     const [filteredUser, setFilteredUser] = useState();
+
+    useEffect(() => {
+        const fetch = async () => {
+            setLoading(true);
+            const [roleResp, userResp] = await Promise.all([
+                axios.get(route("roles.get")),
+                axios.get(route("user.get")),
+            ]);
+            setRoles(roleResp.data);
+            setUsers(userResp.data);
+            setLoading(false);
+        };
+        fetch();
+    }, []);
 
     const onRowClick = (item) => {
         router.visit(route("allocation", item?.id));
@@ -52,7 +68,7 @@ const UserList = () => {
 
     const handleCheckItem = (value) => {
         const selected = formData?.selectedRows || [];
-        const stringId = value;
+        const stringId = value?.id?.toString();
         let updated;
         if (selected.includes(stringId)) {
             updated = selected.filter((id) => id !== stringId);
@@ -69,7 +85,12 @@ const UserList = () => {
         return <LoadingSpinner />;
     }
 
-    const columns = tColumns({ formData, handleSelectAll, handleCheckItem });
+    const columns = tColumns({
+        formData,
+        handleSelectAll,
+        handleCheckItem,
+        onRowClick,
+    });
     const { addToast } = useToast();
     const handleSubmit = async ({ type }) => {
         try {
@@ -92,19 +113,22 @@ const UserList = () => {
             addToast(resp?.data);
         } catch (e) {
             console.log(e);
-            addToast({'type': 'error', 'text': e.response.data.message });
+            addToast({ type: "error", text: e.response.data.message });
         }
     };
 
     return (
         <PageLayout>
             <TableComponent
+                height={"55vh"}
+                roles={roles}
                 isUserList={true}
+                isResponsive={true}
                 handleSubmit={handleSubmit}
                 columns={columns}
                 data={users}
-                filterUserLocation={true}
-                onRowClick={onRowClick}
+                filterUserRole={true}
+                onRowClick={handleCheckItem}
             />
         </PageLayout>
     );

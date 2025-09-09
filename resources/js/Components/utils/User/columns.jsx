@@ -1,4 +1,9 @@
-const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
+const columns = ({
+    formData,
+    handleSelectAll,
+    handleCheckItem,
+    onRowClick,
+}) => {
     const colItem = [
         {
             name: "id",
@@ -55,7 +60,7 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
             Cell: (items) => {
                 return (
                     <>
-                        <div>{items?.areas || '-'}</div>
+                        <div>{items?.areas || "-"}</div>
                     </>
                 );
             },
@@ -79,20 +84,25 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
                 );
             },
         },
-        // {
-        //     name: "action",
-        //     header: "Action",
-        //     headerClassName: "text-center bg-primary text-white",
-        //     cellClassName: "text-start text-lg",
-        //     width: "19.8%",
-        //     Cell: (items) => {
-        //         return (
-        //             <>
-        //                 <button>Edit</button>
-        //             </>
-        //         );
-        //     },
-        // },
+        {
+            name: "action",
+            header: "Action",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-start text-lg",
+            width: "10%",
+            Cell: (items) => {
+                return (
+                    <>
+                        <button
+                            className="bg-primary text-white rounded-lg px-3 py-2 text-sm"
+                            onClick={() => onRowClick(items)}
+                        >
+                            Detail
+                        </button>
+                    </>
+                );
+            },
+        },
         {
             name: "checkbox",
             width: "19.8%",
@@ -120,10 +130,6 @@ const columns = ({ formData, handleSelectAll, handleCheckItem }) => {
                         checked={formData?.selectedRows?.includes(
                             id?.toString()
                         )}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleCheckItem(id?.toString());
-                        }}
                     />
                 );
             },

@@ -70,7 +70,7 @@ const InputValidationSetting = (props) => {
         try {
             setSaving(true);
             const resp = await axios.post(route("daily.setting"), {
-                clientId: selectedClients,
+                client_id: selectedClients,
                 ...formData,
             });
             if (resp.status === 200 || resp.status === 302) {

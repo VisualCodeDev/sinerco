@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\DataUnit;
-use App\Models\Client;
 use App\Models\Location;
 use App\Models\Area;
 use App\Models\UnitPosition;

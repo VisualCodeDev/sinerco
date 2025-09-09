@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Role;
 use App\Models\unitPosition;
 use App\Models\User;
 use App\Models\UserAlocation;
@@ -24,6 +25,11 @@ class ProfileController extends Controller
         $technicianData = User::where('role', 'technician')->get();
         $operatorData = User::where('role', 'operator')->get();
         return Inertia::render('User/UserList', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
+    }
+
+    public function getAllRoles() { 
+        $data = Role::all();
+        return response()->json($data);
     }
     public function index($user_id)
     {

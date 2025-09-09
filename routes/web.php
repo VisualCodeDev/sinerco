@@ -76,12 +76,12 @@ Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'ro
 });
 
 Route::controller(StatusRequestController::class)->group(function () {
-    Route::get('/get-request', 'getRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
+    Route::get('/get-request', 'getFiveRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
     Route::get('/request', 'getRequest')->name('request')->middleware('auth');
 
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
-    Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
+    Route::get('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
 
     Route::post('/request/move-to-history', 'moveToHistory')
         ->name('request.moveToHistory')
@@ -145,6 +145,7 @@ Route::controller(AdminNotificationController::class)->group(function () {
 
 Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
     Route::get('/profile/{user_id}/', 'index')->name('profile');
+    Route::get('/fetch/roles', 'getAllRoles')->name('roles.get');
 });
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {

@@ -25,6 +25,16 @@ const Request = ({ data }) => {
     const [selectedRows, setSelectedRows] = useState([]);
     const [saving, setSaving] = useState(false);
     const [allData, setAllData] = useState(data);
+    const [dateTime, setDateTime] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDateTime(new Date());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
+
     const handleSelect = (itemData) => {
         setModal(true);
         setItem(itemData);
@@ -111,7 +121,7 @@ const Request = ({ data }) => {
 
                 // Clear selected rows
                 setSelectedRows([]);
-                
+
                 window.location.reload();
             }
             console.log(validIds);
@@ -119,6 +129,30 @@ const Request = ({ data }) => {
             console.error(e);
             addToast(e.response?.data?.message || "Something went wrong");
         }
+    };
+
+    const getDuration = (start_date, start_time, end_date, end_time) => {
+        const start = new Date(`${start_date}T${start_time}`);
+        const end = new Date(`${end_date}T${end_time}`);
+
+        let diffMs = 0;
+        if (end_date && end_time) {
+            diffMs = end - start;
+        } else {
+            diffMs = dateTime - start;
+        }
+
+        const diffSec = Math.floor(diffMs / 1000);
+        const hours = Math.floor(diffSec / 3600);
+        const minutes = Math.floor((diffSec % 3600) / 60);
+
+        const formatted = `${hours.toString().padStart(2, "0")} ${
+            hours > 0 ? "hours" : "hour"
+        }  ${minutes.toString().padStart(2, "0")} ${
+            minutes > 0 ? "minutes" : "minute"
+        }`;
+
+        return formatted;
     };
 
     const columns = tColumns({
@@ -129,10 +163,13 @@ const Request = ({ data }) => {
         selectedRows,
         handleCheckItem,
         allData,
+        getDuration,
     });
+
     return (
         <PageLayout>
             <TableComponent
+                height="55vh"
                 title="Request List"
                 subtitle="Click on the row to edit the request"
                 columns={columns}
@@ -175,18 +212,42 @@ const EditItem = ({
     const [type, setType] = useState("Edit");
 
     useEffect(() => {
-        if (selectedItem) {
-            setType(
-                selectedItem?.status === "End"
-                    ? "Set to Ongoing Request"
-                    : "End Request"
-            );
-            setData({
-                ...selectedItem,
-            });
-        }
+        const updateData = async () => {
+            if (selectedItem) {
+                setType(
+                    selectedItem?.status === "End"
+                        ? "Set to Ongoing Request"
+                        : "End Request"
+                );
+
+                let { end_date, end_time, status } = selectedItem;
+                const currDateTime = await getCurrDateTime();
+
+                if (status !== "End") {
+                    if (!end_date && !end_time && currDateTime) {
+                        end_date = currDateTime.date;
+                        end_time = currDateTime.time;
+                    }
+                }
+                if (status === "End") {
+                    if (end_date && end_time) {
+                        end_date = "";
+                        end_time = "";
+                    }
+                }
+
+                setData({
+                    ...selectedItem,
+                    end_date,
+                    end_time,
+                });
+            }
+        };
+
+        updateData();
     }, [selectedItem]);
 
+    console.log(formData);
     const handleChange = async (field, value) => {
         let currDateTime = null;
 
@@ -369,58 +430,53 @@ const EditItem = ({
                                       </>
                                   );
                               })
-                        : editRequestItems.map((item, index) => {
-                              const itemInputType = item?.isInput
-                                  ? item?.type
-                                  : false;
+                        : editRequestItems
+                              .filter(
+                                  (item) =>
+                                      item?.name === "Request" ||
+                                      item?.name === "Remarks" ||
+                                      item?.name === "End Date Time"
+                              )
+                              .map((item, index) => {
+                                  const itemInputType = item?.isInput
+                                      ? item?.type
+                                      : false;
 
-                              return (
-                                  <>
-                                      <div className="font-semibold">
-                                          {item?.name}
-                                      </div>
-                                      {!itemInputType ? (
-                                          <div>
-                                              {item?.name === "Start Date Time"
-                                                  ? getFormattedDate(
-                                                        formData[item?.value]
-                                                    )
-                                                  : getRequestTypeName(
-                                                        formData[item?.value]
-                                                    )}
+                                  return (
+                                      <>
+                                          <div className="font-semibold">
+                                              {item?.name}
                                           </div>
-                                      ) : itemInputType &&
-                                        item?.type != "option" &&
-                                        item?.type != "dateTime" ? (
-                                          <input
-                                              type={itemInputType}
-                                              value={formData[item?.value]}
-                                              onChange={(e) =>
-                                                  handleChange(
-                                                      item?.value,
-                                                      e.target.value
-                                                  )
-                                              }
-                                          />
-                                      ) : item?.type === "dateTime" ? (
-                                          <DateTimeInput
-                                              value={{
-                                                  date: formData[
-                                                      item?.value?.date
-                                                  ],
-                                                  time: formData[
-                                                      item?.value?.time
-                                                  ],
-                                              }}
-                                              name={{
-                                                  date: item?.value?.date,
-                                                  time: item?.value?.time,
-                                              }}
-                                              handleChange={handleChange}
-                                          />
-                                      ) : (
-                                          <div key={index}>
-                                              <select
+                                          {!itemInputType ? (
+                                              <>
+                                                  {item?.name ===
+                                                  "Start Date Time" ? (
+                                                      <div>
+                                                          {getFormattedDate(
+                                                              formData[
+                                                                  item?.value
+                                                              ]
+                                                          )}
+                                                      </div>
+                                                  ) : (
+                                                      <StatusPill
+                                                          request_type={
+                                                              formData[
+                                                                  item?.value
+                                                              ]
+                                                          }
+                                                      />
+                                                  )}
+                                              </>
+                                          ) : itemInputType &&
+                                            item?.type != "option" &&
+                                            item?.type != "dateTime" ? (
+                                              <input
+                                                  disabled={
+                                                      selectedItem?.status ===
+                                                      "End"
+                                                  }
+                                                  type={itemInputType}
                                                   value={formData[item?.value]}
                                                   onChange={(e) =>
                                                       handleChange(
@@ -428,26 +484,66 @@ const EditItem = ({
                                                           e.target.value
                                                       )
                                                   }
-                                              >
-                                                  {item?.options &&
-                                                      item?.options?.map(
-                                                          (item) => (
-                                                              <option
-                                                                  value={
-                                                                      item?.value
-                                                                  }
-                                                                  key={index}
-                                                              >
-                                                                  {item?.name}
-                                                              </option>
+                                              />
+                                          ) : item?.type === "dateTime" ? (
+                                              <DateTimeInput
+                                                  disabled={
+                                                      selectedItem?.status ===
+                                                      "End"
+                                                  }
+                                                  value={{
+                                                      date: formData[
+                                                          item?.value?.date
+                                                      ],
+                                                      time: formData[
+                                                          item?.value?.time
+                                                      ],
+                                                  }}
+                                                  name={{
+                                                      date: item?.value?.date,
+                                                      time: item?.value?.time,
+                                                  }}
+                                                  required={
+                                                      formData?.status != "End"
+                                                  }
+                                                  handleChange={handleChange}
+                                              />
+                                          ) : (
+                                              <div key={index}>
+                                                  <select
+                                                      value={
+                                                          formData[item?.value]
+                                                      }
+                                                      onChange={(e) =>
+                                                          handleChange(
+                                                              item?.value,
+                                                              e.target.value
                                                           )
-                                                      )}
-                                              </select>
-                                          </div>
-                                      )}
-                                  </>
-                              );
-                          })}
+                                                      }
+                                                  >
+                                                      {item?.options &&
+                                                          item?.options?.map(
+                                                              (item) => (
+                                                                  <option
+                                                                      value={
+                                                                          item?.value
+                                                                      }
+                                                                      key={
+                                                                          index
+                                                                      }
+                                                                  >
+                                                                      {
+                                                                          item?.name
+                                                                      }
+                                                                  </option>
+                                                              )
+                                                          )}
+                                                  </select>
+                                              </div>
+                                          )}
+                                      </>
+                                  );
+                              })}
                 </div>
             </Modal.Body>
             <Modal.Footer>

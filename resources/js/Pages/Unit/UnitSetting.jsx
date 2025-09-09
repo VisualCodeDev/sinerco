@@ -91,7 +91,7 @@ const UnitSetting = () => {
             addToast({ type: "error", text: e.response.data.message });
         }
     };
-
+console.log(formData)
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}

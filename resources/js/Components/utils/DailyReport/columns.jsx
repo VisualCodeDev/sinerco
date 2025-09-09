@@ -74,9 +74,10 @@ const list = ({
                 const decimalSetting =
                     1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
                 const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min || null,
-                    max: reportSettings?.minMaxSetting[name]?.max || null,
+                    min: reportSettings?.minMaxSetting.name?.min || null,
+                    max: reportSettings?.minMaxSetting.name?.max || null,
                 };
+                // console.log(reportSettings?.minMaxSetting?.);
                 return (
                     <div className="flex flex-col">
                         <label

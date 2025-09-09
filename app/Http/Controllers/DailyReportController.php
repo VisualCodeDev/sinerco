@@ -117,8 +117,7 @@ class DailyReportController extends Controller
                 });
                 if ($warnings->isNotEmpty()) {
                     $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
-
-                    $warningMessage = "⚠️ Input Warning Detected on \nDate: {$data['date']},\n📍Unit: {$unit->unit->unit}:\n";
+                    $warningMessage = "{$data['date']},\n📍Unit: {$unit->unit->unit}:\n";
 
                     foreach ($warnings as $field => $message) {
                         $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
@@ -134,10 +133,14 @@ class DailyReportController extends Controller
                         ->map(fn($tech) => $tech->user->whatsAppNum)
                         ->implode(',');
 
+                    Log::debug("NOMOR TELP" . $numbers);
+
                     if (!empty($numbers)) {
                         WhatsAppService::sendMessage($numbers, $warningMessage);
                     }
                 }
+                WhatsAppService::sendMessage('082113837546', $warningMessage);
+
 
                 $report = new DailyReport();
                 $report->unit_position_id = $unit_position_id;
@@ -196,7 +199,7 @@ class DailyReportController extends Controller
             'diffPress' => 'required|numeric',
             'mscfd' => 'required|numeric',
         ]);
-        if(!$val) {
+        if (!$val) {
             return response()->json(['type' => 'error', 'text' => 'Validation failed'], 422);
         }
         $report = DailyReport::find($request->id);

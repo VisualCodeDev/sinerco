@@ -71,6 +71,7 @@ const DailyReportForm = (props) => {
             });
             return;
         }
+
         if (minMaxSetting) {
             if (minMaxSetting.min && value < minMaxSetting.min) {
                 warn = `Value for ${field} is ${value} (less than ${minMaxSetting.min})`;

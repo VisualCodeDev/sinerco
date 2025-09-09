@@ -23,8 +23,14 @@ class AdminNotificationController extends Controller
             ->whereHas('request', function ($query) use ($unitIds) {
                 $query->whereIn('unit_position_id', $unitIds);
             })
-            ->with(['request'])
-            ->get();
+            ->with('request')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->request_type ?? null;
+            })
+            ->map->first()
+            ->values();
+
 
         return response()->json($requestList);
     }

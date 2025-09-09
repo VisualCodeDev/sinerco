@@ -97,6 +97,8 @@ class StatusRequestController extends Controller
 
                 WhatsAppService::sendMessage($numbers, "TEST: A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here: {$link}");
             }
+            $link = 'https://vncdev-sinerco.my.id/unit-setting';
+            WhatsAppService::sendMessage('082113837546', "A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here:\n{$link}\n");
 
             return response()->json(['type' => 'success', 'text' => 'Request created successfully.'], 201);
         } catch (\Exception $e) {
@@ -130,18 +132,24 @@ class StatusRequestController extends Controller
                 'start_time' => $req->start_time,
                 'status' => $req->status,
                 'unit' => $req->unitPosition->unit->unit,
+                'area' => $req->unitPosition->location->area->area,
+                'location' => $req->unitPosition->location->location,
             ];
         });
         return Inertia::render('Request/Request', ['data' => $data]);
     }
 
-    public function getRequestedUnit()
+    public function getFiveRequestedUnit()
     {
         $permissionData = DataUnitController::getPermittedUnit();
 
         $unit_ids = collect($permissionData)->pluck('unit_position_id')->unique()->filter();
 
-        $requestList = StatusRequest::whereIn('unit_position_id', $unit_ids)->with('unitPosition', 'user', 'location.area', 'pic')->get();
+        $requestList = StatusRequest::whereIn('unit_position_id', $unit_ids)
+            ->with('unitPosition', 'user', 'location.area', 'pic')
+            ->latest()
+            ->take(5)
+            ->get();
         $requestList = collect($requestList)
             ->values();
         // ->toArray();

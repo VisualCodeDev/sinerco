@@ -8,6 +8,7 @@ const columns = ({
     handleSelectAll,
     selectedRows,
     handleCheckItem,
+    getDuration,
 }) => {
     const colItem = [
         {
@@ -35,7 +36,22 @@ const columns = ({
             Cell: ({ unit }) => {
                 return (
                     <>
-                        <div>{unit}</div>
+                        <div className="text-nowrap">{unit}</div>
+                    </>
+                );
+            },
+        },
+        {
+            name: "location",
+            header: "Location",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "",
+            sortable: false,
+            width: "15%",
+            Cell: ({ location }) => {
+                return (
+                    <>
+                        <div>{location}</div>
                     </>
                 );
             },
@@ -47,7 +63,7 @@ const columns = ({
                 "flex items-center justify-center text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
-            width: "10%",
+            width: "9%",
             Cell: ({ request_type }) => {
                 return (
                     <>
@@ -68,7 +84,7 @@ const columns = ({
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (
-                            !seen_status ? (
+                            seen_status === 0 ? (
                                 <button
                                     className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
@@ -79,7 +95,7 @@ const columns = ({
                                     Confirm
                                 </button>
                             ) : (
-                                seen_status && (
+                                seen_status === 1 && (
                                     <button
                                         className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
                                         onClick={(e) => {
@@ -114,11 +130,13 @@ const columns = ({
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
-            width: "17%",
+            width: "10%",
             Cell: ({ start_date, start_time }) => {
                 return (
                     <>
-                        <div>{getFormattedDate(start_date)}</div>
+                        <div className="text-nowrap">
+                            {getFormattedDate(start_date)}
+                        </div>
                         <div>{start_time}</div>
                     </>
                 );
@@ -130,12 +148,35 @@ const columns = ({
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
-            width: "17%",
+            width: "10%",
             Cell: ({ end_date, end_time }) => {
                 return (
                     <>
-                        <div>{getFormattedDate(end_date)}</div>
+                        <div className="text-nowrap">
+                            {getFormattedDate(end_date)}
+                        </div>
                         <div>{end_time}</div>
+                    </>
+                );
+            },
+        },
+
+        {
+            name: "duration",
+            header: "Duration",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "",
+            sortable: false,
+            width: "17%",
+            Cell: ({ start_time, start_date, end_date, end_time }) => {
+                return (
+                    <>
+                        {getDuration(
+                            start_date,
+                            start_time,
+                            end_date,
+                            end_time
+                        )}
                     </>
                 );
             },
@@ -147,7 +188,7 @@ const columns = ({
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: false,
-            width: "30%",
+            width: "11%",
             Cell: ({ remarks }) => {
                 return (
                     <>

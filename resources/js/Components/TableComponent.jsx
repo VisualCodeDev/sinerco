@@ -9,17 +9,22 @@ import {
     FaSortUp,
     FaTrashAlt,
 } from "react-icons/fa";
-import { getRequestStatus, unitStatus } from "./utils/dashboard-util";
+import {
+    getRequestStatus,
+    splitCamelCase,
+    unitStatus,
+} from "./utils/dashboard-util";
 import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
         isUserList = false,
         maxItemPerPage,
+        roles = [],
         submitPlaceholder,
         height,
         filterStatus = false,
-        filterUserLocation = false,
+        filterUserRole = false,
         isForm = false,
         columns,
         data,
@@ -32,7 +37,7 @@ const TableComponent = (props) => {
         isRequestList,
         handleMoveToHistory,
         handleNew,
-        isResponsive = true,
+        isResponsive = false,
     } = props;
     const [sortConfig, setSortConfig] = useState({
         key: null,
@@ -46,6 +51,7 @@ const TableComponent = (props) => {
         if (!sortConfig.key) return 0;
         const getNestedValue = (obj, key) => {
             if (key === "user") return obj.user?.user?.toLowerCase() || "";
+            if (key === "role") return obj.user?.role?.toLowerCase() || "";
             if (key === "unit") return obj.unit?.unit?.toLowerCase() || "";
             if (key === "user_id") return obj.unit?.unit?.toLowerCase() || "";
             if (key === "status")
@@ -67,6 +73,7 @@ const TableComponent = (props) => {
         }
         return 0;
     });
+
     const handleSort = (key) => {
         setSortConfig((prev) => {
             if (prev.key === key) {
@@ -105,9 +112,16 @@ const TableComponent = (props) => {
     useEffect(() => {
         let filterData = [];
         if (filterConfig) {
-            filterData = data?.filter((item) => {
-                return item?.unit?.status === filterConfig;
-            });
+            if (filterStatus) {
+                filterData = data?.filter((item) => {
+                    return item?.status === filterConfig;
+                });
+            
+            } else if (filterUserRole) {
+                filterData = data?.filter((item) => {
+                    return item?.role === filterConfig;
+                });
+            }
             return setFilteredData(filterData);
         }
         filterData = sortedData?.filter((item) => {
@@ -116,7 +130,7 @@ const TableComponent = (props) => {
 
         setFilteredData(filterData);
     }, [data, filterConfig, sortConfig?.direction, query]);
-    
+
     return (
         <>
             <div
@@ -155,7 +169,7 @@ const TableComponent = (props) => {
                                         }
                                     >
                                         <option value="">
-                                            -- Semua Status --
+                                            -- All Status --
                                         </option>
                                         {unitStatus.map((item, i) => (
                                             <option key={i} value={item.value}>
@@ -166,7 +180,7 @@ const TableComponent = (props) => {
                                 </div>
                             )}
 
-                            {filterUserLocation && (
+                            {filterUserRole && (
                                 <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
                                     <FaFilter />
                                     <select
@@ -175,14 +189,16 @@ const TableComponent = (props) => {
                                             setFilterConfig(e.target.value)
                                         }
                                     >
-                                        <option value="">
-                                            -- Semua Status --
-                                        </option>
-                                        {unitStatus.map((item, i) => (
-                                            <option key={i} value={item.value}>
-                                                {item.name}
-                                            </option>
-                                        ))}
+                                        <option value="">-- All Role --</option>
+                                        {roles &&
+                                            roles?.map((item, i) => (
+                                                <option
+                                                    key={i}
+                                                    value={item.name}
+                                                >
+                                                    {splitCamelCase(item.name)}
+                                                </option>
+                                            ))}
                                     </select>
                                 </div>
                             )}
@@ -331,9 +347,9 @@ const TableComponent = (props) => {
                                     </button>
                                 </div>
 
-                                <div className=" py-3 text-sm font-medium w-full relative">
+                                <div className="py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "delete" })
                                         }
@@ -373,7 +389,7 @@ const TableComponent = (props) => {
             {/* RESPONSIVE */}
             <div
                 className={`${
-                    isResponsive && "block md:hidden"
+                    isResponsive ? "block md:hidden" : "hidden"
                 } bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[90vh] overflow-y-auto w-full`}
             >
                 {/* Top Bar */}
@@ -435,7 +451,7 @@ const TableComponent = (props) => {
                             </div>
 
                             <div className="flex">
-                                {filterUserLocation && (
+                                {filterUserRole && (
                                     <div className="relative flex gap-2 justify-start items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
                                         <FaFilter />
                                         <select
@@ -516,13 +532,29 @@ const TableComponent = (props) => {
                                     )}
 
                                     {/* First 2 columns */}
-                                    <p className="font-semibold text-base">
+                                    <p
+                                        className={`font-semibold text-base ${
+                                            isUserList &&
+                                            "flex gap-2 items-center"
+                                        }`}
+                                    >
                                         {typeof mainCols[1]?.Cell === "function"
                                             ? mainCols[1].Cell({
                                                   ...item,
                                                   index: rowIndex,
                                               })
                                             : mainCols[1]?.Cell}
+                                        {isUserList && (
+                                            <span className="text-sm font-normal text-gray-600">
+                                                {typeof mainCols[4]?.Cell ===
+                                                "function"
+                                                    ? mainCols[4].Cell({
+                                                          ...item,
+                                                          index: rowIndex,
+                                                      })
+                                                    : mainCols[4]?.Cell}
+                                            </span>
+                                        )}
                                     </p>
                                     <p className="text-sm text-gray-600">
                                         {typeof mainCols[2]?.Cell === "function"

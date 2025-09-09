@@ -36,7 +36,8 @@ export default function Home() {
             const filteredData = respUnitData?.data?.filter(
                 (item) => item.status === "Ongoing"
             );
-            setUnitData(filteredData || []);
+            console.log(respUnitData.data);
+            setUnitData(respUnitData.data || []);
         }
         if (response.data) {
             let running = 0;
