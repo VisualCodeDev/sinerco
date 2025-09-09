@@ -13,6 +13,9 @@ return new class extends Migration {
         Schema::create('clients', function (Blueprint $table) {
             $table->string('client_id', 10)->primary();
             $table->string('name');
+            $table->integer('input_interval')->default(1);
+            $table->integer('input_duration')->default(35);
+            $table->boolean('disable_duration')->default(false);
             $table->timestamps();
         });
     }

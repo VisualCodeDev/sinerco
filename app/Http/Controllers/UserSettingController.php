@@ -235,17 +235,57 @@ class UserSettingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(UserAllocation $userAllocation)
+    public function bulkAllocation(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => 'required|array',
+            'user_id.*' => 'exists:users,user_id',
+            'unit_position_id' => 'required|array',
+            'unit_position_id.*' => 'exists:unit_positions,id',
+        ]);
+
+        $userIds = $request->input('user_id');
+        $unitPositionIds = $request->input('unit_position_id');
+
+        foreach ($userIds as $userId) {
+            // Hapus semua setting lama user ini
+            UserSetting::where('user_id', $userId)->delete();
+
+            // Insert ulang berdasarkan unit_position_id yang dikirim
+            $insertData = [];
+            foreach ($unitPositionIds as $unitPositionId) {
+                $insertData[] = [
+                    'user_id' => $userId,
+                    'unit_position_id' => $unitPositionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            UserSetting::insert($insertData);
+        }
+
+        return response()->json(['type' => 'success', 'text' => 'User location set'], 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, UserAllocation $userAllocation)
+    public function reset(Request $request)
     {
-        //
+        $request->validate([
+            'users' => 'required|array',
+            'users.*' => 'exists:users,user_id',
+        ]);
+
+        $userIds = $request->input('users');
+
+        foreach ($userIds as $userId) {
+            // Hapus semua setting lama user ini
+            UserSetting::where('user_id', $userId)->delete();
+        }
+
+        return response()->json(['type' => 'success', 'text' => 'User reset successfuly'], 200);
     }
 
     /**

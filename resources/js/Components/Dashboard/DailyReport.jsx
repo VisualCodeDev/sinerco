@@ -350,7 +350,7 @@ const ExportModal = (props) => {
                         onClick={() => setClick(false)}
                         className="font-semibold w-full h-full text-white"
                     >
-                        Tutup
+                        Close
                     </button>
                 </Card.Footer>
             </Card>

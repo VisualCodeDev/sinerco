@@ -50,6 +50,24 @@ class ClientController extends Controller
         }
     }
 
+    public function updateDurationDisable(Request $request)
+    {
+        $request->validate([
+            'client_id' => 'required|exists:clients,client_id',
+        ]);
+
+        $client = Client::where('client_id', $request->client_id)->first();
+
+        if ($client) {
+            $client->update([
+                'disable_duration' => !$client->disable_duration,
+            ]);
+            return response()->json(['type' => 'success', 'text' => 'Duration updated']);
+        } else {
+            return response()->json(['type' => 'error', 'text' => 'Client not found']);
+        }
+    }
+
     public function setSettings(Request $request)
     {
         $request->validate([

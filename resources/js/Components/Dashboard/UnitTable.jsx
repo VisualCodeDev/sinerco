@@ -47,6 +47,7 @@ const UnitTable = (props) => {
 
     return (
         <TableComponent
+            height={"55vh"}
             filterStatus={true}
             data={data}
             columns={columns}

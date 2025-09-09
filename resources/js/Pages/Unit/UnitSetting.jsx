@@ -19,7 +19,7 @@ const UnitSetting = () => {
         clients: {},
     });
     const { addToast } = useToast();
-    
+
     const handleSelectAll = (currData) => {
         const currentIds = currData.map((item) => item.client_id.toString());
         const selected = formData.selectedRows || [];
@@ -66,13 +66,27 @@ const UnitSetting = () => {
             },
         });
     };
+
+    const handleUpdateDisable = async (client_id) => {
+        try {
+            const resp = await axios.post(
+                route("duration.update.disable", { client_id: client_id })
+            );
+            window.location.reload()
+            addToast(resp?.data);
+        } catch (e) {
+            addToast({ type: "error", text: e.response.data.message });
+        }
+    };
+
     const columns = tColumns(
         "checkbox",
         { ...formData },
         { ...clienData },
         handleSelectAll,
         handleChange,
-        handleCheckItem
+        handleCheckItem,
+        handleUpdateDisable
     );
 
     const handleClientSetting = async (e) => {
@@ -83,15 +97,14 @@ const UnitSetting = () => {
                 route("client.settings", {
                     clientSettings: formData?.clientSettings,
                 })
-            );  
-            console.log(resp)
+            );
+            console.log(resp);
             addToast(resp?.data);
         } catch (e) {
             console.log(e);
             addToast({ type: "error", text: e.response.data.message });
         }
     };
-console.log(formData)
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}

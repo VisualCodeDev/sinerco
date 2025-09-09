@@ -33,5 +33,6 @@ class Client extends Model
         'name',
         'input_interval',
         'input_duration',
+        'disable_duration'
     ];
 }

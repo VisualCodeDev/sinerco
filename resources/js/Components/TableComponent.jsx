@@ -19,6 +19,7 @@ import { router } from "@inertiajs/react";
 const TableComponent = (props) => {
     const {
         isUserList = false,
+        isModal = false,
         maxItemPerPage,
         roles = [],
         submitPlaceholder,
@@ -28,6 +29,7 @@ const TableComponent = (props) => {
         isForm = false,
         columns,
         data,
+        handleClose,
         handleSubmit,
         sortableData,
         onRowClick = null,
@@ -116,7 +118,6 @@ const TableComponent = (props) => {
                 filterData = data?.filter((item) => {
                     return item?.status === filterConfig;
                 });
-            
             } else if (filterUserRole) {
                 filterData = data?.filter((item) => {
                     return item?.role === filterConfig;
@@ -317,7 +318,16 @@ const TableComponent = (props) => {
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
                         <tr>
                             <th>
-                                <div className="px-8 py-3 text-sm font-medium w-full">
+                                <div className="px-8 py-3 text-sm font-medium w-full flex gap-4">
+                                    {isModal && (
+                                        <button
+                                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                            onClick={handleClose}
+                                        >
+                                            Close
+                                        </button>
+                                    )}
+
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={handleSubmit}
@@ -451,29 +461,29 @@ const TableComponent = (props) => {
                             </div>
 
                             <div className="flex">
-                                {filterUserRole && (
-                                    <div className="relative flex gap-2 justify-start items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
-                                        <FaFilter />
-                                        <select
-                                            className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
-                                            onChange={(e) =>
-                                                setFilterConfig(e.target.value)
-                                            }
-                                        >
-                                            <option value="">
-                                                Semua Status
-                                            </option>
-                                            {unitStatus.map((item, i) => (
+                               {filterUserRole && (
+                                <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
+                                    <FaFilter />
+                                    <select
+                                        className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
+                                        onChange={(e) =>
+                                            setFilterConfig(e.target.value)
+                                        }
+                                    >
+                                        <option value="">-- All Role --</option>
+                                        {roles &&
+                                            roles?.map((item, i) => (
                                                 <option
                                                     key={i}
-                                                    value={item.value}
+                                                    value={item.name}
                                                 >
-                                                    {item.name}
+                                                    {splitCamelCase(item.name)}
                                                 </option>
                                             ))}
-                                        </select>
-                                    </div>
-                                )}
+                                    </select>
+                                </div>
+                            )}
+
                             </div>
 
                             <div className="flex gap-2 justify-start items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2">

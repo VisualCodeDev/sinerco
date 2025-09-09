@@ -202,8 +202,14 @@ export default function Dashboard({ unit_position_id }) {
                                                             )
                                                         }
                                                     >
-                                                        <p className="text-base">{item?.unit}</p>
-                                                        <StatusPill request_type={item?.status} />
+                                                        <p className="text-base">
+                                                            {item?.unit}
+                                                        </p>
+                                                        <StatusPill
+                                                            request_type={
+                                                                item?.status
+                                                            }
+                                                        />
                                                     </div>
                                                 ))}
                                             </div>
@@ -226,7 +232,11 @@ export default function Dashboard({ unit_position_id }) {
                                 isDown={!isUnitRunning}
                                 clientData={clientData}
                                 interval={unitData?.input_interval}
-                                duration={unitData?.input_duration}
+                                duration={
+                                    unitData?.disable_duration === 1
+                                        ? 59
+                                        : unitData?.input_duration
+                                }
                                 user={user}
                                 unitData={unitData}
                                 formData={data}

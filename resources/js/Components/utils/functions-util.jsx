@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 
 export const getRequestTypeName = (value) => {
     if (!value) return "";
@@ -19,6 +19,7 @@ export const getRequestStatus = (value) => {
 };
 
 export const DateTimeInput = ({
+    disabled = false,
     value,
     name,
     handleChange,
@@ -27,6 +28,7 @@ export const DateTimeInput = ({
     return (
         <div className="flex items-center flex-wrap w-full">
             <input
+                disabled={disabled}
                 required={required}
                 className="text-sm md:text-base w-3/5"
                 type="date"
@@ -35,6 +37,7 @@ export const DateTimeInput = ({
                 onChange={(e) => handleChange([e.target.name], e.target.value)}
             />
             <input
+                disabled={disabled}
                 required={required}
                 className="text-sm md:text-base w-2/5"
                 type="time"
@@ -63,7 +66,8 @@ export const TimeInput = ({
     const [now, setNow] = useState(null);
     const [time, setTime] = useState(0);
     const [minute, setMinute] = useState(0);
-
+    const [hourDuration, setHourDuration] = useState(0);
+    const [minuteDuration, setMinuteDuration] = useState(duration);
     useEffect(() => {
         const fetchTime = async () => {
             const { minute, hour, now } = await getCurrDateTime();
@@ -75,12 +79,31 @@ export const TimeInput = ({
         fetchTime();
     }, []);
 
+    useEffect(() => {
+        if (duration > 60) {
+            const hour = Math.floor(duration / 60) - 1;
+            setHourDuration(hour);
+            setMinuteDuration(59);
+        }
+    }, [duration]);
+
     const options = [];
-    let permittedTime = time % interval === 0 ? time : time + (time % interval);
-    if (minute > 35) {
+    let permittedTime =
+        time % interval === 0 ? time : time + (time % interval) + hourDuration;
+
+    let permittedTimeAfter =
+        hourDuration != 0 ? permittedTime + hourDuration - 1 : permittedTime;
+
+    if (minute > minuteDuration) {
         permittedTime = permittedTime + interval;
         if (permittedTime > 24) permittedTime = 0;
     }
+
+    if (hourDuration > 0) {
+        permittedTimeAfter = permittedTime + hourDuration;
+        if (permittedTimeAfter < 0) permittedTimeAfter = 0;
+    }
+
     const filledFormTime =
         (Array.isArray(formData) &&
             formData
@@ -90,11 +113,14 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator") {
-        for (let i = 0; i <= 24; i += parseInt(interval)) {
-            const isNow = i === time;
-            const isPermitted = isNow && minute <= duration;
+        for (let i = 0; i <= 24; i += parseInt(Math.floor(interval))) {
+            const isNow =
+                i === time || (time - i <= hourDuration && time - i >= 0);
+            console.log(isNow, i);
+
+            const isPermittedMinute = isNow && minute <= minuteDuration;
             const alreadyFilled = filledFormTime.includes(i);
-            if (isPermitted && !alreadyFilled) {
+            if (isPermittedMinute && !alreadyFilled) {
                 options.push(
                     <option
                         key={i}
@@ -132,8 +158,11 @@ export const TimeInput = ({
                 {options}
             </select>
             <span className="text-sm text-slate-400">
-                Available from {permittedTime}:00 to {permittedTime}:
-                {String(duration).padStart(2, "0")}
+                Available from {permittedTime}:00 to {permittedTimeAfter}:
+                {String(hourDuration === 0 ? minuteDuration : "00").padStart(
+                    2,
+                    "0"
+                )}
             </span>
         </>
     );

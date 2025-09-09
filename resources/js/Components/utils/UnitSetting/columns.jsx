@@ -6,7 +6,10 @@ const columns = (
     unitAreaData,
     handleSelectAll,
     handleChange,
-    handleCheckItem
+    handleCheckItem,
+    handleUpdateDisable,
+    disable,
+    setDisable
 ) => {
     const dataListCheckbox = [
         {
@@ -44,7 +47,8 @@ const columns = (
                 return (
                     <select
                         value={
-                            formData?.clientSettings?.[client_id]?.input_interval ||
+                            formData?.clientSettings?.[client_id]
+                                ?.input_interval ||
                             input_interval ||
                             1
                         }
@@ -72,29 +76,47 @@ const columns = (
             headerClassName: "bg-primary text-white",
             sortable: false,
             width: "17%",
-            Cell: ({ input_duration, client_id }) => {
+            Cell: ({ input_duration, client_id, disable_duration }) => {
                 return (
-                    <select
-                        value={
-                            formData?.clientSettings?.[client_id]?.input_duration ||
-                            input_duration ||
-                            35
-                        }
-                        className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
-                        onChange={(e) => {
-                            handleChange(
-                                "input_duration",
-                                client_id,
-                                e.target.value
-                            );
-                        }}
-                    >
-                        {Array.from({ length: 59 }, (_, i) => (
-                            <option key={i + 1} value={i + 1}>
-                                {i + 1}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={
+                                formData?.clientSettings?.[client_id]
+                                    ?.input_duration ||
+                                input_duration ||
+                                35
+                            }
+                            className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
+                            onChange={(e) => {
+                                handleChange(
+                                    "input_duration",
+                                    client_id,
+                                    e.target.value
+                                );
+                            }}
+                        >
+                            {Array.from({ length: 59 }, (_, i) => (
+                                <option key={i + 1} value={i + 1}>
+                                    {i + 1}
+                                </option>
+                            ))}
+                            {[120, 180].map((value) => (
+                                <option key={value} value={value}>
+                                    {value}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            className={`${
+                                disable_duration === 0
+                                    ? "bg-red-500"
+                                    : "bg-green-500"
+                            } text-white rounded-md px-2 py-1`}
+                            onClick={() => handleUpdateDisable(client_id)}
+                        >
+                            {disable_duration === 1 ? "Enable" : "Disable"}
+                        </button>
+                    </div>
                 );
             },
         },
@@ -128,7 +150,7 @@ const columns = (
                         )}
                         onChange={(e) => {
                             e.stopPropagation();
-                            handleCheckItem(client_id)
+                            handleCheckItem(client_id);
                         }}
                     />
                 );

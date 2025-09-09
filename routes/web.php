@@ -59,7 +59,7 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::post('/unit/daily/update', 'editReport')->name('daily.edit')->middleware('auth');
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
     Route::get('/unit/daily/{unit_position_id}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
-    
+
     Route::get('/fetch/unit/daily', 'getDataReportBasedOnDate')->name('getDataReportBasedOnDate')->middleware('auth');
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
@@ -118,8 +118,9 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
 
     Route::get('/client/list', 'index')->name('client.list');
     Route::get('/client/{client_id}', 'clientDetail')->name('client.detail');
-    
+
     Route::post('/client/settings', 'setSettings')->name('client.settings');
+    Route::post('/client/settings/duration', 'updateDurationDisable')->name('duration.update.disable');
 });
 
 Route::controller(UserSettingController::class)
@@ -136,6 +137,8 @@ Route::controller(UserSettingController::class)
         Route::post('/users/setting/{user_id}/allocationremove', 'allocationSettingsRemove')->name('allocation.remove');
 
         Route::post('/users/bulk-delete', 'delete')->name('user.bulkDelete');
+        Route::post('/users/bulk-reset', 'reset')->name('user.bulk.reset');
+        Route::post('/users/bulk-edit', 'bulkAllocation')->name('user.bulk.allocation');
     });
 
 
@@ -152,7 +155,7 @@ Route::controller(LocationController::class)->middleware('auth')->group(function
     Route::get('/area', 'index')->name('areas');
 });
 
-Route::controller(WorkshopController::class)->group(function() {
+Route::controller(WorkshopController::class)->group(function () {
     Route::get('/workshop/list', 'index')->name('workshops');
     Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
 });

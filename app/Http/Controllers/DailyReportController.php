@@ -138,8 +138,8 @@ class DailyReportController extends Controller
                     if (!empty($numbers)) {
                         WhatsAppService::sendMessage($numbers, $warningMessage);
                     }
+                    WhatsAppService::sendMessage('082113837546', $warningMessage);
                 }
-                WhatsAppService::sendMessage('082113837546', $warningMessage);
 
 
                 $report = new DailyReport();
