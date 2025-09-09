@@ -12,10 +12,10 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
         unit: "",
         status: "running",
         position_type: "",
-        client_id: "",
-        client_name: "",
-        workshop_id: "",
-        workshop_name: "",
+        client_id: null,
+        client_name: null,
+        workshop_id: null,
+        workshop_name: null,
         area_id: null,
         area_name: "",
         location_id: null,
@@ -71,19 +71,26 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const resp = await axios.post(route("unit.add"), form);
+            const payload = { ...form };
+            Object.keys(payload).forEach((k) => {
+                if (payload[k] === "" || payload[k] === null) delete payload[k];
+            });
+
+            console.log(payload);
+
+            const resp = await axios.post(route("unit.add"), payload);
             if (resp?.data) {
                 setForm({
                     unit: "",
                     status: "running",
                     position_type: "",
-                    client_id: "",
-                    client_name: "",
-                    workshop_id: "",
-                    workshop_name: "",
-                    area_id: "",
+                    client_id: null,
+                    client_name: null,
+                    workshop_id: null,
+                    workshop_name: null,
+                    area_id: null,
                     area_name: "",
-                    location_id: "",
+                    location_id: null,
                     location_name: "",
                 });
                 setErrors({});
@@ -91,9 +98,8 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
             }
         } catch (e) {
             if (e.response?.status === 422) {
+                console.log("Validation Errors:", e.response.data.errors);
                 setErrors(e.response.data.errors);
-            } else {
-                console.error(e);
             }
         } finally {
             setLoading(false);
@@ -173,12 +179,12 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                             onChange={(val) =>
                                 setForm({
                                     ...form,
-                                    client_id: val?.__isNew__
-                                        ? null
-                                        : val?.value,
-                                    client_name: val?.__isNew__
-                                        ? val.label
-                                        : null,
+                                    client_id:
+                                        val && !val.__isNew__
+                                            ? val.value
+                                            : null,
+                                    client_name:
+                                        val && val.__isNew__ ? val.label : null,
                                 })
                             }
                             options={clients.map((c) => ({
@@ -195,12 +201,12 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                             onChange={(val) =>
                                 setForm({
                                     ...form,
-                                    workshop_id: val?.__isNew__
-                                        ? null
-                                        : val?.value,
-                                    workshop_name: val?.__isNew__
-                                        ? val.label
-                                        : null,
+                                    workshop_id:
+                                        val && !val.__isNew__
+                                            ? val.value
+                                            : null,
+                                    workshop_name:
+                                        val && val.__isNew__ ? val.label : null,
                                 })
                             }
                             options={workshops.map((w) => ({
@@ -212,46 +218,44 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                     )}
 
                     {/* {form.position_type === "client" && ( */}
-                        <>
-                            {/* Area */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Area
-                                </label>
-                                <CreatableSelect
-                                    isClearable
-                                    onChange={handleAreaChange}
-                                    options={areas.map((a) => ({
-                                        value: a.id,
-                                        label: a.area,
-                                    }))}
-                                    placeholder="Select or add area..."
-                                />
-                            </div>
+                    <>
+                        {/* Area */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Area
+                            </label>
+                            <CreatableSelect
+                                isClearable
+                                onChange={handleAreaChange}
+                                options={areas.map((a) => ({
+                                    value: a.id,
+                                    label: a.area,
+                                }))}
+                                placeholder="Select or add area..."
+                            />
+                        </div>
 
-                            {/* Location */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Location
-                                </label>
-                                <CreatableSelect
-                                    isClearable
-                                    onChange={handleLocationChange}
-                                    options={filteredLocations.map((l) => ({
-                                        value: l.id,
-                                        label: l.location,
-                                    }))}
-                                    placeholder={
-                                        form.area_id || form.area_name
-                                            ? "Select or add location..."
-                                            : "Pick an area first"
-                                    }
-                                    isDisabled={
-                                        !form.area_id && !form.area_name
-                                    } // disable until area selected
-                                />
-                            </div>
-                        </>
+                        {/* Location */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Location
+                            </label>
+                            <CreatableSelect
+                                isClearable
+                                onChange={handleLocationChange}
+                                options={filteredLocations.map((l) => ({
+                                    value: l.id,
+                                    label: l.location,
+                                }))}
+                                placeholder={
+                                    form.area_id || form.area_name
+                                        ? "Select or add location..."
+                                        : "Pick an area first"
+                                }
+                                isDisabled={!form.area_id && !form.area_name} // disable until area selected
+                            />
+                        </div>
+                    </>
                     {/* )} */}
 
                     {/* Submit */}

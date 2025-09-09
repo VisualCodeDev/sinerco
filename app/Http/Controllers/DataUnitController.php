@@ -194,28 +194,37 @@ class DataUnitController extends Controller
 
     public function addNewUnit(Request $request)
     {
-        $val = $request->validate([
-            'unit' => 'required',
-            'status' => 'required',
-
+        $rules = [
+            'unit' => 'required|string',
+            'status' => 'required|string',
             'position_type' => 'required|in:client,workshop',
-
-            // Either existing or new Client
-            'client_id' => 'nullable|exists:clients,client_id',
-            'client_name' => 'nullable|required_if:position_type,client|string',
-
-            // Either existing or new Workshop
-            'workshop_id' => 'nullable|exists:workshops,workshop_id',
-            'workshop_name' => 'nullable|required_if:position_type,workshop|string',
-
-            // Either existing or new Area
             'area_id' => 'nullable|exists:areas,id',
             'area_name' => 'nullable|string',
-
-            // Either existing or new Location
             'location_id' => 'nullable|exists:locations,id',
             'location_name' => 'nullable|string',
-        ]);
+        ];
+
+        if ($request->position_type === 'client') {
+            $rules['client_id'] = 'nullable|exists:clients,client_id';
+            $rules['client_name'] = 'nullable|string';
+        } elseif ($request->position_type === 'workshop') {
+            $rules['workshop_id'] = 'nullable|exists:workshops,workshop_id';
+            $rules['workshop_name'] = 'nullable|string';
+        }
+
+        $val = $request->validate($rules);
+
+        if ($request->position_type === 'client' && !$request->client_id && !$request->client_name) {
+            return response()->json([
+                'errors' => ['client' => ['Either client_id or client_name is required.']]
+            ], 422);
+        }
+
+        if ($request->position_type === 'workshop' && !$request->workshop_id && !$request->workshop_name) {
+            return response()->json([
+                'errors' => ['workshop' => ['Either workshop_id or workshop_name is required.']]
+            ], 422);
+        }
 
         DB::transaction(function () use ($val) {
 
@@ -269,7 +278,7 @@ class DataUnitController extends Controller
             }
 
             $unit->UnitPositions()->create([
-                'client_id' => $val['client_id'],
+                'client_id' => $clientId,
                 'location_id' => $locationId,
                 'workshop_id' => $workshopId,
                 'position_type' => $val['position_type'],
