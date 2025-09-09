@@ -95,7 +95,7 @@ const list = ({
                             type="text"
                             inputmode="numeric"
                             name={name}
-                            value={item[name] || ""}
+                            value={item[name || ""] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(

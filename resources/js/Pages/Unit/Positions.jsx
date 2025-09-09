@@ -60,30 +60,26 @@ const UnitLocationSetting = () => {
                             </div>
                         </div>
                     ))} */}
-                {workshopData &&
-                    workshopData.length > 0 &&
-                    workshopData.map((item) => (
-                        <div className="flex w-full gap-4">
-                            <div className="w-1/2">
-                                <TableComponent
-                                    data={clientData || []}
-                                    height="55vh"
-                                    columns={columns}
-                                    onRowClick={handleSelectItem}
-                                    title={"Clients"}
-                                />
-                            </div>
-                            <div className="w-1/2">
-                                <TableComponent
-                                    data={workshopData || []}
-                                    height="55vh"
-                                    columns={columns}
-                                    onRowClick={handleSelectItem}
-                                    title={"Workshops"}
-                                />
-                            </div>
-                        </div>
-                    ))}
+                <div className="flex w-full gap-4">
+                    <div className="w-1/2">
+                        <TableComponent
+                            data={clientData || []}
+                            height="55vh"
+                            columns={columns}
+                            onRowClick={handleSelectItem}
+                            title={"Clients"}
+                        />
+                    </div>
+                    <div className="w-1/2">
+                        <TableComponent
+                            data={workshopData || []}
+                            height="55vh"
+                            columns={columns}
+                            onRowClick={handleSelectItem}
+                            title={"Workshops"}
+                        />
+                    </div>
+                </div>
             </div>
         </PageLayout>
     );

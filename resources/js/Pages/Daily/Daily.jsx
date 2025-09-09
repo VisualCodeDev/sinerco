@@ -5,7 +5,10 @@ import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
 import UnitTable from "@/Components/Dashboard/UnitTable";
 import LoadingSpinner from "@/Components/Loading";
 import StatusPill from "@/Components/StatusPill";
-import { getDDMMYYDate } from "@/Components/utils/dashboard-util";
+import {
+    generatePrevHour,
+    getDDMMYYDate,
+} from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
@@ -77,25 +80,50 @@ export default function Dashboard({ unit_position_id }) {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
+            try {
+                const [reportData, unit] = await Promise.all([
+                    axios.get(
+                        route("getDataReportBasedOnDate", {
+                            unit_position_id: unit_position_id,
+                            date: selectedDate,
+                        })
+                    ),
+                    axios.get(
+                        route("getSelectedUnit", {
+                            unit_position_id: unit_position_id,
+                        })
+                    ),
+                ]);
+                setUnitData(unit?.data);
+                setClientData(unit?.data?.client || []);
+                console.log(unit.data)
+                const fullDay = await generatePrevHour();
+                const reportTimes = reportData.data.map((r) => r.time);
 
-            const [reportData, unit] = await Promise.all([
-                axios.get(
-                    route("getDataReportBasedOnDate", {
-                        unit_position_id: unit_position_id,
-                        date: selectedDate,
-                    })
-                ),
-                axios.get(
-                    route("getSelectedUnit", {
-                        unit_position_id: unit_position_id,
-                    })
-                ),
-            ]);
+                const missingHours = fullDay.filter(
+                    (h) => !reportTimes.includes(h)
+                );
 
-            setUnitData(unit?.data);
-            setData(reportData?.data);
-            setClientData(unit?.data?.client);
-            setLoading(false);
+                if (missingHours.length > 0) {
+                    try {
+                        const resp = await axios.post(route("fill.report"), {
+                            missingHours: missingHours,
+                            date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
+                            unit_position_id: unit_position_id,
+                        });
+                        
+                        setData([...reportData?.data, ...resp?.data]);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                } else {
+                    setData(reportData?.data);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchData();
@@ -104,15 +132,19 @@ export default function Dashboard({ unit_position_id }) {
     useEffect(() => {
         const changeReportData = async () => {
             setLoading(true);
-            const reportData = await axios.get(
-                route("getDataReportBasedOnDate", {
-                    unit_position_id: unit_position_id,
-                    date: selectedDate,
-                })
-            );
-
-            setData(reportData?.data);
-            setLoading(false);
+            try {
+                const reportData = await axios.get(
+                    route("getDataReportBasedOnDate", {
+                        unit_position_id: unit_position_id,
+                        date: selectedDate,
+                    })
+                );
+                setData(reportData?.data);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
         };
         changeReportData();
     }, [selectedDate]);

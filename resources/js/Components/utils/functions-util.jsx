@@ -168,6 +168,15 @@ export const TimeInput = ({
     );
 };
 
+export const generatePrevHour = async () => {
+    const hours = [];
+    const { hour } = await getCurrDateTime();
+    for (let i = 0; i < hour; i++) {
+        hours.push(`${String(i).padStart(2, "0")}:00`);
+    }
+    return hours;
+};
+
 export const DateInput = ({
     onChange,
     placeholder = "Enter Date",

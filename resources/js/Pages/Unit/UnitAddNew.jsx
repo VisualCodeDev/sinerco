@@ -139,7 +139,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                             onChange={handleChange}
                             className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
                         >
-                            <option value="running">Runing</option>
+                            <option value="running">Running</option>
                             <option value="sd">Shutdown</option>
                             <option value="stdby">Stand By</option>
                         </select>
@@ -211,7 +211,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                         />
                     )}
 
-                    {form.position_type === "client" && (
+                    {/* {form.position_type === "client" && ( */}
                         <>
                             {/* Area */}
                             <div>
@@ -252,7 +252,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                                 />
                             </div>
                         </>
-                    )}
+                    {/* )} */}
 
                     {/* Submit */}
                     <button

@@ -245,7 +245,7 @@ class DailyReportController extends Controller
     public function getDataReportBasedOnDate(Request $request)
     {
         $data = DailyReport::with('request')->where('unit_position_id', $request->unit_position_id)
-            ->where('date', $request->date)->get()->map(function ($item) {
+            ->where('date', $request->date)->orderBy('time')->get()->map(function ($item) {
                 return collect($item)->except([
                     "created_at",
                     "updated_at",
@@ -255,6 +255,48 @@ class DailyReportController extends Controller
                 ]);
             });
         return response()->json($data);
+    }
+
+    public function fillReport(Request $request)
+    {
+        $val = $request->validate([
+            'missingHours' => 'required|array',
+            'missingHours.*' => ['regex:/^(?:[01]\d|2[0-3]):00$/'],
+            'unit_position_id' => 'required|exists:unit_positions,id',
+            'date' => 'required|date'
+        ]);
+
+
+        $rows = [];
+
+        foreach ($val['missingHours'] as $time) {
+            $rows[] = [
+                'unit_position_id' => $val['unit_position_id'],
+                'date' => $val['date'],
+                'time' => $time,
+                'sourcePress' => 0,
+                'suctionPress' => 0,
+                'dischargePress' => 0,
+                'speed' => 0,
+                'manifoldPress' => 0,
+                'oilPress' => 0,
+                'oilDiff' => 0,
+                'runningHours' => 0,
+                'voltage' => 0,
+                'waterTemp' => 0,
+                'befCooler' => 0,
+                'aftCooler' => 0,
+                'staticPress' => 0,
+                'diffPress' => 0,
+                'mscfd' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DailyReport::insert($rows);
+
+        return response()->json($rows);
     }
 
 }

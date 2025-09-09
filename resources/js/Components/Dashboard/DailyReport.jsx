@@ -51,6 +51,7 @@ const DailyReport = (props) => {
         }
     }, [dataAll]);
     const handleEdit = (id) => {
+        if(user?.role === "operator") return;
         const data = dataAll.find((item) => item?.id === id);
         setEditModal(true);
         setSelectedData(data);

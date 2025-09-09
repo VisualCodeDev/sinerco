@@ -154,7 +154,7 @@ class DataUnitController extends Controller
      */
     public function getSelectedUnit(Request $request)
     {
-        $unit = UnitPosition::with(['client', 'unit', 'dailyReportSetting', 'location.area'])
+        $unit = UnitPosition::with(['client', 'unit', 'dailyReportSetting', 'location.area', 'workshop'])
             ->where('id', $request->unit_position_id)->first();
 
         $data = [
@@ -162,7 +162,7 @@ class DataUnitController extends Controller
             'daily_report_setting' => $unit->dailyReportSetting ?? null,
             'unit' => $unit->unit->unit ?? null,
             'status' => $unit->unit->status ?? null,
-            'client' => $unit->client?->name ?? null,
+            'client' => $unit->client?->name ?? $unit->workshop?->name ?? null,
             'input_interval' => $unit->client?->input_interval ?? null,
             'input_duration' => $unit->client?->input_duration ?? null,
             'disable_duration' => $unit->client?->disable_duration ?? false,
@@ -223,7 +223,7 @@ class DataUnitController extends Controller
             $locationId = null;
             
             // 1. Handle Area
-            if ($val['position_type'] === 'client') {
+            // if ($val['position_type'] === 'client') {
                 if (!empty($val['area_id'])) {
                     $areaId = $val['area_id'];
                 } else {
@@ -243,7 +243,7 @@ class DataUnitController extends Controller
                     ]);
                     $locationId = $location->id;
                 }
-            }
+            // }
 
             // 3. Create Unit
             $unit = DataUnit::create([
