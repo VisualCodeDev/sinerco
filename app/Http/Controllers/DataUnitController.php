@@ -173,11 +173,13 @@ class DataUnitController extends Controller
     public function create()
     {
         $clients = Client::all();
+        $workshops = Workshop::all();
         $locations = Location::all();
         $areas = Area::all();
 
         return inertia('Unit/UnitAddNew', [
             'clients' => $clients,
+            'workshops' => $workshops,
             'locations' => $locations,
             'areas' => $areas,
         ]);
@@ -188,7 +190,16 @@ class DataUnitController extends Controller
         $val = $request->validate([
             'unit' => 'required',
             'status' => 'required',
+
+            'position_type' => 'required|in:client,workshop',
+
+            // Either existing or new Client
             'client_id' => 'nullable|exists:clients,client_id',
+            'client_name' => 'nullable|required_if:position_type,client|string',
+
+            // Either existing or new Workshop
+            'workshop_id' => 'nullable|exists:workshops,workshop_id',
+            'workshop_name' => 'nullable|required_if:position_type,workshop|string',
 
             // Either existing or new Area
             'area_id' => 'nullable|exists:areas,id',
@@ -200,25 +211,31 @@ class DataUnitController extends Controller
         ]);
 
         DB::transaction(function () use ($val) {
-            // 1. Handle Area
-            if (!empty($val['area_id'])) {
-                $areaId = $val['area_id'];
-            } else {
-                $area = Area::create([
-                    'area' => $val['area_name'],
-                ]);
-                $areaId = $area->id;
-            }
 
-            // 2. Handle Location
-            if (!empty($val['location_id'])) {
-                $locationId = $val['location_id'];
-            } else {
-                $location = Location::create([
-                    'area_id' => $areaId,
-                    'location' => $val['location_name'],
-                ]);
-                $locationId = $location->id;
+            $areaId = null;
+            $locationId = null;
+            
+            // 1. Handle Area
+            if ($val['position_type'] === 'client') {
+                if (!empty($val['area_id'])) {
+                    $areaId = $val['area_id'];
+                } else {
+                    $area = Area::create([
+                        'area' => $val['area_name'],
+                    ]);
+                    $areaId = $area->id;
+                }
+
+                // 2. Handle Location
+                if (!empty($val['location_id'])) {
+                    $locationId = $val['location_id'];
+                } else {
+                    $location = Location::create([
+                        'area_id' => $areaId,
+                        'location' => $val['location_name'],
+                    ]);
+                    $locationId = $location->id;
+                }
             }
 
             // 3. Create Unit
@@ -227,11 +244,28 @@ class DataUnitController extends Controller
                 'status' => $val['status'],
             ]);
 
-            // 4. Attach Unit → Position
+            $clientId = null;
+            $workshopId = null;
+
+            if ($val['position_type'] === 'client') {
+                $clientId = !empty($val['client_id'])
+                    ? $val['client_id']
+                    : Client::create([
+                        'name' => $val['client_name'],
+                    ])->client_id;
+            } else {
+                $workshopId = !empty($val['workshop_id'])
+                    ? $val['workshop_id']
+                    : Workshop::create([
+                        'name' => $val['workshop_name'],
+                    ])->workshop_id;
+            }
+
             $unit->UnitPositions()->create([
                 'client_id' => $val['client_id'],
                 'location_id' => $locationId,
-                'position_type' => 'client',
+                'workshop_id' => $workshopId,
+                'position_type' => $val['position_type'],
             ]);
 
             return $unit;
