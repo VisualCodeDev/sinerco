@@ -102,6 +102,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
+    Route::post('/unit/update/info', 'updateUnitInfo')->name('unit.update.info');
 
     Route::get('/unit/list/add', 'create')->name('unit.add.page')->middleware('roles:super_admin');
     Route::post('/unit/list/add', 'addNewUnit')->name('unit.add')->middleware('roles:super_admin');

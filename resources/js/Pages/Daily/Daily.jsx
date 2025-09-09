@@ -15,6 +15,7 @@ import PageLayout from "@/Layouts/PageLayout";
 import { Head, router, usePage } from "@inertiajs/react";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { BsGear } from "react-icons/bs";
 import {
     FaRegFileAlt,
     FaRegCalendarAlt,
@@ -23,9 +24,11 @@ import {
     FaFileContract,
     FaLock,
 } from "react-icons/fa";
+import UnitInfo from "../Unit/UnitInfo";
 
 export default function Dashboard({ unit_position_id }) {
     const { user, loading: userLoding } = useAuth();
+    const [name, setName] = useState("");
     const currDate = new Date();
     const [selectedDate, setSelectedDate] = useState(
         getDDMMYYDate(currDate, "YYYY-MM-DD")
@@ -45,6 +48,11 @@ export default function Dashboard({ unit_position_id }) {
     );
 
     const tabs = [
+        {
+            key: "data_unit",
+            label: "Data unit",
+            icon: <BsGear className="mr-2" />,
+        },
         {
             key: "report",
             label: "Daily Report",
@@ -96,7 +104,7 @@ export default function Dashboard({ unit_position_id }) {
                 ]);
                 setUnitData(unit?.data);
                 setClientData(unit?.data?.client || []);
-                console.log(unit.data)
+                console.log(unit.data);
                 const fullDay = await generatePrevHour();
                 const reportTimes = reportData.data.map((r) => r.time);
 
@@ -111,7 +119,7 @@ export default function Dashboard({ unit_position_id }) {
                             date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
                             unit_position_id: unit_position_id,
                         });
-                        
+
                         setData([...reportData?.data, ...resp?.data]);
                     } catch (e) {
                         console.error(e);
@@ -202,7 +210,7 @@ export default function Dashboard({ unit_position_id }) {
                                                 setExpanded(!expanded)
                                             }
                                         >
-                                            {unitData?.unit}
+                                            {name || unitData?.unit}
                                             <div className="text-xs">
                                                 <StatusPill
                                                     request_type={
@@ -259,6 +267,15 @@ export default function Dashboard({ unit_position_id }) {
                                 </div>
                             </>
                         )}
+
+                        {activeTab === "data_unit" && (
+                            <UnitInfo
+                                unitData={unitData}
+                                setName={setName}
+                                name={name}
+                            />
+                        )}
+
                         {activeTab === "form" && (
                             <DailyReportForm
                                 isDown={!isUnitRunning}

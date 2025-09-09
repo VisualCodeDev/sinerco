@@ -221,28 +221,28 @@ class DataUnitController extends Controller
 
             $areaId = null;
             $locationId = null;
-            
+
             // 1. Handle Area
             // if ($val['position_type'] === 'client') {
-                if (!empty($val['area_id'])) {
-                    $areaId = $val['area_id'];
-                } else {
-                    $area = Area::create([
-                        'area' => $val['area_name'],
-                    ]);
-                    $areaId = $area->id;
-                }
+            if (!empty($val['area_id'])) {
+                $areaId = $val['area_id'];
+            } else {
+                $area = Area::create([
+                    'area' => $val['area_name'],
+                ]);
+                $areaId = $area->id;
+            }
 
-                // 2. Handle Location
-                if (!empty($val['location_id'])) {
-                    $locationId = $val['location_id'];
-                } else {
-                    $location = Location::create([
-                        'area_id' => $areaId,
-                        'location' => $val['location_name'],
-                    ]);
-                    $locationId = $location->id;
-                }
+            // 2. Handle Location
+            if (!empty($val['location_id'])) {
+                $locationId = $val['location_id'];
+            } else {
+                $location = Location::create([
+                    'area_id' => $areaId,
+                    'location' => $val['location_name'],
+                ]);
+                $locationId = $location->id;
+            }
             // }
 
             // 3. Create Unit
@@ -335,6 +335,25 @@ class DataUnitController extends Controller
             'text' => 'Units added successfully',
             // 'inserted' => count($newData),
             // 'skipped' => count($existing),
+        ]);
+    }
+
+
+    public function updateUnitInfo(Request $request)
+    {
+        $val = $request->validate([
+            "unit_id" => "required|exists:data_units,unit_id",
+            "name" => "required|string"
+        ]);
+
+        DataUnit::where("unit_id", $val["unit_id"])
+            ->update([
+                "unit" => $val["name"]
+            ]);
+
+        return response()->json([
+            "type" => "success",
+            "text" => "Unit Updated"
         ]);
     }
 
