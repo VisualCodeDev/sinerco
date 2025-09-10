@@ -81,10 +81,11 @@ const columns = ({
             sortable: false,
             width: "10%",
             Cell: ({ request_id, seen_status, pic }) => {
+                console.log(seen_status)
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (
-                            seen_status === 0 ? (
+                            !seen_status ? (
                                 <button
                                     className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
@@ -95,15 +96,14 @@ const columns = ({
                                     Confirm
                                 </button>
                             ) : (
-                                seen_status === 1 && (
+                                seen_status && (
                                     <button
-                                        className="bg-red-500 hover:bg-[#d82828] px-3 py-2 rounded-lg text-white transition duration-100"
+                                        className="bg-green-500 px-3 py-2 rounded-lg text-white transition duration-100"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            handleSeen(request_id);
                                         }}
                                     >
-                                        Undo
+                                        Seen
                                     </button>
                                 )
                             )

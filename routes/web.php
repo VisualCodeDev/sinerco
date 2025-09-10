@@ -83,7 +83,7 @@ Route::controller(StatusRequestController::class)->group(function () {
 
     Route::post('/request/post', 'setRequest')->name('request.post')->middleware('auth');
     Route::post('/request/update', 'updateRequest')->name('request.update')->middleware('auth');
-    Route::get('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
+    Route::post('/request/seen/{id}', 'seenRequest')->name('request.seen')->middleware('auth');
 
     Route::post('/request/move-to-history', 'moveToHistory')
         ->name('request.moveToHistory')
