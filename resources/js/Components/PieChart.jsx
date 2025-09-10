@@ -31,7 +31,7 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
             {/* Title and Value */}
             <div className="flex flex-col gap-2 md:gap-3 mb-1 text-start">
                 <p className="text-base md:text-xl text-gray-500">Total Unit {chartData[0]?.label}</p>
-                <p className="text-2xl md:text-4xl font-bold">
+                <p className="text-2xl md:text-4xl font-semibold">
                     {chartData[0]?.value.toLocaleString()}{" "} <span className="text-base md:text-xl">Units</span>
                 </p>
             </div>
@@ -69,7 +69,6 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
                                 strokeWidth={strokeWidth}
                                 strokeDasharray={dashArray}
                                 strokeDashoffset={offset}
-                                strokeLinecap="round"
                                 transform={`rotate(-90 ${center} ${center})`}
                             />
                         );
@@ -77,7 +76,7 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
                 </svg>
 
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-base font-black">
+                    <span className="text-xl font-semibold">
                         {percentage.toFixed()}%
                     </span>
                 </div>

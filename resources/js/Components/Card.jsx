@@ -24,7 +24,7 @@ Card.Header = ({ children, className = "", headerSticky = false, style }) => {
             role="heading"
             aria-level="2"
         >
-            <h2 className="text-xl font-bold">{children}</h2>
+            <h2 className="text-xl font-semibold">{children}</h2>
         </div>
     );
 };

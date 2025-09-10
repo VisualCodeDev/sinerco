@@ -25,11 +25,11 @@ const Modal = (props) => {
                     >
                         <div className="bg-primary text-white w-full px-5 p-2.5 md:p-5 sticky top-0 left-0 flex justify-between">
                             <div className="w-full">
-                                <h2 className="text-lg md:text-xl font-bold">
+                                <h2 className="text-lg md:text-xl font-semibold">
                                     {title}
                                 </h2>
                             </div>
-                            <div className="text-xl font-bold w-fit text-end">
+                            <div className="text-xl font-semibold w-fit text-end">
                                 <span
                                     onClick={handleCloseModal}
                                     className="cursor-pointer"

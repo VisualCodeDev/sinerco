@@ -162,6 +162,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
                 return (
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={formData?.selectedRows?.includes(
                             String(unit_position_id)
                         )}

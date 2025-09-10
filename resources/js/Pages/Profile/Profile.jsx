@@ -36,17 +36,18 @@ const Profile = ({ data, permissionData, requestList }) => {
                     </div>
                     <div className="flex flex-col w-full gap-4 md:gap-6">
                         <div className="">
-                            <div className="flex flex-col mb-1">
-                                <p className="text-xl md:text-3xl font-semibold">
+                            <div className="flex justify-center items-center gap-2 mb-1 text-xl md:text-3xl">
+                                <FaUserCog />
+                                <p className="font-semibold">
                                     {data?.name}
                                 </p>
                             </div>
-                            <div className="flex flex-row justify-center items-center gap-2 text-sm md:text-md text-[#ccc]">
+                            {/* <div className="flex flex-row justify-center items-center gap-2 text-sm md:text-md text-[#ccc]">
                                 <FaUserCog />
                                 <p className="">
                                     {toCapitalizeFirstLetter(data?.role)}
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                         <div className="flex items-center gap-4">
                             <p>More Info</p>
@@ -154,11 +155,11 @@ const Profile = ({ data, permissionData, requestList }) => {
                                             <div className="text-end">
                                                 <p
                                                     className={`text-base md:text-lg font-semibold ${
-                                                        request.unit.status ===
+                                                        request?.unit?.status ===
                                                         "running"
                                                             ? "text-green-600"
-                                                            : request.unit
-                                                                  .status ===
+                                                            : request?.unit
+                                                                  ?.status ===
                                                               "sd"
                                                             ? "text-red-600"
                                                             : "text-yellow-600"
@@ -166,13 +167,13 @@ const Profile = ({ data, permissionData, requestList }) => {
                                                 >
                                                     {toCapitalizeFirstLetter(
                                                         getRequestTypeName(
-                                                            request.unit.status
+                                                            request?.unit?.status
                                                         )
                                                     )}
                                                 </p>
                                                 <p className="text-sm text-gray-500">
                                                     Seen Status:{" "}
-                                                    {request.seenStatus
+                                                    {request.seen_status
                                                         ? "Confirmed"
                                                         : "Not Seen"}
                                                 </p>

@@ -19,9 +19,9 @@ const Notification = ({ message }) => {
         <div
             className={`${
                 message.request_type === "stdby"
-                    ? "bg-yellow-100 border-yellow-400"
+                    ? "bg-gradient-to-r from-yellow-100 via-neutral-50 to-neutral-50 border-yellow-400"
                     : message.request_type === "sd" &&
-                      "bg-red-100 border-red-400"
+                      "bg-gradient-to-r from-red-100 via-neutral-50 to-neutral-50 border-red-400"
             } border shadow-lg rounded-md px-6 py-4 mb-3 transition-all flex items-center gap-3 min-w-[25vw]
             ${animate === "slideIn" ? "animate-slideIn" : "animate-slideOut"}`}
         >
@@ -39,11 +39,11 @@ const Notification = ({ message }) => {
 
                 <a
                     href={route("request") + "#" + message.id}
-                    className={`inline-block mt-1 text-xs font-semibold underline px-2 py-1 rounded 
+                    className={`inline-block mt-1 text-xs font-semibold underline px-3 py-2 rounded 
                     ${
-                        message?.requestType === "stdby"
-                            ? "text-yellow-800 bg-yellow-200"
-                            : "text-red-800 bg-red-200"
+                        message?.request_type === "stdby"
+                            ? "text-yellow-800 bg-yellow-100"
+                            : "text-red-800 bg-red-100"
                     } hover:bg-opacity-80 transition`}
                 >
                     View Request

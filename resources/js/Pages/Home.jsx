@@ -184,27 +184,27 @@ export default function Home() {
                 <div>
                     <div class="relative overflow-x-auto shadow-md sm:rounded-xl max-h-[400px] overflow-auto border border-[#dadee3]">
                         <table class="w-full text-sm text-left rtl:text-right">
-                            <thead class="text-xs text-white uppercase bg-primary">
+                            <thead class="text-sm text-white uppercase bg-primary">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Unit
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Location
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Status
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Start
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Remark
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         Duration
                                     </th>
-                                    <th scope="col" class="px-6 py-3">
+                                    <th scope="col" class="px-6 py-3 font-semibold">
                                         PIC
                                     </th>
                                 </tr>
@@ -223,7 +223,7 @@ export default function Home() {
                                                 scope="row"
                                                 class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                                             >
-                                                <div class="md:text-base font-semibold">
+                                                <div class="md:text-base font-medium">
                                                     {
                                                         item?.unit
                                                     }

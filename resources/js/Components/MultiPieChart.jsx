@@ -22,7 +22,7 @@ const MultiRingChart = ({
                                 style={{ backgroundColor: item.color }}
                             />
                             <span className="text-sm md:text-base text-gray-600">{item.label}</span>
-                            <span className="ml-auto font-black">
+                            <span className="ml-auto font-semibold">
                                 {item.value}
                             </span>
                         </div>

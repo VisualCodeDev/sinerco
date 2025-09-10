@@ -126,7 +126,7 @@ const UnitPositionSetting = ({ data }) => {
         <PageLayout>
             {loading && <LoadingSpinner />}
             <div className="flex gap-4 relative w-full">
-                <div className="w-1/2 relative">
+                <div className="w-2/5 relative">
                     <TableComponent
                         data={selectedItemUnits || []}
                         columns={workshopColumns}
@@ -136,7 +136,7 @@ const UnitPositionSetting = ({ data }) => {
                         submitPlaceholder="Remove"
                     />
                 </div>
-                <div className="w-1/2 relative">
+                <div className="w-3/5 relative">
                     {filteredUnitData && filteredUnitData?.length > 0 && (
                         <TableComponent
                             data={filteredUnitData || []}

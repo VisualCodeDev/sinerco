@@ -51,7 +51,7 @@ export default function Login({ status, canResetPassword }) {
                     src="./logo_sinerco.webp"
                     alt="Logo Sinerco"
                 />
-                <p className="text-2xl md:text-4xl pb-1 md:pb-2 font-bold text-primary">
+                <p className="text-2xl md:text-4xl pb-1 md:pb-2 font-semibold text-primary">
                     Admin Login!
                 </p>
                 <p className="text-sm md:text-base text-gray-600 pb-5">

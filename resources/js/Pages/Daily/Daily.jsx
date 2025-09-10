@@ -203,7 +203,7 @@ export default function Dashboard({ unit_position_id }) {
                         {unitData && (
                             <>
                                 <div className="text-center w-full flex flex-col items-center lg:md:gap-1 gap-1 lg:md:py-8 py-6 bg-primary text-white">
-                                    <div className="text-xl lg:md:text-2xl font-bold bg-primary flex justify-center items-center">
+                                    <div className="text-xl lg:md:text-2xl font-semibold bg-primary flex justify-center items-center">
                                         <div
                                             className="cursor-pointer flex items-center gap-2  relative"
                                             onClick={() =>

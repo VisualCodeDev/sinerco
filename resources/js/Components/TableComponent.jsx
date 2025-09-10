@@ -8,6 +8,8 @@ import {
     FaSortDown,
     FaSortUp,
     FaTrashAlt,
+    FaEdit,
+    FaSyncAlt,
 } from "react-icons/fa";
 import {
     getRequestStatus,
@@ -138,7 +140,7 @@ const TableComponent = (props) => {
             <div
                 className={`${
                     isResponsive && "md:block hidden"
-                } bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto`}
+                } bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[85vh] overflow-y-auto`}
             >
                 <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b sticky top-0 left-0 bg-white z-10">
                     {title && (
@@ -349,11 +351,12 @@ const TableComponent = (props) => {
                             <th className="flex gap-4">
                                 <div className=" py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "edit" })
                                         }
                                     >
+                                        <FaEdit />
                                         Edit
                                     </button>
                                 </div>
@@ -372,11 +375,12 @@ const TableComponent = (props) => {
 
                                 <div className="pe-8 py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "reset" })
                                         }
                                     >
+                                        <FaSyncAlt />
                                         Reset
                                     </button>
                                 </div>

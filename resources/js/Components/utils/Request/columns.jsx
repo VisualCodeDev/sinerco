@@ -204,6 +204,7 @@ const columns = ({
                 <div className="text-center">
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={
                             selectedRows.length === allData.length &&
                             allData.length > 0
@@ -222,6 +223,7 @@ const columns = ({
                     <div onClick={(e) => e.stopPropagation()}>
                         <input
                             type="checkbox"
+                            className="w-5 h-5 rounded-sm"
                             checked={selectedRows.includes(
                                 request_id.toString()
                             )}

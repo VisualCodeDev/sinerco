@@ -47,7 +47,7 @@ const AddUser = ({ roles }) => {
         <PageLayout>
             {loading && <LoadingSpinner/>}
             <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-10">
-                <h2 className="text-2xl font-bold mb-6 text-center">
+                <h2 className="text-2xl font-semibold mb-6 text-center">
                     Add New User
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-5">

@@ -94,7 +94,7 @@ const columns = ({
                 return (
                     <>
                         <button
-                            className="bg-primary text-white rounded-lg px-3 py-2 text-sm"
+                            className="bg-primary text-white rounded px-5 py-2 text-sm hover:scale-90 hover:bg-transparent hover:border-primary border-2 hover:text-primary transition ease-in-out delay-75"
                             onClick={() => onRowClick(items)}
                         >
                             Detail
@@ -127,6 +127,7 @@ const columns = ({
                 return (
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={formData?.selectedRows?.includes(
                             id?.toString()
                         )}

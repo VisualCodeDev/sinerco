@@ -112,6 +112,7 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
                 return (
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={formData?.add?.includes(unit_id?.toString())}
                         onChange={(e) => {
                             e.stopPropagation();
@@ -170,6 +171,7 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
                 return (
                     <input
                         type="checkbox"
+                        className="w-5 h-5 rounded-sm"
                         checked={formData?.add?.includes(unit_id?.toString())}
                         onChange={(e) => {
                             e.stopPropagation();

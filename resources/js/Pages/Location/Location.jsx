@@ -33,7 +33,7 @@ const Location = ({ data }) => {
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaMapPin className="text-2xl md:text-3xl" />
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">Area</h2>
+                        <h2 className="font-semibold text-base md:text-2xl text-gray-700">Area</h2>
                     </div>
                     <div className="space-y-2 max-h-[70vh] overflow-y-auto">
                         {areas?.map((item) => (
@@ -100,7 +100,7 @@ const Location = ({ data }) => {
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaMapMarkedAlt className="text-2xl md:text-3xl" />
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                        <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                             Locations
                         </h2>
                     </div>

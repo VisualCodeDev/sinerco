@@ -60,7 +60,7 @@ const WorkshopList = () => {
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaUserFriends className="text-2xl md:text-3xl" />
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                        <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                             Workhops
                         </h2>
                     </div>
@@ -134,7 +134,7 @@ const WorkshopList = () => {
                                 <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                                     <FaList className="text-2xl md:text-3xl" />
                                 </div>
-                                <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                <h2 className="font-semibold text-base md:text-2xl text-gray-700">
                                     Unit
                                 </h2>
                             </div>
