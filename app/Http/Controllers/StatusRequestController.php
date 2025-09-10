@@ -127,7 +127,7 @@ class StatusRequestController extends Controller
                 'remarks' => $req->remarks,
                 'request_type' => $req->request_type,
                 'requested_by' => $req->user->name,
-                'seen_status' => $req->seen_status === 1 ? true : false,
+                'seen_status' => (bool) $req->seen_status,
                 'start_date' => $req->start_date,
                 'start_time' => $req->start_time,
                 'status' => $req->status,
