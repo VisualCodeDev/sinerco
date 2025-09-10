@@ -163,7 +163,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
                     <input
                         type="checkbox"
                         checked={formData?.selectedRows?.includes(
-                            unit_position_id
+                            String(unit_position_id)
                         )}
                         onChange={(e) => {
                             e.stopPropagation();
