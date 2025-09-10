@@ -161,6 +161,9 @@ const UserList = () => {
     return (
         <PageLayout>
             <TableComponent
+                handleNew={route("user.new")}
+                addNewItem={true}
+                newItemPlaceholder={"Add User"}
                 height={"55vh"}
                 roles={roles}
                 isUserList={true}

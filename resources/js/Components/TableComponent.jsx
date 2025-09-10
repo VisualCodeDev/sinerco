@@ -19,6 +19,7 @@ import { router } from "@inertiajs/react";
 const TableComponent = (props) => {
     const {
         isUserList = false,
+        newItemPlaceholder="Add Unit",
         isModal = false,
         maxItemPerPage,
         roles = [],
@@ -223,7 +224,7 @@ const TableComponent = (props) => {
                                 className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
                             >
                                 <FaPlus />
-                                <span className="">Add New Unit</span>
+                                <span className="">{newItemPlaceholder || 'Add'}</span>
                             </a>
                         )}
                     </div>
@@ -455,7 +456,7 @@ const TableComponent = (props) => {
                                         className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-sm text-white px-2 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
                                     >
                                         <FaPlus />
-                                        <span className="">Add Unit</span>
+                                        <span className="">{newItemPlaceholder || 'Add'}</span>
                                     </a>
                                 )}
                             </div>
