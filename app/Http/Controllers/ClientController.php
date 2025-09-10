@@ -60,7 +60,7 @@ class ClientController extends Controller
 
         if ($client) {
             $client->update([
-                'disable_duration' => !$client->disable_duration,
+                'disable_duration' => !(bool)$client->disable_duration,
             ]);
             return response()->json(['type' => 'success', 'text' => 'Duration updated']);
         } else {

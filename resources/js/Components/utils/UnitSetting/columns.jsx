@@ -108,13 +108,13 @@ const columns = (
                         </select>
                         <button
                             className={`${
-                                disable_duration === 0
+                                !disable_duration
                                     ? "bg-red-500"
                                     : "bg-green-500"
                             } text-white rounded-md px-2 py-1`}
                             onClick={() => handleUpdateDisable(client_id)}
                         >
-                            {disable_duration === 1 ? "Enable" : "Disable"}
+                            {disable_duration ? "Enable" : "Disable"}
                         </button>
                     </div>
                 );

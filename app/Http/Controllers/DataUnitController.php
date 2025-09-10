@@ -165,7 +165,7 @@ class DataUnitController extends Controller
             'client' => $unit->client?->name ?? $unit->workshop?->name ?? null,
             'input_interval' => $unit->client?->input_interval ?? null,
             'input_duration' => $unit->client?->input_duration ?? null,
-            'disable_duration' => $unit->client?->disable_duration ?? false,
+            'disable_duration' => (bool) $unit->client?->disable_duration ?? false,
             'location' => $unit->location?->location ?? null,
             'area' => $unit->location?->area?->area ?? null,
             'unit_position_id' => $unit->id ?? null,

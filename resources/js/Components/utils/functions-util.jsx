@@ -91,13 +91,13 @@ export const TimeInput = ({
     let permittedTime =
         time % interval === 0 ? time : time + (time % interval) + hourDuration;
 
-    let permittedTimeAfter =
-        hourDuration != 0 ? permittedTime + hourDuration - 1 : permittedTime;
-
     if (minute > minuteDuration) {
         permittedTime = permittedTime + interval;
         if (permittedTime > 24) permittedTime = 0;
     }
+
+    let permittedTimeAfter =
+        hourDuration > 0 ? permittedTime + hourDuration - 1 : permittedTime;
 
     if (hourDuration > 0) {
         permittedTimeAfter = permittedTime + hourDuration;

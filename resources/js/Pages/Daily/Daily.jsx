@@ -104,9 +104,9 @@ export default function Dashboard({ unit_position_id }) {
                 ]);
                 setUnitData(unit?.data);
                 setClientData(unit?.data?.client || []);
-                console.log(unit.data);
                 const fullDay = await generatePrevHour();
-                const reportTimes = reportData.data.map((r) => r.time);
+
+                const reportTimes = reportData?.data?.map((r) => r.time);
 
                 const missingHours = fullDay.filter(
                     (h) => !reportTimes.includes(h)
@@ -282,7 +282,7 @@ export default function Dashboard({ unit_position_id }) {
                                 clientData={clientData}
                                 interval={unitData?.input_interval}
                                 duration={
-                                    unitData?.disable_duration === 1
+                                    unitData?.disable_duration
                                         ? 59
                                         : unitData?.input_duration
                                 }
