@@ -145,7 +145,7 @@ const columns = (
                             } text-white rounded-md px-2 py-1`}
                             onClick={() => handleUpdateDisable(client_id)}
                         >
-                            {!disable_duration ? "Enable" : "Disable"}
+                            {disable_duration ? "Enable" : "Disable"}
                         </button>
                     </div>
                 );
