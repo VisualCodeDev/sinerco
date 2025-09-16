@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { formItems, requestStatus, requestType } from "./dashboard-util";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
@@ -62,6 +63,7 @@ export const TimeInput = ({
     disabled = false,
     interval = 1,
     duration = 35,
+    gmt_offset = 7,
 }) => {
     const [now, setNow] = useState(null);
     const [time, setTime] = useState(0);
@@ -70,7 +72,7 @@ export const TimeInput = ({
     const [minuteDuration, setMinuteDuration] = useState(duration);
     useEffect(() => {
         const fetchTime = async () => {
-            const { minute, hour, now } = await getCurrDateTime();
+            const { minute, hour, now } = await getCurrDateTime(gmt_offset);
             setNow(now);
             setTime(hour);
             setMinute(minute);
@@ -78,7 +80,6 @@ export const TimeInput = ({
 
         fetchTime();
     }, []);
-
     useEffect(() => {
         if (duration > 60) {
             const hour = Math.floor(duration / 60) - 1;
@@ -168,9 +169,10 @@ export const TimeInput = ({
     );
 };
 
-export const generatePrevHour = async () => {
+export const generatePrevHour = async (gmt_offset) => {
     const hours = [];
-    const { hour } = await getCurrDateTime();
+    console.log(gmt_offset)
+    const { hour } = await getCurrDateTime(gmt_offset);
     for (let i = 0; i < hour; i++) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
     }
@@ -606,28 +608,36 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
     if (!value) return;
     return dayjs(value).format(format);
 };
-export const getCurrDateTime = async () => {
-    try {
-        const res = await fetch("/get/server-time");
-        const { server_time } = await res.json();
-        const now = dayjs(server_time);
-        const rawTime = now;
-        const date = rawTime.format("YYYY-MM-DD");
-        const time = rawTime.format("HH:mm");
-        const hour = parseInt(rawTime.hour());
-        const minute = parseInt(rawTime.minute());
 
-        return { date, time, now: rawTime, hour, minute };
-    } catch (error) {
-        console.error("Gagal ambil waktu server:", error);
+dayjs.extend(utc);
 
-        const now = dayjs();
-        return {
-            date: now.format("YYYY-MM-DD"),
-            time: now.format("HH:mm"),
-            now,
-        };
-    }
+export const getCurrDateTime = async (gmt_offset = 7) => {
+  try {
+    const res = await fetch("/get/server-time");
+    const { server_time } = await res.json();
+
+    // convert jam offset → menit
+    const rawTime = dayjs.utc(server_time).utcOffset(gmt_offset * 60);
+
+    return {
+      date: rawTime.format("YYYY-MM-DD"),
+      time: rawTime.format("HH:mm"),
+      now: rawTime,
+      hour: rawTime.hour(),
+      minute: rawTime.minute(),
+    };
+  } catch (error) {
+    console.error("Gagal ambil waktu server:", error);
+
+    const now = dayjs().utcOffset(gmt_offset * 60);
+    return {
+      date: now.format("YYYY-MM-DD"),
+      time: now.format("HH:mm"),
+      now,
+      hour: now.hour(),
+      minute: now.minute(),
+    };
+  }
 };
 
 export const toCapitalizeFirstLetter = (str) => {

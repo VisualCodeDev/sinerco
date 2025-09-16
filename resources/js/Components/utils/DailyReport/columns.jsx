@@ -8,6 +8,7 @@ const list = ({
     interval,
     duration,
     isDown,
+    gmt_offset,
 }) => {
     const colItem = [
         {
@@ -50,6 +51,7 @@ const list = ({
                             {header}{" "}
                         </label>
                         <TimeInput
+                            gmt_offset={gmt_offset}
                             disabled={isDown}
                             formData={formData}
                             item={item}

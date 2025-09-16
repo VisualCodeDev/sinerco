@@ -38,11 +38,44 @@ const columns = (
             },
         },
         {
+            name: "gmt",
+            header: "Time Zone (GMT)",
+            headerClassName: "bg-primary text-white",
+            sortable: false,
+            width: "15%",
+            Cell: ({ gmt_offset, client_id }) => {
+                return (
+                    <select
+                        value={
+                            formData?.clientSettings?.[client_id]
+                                ?.gmt_offset ||
+                            gmt_offset ||
+                            1
+                        }
+                        className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
+                        onChange={(e) => {
+                            handleChange(
+                                "gmt_offset",
+                                client_id,
+                                e.target.value
+                            );
+                        }}
+                    >
+                        {Array.from({ length: 9 }, (_, i) => (
+                            <option key={i + 1} value={i + 1}>
+                                {i + 1}
+                            </option>
+                        ))}
+                    </select>
+                );
+            },
+        },
+        {
             name: "interval",
             header: "Input Interval (Hours)",
             headerClassName: "bg-primary text-white",
             sortable: false,
-            width: "17%",
+            width: "15%",
             Cell: ({ input_interval, client_id }) => {
                 return (
                     <select
@@ -108,13 +141,11 @@ const columns = (
                         </select>
                         <button
                             className={`${
-                                !disable_duration
-                                    ? "bg-red-500"
-                                    : "bg-green-500"
+                                disable_duration ? "bg-red-500" : "bg-green-500"
                             } text-white rounded-md px-2 py-1`}
                             onClick={() => handleUpdateDisable(client_id)}
                         >
-                            {disable_duration ? "Enable" : "Disable"}
+                            {!disable_duration ? "Enable" : "Disable"}
                         </button>
                     </div>
                 );

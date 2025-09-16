@@ -17,7 +17,12 @@ class ClientController extends Controller
 
     public function getAllClient()
     {
-        $allData = Client::all();
+        $allData = Client::all()->map(function ($client) {
+            return [
+                ...$client->toArray(),
+                'disable_duration' => (bool) $client->disable_duration,
+            ];
+        });
         return response()->json($allData);
     }
 
@@ -60,7 +65,7 @@ class ClientController extends Controller
 
         if ($client) {
             $client->update([
-                'disable_duration' => !(bool)$client->disable_duration,
+                'disable_duration' => !(bool) $client->disable_duration,
             ]);
             return response()->json(['type' => 'success', 'text' => 'Duration updated']);
         } else {
@@ -73,7 +78,6 @@ class ClientController extends Controller
         $request->validate([
             'clientSettings' => 'required|array',
         ]);
-
         foreach ($request->clientSettings as $client_id => $settings) {
             $client = Client::where('client_id', $client_id)->first();
 
@@ -81,6 +85,7 @@ class ClientController extends Controller
                 $client->update([
                     'input_interval' => $settings['input_interval'] ?? $client->input_interval,
                     'input_duration' => $settings['input_duration'] ?? $client->input_duration,
+                    'gmt_offset' => $settings['gmt_offset'] ?? $client->gmt_offset,
                 ]);
             } else {
                 return response()->json(['type' => 'error', 'text' => 'Client not found']);

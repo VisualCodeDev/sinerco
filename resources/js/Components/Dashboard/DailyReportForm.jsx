@@ -24,6 +24,7 @@ const DailyReportForm = (props) => {
         user,
         interval,
         duration,
+        gmt_offset,
         isDown = true,
     } = props;
     const [data, setData] = useState({});
@@ -96,6 +97,7 @@ const DailyReportForm = (props) => {
         role: user?.role,
         interval: interval,
         duration: duration,
+        gmt_offset: gmt_offset
     });
 
     useEffect(() => {

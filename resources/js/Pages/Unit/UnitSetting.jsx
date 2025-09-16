@@ -88,7 +88,6 @@ const UnitSetting = () => {
         handleCheckItem,
         handleUpdateDisable
     );
-
     const handleClientSetting = async (e) => {
         e.preventDefault();
 

@@ -139,6 +139,39 @@ class StatusRequestController extends Controller
         return Inertia::render('Request/Request', ['data' => $data]);
     }
 
+    public function getRequestedUnit()
+    {
+        $permissionData = DataUnitController::getPermittedUnit();
+
+        $unit_ids = collect($permissionData)->pluck('unit_position_id')->unique()->filter();
+
+        $requestList = StatusRequest::whereIn('unit_position_id', $unit_ids)
+            ->with('unitPosition', 'user', 'location.area', 'pic')
+            ->where('status', '!=', 'End')->get();
+        $requestList = collect($requestList)
+            ->values();
+        // ->toArray();
+        $data = $requestList->map(function ($req) {
+            return [
+                'location' => $req->unitPosition->location->location ?? null,
+                'request_id' => $req->request_id,
+                'action' => $req->action,
+                'end_date' => $req->end_date,
+                'end_time' => $req->end_time,
+                'pic' => $req?->pic?->name,
+                'remarks' => $req->remarks,
+                'request_type' => $req->request_type,
+                'requested_by' => $req->user->name,
+                'seen_status' => $req->seen_status,
+                'start_date' => $req->start_date,
+                'start_time' => $req->start_time,
+                'status' => $req->status,
+                'unit' => $req->unitPosition->unit->unit,
+            ];
+        });
+        return response()->json($data);
+    }
+
     public function getFiveRequestedUnit()
     {
         $permissionData = DataUnitController::getPermittedUnit();

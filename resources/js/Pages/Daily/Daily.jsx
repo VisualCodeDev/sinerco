@@ -34,10 +34,10 @@ export default function Dashboard({ unit_position_id }) {
         getDDMMYYDate(currDate, "YYYY-MM-DD")
     );
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState();
+    const [data, setData] = useState([]);
     const [unitData, setUnitData] = useState();
     const [isUnitRunning, setIsUnitRunning] = useState(true);
-    const [clientData, setClientData] = useState();
+    const [clientName, setClientName] = useState();
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
 
     const [expanded, setExpanded] = useState(false);
@@ -85,6 +85,29 @@ export default function Dashboard({ unit_position_id }) {
         },
     ];
 
+    const setInitReport = async (reportData, gmt_offset) => {
+        const fullDay = await generatePrevHour(gmt_offset);
+
+        const reportTimes = reportData?.map((r) => r.time);
+
+        const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
+        if (missingHours.length > 0) {
+            try {
+                const resp = await axios.post(route("fill.report"), {
+                    missingHours: missingHours,
+                    date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
+                    unit_position_id: unit_position_id,
+                });
+
+                setData([...reportData, ...resp?.data]);
+            } catch (e) {
+                console.error(e);
+            }
+        } else {
+            setData(reportData);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
@@ -102,31 +125,10 @@ export default function Dashboard({ unit_position_id }) {
                         })
                     ),
                 ]);
+
                 setUnitData(unit?.data);
-                setClientData(unit?.data?.client || []);
-                const fullDay = await generatePrevHour();
-
-                const reportTimes = reportData?.data?.map((r) => r.time);
-
-                const missingHours = fullDay.filter(
-                    (h) => !reportTimes.includes(h)
-                );
-
-                if (missingHours.length > 0) {
-                    try {
-                        const resp = await axios.post(route("fill.report"), {
-                            missingHours: missingHours,
-                            date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
-                            unit_position_id: unit_position_id,
-                        });
-
-                        setData([...reportData?.data, ...resp?.data]);
-                    } catch (e) {
-                        console.error(e);
-                    }
-                } else {
-                    setData(reportData?.data);
-                }
+                setClientName(unit?.data?.client || "");
+                await setInitReport(reportData?.data, unit?.data?.gmt_offset);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -147,7 +149,7 @@ export default function Dashboard({ unit_position_id }) {
                         date: selectedDate,
                     })
                 );
-                setData(reportData?.data);
+                await setInitReport(reportData?.data, unitData?.gmt_offset)
             } catch (e) {
                 console.error(e);
             } finally {
@@ -170,7 +172,7 @@ export default function Dashboard({ unit_position_id }) {
                 !data ||
                 !allUnits ||
                 !unitData ||
-                !clientData ||
+                !clientName ||
                 loading) && <LoadingSpinner />}
             <div className="flex">
                 <div className="w-full h-full flex flex-col">
@@ -279,8 +281,9 @@ export default function Dashboard({ unit_position_id }) {
                         {activeTab === "form" && (
                             <DailyReportForm
                                 isDown={!isUnitRunning}
-                                clientData={clientData}
+                                clientData={clientName}
                                 interval={unitData?.input_interval}
+                                gmt_offset={unitData?.gmt_offset || 7}
                                 duration={
                                     unitData?.disable_duration
                                         ? 59
