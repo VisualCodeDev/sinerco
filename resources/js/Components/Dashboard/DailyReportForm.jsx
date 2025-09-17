@@ -19,6 +19,7 @@ import { useToast } from "../Toast/ToastProvider";
 
 const DailyReportForm = (props) => {
     const {
+        disableDuration = false,
         unitData,
         formData,
         user,
@@ -97,13 +98,14 @@ const DailyReportForm = (props) => {
         role: user?.role,
         interval: interval,
         duration: duration,
-        gmt_offset: gmt_offset
+        gmt_offset: gmt_offset,
+        disableDuration: disableDuration
     });
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const dateTime = await getCurrDateTime();
+            const dateTime = await getCurrDateTime(gmt_offset);
             const now = dateTime.now;
             const filledFormTime = Array.isArray(formData)
                 ? formData
@@ -112,12 +114,16 @@ const DailyReportForm = (props) => {
                 : [];
 
             let currentHour = parseInt(now.format("HH"), 10);
+            console.log(currentHour);
 
             if (filledFormTime.includes(currentHour)) {
-                currentHour = currentHour - 1;
-                if (currentHour < 0) currentHour = 23;
+                currentHour = null;
+                // if (currentHour < 0) currentHour = 23;
             }
-            const time = String(currentHour).padStart(2, "0") + ":00";
+
+            const time =
+                (currentHour && String(currentHour).padStart(2, "0") + ":00") ||
+                null;
             const date = dateTime.date;
 
             setData((prevData) => ({

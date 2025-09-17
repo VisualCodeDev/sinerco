@@ -51,6 +51,7 @@ export const DateTimeInput = ({
 };
 
 export const TimeInput = ({
+    isModal = false,
     formData,
     item,
     onChange,
@@ -64,6 +65,7 @@ export const TimeInput = ({
     interval = 1,
     duration = 35,
     gmt_offset = 7,
+    disableDuration = false,
 }) => {
     const [now, setNow] = useState(null);
     const [time, setTime] = useState(0);
@@ -80,6 +82,7 @@ export const TimeInput = ({
 
         fetchTime();
     }, []);
+
     useEffect(() => {
         if (duration > 60) {
             const hour = Math.floor(duration / 60) - 1;
@@ -113,12 +116,11 @@ export const TimeInput = ({
         [];
 
     // hanya untuk operator
-    if (role === "operator") {
+    if (role === "operator" && !disableDuration) {
         for (let i = 0; i <= 24; i += parseInt(Math.floor(interval))) {
             const isNow =
                 i === time || (time - i <= hourDuration && time - i >= 0);
-            console.log(isNow, i);
-
+            
             const isPermittedMinute = isNow && minute <= minuteDuration;
             const alreadyFilled = filledFormTime.includes(i);
             if (isPermittedMinute && !alreadyFilled) {
@@ -132,7 +134,7 @@ export const TimeInput = ({
                 );
             }
         }
-    } else if (role === "super_admin" || role === "technician") {
+    } else if (role === "super_admin" || role === "technician" || disableDuration) {
         for (let i = 1; i <= 24; i++) {
             if (!filledFormTime.includes(i)) {
                 options.push(
@@ -158,20 +160,21 @@ export const TimeInput = ({
             >
                 {options}
             </select>
-            <span className="text-sm text-slate-400">
-                Available from {permittedTime}:00 to {permittedTimeAfter}:
-                {String(hourDuration === 0 ? minuteDuration : "00").padStart(
-                    2,
-                    "0"
-                )}
-            </span>
+            {!isModal && (
+                <span className="text-sm text-slate-400">
+                    Available from {permittedTime}:00 to {permittedTimeAfter}:
+                    {String(
+                        hourDuration === 0 ? minuteDuration : "00"
+                    ).padStart(2, "0")}
+                </span>
+            )}
         </>
     );
 };
 
 export const generatePrevHour = async (gmt_offset) => {
     const hours = [];
-    console.log(gmt_offset)
+    console.log(gmt_offset);
     const { hour } = await getCurrDateTime(gmt_offset);
     for (let i = 0; i < hour; i++) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
@@ -612,32 +615,32 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
 dayjs.extend(utc);
 
 export const getCurrDateTime = async (gmt_offset = 7) => {
-  try {
-    const res = await fetch("/get/server-time");
-    const { server_time } = await res.json();
+    try {
+        const res = await fetch("/get/server-time");
+        const { server_time } = await res.json();
 
-    // convert jam offset → menit
-    const rawTime = dayjs.utc(server_time).utcOffset(gmt_offset * 60);
+        // convert jam offset → menit
+        const rawTime = dayjs.utc(server_time).utcOffset(gmt_offset * 60);
 
-    return {
-      date: rawTime.format("YYYY-MM-DD"),
-      time: rawTime.format("HH:mm"),
-      now: rawTime,
-      hour: rawTime.hour(),
-      minute: rawTime.minute(),
-    };
-  } catch (error) {
-    console.error("Gagal ambil waktu server:", error);
+        return {
+            date: rawTime.format("YYYY-MM-DD"),
+            time: rawTime.format("HH:mm"),
+            now: rawTime,
+            hour: rawTime.hour(),
+            minute: rawTime.minute(),
+        };
+    } catch (error) {
+        console.error("Gagal ambil waktu server:", error);
 
-    const now = dayjs().utcOffset(gmt_offset * 60);
-    return {
-      date: now.format("YYYY-MM-DD"),
-      time: now.format("HH:mm"),
-      now,
-      hour: now.hour(),
-      minute: now.minute(),
-    };
-  }
+        const now = dayjs().utcOffset(gmt_offset * 60);
+        return {
+            date: now.format("YYYY-MM-DD"),
+            time: now.format("HH:mm"),
+            now,
+            hour: now.hour(),
+            minute: now.minute(),
+        };
+    }
 };
 
 export const toCapitalizeFirstLetter = (str) => {

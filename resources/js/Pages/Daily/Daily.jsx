@@ -284,6 +284,7 @@ export default function Dashboard({ unit_position_id }) {
                                 clientData={clientName}
                                 interval={unitData?.input_interval}
                                 gmt_offset={unitData?.gmt_offset || 7}
+                                disableDuration={unitData?.disable_duration}
                                 duration={
                                     unitData?.disable_duration
                                         ? 59

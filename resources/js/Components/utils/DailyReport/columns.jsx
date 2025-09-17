@@ -9,6 +9,7 @@ const list = ({
     duration,
     isDown,
     gmt_offset,
+    disableDuration,
 }) => {
     const colItem = [
         {
@@ -42,6 +43,7 @@ const list = ({
             name: "time",
             header: "Time",
             Cell: ({ item, header, name }) => {
+                console.log(item)
                 return (
                     <div className="flex flex-col">
                         <label
@@ -60,6 +62,7 @@ const list = ({
                             name={name}
                             interval={interval}
                             duration={duration}
+                            disableDuration={disableDuration}
                             value={item[name] || ""}
                             onChange={(e) =>
                                 handleChange([e.target.name], e.target.value)

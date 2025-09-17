@@ -28,11 +28,10 @@ const DailyReport = (props) => {
     const [isEditModal, setEditModal] = useState(false);
     const [selectedData, setSelectedData] = useState(null);
     const [dataAll, setData] = useState(formData);
-
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
-
+    
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -50,6 +49,7 @@ const DailyReport = (props) => {
             setCurrData(sortedData);
         }
     }, [dataAll]);
+
     const handleEdit = (id) => {
         if(user?.role === "operator") return;
         const data = dataAll.find((item) => item?.id === id);
@@ -58,6 +58,7 @@ const DailyReport = (props) => {
     };
 
     useEffect(() => {
+        setData(formData)
         setCurrData(formData);
     }, [formData]);
 
@@ -414,7 +415,7 @@ const EditModal = (props) => {
             }
         }
     };
-    if (loading) {
+    if (loading || !formDataState) {
         return <LoadingSpinner text="Saving" />;
     }
     return (
@@ -451,6 +452,7 @@ const EditModal = (props) => {
                             Time
                         </label>
                         <TimeInput
+                            isModal={true}
                             formData={formData}
                             disabled
                             id={"time"}
