@@ -99,7 +99,7 @@ const DailyReportForm = (props) => {
         interval: interval,
         duration: duration,
         gmt_offset: gmt_offset,
-        disableDuration: disableDuration
+        disableDuration: disableDuration,
     });
 
     useEffect(() => {
@@ -118,12 +118,10 @@ const DailyReportForm = (props) => {
             if (filledFormTime.includes(currentHour)) {
                 currentHour = currentHour + 1;
                 if (currentHour < 0) currentHour = 23;
-                if (currentHour > 24) currentHour = null;
+                if (currentHour > 24) currentHour = 0;
             }
-
-            const time =
-                (currentHour && String(currentHour).padStart(2, "0") + ":00") ||
-                null;
+            
+            const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
 
             setData((prevData) => ({
