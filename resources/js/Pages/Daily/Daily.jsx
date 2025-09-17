@@ -86,7 +86,7 @@ export default function Dashboard({ unit_position_id }) {
     ];
 
     const setInitReport = async (reportData, gmt_offset) => {
-        if(!reportData) return;
+        if (!reportData) return;
         const fullDay = await generatePrevHour(gmt_offset);
 
         const reportTimes = reportData?.map((r) => r.time);
@@ -109,38 +109,68 @@ export default function Dashboard({ unit_position_id }) {
         }
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [reportData, unit] = await Promise.all([
-                    axios.get(
-                        route("getDataReportBasedOnDate", {
-                            unit_position_id: unit_position_id,
-                            date: selectedDate,
-                        })
-                    ),
-                    axios.get(
-                        route("getSelectedUnit", {
-                            unit_position_id: unit_position_id,
-                        })
-                    ),
-                ]);
+    const setInitPrevReport = async (reportData) => {
+        let fullDay = [];
+        for (let i = 1; i <= 24; i++) {
+            fullDay.push(`${String(i).padStart(2, "0")}:00`);
+        }
+        const reportTimes = reportData?.map((r) => r.time);
 
-                setUnitData(unit?.data);
-                setClientName(unit?.data?.client || "");
-                await setInitReport(reportData?.data, unit?.data?.gmt_offset);
+        const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
+        console.log(missingHours);
+        if (missingHours.length > 0) {
+            try {
+                const resp = await axios.post(route("fill.report"), {
+                    missingHours: missingHours,
+                    date: getDDMMYYDate(new Date(selectedDate), "YYYY-MM-DD"),
+                    unit_position_id: unit_position_id,
+                });
+
+                setData([...reportData, ...resp?.data]);
             } catch (e) {
                 console.error(e);
-            } finally {
-                setLoading(false);
             }
-        };
+        } else {
+            setData(reportData);
+        }
+    };
 
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [reportData, unit] = await Promise.all([
+                axios.get(
+                    route("getDataReportBasedOnDate", {
+                        unit_position_id: unit_position_id,
+                        date: selectedDate,
+                    })
+                ),
+                axios.get(
+                    route("getSelectedUnit", {
+                        unit_position_id: unit_position_id,
+                    })
+                ),
+            ]);
+
+            setUnitData(unit?.data);
+            setClientName(unit?.data?.client || "");
+            await setInitReport(reportData?.data, unit?.data?.gmt_offset);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
     useEffect(() => {
+        if (selectedDate === getDDMMYYDate(currDate, "YYYY-MM-DD")) {
+            fetchData();
+            return;
+        }
         const changeReportData = async () => {
             setLoading(true);
             try {
@@ -150,7 +180,12 @@ export default function Dashboard({ unit_position_id }) {
                         date: selectedDate,
                     })
                 );
-                await setInitReport(reportData?.data, unitData?.gmt_offset)
+                if (new Date(selectedDate) < currDate) {
+                    await setInitPrevReport(reportData?.data);
+                }
+                else{
+                    setData(reportData?.data);
+                }
             } catch (e) {
                 console.error(e);
             } finally {
@@ -233,28 +268,30 @@ export default function Dashboard({ unit_position_id }) {
                                                         : "hidden"
                                                 }`}
                                             >
-                                                {allUnits && allUnits?.length > 0 && allUnits?.map((item) => (
-                                                    <div
-                                                        className="py-1 px-2 flex items-center justify-between text-xs"
-                                                        onClick={() =>
-                                                            router.visit(
-                                                                route(
-                                                                    "daily",
-                                                                    item?.unit_position_id
+                                                {allUnits &&
+                                                    allUnits?.length > 0 &&
+                                                    allUnits?.map((item) => (
+                                                        <div
+                                                            className="py-1 px-2 flex items-center justify-between text-xs"
+                                                            onClick={() =>
+                                                                router.visit(
+                                                                    route(
+                                                                        "daily",
+                                                                        item?.unit_position_id
+                                                                    )
                                                                 )
-                                                            )
-                                                        }
-                                                    >
-                                                        <p className="text-base">
-                                                            {item?.unit}
-                                                        </p>
-                                                        <StatusPill
-                                                            request_type={
-                                                                item?.status
                                                             }
-                                                        />
-                                                    </div>
-                                                ))}
+                                                        >
+                                                            <p className="text-base">
+                                                                {item?.unit}
+                                                            </p>
+                                                            <StatusPill
+                                                                request_type={
+                                                                    item?.status
+                                                                }
+                                                            />
+                                                        </div>
+                                                    ))}
                                             </div>
                                         </div>
                                     </div>

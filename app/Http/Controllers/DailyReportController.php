@@ -258,10 +258,11 @@ class DailyReportController extends Controller
     }
 
     public function fillReport(Request $request)
-    {
+    {   
+        Log::debug($request->all());
         $val = $request->validate([
             'missingHours' => 'required|array',
-            'missingHours.*' => ['regex:/^(?:[01]\d|2[0-3]):00$/'],
+            'missingHours.*' => ['regex:/^(?:[01]\d|2[0-4]):00$/'],
             'unit_position_id' => 'required|exists:unit_positions,id',
             'date' => 'required|date'
         ]);
