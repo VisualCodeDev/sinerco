@@ -7,6 +7,7 @@ import LoadingSpinner from "@/Components/Loading";
 import StatusPill from "@/Components/StatusPill";
 import {
     generatePrevHour,
+    getCurrDateTime,
     getDDMMYYDate,
 } from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
@@ -29,10 +30,8 @@ import UnitInfo from "../Unit/UnitInfo";
 export default function Dashboard({ unit_position_id }) {
     const { user, loading: userLoding } = useAuth();
     const [name, setName] = useState("");
-    const currDate = new Date();
-    const [selectedDate, setSelectedDate] = useState(
-        getDDMMYYDate(currDate, "YYYY-MM-DD")
-    );
+    const [currDate, setCurrDate] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
     const [unitData, setUnitData] = useState();
@@ -86,10 +85,8 @@ export default function Dashboard({ unit_position_id }) {
     ];
 
     const setInitReport = async (reportData, gmt_offset) => {
-        if (!reportData) return;
         const fullDay = await generatePrevHour(gmt_offset);
-
-        const reportTimes = reportData?.map((r) => r.time);
+        const reportTimes = reportData?.map((r) => r.time) || [];
 
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
         if (missingHours.length > 0) {
@@ -111,7 +108,7 @@ export default function Dashboard({ unit_position_id }) {
 
     const setInitPrevReport = async (reportData) => {
         let fullDay = [];
-        for (let i = 1; i <= 24; i++) {
+        for (let i = 0; i < 24; i++) {
             fullDay.push(`${String(i).padStart(2, "0")}:00`);
         }
         const reportTimes = reportData?.map((r) => r.time);
@@ -154,7 +151,8 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-            await setInitReport(reportData?.data, unit?.data?.gmt_offset);
+
+            await initCurrDate(reportData?.data, unit?.data?.gmt_offset);
         } catch (e) {
             console.error(e);
         } finally {
@@ -162,11 +160,21 @@ export default function Dashboard({ unit_position_id }) {
         }
     };
 
+    const initCurrDate = async (reportData, gmt_offset) => {
+        setLoading(true);
+        const { date } = await getCurrDateTime(gmt_offset);
+        setCurrDate(new Date(date));
+        setSelectedDate(date);
+
+        await setInitReport(reportData, gmt_offset);
+        setLoading(false);
+    };
     useEffect(() => {
         fetchData();
     }, []);
 
     useEffect(() => {
+        if (!currDate) return;
         if (selectedDate === getDDMMYYDate(currDate, "YYYY-MM-DD")) {
             fetchData();
             return;
@@ -182,8 +190,7 @@ export default function Dashboard({ unit_position_id }) {
                 );
                 if (new Date(selectedDate) < currDate) {
                     await setInitPrevReport(reportData?.data);
-                }
-                else{
+                } else {
                     setData(reportData?.data);
                 }
             } catch (e) {

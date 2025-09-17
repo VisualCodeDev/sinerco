@@ -117,7 +117,7 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator" && !disableDuration) {
-        for (let i = 1; i <= 24; i += parseInt(Math.floor(interval))) {
+        for (let i = 0; i < 24; i += parseInt(Math.floor(interval))) {
             const isNow =
                 i === time || (time - i <= hourDuration && time - i >= 0);
             
@@ -135,7 +135,7 @@ export const TimeInput = ({
             }
         }
     } else if (role === "super_admin" || role === "technician" || disableDuration) {
-        for (let i = 1; i <= 24; i++) {
+        for (let i = 0; i < 24; i++) {
             if (!filledFormTime.includes(i)) {
                 options.push(
                     <option
