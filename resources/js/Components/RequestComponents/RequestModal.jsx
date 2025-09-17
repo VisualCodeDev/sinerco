@@ -64,10 +64,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const response = await axios.get(route("getUnitAreaLocation"));
         setUnitData(response.data);
     };
-
+    
     const fetchTime = async () => {
         setLoading(true);
-        const dataDateTime = await getCurrDateTime();
+        const dataDateTime = await getCurrDateTime(unitData[0]?.gmt_offset || 7);
         setData((prevData) => ({
             ...prevData,
             start_date: dataDateTime.date,
@@ -77,7 +77,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     };
 
     useEffect(() => {
-        if (showModal) {
+        if (showModal && unitData) {
             fetchTime();
             fetchDataUnit();
         }
@@ -87,7 +87,6 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const areaLocation = unitData.find(
             (item) => item?.unit_id === data?.unit_id
         );
-        console.log(areaLocation?.status != "running")
         setIsUnitDown(areaLocation?.status != "running")
         handleChange(["unit_position_id"], areaLocation?.unit_position_id);
     }, [data?.unit_id]);

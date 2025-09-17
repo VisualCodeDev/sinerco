@@ -28,7 +28,7 @@ class DataUnitController extends Controller
                     $q->select(['unit_id', 'unit', 'status']);
                 },
                 'client' => function ($q) {
-                    $q->select(['client_id', 'name']);
+                    $q->select(['client_id', 'name', 'gmt_offset']);
                 },
                 'workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
@@ -41,6 +41,7 @@ class DataUnitController extends Controller
                     'unit' => $pos->unit->unit,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
+                    'gmt_offset' => $pos->client?->gmt_offset ?? $pos->workshop?->gmt_offset ?? 7,
                     'location' => $pos->location?->location ?? null,
                     'location_id' => $pos->location_id ?? null,
                     'area' => $pos->location?->area?->area ?? null,
@@ -50,7 +51,7 @@ class DataUnitController extends Controller
         } else {
             $temp = DataUnit::with([
                 'UnitPositions.client' => function ($q) {
-                    $q->select(['client_id', 'name']);
+                    $q->select(['client_id', 'name', 'gmt_offset']);
                 },
                 'UnitPositions.location.area',
                 'UnitPositions.workshop' => function ($q) {
@@ -64,6 +65,7 @@ class DataUnitController extends Controller
                     'unit' => $unit->unit,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client->name ?? $unit->UnitPositions?->workshop->name,
+                    'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
                     'location_id' => $unit->location_id,
                     'location' => $unit->UnitPositions?->location->location ?? null,
                     'area' => $unit->UnitPositions?->location->area->area ?? null,

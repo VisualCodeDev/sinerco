@@ -81,7 +81,6 @@ const columns = ({
             sortable: false,
             width: "10%",
             Cell: ({ request_id, seen_status, pic }) => {
-                console.log(seen_status)
                 return (
                     <div className="flex flex-col justify-center items-center">
                         {user?.role === "technician" ? (

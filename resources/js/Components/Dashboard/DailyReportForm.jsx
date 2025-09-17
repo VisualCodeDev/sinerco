@@ -114,11 +114,11 @@ const DailyReportForm = (props) => {
                 : [];
 
             let currentHour = parseInt(now.format("HH"), 10);
-            console.log(currentHour);
 
             if (filledFormTime.includes(currentHour)) {
-                currentHour = null;
-                // if (currentHour < 0) currentHour = 23;
+                currentHour = currentHour + 1;
+                if (currentHour < 0) currentHour = 23;
+                if (currentHour > 24) currentHour = null;
             }
 
             const time =

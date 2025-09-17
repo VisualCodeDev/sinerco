@@ -86,6 +86,7 @@ export default function Dashboard({ unit_position_id }) {
     ];
 
     const setInitReport = async (reportData, gmt_offset) => {
+        if(!reportData) return;
         const fullDay = await generatePrevHour(gmt_offset);
 
         const reportTimes = reportData?.map((r) => r.time);
@@ -232,7 +233,7 @@ export default function Dashboard({ unit_position_id }) {
                                                         : "hidden"
                                                 }`}
                                             >
-                                                {allUnits.map((item) => (
+                                                {allUnits && allUnits?.length > 0 && allUnits?.map((item) => (
                                                     <div
                                                         className="py-1 px-2 flex items-center justify-between text-xs"
                                                         onClick={() =>

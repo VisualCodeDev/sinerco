@@ -64,6 +64,7 @@ class StatusRequestController extends Controller
         $status->status = 'Ongoing';
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
+        $status->save();
 
         $unitPosition->unit->update(['status' => $val['request_type']]);
         if ($unit) {
@@ -77,7 +78,6 @@ class StatusRequestController extends Controller
             }
             // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
         }
-        $status->save();
 
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
