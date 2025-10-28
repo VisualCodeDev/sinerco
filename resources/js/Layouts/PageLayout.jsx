@@ -10,7 +10,7 @@ import LoadingSpinner from "@/Components/Loading";
 const PageLayout = ({ children }) => {
     const { user, loading } = useAuth();
     const [showModal, setShowModal] = useState(false);
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(true);
     const [messages, setMessages] = useState([]);
 
     const handleClick = () => {
@@ -49,7 +49,7 @@ const PageLayout = ({ children }) => {
             <AuthGuard>
                 <div className="relative h-full">
                     <NotificationContainer messages={messages} />
-                    {user && user?.role === "operator" && (
+                    {user && (user?.role === "operator" || user?.role === "technician") && (
                         <div className="fixed bottom-0 right-0 z-[100] md:m-12 m-5">
                             {/* Mobile button */}
                             <button

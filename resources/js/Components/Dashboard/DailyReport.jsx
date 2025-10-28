@@ -310,31 +310,6 @@ const ExportModal = (props) => {
                             }
                         />
                     </div>
-                    {/* <div className="flex gap-1 items-center">
-                        <input
-                            type="checkbox"
-                            value="all"
-                            checked={isAllChecked}
-                            onChange={handleSelectAll}
-                        />
-                        <span>Select All</span>
-                    </div>
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mt-2 mb-6">
-                        {list.map((item, index) => (
-                            <div
-                                key={index}
-                                className="flex items-center gap-1 md:text-md text-sm"
-                            >
-                                <input
-                                    type="checkbox"
-                                    value={item}
-                                    checked={checkedItems.includes(item)}
-                                    onChange={() => handleCheckboxChange(item)}
-                                />
-                                <span>{item}</span>
-                            </div>
-                        ))}
-                    </div> */}
                     <div className="flex items-center place-self-center w-fit gap-2 bg-secondary text-white px-4 py-1 rounded-full transition ease-in-out delay-75 hover:scale-95">
                         <FaFileExport />
                         <button

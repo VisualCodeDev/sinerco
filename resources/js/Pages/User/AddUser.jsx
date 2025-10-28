@@ -3,10 +3,12 @@ import { useToast } from "@/Components/Toast/ToastProvider";
 import PageLayout from "@/Layouts/PageLayout";
 import axios from "axios";
 import React, { useState } from "react";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 const AddUser = ({ roles }) => {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
+    const [reveal, setReveal] = useState(false);
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -40,12 +42,12 @@ const AddUser = ({ roles }) => {
                 console.error(e);
             }
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
     return (
         <PageLayout>
-            {loading && <LoadingSpinner/>}
+            {loading && <LoadingSpinner />}
             <div className="max-w-xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-10">
                 <h2 className="text-2xl font-bold mb-6 text-center">
                     Add New User
@@ -93,14 +95,22 @@ const AddUser = ({ roles }) => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Password
                         </label>
-                        <input
-                            name="password"
-                            type="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
-                            required
-                        />
+                        <div className="relative">
+                            <input
+                                name="password"
+                                type={reveal ? "text" : "password"}
+                                value={form.password}
+                                onChange={handleChange}
+                                className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
+                                required
+                            />
+                            <div
+                                className="absolute right-0 top-1/2 -translate-y-1/2 pe-3 cursor-pointer"
+                                onClick={() => setReveal(!reveal)}
+                            >
+                                {!reveal ? <FaRegEyeSlash /> : <FaRegEye />}
+                            </div>
+                        </div>
                         {errors.password && (
                             <p className="text-red-600 text-sm mt-1">
                                 {errors.password[0]}

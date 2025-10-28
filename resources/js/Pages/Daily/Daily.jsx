@@ -84,8 +84,8 @@ export default function Dashboard({ unit_position_id }) {
         },
     ];
 
-    const setInitReport = async (reportData, gmt_offset) => {
-        const fullDay = await generatePrevHour(gmt_offset);
+    const setInitReport = async (reportData, gmt_offset, interval) => {
+        const fullDay = await generatePrevHour(gmt_offset, interval);
         const reportTimes = reportData?.map((r) => r.time) || [];
 
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
@@ -151,8 +151,7 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-
-            await initCurrDate(reportData?.data, unit?.data?.gmt_offset);
+            await initCurrDate(reportData?.data, unit?.data?.gmt_offset, unit?.data?.input_interval);
         } catch (e) {
             console.error(e);
         } finally {
@@ -160,13 +159,13 @@ export default function Dashboard({ unit_position_id }) {
         }
     };
 
-    const initCurrDate = async (reportData, gmt_offset) => {
+    const initCurrDate = async (reportData, gmt_offset, interval) => {
         setLoading(true);
         const { date } = await getCurrDateTime(gmt_offset);
         setCurrDate(new Date(date));
         setSelectedDate(date);
 
-        await setInitReport(reportData, gmt_offset);
+        await setInitReport(reportData, gmt_offset, interval);
         setLoading(false);
     };
     useEffect(() => {
