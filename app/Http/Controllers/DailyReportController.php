@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
 use App\Models\StatusRequest;
+use App\Models\TableCell;
 use App\Models\UnitPosition;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
@@ -14,6 +15,31 @@ use Log;
 
 class DailyReportController extends Controller
 {
+    public function getDailyReport(Request $request)
+    {
+        $start = $request->query('start');
+        $end = $request->query('end');
+
+        $reports = TableCell::with('report')
+            ->whereHas('report', function ($q) use ($start, $end) {
+                $q->whereDate('date', '>=', $start)
+                    ->whereDate('date', '<=', $end);
+            })
+            ->orderBy('daily_report_id')
+            ->get();
+            
+        $reportFormat = $reports->map(function ($item) {
+            return [
+                'date' => $item->report->date, // hanya ambil date dari report
+                'time' => $item->report->time, // hanya ambil date dari report
+                // ambil semua kolom TableCell
+                ...$item->toArray(),
+            ];
+        });
+
+        return response()->json($reportFormat);
+    }
+
     // public function unitList()
     // {
     //     $user = Auth::user();
@@ -41,6 +67,55 @@ class DailyReportController extends Controller
 
     //     return Inertia::render('Daily/DailyList', ['data' => $data]);
     // }
+    public $fields = [
+        ['param' => 'sourcePress', 'cell' => 'B'],
+        ['param' => 'dischargePress', 'cell' => 'C'],
+        ['param' => 'suctionPress', 'cell' => 'D'],
+        ['param' => 'speed', 'cell' => 'E'],
+        ['param' => 'manifoldPress', 'cell' => 'F'],
+        ['param' => 'oilPress', 'cell' => 'G'],
+        ['param' => 'oilDiff', 'cell' => 'H'],
+        ['param' => 'runningHours', 'cell' => 'I'],
+        ['param' => 'voltage', 'cell' => 'J'],
+        ['param' => 'waterTemp', 'cell' => 'K'],
+        ['param' => 'befCooler', 'cell' => 'L'],
+        ['param' => 'aftCooler', 'cell' => 'M'],
+        ['param' => 'staticPress', 'cell' => 'N'],
+        ['param' => 'diffPress', 'cell' => 'O'],
+        ['param' => 'mscfd', 'cell' => 'P'],
+        ['param' => 'remarks', 'cell' => 'Q']
+    ];
+
+    public function setCells($reportData)
+    {
+        $cellsData = [];
+
+        foreach ($this->fields as $field) {
+            $param = $field['param'];
+            $cell = $field['cell']; // selalu ambil dari fields
+            $value = $reportData[$param] ?? 0; // kalau $reportData array, pakai ini. Kalau model, pakai $reportData->$param
+
+            $cellsData[] = [
+                'daily_report_id' => $reportData['id'] ?? $reportData->id,
+                'parameter' => $param,
+                'value' => $value,
+                'cell' => $cell,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        if (!empty($cellsData)) {
+            TableCell::upsert(
+                $cellsData,
+                ['daily_report_id', 'parameter'], // key unik untuk cek apakah update atau insert
+                ['value', 'cell', 'updated_at']   // fields yang diupdate kalau record sudah ada
+            );
+        }
+    }
+
+
+
     public function setReport(Request $request, $unit_position_id)
     {
         if ($unit_position_id) {
@@ -166,6 +241,7 @@ class DailyReportController extends Controller
                     $report->request_id = $statusRequest->request_id;
                 }
                 $report->save();
+                $this->setCells($report);
                 // $report->unit_position_id = $unit_position_id;
                 // $report->fill($data)->save();
             }
@@ -204,9 +280,10 @@ class DailyReportController extends Controller
         }
         $report = DailyReport::find($request->id);
         $report->update($request->all());
-
+        $this->setCells($report);
         return response()->json(['type' => 'success', 'text' => 'Report updated successfully'], 200);
     }
+
     public function index($unit_position_id)
     {
         DailyReport::with('request')->where('unit_position_id', $unit_position_id)->get()->map(function ($item) {
@@ -226,6 +303,7 @@ class DailyReportController extends Controller
         }
         return redirect()->route('dashboard');
     }
+
     public function getReport()
     {
         $data = DailyReport::all()
@@ -241,6 +319,7 @@ class DailyReportController extends Controller
             });
         return response()->json($data);
     }
+
 
     public function getDataReportBasedOnDate(Request $request)
     {
@@ -258,7 +337,7 @@ class DailyReportController extends Controller
     }
 
     public function fillReport(Request $request)
-    {   
+    {
         Log::debug($request->all());
         $val = $request->validate([
             'missingHours' => 'required|array',

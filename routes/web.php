@@ -54,11 +54,12 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
-Route::controller(DailyReportController::class)->group(function () {
-    Route::post('/unit/daily/{unit_position_id}/add', 'setReport')->name('daily.add')->middleware('auth');
+Route::controller(DailyReportController::class)->middleware('auth')->group(function () {
+    Route::get('/api/daily-report', 'getDailyReport');
+    Route::post('/unit/daily/{unit_position_id}/add', 'setReport')->name('daily.add');
     Route::post('/unit/daily/update', 'editReport')->name('daily.edit')->middleware('auth');
     Route::post('/unit/fill/NaN', 'fillReport')->name('fill.report');
-    
+
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
     Route::get('/unit/daily/{unit_position_id}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
 

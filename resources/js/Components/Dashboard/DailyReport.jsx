@@ -19,6 +19,7 @@ import list from "../utils/DailyReport/columns";
 import axios from "axios";
 import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
+import ExportXlsm from "../utils/DailyReport/exportExcel";
 
 const DailyReport = (props) => {
     const { formData, unitData, user, setSelectedDate, selectedDate } = props;
@@ -31,7 +32,7 @@ const DailyReport = (props) => {
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(() => getAvg(currData), [currData]);
     const prevDateList = getDateLists(currDate);
-    
+
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -51,14 +52,14 @@ const DailyReport = (props) => {
     }, [dataAll]);
 
     const handleEdit = (id) => {
-        if(user?.role === "operator") return;
+        if (user?.role === "operator") return;
         const data = dataAll.find((item) => item?.id === id);
         setEditModal(true);
         setSelectedData(data);
     };
 
     useEffect(() => {
-        setData(formData)
+        setData(formData);
         setCurrData(formData);
     }, [formData]);
 
@@ -204,6 +205,7 @@ const DailyReport = (props) => {
 
             {isClicked && (
                 <ExportModal
+                    unitData={unitData}
                     list={prevDateList}
                     setClick={setClick}
                     // data={currData}
@@ -228,7 +230,7 @@ const DailyReport = (props) => {
 };
 
 const ExportModal = (props) => {
-    const { setClick, list, data } = props;
+    const { setClick, list, data, unitData } = props;
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
     const [selectedDate, setSelectedDate] = useState({
@@ -278,9 +280,19 @@ const ExportModal = (props) => {
         return dateArray;
     };
 
-    const handleGenerate = () => {
-        const range = getDateRange(selectedDate.start, selectedDate.end);
-        generateExcel("Report.xlsx", data, range);
+    const handleGenerate = async () => {
+        try {
+            const { start, end } = selectedDate;
+            const res = await fetch(
+                `/api/daily-report?start=${start}&end=${end}`
+            );
+            const data = await res.json();
+            console.log(start, end, data);
+            const range = getDateRange(start, end);
+            await ExportXlsm("Report.xlsx", data, range, unitData);
+        } catch (err) {
+            console.error("❌ Gagal ambil data:", err);
+        }
     };
 
     return (

@@ -120,7 +120,7 @@ export const TimeInput = ({
         for (let i = 0; i < 24; i += parseInt(Math.floor(interval))) {
             const isNow =
                 i === time || (time - i <= hourDuration && time - i >= 0);
-            
+
             const isPermittedMinute = isNow && minute <= minuteDuration;
             const alreadyFilled = filledFormTime.includes(i);
             if (isPermittedMinute && !alreadyFilled) {
@@ -134,7 +134,11 @@ export const TimeInput = ({
                 );
             }
         }
-    } else if (role === "super_admin" || role === "technician" || disableDuration) {
+    } else if (
+        role === "super_admin" ||
+        role === "technician" ||
+        disableDuration
+    ) {
         for (let i = 0; i < 24; i++) {
             if (!filledFormTime.includes(i)) {
                 options.push(
@@ -175,7 +179,7 @@ export const TimeInput = ({
 export const generatePrevHour = async (gmt_offset, interval = 1) => {
     const hours = [];
     const { hour } = await getCurrDateTime(gmt_offset);
-    for (let i = 0; i < hour; i+=interval) {
+    for (let i = 0; i < hour; i += interval) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
     }
     return hours;
