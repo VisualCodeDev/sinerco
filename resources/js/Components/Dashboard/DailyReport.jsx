@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-    formItems,
     exportToExcel,
     generateExcel,
     getAvg,
@@ -21,7 +20,8 @@ import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 
 const DailyReport = (props) => {
-    const { formData, unitData, user, setSelectedDate, selectedDate } = props;
+    const { formData, unitData, user, setSelectedDate, selectedDate, fields } =
+        props;
     const currDate = new Date();
 
     const [isClicked, setClick] = useState(false);
@@ -29,9 +29,12 @@ const DailyReport = (props) => {
     const [selectedData, setSelectedData] = useState(null);
     const [dataAll, setData] = useState(formData);
     const [currData, setCurrData] = useState(null);
-    const averages = useMemo(() => getAvg(currData), [currData]);
+    const averages = useMemo(
+        () => getAvg(currData, fields),
+        [currData, fields]
+    );
     const prevDateList = getDateLists(currDate);
-    
+
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -51,14 +54,15 @@ const DailyReport = (props) => {
     }, [dataAll]);
 
     const handleEdit = (id) => {
-        if(user?.role === "operator") return;
-        const data = dataAll.find((item) => item?.id === id);
+        if (user?.role === "operator") return;
+        const data = dataAll[id];
+
         setEditModal(true);
-        setSelectedData(data);
+        setSelectedData({ ...data, key: id });
     };
 
     useEffect(() => {
-        setData(formData)
+        setData(formData);
         setCurrData(formData);
     }, [formData]);
 
@@ -96,16 +100,32 @@ const DailyReport = (props) => {
                 <table className="min-w-[900px] w-full table-auto border-collapse">
                     <thead className="bg-primary text-white text-center">
                         <tr>
-                            {formItems?.map((item, index) => (
+                            <th
+                                className="px-4 py-2 text-sm font-semibold border border-black text-center"
+                                rowSpan={2}
+                            >
+                                Time
+                            </th>
+                            {fields?.map((item, index) => (
                                 <th
                                     key={index}
                                     className="px-4 py-2 text-sm font-semibold border border-black text-center"
-                                    rowSpan={!item.subheader ? 2 : undefined}
-                                    colSpan={item.subheader?.length}
+                                    rowSpan={
+                                        !item?.subfields?.length > 0
+                                            ? 2
+                                            : undefined
+                                    }
+                                    colSpan={item?.subfields?.length}
                                 >
-                                    {item.header}
+                                    {item.name}
                                 </th>
                             ))}
+                            <th
+                                rowSpan={2}
+                                className="px-4 py-2 text-sm font-semibold border border-black text-left text-center"
+                            >
+                                Remarks
+                            </th>
                             {user?.role === "super_admin" && (
                                 <th
                                     rowSpan={2}
@@ -116,13 +136,13 @@ const DailyReport = (props) => {
                             )}
                         </tr>
                         <tr>
-                            {formItems?.map((item) =>
-                                item.subheader?.map((sub, index) => (
+                            {fields?.map((item) =>
+                                item.subfields?.map((sub, index) => (
                                     <th
                                         key={index}
                                         className="px-4 py-2 text-sm font-semibold border border-black text-left"
                                     >
-                                        {sub.sub}
+                                        {sub.name}
                                     </th>
                                 ))
                             )}
@@ -134,22 +154,26 @@ const DailyReport = (props) => {
                                 <tr
                                     key={key}
                                     className="odd:bg-white even:bg-gray-50 hover:bg-slate-50 cursor-pointer transition duration-75"
-                                    onClick={() => handleEdit(value.id)}
+                                    onClick={() => handleEdit(key)}
                                 >
-                                    {formItems
+                                    <td className="px-4 py-2 border text-center">
+                                        {value?.time}
+                                    </td>
+                                    {fields
                                         ?.filter(
                                             (item) => item?.name != "remarks"
                                         )
                                         .map((item) =>
-                                            item?.subheader?.length > 0 ? (
-                                                item.subheader.map((sub) => (
+                                            item?.subfields?.length > 0 ? (
+                                                item.subfields.map((sub) => (
                                                     <td className="px-4 py-2 border text-center">
-                                                        {value?.[sub?.name]}
+                                                        {value?.[sub?.slug] ||
+                                                            0}
                                                     </td>
                                                 ))
                                             ) : (
                                                 <td className="px-4 py-2 border text-center">
-                                                    {value?.[item?.name]}
+                                                    {value?.[item?.slug] || 0}
                                                 </td>
                                             )
                                         )}
@@ -213,6 +237,7 @@ const DailyReport = (props) => {
             )}
             {isEditModal && (
                 <EditModal
+                    fields={fields}
                     role={user.role}
                     setClick={setEditModal}
                     setEditModal={setEditModal}
@@ -337,6 +362,7 @@ const ExportModal = (props) => {
 
 const EditModal = (props) => {
     const {
+        fields,
         setEditModal,
         isEditModal,
         data,
@@ -355,6 +381,7 @@ const EditModal = (props) => {
     };
 
     const formList = list({
+        fields: fields,
         handleChange: handleChange,
         formData: formDataState,
         reportSettings: unitData?.daily_report_setting,
@@ -362,19 +389,39 @@ const EditModal = (props) => {
 
     const handleSubmit = async () => {
         if (formDataState) {
+            console.log(formDataState);
             setLoading(true);
             try {
-                console.log(formDataState);
+                const normalizedField = [
+                    "date",
+                    "time",
+                    ...fields.flatMap((item) =>
+                        item.subfields.length > 0
+                            ? item?.subfields.map((sub) => sub.slug)
+                            : item?.slug
+                    ),
+                ];
                 const resp = await axios.post(
-                    route("daily.edit", { ...formDataState })
+                    route("daily.edit", {
+                        data: formDataState,
+                        fields: normalizedField,
+                        unit_position_id: unitData?.unit_position_id,
+                    })
                 );
                 if (resp.status === 200) {
                     addToast(resp.data);
-                    const updatedItems = data.map((item) =>
-                        item.id === formDataState.id
-                            ? { ...item, ...formDataState }
-                            : item
-                    );
+                    const updatedItems = [...data];
+
+                    const newItem = {
+                        ...formDataState,
+                        id: resp.data.report.id,
+                    };
+
+                    updatedItems[formData?.key] = {
+                        ...updatedItems[formData?.key],
+                        ...newItem,
+                    };
+
                     setData(updatedItems);
                     setEditModal(false);
                 }
@@ -439,7 +486,7 @@ const EditModal = (props) => {
                             }
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-x-10 gap-y-8 mb-4 items-end">
+                    <div className="grid grid-cols-2 gap-x-10 gap-y-8 mb-4 items-start">
                         {formList
                             .filter(
                                 (item) =>
@@ -459,8 +506,8 @@ const EditModal = (props) => {
                                                   item: formDataState,
                                                   header: item.header,
                                                   name: item.name,
-                                                  subheader:
-                                                      item?.subheader || [],
+                                                  subfields:
+                                                      item?.subfields || [],
                                               } || ""
                                           )
                                         : item.Cell}

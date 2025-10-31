@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DailyFieldController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\UserSettingController;
 use App\Http\Controllers\UserUnitController;
 use App\Http\Controllers\WorkshopController;
 use App\Models\AdminNotification;
+use App\Models\DailyField;
 use App\Models\DailyReportSettings;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -93,6 +95,7 @@ Route::controller(StatusRequestController::class)->group(function () {
 
 Route::controller(DataUnitController::class)->middleware('auth')->group(function () {
     Route::get('/unit/setting', 'unitSetting')->name('unit.interval.setting');
+    Route::get('/unit/input-field', 'inputFieldSetting')->name('unit.input.setting');
     Route::get('/unit/location', 'unitLocation')->name('unit.position');
     Route::get('/unit/location/setting', 'unitLocationSetting')->name('unit.position.setting');
     Route::get('/unit/list', 'unitList')->name('daily.list');
@@ -100,6 +103,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/api/get-unit-data', 'getUnit')->name('getUnitAreaLocation');
     Route::get('/api/get-selected-unit-data', 'getSelectedUnit')->name('getSelectedUnit');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
+    Route::get('/get/fields', 'getUnitFields')->name('unit.fields.get');
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
@@ -107,6 +111,11 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 
     Route::get('/unit/list/add', 'create')->name('unit.add.page')->middleware('roles:super_admin');
     Route::post('/unit/list/add', 'addNewUnit')->name('unit.add')->middleware('roles:super_admin');
+});
+
+Route::controller(DailyFieldController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::get('/unit/input-field', 'index')->name('input.field.setting');
+    Route::get('/get/field', 'getFields')->name('input.field.get');
 });
 
 Route::get('/get/server-time', function () {

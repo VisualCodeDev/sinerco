@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\DataUnit;
 use App\Models\Location;
 use App\Models\Area;
+use App\Models\UnitField;
 use App\Models\UnitPosition;
 use App\Models\Workshop;
 use DB;
@@ -369,4 +370,13 @@ class DataUnitController extends Controller
         ]);
     }
 
+    public function getUnitFields(Request $request)
+    {
+        $fields = UnitField::where("unit_id", $request->unit_id)
+            ->with('fields.subfields')
+            ->get()
+            ->pluck('fields');
+
+        return response()->json($fields);
+    }
 }

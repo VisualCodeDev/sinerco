@@ -16,7 +16,8 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
-import { IoMap } from "react-icons/io5";
+import { IoDocumentText, IoMap } from "react-icons/io5";
+import { FaTextSlash } from "react-icons/fa6";
 
 const Heading = ({ children }) => {
     const [isLoading, setLoading] = useState(false);
@@ -58,6 +59,11 @@ const Heading = ({ children }) => {
             icon: <IoMap />,
             label: "Unit Location Set.",
             href: route("unit.position"),
+        },
+        inputField: {
+            icon: <IoDocumentText/>,
+            label: "Input Fields",
+            href: route('input.field.setting'),
         },
         unitList: {
             icon: <FaList />,
@@ -159,6 +165,7 @@ const Heading = ({ children }) => {
             menu.unitList,
             menu.unitLocationSetting,
             menu.inputSetting,
+            menu.inputField,
             menu.accountList,
             menu.logHistory,
             // menu.area,

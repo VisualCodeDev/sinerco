@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->integer('input_interval')->default(1);
             $table->integer('input_duration')->default(35);
             $table->boolean('disable_duration')->default(false);
+            $table->string('contract_ref')->default('0000000000');
             $table->timestamps();
         });
     }

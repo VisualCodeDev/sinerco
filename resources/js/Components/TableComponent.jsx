@@ -19,7 +19,7 @@ import { router } from "@inertiajs/react";
 const TableComponent = (props) => {
     const {
         isUserList = false,
-        newItemPlaceholder="Add Unit",
+        newItemPlaceholder = "Add Unit",
         isModal = false,
         maxItemPerPage,
         roles = [],
@@ -224,7 +224,9 @@ const TableComponent = (props) => {
                                 className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
                             >
                                 <FaPlus />
-                                <span className="">{newItemPlaceholder || 'Add'}</span>
+                                <span className="">
+                                    {newItemPlaceholder || "Add"}
+                                </span>
                             </a>
                         )}
                     </div>
@@ -278,8 +280,15 @@ const TableComponent = (props) => {
                                             "border-" + onRowClick &&
                                             `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                         }
-                                        onClick={() =>
-                                            onRowClick ? onRowClick(item) : null
+                                        onClick={(e) =>
+                                            onRowClick
+                                                ? onRowClick(item, e)
+                                                : null
+                                        }
+                                        onMouseDown={(e) =>
+                                            onRowClick
+                                                ? onRowClick(item, e)
+                                                : null
                                         }
                                     >
                                         {columns.map((col, colIndex) => (
@@ -456,35 +465,40 @@ const TableComponent = (props) => {
                                         className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-sm text-white px-2 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
                                     >
                                         <FaPlus />
-                                        <span className="">{newItemPlaceholder || 'Add'}</span>
+                                        <span className="">
+                                            {newItemPlaceholder || "Add"}
+                                        </span>
                                     </a>
                                 )}
                             </div>
 
                             <div className="flex">
-                               {filterUserRole && (
-                                <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
-                                    <FaFilter />
-                                    <select
-                                        className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
-                                        onChange={(e) =>
-                                            setFilterConfig(e.target.value)
-                                        }
-                                    >
-                                        <option value="">-- All Role --</option>
-                                        {roles &&
-                                            roles?.map((item, i) => (
-                                                <option
-                                                    key={i}
-                                                    value={item.name}
-                                                >
-                                                    {splitCamelCase(item.name)}
-                                                </option>
-                                            ))}
-                                    </select>
-                                </div>
-                            )}
-
+                                {filterUserRole && (
+                                    <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
+                                        <FaFilter />
+                                        <select
+                                            className="border-none focus:border-none outline-none focus:outline-none text-sm md:text-base"
+                                            onChange={(e) =>
+                                                setFilterConfig(e.target.value)
+                                            }
+                                        >
+                                            <option value="">
+                                                -- All Role --
+                                            </option>
+                                            {roles &&
+                                                roles?.map((item, i) => (
+                                                    <option
+                                                        key={i}
+                                                        value={item.name}
+                                                    >
+                                                        {splitCamelCase(
+                                                            item.name
+                                                        )}
+                                                    </option>
+                                                ))}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="flex gap-2 justify-start items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-4 py-2">

@@ -15,23 +15,9 @@ class DailyReport extends Model
         return $this->belongsTo(StatusRequest::class, 'request_id', 'request_id');
     }
     protected $fillable = [
+        'unit_position_id',
+        'data',
         'date',
-        'time',
-        'sourcePress',
-        'suctionPress',
-        'dischargePress',
-        'speed',
-        'manifoldPress',
-        'oilPress',
-        'oilDiff',
-        'runningHours',
-        'voltage',
-        'waterTemp',
-        'befCooler',
-        'arfCooler',
-        'staticPress',
-        'diffPress',
-        'mscfd',
-        'request_id'
+        'time'
     ];
 }

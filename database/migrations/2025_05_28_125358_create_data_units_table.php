@@ -13,6 +13,10 @@ return new class extends Migration {
         Schema::create('data_units', function (Blueprint $table) {
             $table->string('unit_id', 10)->primary();
             $table->string('unit');
+            $table->string('unit_sn')->default('');
+            $table->string('engine_sn')->default('');
+            $table->string('office_size')->default('');
+            $table->string('config')->default('');
             $table->enum('status', ['stdby', 'sd', 'running'])->default('running');
 
             $table->timestamps();

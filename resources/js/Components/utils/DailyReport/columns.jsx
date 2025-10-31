@@ -2,6 +2,7 @@ import { DateInput, TimeInput } from "../dashboard-util";
 
 const list = ({
     handleChange,
+    fields,
     formData,
     reportSettings,
     role,
@@ -43,7 +44,6 @@ const list = ({
             name: "time",
             header: "Time",
             Cell: ({ item, header, name }) => {
-                console.log(item)
                 return (
                     <div className="flex flex-col">
                         <label
@@ -72,698 +72,788 @@ const list = ({
                 );
             },
         },
-        {
-            name: "sourcePress",
-            header: "Source Press.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting.name?.min || null,
-                    max: reportSettings?.minMaxSetting.name?.max || null,
-                };
-                // console.log(reportSettings?.minMaxSetting?.);
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name || ""] || ""}
-                            step={decimalSetting}
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "suctionPress",
-            header: "Suction Press.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "dischargePress",
-            header: "Discharge Press.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "speed",
-            header: "Speed",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "manifoldPress",
-            header: "Manifold Press.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "oilPress",
-            header: "Oil Press.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "oilDiff",
-            header: "Oil Diff.",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "runningHours",
-            header: "Running Hours",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "voltage",
-            header: "Voltage",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "waterTemp",
-            header: "Water Temp",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "dischargeTemp",
-            header: "Discharge Temp",
-            subheader: [
-                {
-                    name: "befCooler",
-                    sub: "Bef. Cooler",
-                },
-                {
-                    name: "aftCooler",
-                    sub: "Aft. Cooler",
-                },
-            ],
-            Cell: ({ item, header, name, subheader }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col flew-wrap">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <div className="flex flex-row gap-4">
-                            {subheader?.map((sub, index) => {
-                                return (
-                                    <div className="flex flex-col lg:md:w-1/2 w-full">
-                                        <label className="text-sm">
-                                            {sub?.sub}
-                                        </label>
-                                        <input
-                                            required
-                                            id={sub.name}
-                                            type="text"
-                                            inputmode="decimal"
-                                            name={sub.name}
-                                            value={item[sub.name] || ""}
-                                            step={decimalSetting}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    [e.target.name],
-                                                    e.target.value,
-                                                    minMaxSetting
-                                                )
-                                            }
-                                            placeholder={decimalSetting}
-                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            },
-        },
-        {
-            name: "staticPress",
-            header: "Static Press. Reading",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={
-                                1 /
-                                Math.pow(
-                                    10,
-                                    reportSettings?.decimalSetting[name]
-                                )
-                            }
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "diffPress",
-            header: "Diff. Press. Reading",
-            Cell: ({ item, header, name }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <input
-                            required
-                            disabled={isDown}
-                            // min={minMaxSetting.min}
-                            // max={minMaxSetting.max}
-                            id={name}
-                            type="text"
-                            inputmode="decimal"
-                            name={name}
-                            value={item[name] || ""}
-                            step={decimalSetting}
-                            onChange={(e) =>
-                                handleChange(
-                                    [e.target.name],
-                                    e.target.value,
-                                    minMaxSetting
-                                )
-                            }
-                            placeholder={decimalSetting}
-                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                        />
-                    </div>
-                );
-            },
-        },
-        {
-            name: "flowRate",
-            header: "Flowrate",
-            subheader: [{ name: "mscfd", sub: "MSCFD" }],
-            Cell: ({ item, header, name, subheader }) => {
-                const decimalSetting =
-                    1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
-                const minMaxSetting = {
-                    min: reportSettings?.minMaxSetting[name]?.min,
-                    max: reportSettings?.minMaxSetting[name]?.max,
-                };
-                return (
-                    <div className="flex flex-col">
-                        <label
-                            htmlFor={name}
-                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
-                        >
-                            {header}{" "}
-                        </label>
-                        <div className="flex gap-4">
-                            {subheader?.map((sub, index) => {
-                                return (
-                                    <div className="flex flex-col w-full">
-                                        <label className="text-sm">
-                                            {sub?.sub}
-                                        </label>
-                                        <input
-                                            required
-                                            id={sub.name}
-                                            type="text"
-                                            inputmode="decimal"
-                                            name={sub.name}
-                                            value={item[sub.name] || ""}
-                                            step={decimalSetting}
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    [e.target.name],
-                                                    e.target.value,
-                                                    minMaxSetting
-                                                )
-                                            }
-                                            placeholder={decimalSetting}
-                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            },
-        },
+        // {
+        //     name: "sourcePress",
+        //     header: "Source Press.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting.name?.min || null,
+        //             max: reportSettings?.minMaxSetting.name?.max || null,
+        //         };
+        //         // console.log(reportSettings?.minMaxSetting?.);
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name || ""] || ""}
+        //                     step={decimalSetting}
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "suctionPress",
+        //     header: "Suction Press.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "dischargePress",
+        //     header: "Discharge Press.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "speed",
+        //     header: "Speed",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "manifoldPress",
+        //     header: "Manifold Press.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "oilPress",
+        //     header: "Oil Press.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "oilDiff",
+        //     header: "Oil Diff.",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "runningHours",
+        //     header: "Running Hours",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "voltage",
+        //     header: "Voltage",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "waterTemp",
+        //     header: "Water Temp",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "dischargeTemp",
+        //     header: "Discharge Temp",
+        //     subheader: [
+        //         {
+        //             name: "befCooler",
+        //             sub: "Bef. Cooler",
+        //         },
+        //         {
+        //             name: "aftCooler",
+        //             sub: "Aft. Cooler",
+        //         },
+        //     ],
+        //     Cell: ({ item, header, name, subheader }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col flew-wrap">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <div className="flex flex-row gap-4">
+        //                     {subheader?.map((sub, index) => {
+        //                         return (
+        //                             <div className="flex flex-col lg:md:w-1/2 w-full">
+        //                                 <label className="text-sm">
+        //                                     {sub?.sub}
+        //                                 </label>
+        //                                 <input
+        //                                     required
+        //                                     id={sub.name}
+        //                                     type="text"
+        //                                     inputmode="decimal"
+        //                                     name={sub.name}
+        //                                     value={item[sub.name] || ""}
+        //                                     step={decimalSetting}
+        //                                     onChange={(e) =>
+        //                                         handleChange(
+        //                                             [e.target.name],
+        //                                             e.target.value,
+        //                                             minMaxSetting
+        //                                         )
+        //                                     }
+        //                                     placeholder={decimalSetting}
+        //                                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                                 />
+        //                             </div>
+        //                         );
+        //                     })}
+        //                 </div>
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "staticPress",
+        //     header: "Static Press. Reading",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={
+        //                         1 /
+        //                         Math.pow(
+        //                             10,
+        //                             reportSettings?.decimalSetting[name]
+        //                         )
+        //                     }
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "diffPress",
+        //     header: "Diff. Press. Reading",
+        //     Cell: ({ item, header, name }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <input
+        //                     required
+        //                     disabled={isDown}
+        //                     // min={minMaxSetting.min}
+        //                     // max={minMaxSetting.max}
+        //                     id={name}
+        //                     type="text"
+        //                     inputmode="decimal"
+        //                     name={name}
+        //                     value={item[name] || ""}
+        //                     step={decimalSetting}
+        //                     onChange={(e) =>
+        //                         handleChange(
+        //                             [e.target.name],
+        //                             e.target.value,
+        //                             minMaxSetting
+        //                         )
+        //                     }
+        //                     placeholder={decimalSetting}
+        //                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                 />
+        //             </div>
+        //         );
+        //     },
+        // },
+        // {
+        //     name: "flowRate",
+        //     header: "Flowrate",
+        //     subheader: [{ name: "mscfd", sub: "MSCFD" }],
+        //     Cell: ({ item, header, name, subheader }) => {
+        //         const decimalSetting =
+        //             1 / Math.pow(10, reportSettings?.decimalSetting[name]) || 1;
+        //         const minMaxSetting = {
+        //             min: reportSettings?.minMaxSetting[name]?.min,
+        //             max: reportSettings?.minMaxSetting[name]?.max,
+        //         };
+        //         return (
+        //             <div className="flex flex-col">
+        //                 <label
+        //                     htmlFor={name}
+        //                     className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+        //                 >
+        //                     {header}{" "}
+        //                 </label>
+        //                 <div className="flex gap-4">
+        //                     {subheader?.map((sub, index) => {
+        //                         return (
+        //                             <div className="flex flex-col w-full">
+        //                                 <label className="text-sm">
+        //                                     {sub?.sub}
+        //                                 </label>
+        //                                 <input
+        //                                     required
+        //                                     id={sub.name}
+        //                                     type="text"
+        //                                     inputmode="decimal"
+        //                                     name={sub.name}
+        //                                     value={item[sub.name] || ""}
+        //                                     step={decimalSetting}
+        //                                     onChange={(e) =>
+        //                                         handleChange(
+        //                                             [e.target.name],
+        //                                             e.target.value,
+        //                                             minMaxSetting
+        //                                         )
+        //                                     }
+        //                                     placeholder={decimalSetting}
+        //                                     className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+        //                                 />
+        //                             </div>
+        //                         );
+        //                     })}
+        //                 </div>
+        //             </div>
+        //         );
+        //     },
+        // },
     ];
 
-    return colItem;
+    const additionalFields = fields.map((item) => ({
+        name: item?.slug,
+        header: item?.name,
+        subheader: item?.slug,
+        Cell: () => {
+            const decimalSetting =
+                1 /
+                Math.pow(10, reportSettings?.decimalSetting?.[item?.slug] || 0);
+            const minMaxSetting = {
+                min: reportSettings?.minMaxSetting?.[item?.slug]?.min,
+                max: reportSettings?.minMaxSetting?.[item?.slug]?.max,
+            };
+            if (item?.subfields?.length > 0) {
+                return (
+                    <div className="flex flex-col">
+                        <label
+                            htmlFor={item?.slug}
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+                        >
+                            {item?.name}
+                        </label>
+
+                        <div className="flex gap-4 flex-wrap">
+                            {item?.subfields?.map((sub, index) => (
+                                <div
+                                    key={index}
+                                    className="flex flex-col w-full"
+                                >
+                                    <label className="text-sm">
+                                        {sub?.name}
+                                    </label>
+                                    <input
+                                        required
+                                        id={sub.slug}
+                                        type="text"
+                                        inputMode="decimal"
+                                        name={sub.slug}
+                                        value={formData[sub.slug] || ""}
+                                        step={decimalSetting}
+                                        onChange={(e) =>
+                                            handleChange(
+                                                [sub.slug],
+                                                e.target.value,
+                                                minMaxSetting
+                                            )
+                                        }
+                                        placeholder={decimalSetting}
+                                        className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            } else {
+                return (
+                    <div className="flex flex-col">
+                        <label
+                            htmlFor={item?.name}
+                            className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
+                        >
+                            {item?.name}{" "}
+                        </label>
+                        <input
+                            required
+                            disabled={isDown}
+                            // min={minMaxSetting.min}
+                            // max={minMaxSetting.max}
+                            id={item?.slug}
+                            type="text"
+                            inputmode="decimal"
+                            name={item?.slug}
+                            value={formData[item?.slug || ""] || ""}
+                            step={decimalSetting}
+                            onChange={(e) =>
+                                handleChange(
+                                    [e.target.name],
+                                    e.target.value,
+                                    minMaxSetting
+                                )
+                            }
+                            placeholder={decimalSetting}
+                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+                        />
+                    </div>
+                );
+            }
+        },
+    }));
+
+    return [...colItem, ...additionalFields];
 };
 export default list;

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Card from "../Card";
 import {
-    formItems,
     DateInput,
     getCurrDateTime,
     TimeInput,
@@ -26,6 +25,7 @@ const DailyReportForm = (props) => {
         interval,
         duration,
         gmt_offset,
+        fields,
         isDown = true,
     } = props;
     const [data, setData] = useState({});
@@ -33,6 +33,7 @@ const DailyReportForm = (props) => {
     const [isConfirmationModal, setConfirmationModal] = useState(false);
     const [saving, setSaving] = useState(false);
     const { addToast } = useToast();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setConfirmationModal(true);
@@ -41,9 +42,18 @@ const DailyReportForm = (props) => {
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
+            const normalizedField = [
+                "date",
+                "time",
+                ...fields.flatMap((item) =>
+                    item.subfields.length > 0
+                        ? item?.subfields.map((sub) => sub.slug)
+                        : item?.slug
+                ),
+            ];
             const resp = await axios.post(
                 route("daily.add", unitData?.unit_position_id),
-                data
+                { data: data, fields: normalizedField }
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
@@ -91,9 +101,10 @@ const DailyReportForm = (props) => {
     };
 
     const formList = list({
+        fields: fields,
         handleChange: handleChange,
         isDown: isDown,
-        formData: formData,
+        formData: data,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
         interval: interval,
@@ -120,7 +131,7 @@ const DailyReportForm = (props) => {
                 if (currentHour < 0) currentHour = 23;
                 if (currentHour > 24) currentHour = 0;
             }
-            
+
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
 

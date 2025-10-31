@@ -37,6 +37,7 @@ export default function Dashboard({ unit_position_id }) {
     const [unitData, setUnitData] = useState();
     const [isUnitRunning, setIsUnitRunning] = useState(true);
     const [clientName, setClientName] = useState();
+    const [fields, setFields] = useState([]);
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
 
     const [expanded, setExpanded] = useState(false);
@@ -86,24 +87,32 @@ export default function Dashboard({ unit_position_id }) {
 
     const setInitReport = async (reportData, gmt_offset, interval) => {
         const fullDay = await generatePrevHour(gmt_offset, interval);
+        let finalReportData = reportData;
         const reportTimes = reportData?.map((r) => r.time) || [];
-
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
         if (missingHours.length > 0) {
-            try {
-                const resp = await axios.post(route("fill.report"), {
-                    missingHours: missingHours,
-                    date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
-                    unit_position_id: unit_position_id,
-                });
+            const formattedData = missingHours.map((time) => {
+                return {
+                    time,
+                    unit_position_id,
+                    date: selectedDate,
+                    ...fields.reduce((acc, field) => {
+                        acc[field.slug] = 0;
+                        return acc;
+                    }, {}),
+                };
+            });
+            console.log(formattedData)
+            finalReportData = [...reportData, ...formattedData];
 
-                setData([...reportData, ...resp?.data]);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            setData(reportData);
+            finalReportData.sort((a, b) => {
+                const timeA = parseInt(a.time.split(":")[0], 10);
+                const timeB = parseInt(b.time.split(":")[0], 10);
+                return timeA - timeB;
+            });
         }
+
+        setData(finalReportData);
     };
 
     const setInitPrevReport = async (reportData) => {
@@ -151,7 +160,12 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-            await initCurrDate(reportData?.data, unit?.data?.gmt_offset, unit?.data?.input_interval);
+
+            await initCurrDate(
+                reportData?.data,
+                unit?.data?.gmt_offset,
+                unit?.data?.input_interval
+            );
         } catch (e) {
             console.error(e);
         } finally {
@@ -168,6 +182,7 @@ export default function Dashboard({ unit_position_id }) {
         await setInitReport(reportData, gmt_offset, interval);
         setLoading(false);
     };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -178,32 +193,56 @@ export default function Dashboard({ unit_position_id }) {
             fetchData();
             return;
         }
-        const changeReportData = async () => {
-            setLoading(true);
-            try {
-                const reportData = await axios.get(
-                    route("getDataReportBasedOnDate", {
-                        unit_position_id: unit_position_id,
-                        date: selectedDate,
-                    })
-                );
-                if (new Date(selectedDate) < currDate) {
-                    await setInitPrevReport(reportData?.data);
-                } else {
-                    setData(reportData?.data);
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
-        };
-        changeReportData();
+        // const changeReportData = async () => {
+        //     setLoading(true);
+        //     try {
+        //         const reportData = await axios.get(
+        //             route("getDataReportBasedOnDate", {
+        //                 unit_position_id: unit_position_id,
+        //                 date: selectedDate,
+        //             })
+        //         );
+        //         if (new Date(selectedDate) < currDate) {
+        //             await setInitPrevReport(reportData?.data?.reportData);
+        //         } else {
+        //             setData(reportData?.data);
+        //         }
+        //     } catch (e) {
+        //         console.error(e);
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+        // changeReportData();
     }, [selectedDate]);
 
     useEffect(() => {
         if (!unitData?.status) return;
         const status = unitData?.status === "running" ? true : false;
+
+        const getFields = async () => {
+            if (!unitData?.unit_id) return;
+            try {
+                setLoading(true);
+                const response = await axios.get(
+                    route("unit.fields.get", { unit_id: unitData.unit_id }),
+                    {
+                        headers: { Accept: "application/json" },
+                    }
+                );
+
+                const data = response?.data?.data || response?.data;
+
+                setFields(data);
+            } catch (error) {
+                console.error(
+                    "Gagal mengambil field:",
+                    error.response?.data || error
+                );
+            }
+            setLoading(false);
+        };
+        getFields();
         setIsUnitRunning(status);
     }, [unitData]);
 
@@ -324,6 +363,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "form" && (
                             <DailyReportForm
+                                fields={fields}
                                 isDown={!isUnitRunning}
                                 clientData={clientName}
                                 interval={unitData?.input_interval}
@@ -342,6 +382,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "report" && (
                             <DailyReport
+                                fields={fields}
                                 selectedDate={selectedDate}
                                 setSelectedDate={setSelectedDate}
                                 formData={data}
