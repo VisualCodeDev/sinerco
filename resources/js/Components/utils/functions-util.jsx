@@ -179,8 +179,7 @@ export const TimeInput = ({
 export const generatePrevHour = async (gmt_offset, interval = 1) => {
     const hours = [];
     const { hour } = await getCurrDateTime(gmt_offset);
-    console.log(hour, interval, gmt_offset);
-    for (let i = 1; i < hour; i += interval) {
+    for (let i = 1; i < hour; i += Number(interval)) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
     }
     return hours;

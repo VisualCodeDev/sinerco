@@ -280,11 +280,7 @@ const TableComponent = (props) => {
                                             "border-" + onRowClick &&
                                             `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                         }
-                                        onClick={(e) =>
-                                            onRowClick
-                                                ? onRowClick(item, e)
-                                                : null
-                                        }
+                                      
                                         onMouseDown={(e) =>
                                             onRowClick
                                                 ? onRowClick(item, e)
