@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->string('office_size')->default('');
             $table->string('config')->default('');
             $table->enum('status', ['stdby', 'sd', 'running'])->default('running');
+            $table->string('contract_ref')->default('0000000000');
+            $table->string('application')->nullable();
 
             $table->timestamps();
         });

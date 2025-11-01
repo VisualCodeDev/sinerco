@@ -57,8 +57,8 @@ export const TimeInput = ({
     onChange,
     role,
     name = "time",
-    min = 0,
-    max = 23,
+    min = 1,
+    max = 24,
     placeholder = "Enter time",
     value,
     disabled = false,
@@ -97,7 +97,7 @@ export const TimeInput = ({
 
     if (minute > minuteDuration) {
         permittedTime = permittedTime + interval;
-        if (permittedTime > 24) permittedTime = 0;
+        if (permittedTime > 24) permittedTime = 24;
     }
 
     let permittedTimeAfter =
@@ -117,7 +117,7 @@ export const TimeInput = ({
 
     // hanya untuk operator
     if (role === "operator" && !disableDuration) {
-        for (let i = 0; i < 24; i += parseInt(Math.floor(interval))) {
+        for (let i = 1; i <= 24; i += parseInt(Math.floor(interval))) {
             const isNow =
                 i === time || (time - i <= hourDuration && time - i >= 0);
 
@@ -139,7 +139,7 @@ export const TimeInput = ({
         role === "technician" ||
         disableDuration
     ) {
-        for (let i = 0; i < 24; i++) {
+        for (let i = 1; i <= 24; i++) {
             if (!filledFormTime.includes(i)) {
                 options.push(
                     <option
@@ -179,7 +179,7 @@ export const TimeInput = ({
 export const generatePrevHour = async (gmt_offset, interval = 1) => {
     const hours = [];
     const { hour } = await getCurrDateTime(gmt_offset);
-    for (let i = 0; i < hour; i += interval) {
+    for (let i = 1; i < hour; i += interval) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
     }
     return hours;

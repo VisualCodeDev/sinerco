@@ -51,7 +51,7 @@ class DataUnitSeeder extends Seeder
 
         foreach ($units as $unit) {
             DataUnit::firstOrCreate(
-                ['unit' => $unit],
+                ['unit' => $unit, 'unit_sn' => $unit],
             );
         }
     }

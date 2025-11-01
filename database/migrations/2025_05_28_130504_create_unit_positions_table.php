@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->enum('position_type', ['client', 'workshop']);
             $table->string('client_id', 10)->nullable();
             $table->string('workshop_id', 10)->nullable();
-            $table->string('application')->nullable();
             $table->unsignedBigInteger('location_id')->nullable();
             $table->timestamps();
 

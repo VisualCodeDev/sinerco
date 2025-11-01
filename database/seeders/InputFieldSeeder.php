@@ -12,6 +12,7 @@ class InputFieldSeeder extends Seeder
     public function run(): void
     {
         $fields = [
+            'Source Press',
             'Suction Press',
             'Discharge Press',
             'Speed',
@@ -38,10 +39,24 @@ class InputFieldSeeder extends Seeder
         ]);
 
         // Tambahkan subfields-nya
-        $subfields = ['Bef. Cooler', 'Aft. Cooler'];
-        foreach ($subfields as $subName) {
+        $disTempSubfields = ['Bef. Cooler', 'Aft. Cooler'];
+        foreach ($disTempSubfields as $subName) {
             Subfield::create([
                 'field_id' => $dischargeTemp->id,
+                'name' => $subName,
+                'slug' => Str::slug($subName, '_'),
+            ]);
+        }
+
+        $flowrate = DailyField::create([
+            'name' => 'Flowrate',
+            'slug' => 'flowrate',
+        ]);
+
+        $flowSubfields = ['MSCFD'];
+        foreach ($flowSubfields as $subName) {
+            Subfield::create([
+                'field_id' => $flowrate->id,
                 'name' => $subName,
                 'slug' => Str::slug($subName, '_'),
             ]);

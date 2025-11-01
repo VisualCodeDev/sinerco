@@ -14,3 +14,20 @@ export const getFields = async () => {
 
     return data;
 };
+
+export const getSetting = async () => {
+    let data;
+    try {
+        const response = await fetch(route("setting.get"));
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        data = await response.json();
+    } catch (error) {
+        console.error("Gagal ambil data:", error);
+    }
+
+    return data;
+};

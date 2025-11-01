@@ -8,6 +8,7 @@ use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\UserPermissionController;
@@ -60,7 +61,7 @@ Route::controller(DailyReportController::class)->group(function () {
     Route::post('/unit/daily/{unit_position_id}/add', 'setReport')->name('daily.add')->middleware('auth');
     Route::post('/unit/daily/update', 'editReport')->name('daily.edit')->middleware('auth');
     Route::post('/unit/fill/NaN', 'fillReport')->name('fill.report');
-    
+
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
     Route::get('/unit/daily/{unit_position_id}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
 
@@ -116,6 +117,11 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 Route::controller(DailyFieldController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::get('/unit/input-field', 'index')->name('input.field.setting');
     Route::get('/get/field', 'getFields')->name('input.field.get');
+});
+
+Route::controller(SettingController::class)->middleware(['auth'])->group(function () {
+    Route::get('/get/setting', 'index')->name('setting.get');
+    Route::post('/set/setting', 'setSetting')->name('setting.set')->middleware(['roles:super_admin']);
 });
 
 Route::get('/get/server-time', function () {
