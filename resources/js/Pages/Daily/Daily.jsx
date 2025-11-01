@@ -102,7 +102,6 @@ export default function Dashboard({ unit_position_id }) {
         const fullDay = await generatePrevHour(gmt_offset, interval);
         let finalReportData = reportData;
         const reportTimes = reportData?.map((r) => r.time) || [];
-        console.log(fullDay, reportTimes)
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
         if (missingHours.length > 0) {
             const formattedData = missingHours.map((time) => {
