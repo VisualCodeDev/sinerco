@@ -389,7 +389,6 @@ const EditModal = (props) => {
 
     const handleSubmit = async () => {
         if (formDataState) {
-            console.log(formDataState);
             setLoading(true);
             try {
                 const normalizedField = [
