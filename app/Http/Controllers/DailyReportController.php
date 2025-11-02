@@ -111,18 +111,27 @@ class DailyReportController extends Controller
             WhatsAppService::sendMessage('082113837546', $warningMessage);
         }
 
-        // 💾 Simpan report
-        $report = new DailyReport();
-        $report->unit_position_id = $unit_position_id;
-        $report->date = $validated['date'];
-        $report->time = $validated['time'];
-        $report->data = json_encode($validated);
-        if ($statusRequest) {
-            $report->request_id = $statusRequest->request_id;
-        }
-        $report->save();
+        try {
+            $report = new DailyReport();
+            $report->unit_position_id = $unit_position_id;
+            $report->date = $validated['date'];
+            $report->time = $validated['time'];
+            $report->data = json_encode($validated);
+            if ($statusRequest) {
+                $report->request_id = $statusRequest->request_id;
+            }
 
-        return back()->with('success', 'Report berhasil disimpan.');
+            $report->save();
+
+            Log::info('Report tersimpan:', $report->toArray());
+
+            return back()->with('success', 'Report berhasil disimpan.');
+        } catch (\Throwable $e) {
+            Log::error('Gagal simpan report: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors('Gagal menyimpan report: ' . $e->getMessage());
+        }
     }
 
     public function editReport(Request $request)
