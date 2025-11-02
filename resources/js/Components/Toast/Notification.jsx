@@ -35,7 +35,7 @@ const Notification = ({ message, alert = true }) => {
     };
 
     if (!visible) return null;
-
+    if (!message?.request_type) return;
     return (
         <div
             className={`${
@@ -88,7 +88,7 @@ const NotificationContainer = ({
                     : "top-5 right-5"
             } z-[1000] ${alert && "animate-blink"}`}
         >
-            {Array.isArray(messages) ? (
+            {Array.isArray(messages) && messages.length > 0 ? (
                 messages.map((message, index) => (
                     <Notification
                         alert={alert}
