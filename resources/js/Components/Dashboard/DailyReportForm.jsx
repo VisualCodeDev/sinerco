@@ -57,7 +57,7 @@ const DailyReportForm = (props) => {
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
-                addToast({ type: "success", text: "Report Added" });
+                addToast(resp.data);
                 route("daily", Number(unitData?.unit_position_id));
                 setConfirmationModal(false);
                 setSaving(false);

@@ -43,7 +43,6 @@ class DailyReportController extends Controller
     // }
     public function setReport(Request $request, $unit_position_id)
     {
-        Log::debug("UNIT POSITION ID", $unit_position_id);
         if (!$unit_position_id) {
             return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
@@ -111,13 +110,6 @@ class DailyReportController extends Controller
             }
             WhatsAppService::sendMessage('082113837546', $warningMessage);
         }
-        Log::debug('validatedTime: ' . $validatedTime);
-        Log::debug('oneHourBefore: ' . $oneHourBefore);
-        Log::debug('Query StatusRequest', [
-            'unit_position_id' => $unit_position_id,
-            'start_date' => $validated['date'],
-        ]);
-        Log::debug('Hasil statusRequest:', [$statusRequest]);
         try {
             $report = new DailyReport();
             $report->unit_position_id = $unit_position_id;
