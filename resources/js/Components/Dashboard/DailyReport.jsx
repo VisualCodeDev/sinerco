@@ -400,6 +400,7 @@ const EditModal = (props) => {
                             : item?.slug
                     ),
                 ];
+                console.log(data, fields, unit_position_id)
                 const resp = await axios.post(
                     route("daily.edit", {
                         data: formDataState,
@@ -413,7 +414,7 @@ const EditModal = (props) => {
 
                     const newItem = {
                         ...formDataState,
-                        id: resp.data.report.id,
+                        id: resp?.data?.report?.id,
                     };
 
                     updatedItems[formData?.key] = {
