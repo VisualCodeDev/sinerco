@@ -121,6 +121,7 @@ class DailyReportController extends Controller
                 $report->request_id = $statusRequest->request_id;
             }
 
+            Log::info('DEBUG', $report->toArray());
             $report->save();
 
             Log::info('Report tersimpan:', $report->toArray());
