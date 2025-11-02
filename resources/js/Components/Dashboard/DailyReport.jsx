@@ -400,12 +400,12 @@ const EditModal = (props) => {
                             : item?.slug
                     ),
                 ];
-                console.log(data, fields, unit_position_id)
+                console.log(data, fields, unitData?.unit_position_id)
                 const resp = await axios.post(
                     route("daily.edit", {
                         data: formDataState,
                         fields: normalizedField,
-                        unit_position_id: unitData?.unit_position_id,
+                        unit_position_id: Number(unitData?.unit_position_id),
                     })
                 );
                 if (resp.status === 200) {

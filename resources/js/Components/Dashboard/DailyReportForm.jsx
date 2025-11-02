@@ -52,19 +52,19 @@ const DailyReportForm = (props) => {
                 ),
             ];
             const resp = await axios.post(
-                route("daily.add", unitData?.unit_position_id),
+                route("daily.add",  Number(unitData?.unit_position_id)),
                 { data: data, fields: normalizedField }
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
-                route("daily", unitData?.unit_position_id);
+                addToast({ type: "success", text: "Report Added" });
+                route("daily", Number(unitData?.unit_position_id));
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
                 setConfirmationModal(false);
                 setSaving(false);
             }
-            addToast({ type: "success", text: "Report Added" });
         } catch (err) {
             console.error("Error creating report:", err);
             addToast({ type: "error", text: err.response.data.message });
