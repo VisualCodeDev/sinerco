@@ -43,6 +43,7 @@ class DailyReportController extends Controller
     // }
     public function setReport(Request $request, $unit_position_id)
     {
+        Log::debug("UNIT POSITION ID", $unit_position_id);
         if (!$unit_position_id) {
             return back()->withErrors('Unit position ID tidak ditemukan.');
         }
