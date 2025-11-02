@@ -39,8 +39,9 @@ const DailyReportForm = (props) => {
         setConfirmationModal(true);
     };
 
-    const handleSetReport = async () => {
+    const handleSetReport = async (e) => {
         try {
+            setSaving(true);
             const normalizedField = [
                 "date",
                 "time",
@@ -50,35 +51,35 @@ const DailyReportForm = (props) => {
                         : item?.slug
                 ),
             ];
-            const resp = await fetch(
+            const resp = await axios.post(
                 route("daily.add", Number(unitData?.unit_position_id)),
+                { data, fields: normalizedField },
                 {
-                    method: "POST",
                     headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
+                        "User-Agent":
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
                         "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
                     },
-                    credentials: "include", // sama kayak withCredentials di axios
-                    body: JSON.stringify({
-                        data,
-                        fields: normalizedField,
-                    }),
+                    withCredentials: true,
                 }
             );
 
-            if (!resp.ok) throw new Error(`HTTP error: ${resp.status}`);
-
-            const json = await resp.json();
-            console.log(json);
-            addToast({ type: "success", text: "Report Added" });
-            setData({});
-            setConfirmationModal(false);
+            console.log(resp);
+            if (resp.status === 200 || resp.status === 302) {
+                setData({});
+                setConfirmationModal(false);
+                setSaving(false);
+            } else {
+                setConfirmationModal(false);
+                setSaving(false);
+            }
+            addToast(resp.data);
         } catch (err) {
             console.error("Error creating report:", err);
-            addToast({ type: "error", text: err.message });
+            addToast({ type: "error", text: err.response.data.message });
             setConfirmationModal(false);
-        } finally {
             setSaving(false);
         }
     };
@@ -156,6 +157,7 @@ const DailyReportForm = (props) => {
 
         fetchData();
     }, []);
+    console.log(data);
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving || (loading && <LoadingSpinner text="Saving..." />)}
