@@ -52,10 +52,19 @@ const DailyReportForm = (props) => {
                 ),
             ];
             const resp = await axios.post(
-                route("daily.add",  Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField }
+                route("daily.add", Number(unitData?.unit_position_id)),
+                { data: data, fields: normalizedField },
+                {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
             );
-            console.log(resp)
+
+            console.log(resp);
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
                 addToast(resp.data);
