@@ -55,10 +55,10 @@ const DailyReportForm = (props) => {
                 route("daily.add",  Number(unitData?.unit_position_id)),
                 { data: data, fields: normalizedField }
             );
+            console.log(resp)
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
                 addToast(resp.data);
-                route("daily", Number(unitData?.unit_position_id));
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
