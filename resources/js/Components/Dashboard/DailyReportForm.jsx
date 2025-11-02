@@ -40,34 +40,55 @@ const DailyReportForm = (props) => {
     };
 
     const handleSetReport = async (e) => {
+        e.preventDefault?.(); // biar aman kalau dipanggil dari event
         try {
             setSaving(true);
+
             const normalizedField = [
                 "date",
                 "time",
                 ...fields.flatMap((item) =>
                     item.subfields.length > 0
-                        ? item?.subfields.map((sub) => sub.slug)
-                        : item?.slug
+                        ? item.subfields.map((sub) => sub.slug)
+                        : item.slug
                 ),
             ];
-            const resp = await axios.post(
-                route("daily.add",  Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField },
+
+            const response = await fetch(
+                route("daily.add", Number(unitData?.unit_position_id)),
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    credentials: "include", // penting buat sanctum
+                    body: JSON.stringify({
+                        data: data,
+                        fields: normalizedField,
+                    }),
+                }
             );
-            console.log(resp)
-            if (resp.status === 200 || resp.status === 302) {
-                setData({});
-                addToast(resp.data);
-                setConfirmationModal(false);
-                setSaving(false);
-            } else {
-                setConfirmationModal(false);
-                setSaving(false);
+
+            // cek status respon
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData?.message || "Gagal membuat report.");
             }
+
+            const respData = await response.json();
+            console.log(respData);
+
+            // addToast dari response
+            addToast(respData);
+
+            setData({});
+            setConfirmationModal(false);
+            setSaving(false);
         } catch (err) {
             console.error("Error creating report:", err);
-            addToast({ type: "error", text: err.response.data.message });
+            addToast({ type: "error", text: err.message });
             setConfirmationModal(false);
             setSaving(false);
         }
