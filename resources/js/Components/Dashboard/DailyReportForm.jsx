@@ -41,6 +41,15 @@ const DailyReportForm = (props) => {
 
     const handleSetReport = async () => {
         try {
+            const normalizedField = [
+                "date",
+                "time",
+                ...fields.flatMap((item) =>
+                    item.subfields.length > 0
+                        ? item?.subfields.map((sub) => sub.slug)
+                        : item?.slug
+                ),
+            ];
             const resp = await fetch(
                 route("daily.add", Number(unitData?.unit_position_id)),
                 {
