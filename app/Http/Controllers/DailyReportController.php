@@ -45,7 +45,7 @@ class DailyReportController extends Controller
     {
         Log::debug("UNIT POSITION ID", $unit_position_id);
         if (!$unit_position_id) {
-            return back()->withErrors('Unit position ID tidak ditemukan.');
+            return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
 
         $fieldsToNormalize = $request->fields ?? [];
@@ -133,7 +133,7 @@ class DailyReportController extends Controller
 
             Log::info('Report tersimpan:', $report->toArray());
 
-            return back()->with('success', 'Report berhasil disimpan.');
+            return response()->json(['type' => 'success', 'text' => 'Report berhasil disimpan.']);
         } catch (\Throwable $e) {
             Log::error('Gagal simpan report: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
