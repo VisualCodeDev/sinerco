@@ -6,7 +6,7 @@ const Notification = ({ message, alert = true }) => {
     const [visible, setVisible] = useState(true);
 
     useEffect(() => {
-        if (alert) playAlertSound();
+        if (alert && message?.request_type) playAlertSound();
         const timeout = setTimeout(() => {
             setAnimate("slideOut");
             setTimeout(() => setVisible(false), 400);
