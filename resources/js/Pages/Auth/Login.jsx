@@ -17,16 +17,40 @@ export default function Login({ status, canResetPassword }) {
 
     const [reveal, setReveal] = useState(false);
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
+        try {
+            // Dapatkan CSRF token dari Laravel Sanctum
+            await axios.get("/sanctum/csrf-cookie");
 
-        post(route("login"), {
-            onFinish: () => reset("password"),
-            onSuccess: async () => {
-                await axios.get("/sanctum/csrf-cookie");
+            // Kirim data login ke server
+            const resp = await axios.post(
+                route("login"),
+                {
+                    email,
+                    password,
+                },
+                {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+
+            // Kalau login sukses
+            if (resp.status === 200) {
+                reset("password");
                 window.location.href = route("dashboard");
-            },
-        });
+            }
+        } catch (err) {
+            console.error("Login gagal:", err);
+            if (err.response?.data?.message) {
+                alert(err.response.data.message);
+            }
+        }
     };
 
     return (
