@@ -52,30 +52,19 @@ const DailyReportForm = (props) => {
                 ),
             ];
             const resp = await axios.post(
-                route("daily.add", Number(unitData?.unit_position_id)),
-                { data, fields: normalizedField },
-                {
-                    headers: {
-                        "User-Agent":
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
-                        "X-Requested-With": "XMLHttpRequest",
-                        Accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    withCredentials: true,
-                }
+                route("daily.add",  Number(unitData?.unit_position_id)),
+                { data: data, fields: normalizedField },
             );
-
-            console.log(resp);
+            console.log(resp)
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
+                addToast(resp.data);
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
                 setConfirmationModal(false);
                 setSaving(false);
             }
-            addToast(resp.data);
         } catch (err) {
             console.error("Error creating report:", err);
             addToast({ type: "error", text: err.response.data.message });
@@ -157,7 +146,7 @@ const DailyReportForm = (props) => {
 
         fetchData();
     }, []);
-    console.log(data);
+
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving || (loading && <LoadingSpinner text="Saving..." />)}
