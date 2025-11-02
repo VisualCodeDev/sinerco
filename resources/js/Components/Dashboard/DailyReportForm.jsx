@@ -39,45 +39,36 @@ const DailyReportForm = (props) => {
         setConfirmationModal(true);
     };
 
-    const handleSetReport = async (e) => {
+    const handleSetReport = async () => {
         try {
-            setSaving(true);
-            const normalizedField = [
-                "date",
-                "time",
-                ...fields.flatMap((item) =>
-                    item.subfields.length > 0
-                        ? item?.subfields.map((sub) => sub.slug)
-                        : item?.slug
-                ),
-            ];
-            const resp = await axios.post(
+            const resp = await fetch(
                 route("daily.add", Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField },
                 {
+                    method: "POST",
                     headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        Accept: "application/json",
                         "Content-Type": "application/json",
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
                     },
-                    withCredentials: true,
+                    credentials: "include", // sama kayak withCredentials di axios
+                    body: JSON.stringify({
+                        data,
+                        fields: normalizedField,
+                    }),
                 }
             );
 
-            console.log(resp);
-            if (resp.status === 200 || resp.status === 302) {
-                setData({});
-                addToast(resp.data);
-                setConfirmationModal(false);
-                setSaving(false);
-            } else {
-                setConfirmationModal(false);
-                setSaving(false);
-            }
+            if (!resp.ok) throw new Error(`HTTP error: ${resp.status}`);
+
+            const json = await resp.json();
+            addToast({ type: "success", text: "Report Added" });
+            setData({});
+            setConfirmationModal(false);
         } catch (err) {
             console.error("Error creating report:", err);
-            addToast({ type: "error", text: err.response.data.message });
+            addToast({ type: "error", text: err.message });
             setConfirmationModal(false);
+        } finally {
             setSaving(false);
         }
     };
