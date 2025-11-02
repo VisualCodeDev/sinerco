@@ -43,6 +43,8 @@ class DailyReportController extends Controller
     // }
     public function setReport(Request $request, $unit_position_id)
     {
+        Log::debug('CSRF Token', ['header' => $request->header('X-CSRF-TOKEN')]);
+        Log::debug('Session', $request->session()->all());
         if (!$unit_position_id) {
             return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
