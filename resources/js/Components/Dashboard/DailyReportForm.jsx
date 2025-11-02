@@ -146,7 +146,7 @@ const DailyReportForm = (props) => {
 
         fetchData();
     }, []);
-    console.log(formData);
+    console.log(data);
     return (
         <div className="flex flex-col justify-center items-start w-full bg-white lg:md:py-8 py-3">
             {saving || (loading && <LoadingSpinner text="Saving..." />)}
