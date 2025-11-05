@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
     FaHome,
     FaUser,
@@ -16,17 +16,33 @@ import {
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
-import { IoMap } from "react-icons/io5";
+import { IoDocumentText, IoMap } from "react-icons/io5";
+import { FaTextSlash } from "react-icons/fa6";
+import { BsFillBellFill, BsFillBellSlashFill } from "react-icons/bs";
+import { getSetting } from "../db";
 
-const Heading = ({ children }) => {
+const Heading = ({ children, alert, setAlert }) => {
     const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [openIndex, setOpenIndex] = useState(null);
+
     const handleSubMenu = (index) => {
         setOpenIndex(openIndex === index ? null : index);
     };
     let menuItems = [];
     const { user, loading } = useAuth();
+
+    const handleAlert = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.post(route("setting.set"));
+            setAlert(res.data);
+        } catch (e) {
+            console.error(e);
+        }
+        setLoading(false);
+    };
+
     if (isLoading || loading) return <LoadingSpinner />;
     const menu = {
         home: {
@@ -58,6 +74,11 @@ const Heading = ({ children }) => {
             icon: <IoMap />,
             label: "Unit Location Set.",
             href: route("unit.position"),
+        },
+        inputField: {
+            icon: <IoDocumentText />,
+            label: "Input Fields",
+            href: route("input.field.setting"),
         },
         unitList: {
             icon: <FaList />,
@@ -159,6 +180,7 @@ const Heading = ({ children }) => {
             menu.unitList,
             menu.unitLocationSetting,
             menu.inputSetting,
+            menu.inputField,
             menu.accountList,
             menu.logHistory,
             // menu.area,
@@ -351,9 +373,17 @@ const Heading = ({ children }) => {
                             className="h-full object-contain"
                         />
                     </div>
-                    {/* <p className="text-gray-700 text-xl font-medium">
-                        <FaBell />
-                    </p> */}
+                    <p
+                        className="text-gray-700 text-xl font-medium cursor-pointer"
+                        onClick={() => handleAlert()}
+                    >
+                        {user?.role === "super_admin" &&
+                            (alert ? (
+                                <BsFillBellFill />
+                            ) : (
+                                <BsFillBellSlashFill />
+                            ))}
+                    </p>
                 </div>
 
                 {/* Page Content */}

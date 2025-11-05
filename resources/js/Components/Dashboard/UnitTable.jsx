@@ -21,9 +21,17 @@ const UnitTable = (props) => {
     const data = propsData ?? fetchedData;
     const { user } = useAuth();
 
-    const handleClick = (item) => {
+    const handleClick = (item, e) => {
         if (!item.unit_position_id) return;
-        router.visit(route("daily", item.unit_position_id));
+        console.log(e)
+        const url = route("daily", item.unit_position_id);
+
+        // hanya klik tengah atau Ctrl/Cmd + klik yang buka tab baru
+        if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
+            window.open(url, "_blank");
+        } else {
+            router.visit(url);
+        }
     };
 
     if (!propsData) {

@@ -118,170 +118,157 @@ class DailyReportController extends Controller
 
     public function setReport(Request $request, $unit_position_id)
     {
-        if ($unit_position_id) {
-            $fieldsToNormalize = [
-                'sourcePress',
-                'suctionPress',
-                'dischargePress',
-                'speed',
-                'manifoldPress',
-                'oilPress',
-                'oilDiff',
-                'runningHours',
-                'voltage',
-                'waterTemp',
-                'befCooler',
-                'aftCooler',
-                'staticPress',
-                'diffPress',
-                'mscfd'
-            ];
-
-            foreach ($fieldsToNormalize as $field) {
-                if ($request->has($field)) {
-                    $request->merge([
-                        $field => str_replace(',', '.', $request->input($field))
-                    ]);
-                }
-            }
-
-            $validatedData = $request->validate([
-                'date' => 'required|string',
-                'time' => 'required|string',
-                'sourcePress' => 'required|numeric',
-                'suctionPress' => 'required|numeric',
-                'dischargePress' => 'required|numeric',
-                'speed' => 'required|numeric',
-                'manifoldPress' => 'required|numeric',
-                'oilPress' => 'required|numeric',
-                'oilDiff' => 'required|numeric',
-                'runningHours' => 'required|numeric',
-                'voltage' => 'required|numeric',
-                'waterTemp' => 'required|numeric',
-                'befCooler' => 'required|numeric',
-                'aftCooler' => 'required|numeric',
-                'staticPress' => 'required|numeric',
-                'diffPress' => 'required|numeric',
-                'mscfd' => 'required|numeric',
-            ]);
-
-            $validatedTime = $validatedData['time'];
-            $oneHourBefore = \Carbon\Carbon::createFromFormat('H:i', $validatedTime)
-                ->subHour()
-                ->format('H:i');
-
-            $statusRequest = StatusRequest::where('unit_position_id', $unit_position_id)
-                ->where('start_date', $validatedData['date'])
-                ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
-                ->first();
-
-            Log::debug('status ' . $statusRequest);
-
-            if ($validatedData) {
-                $data = collect($validatedData)
-                    ->mapWithKeys(function ($field, $key) {
-                        return is_array($field) && isset($field['value'])
-                            ? [$key => $field['value']]
-                            : [$key => $field];
-                    })
-                    ->toArray();
-                $originalInput = $request->all();
-
-                $warnings = collect($originalInput['warn'] ?? [])->filter(function ($message) {
-                    return !empty($message);
-                });
-                if ($warnings->isNotEmpty()) {
-                    $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
-                    $warningMessage = "{$data['date']},\n📍Unit: {$unit->unit->unit}:\n";
-
-                    foreach ($warnings as $field => $message) {
-                        $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
-                    }
-                    $technicians = UserSetting::with('user')
-                        ->where('unit_position_id', $unit_position_id)
-                        ->get()
-                        ->filter(fn($allocation) => $allocation->user?->role === 'technician');
-
-
-                    $numbers = $technicians
-                        ->filter(fn($tech) => !empty($tech->user->whatsAppNum))
-                        ->map(fn($tech) => $tech->user->whatsAppNum)
-                        ->implode(',');
-
-                    Log::debug("NOMOR TELP" . $numbers);
-
-                    if (!empty($numbers)) {
-                        WhatsAppService::sendMessage($numbers, $warningMessage);
-                    }
-                    WhatsAppService::sendMessage('082113837546', $warningMessage);
-                }
-
-
-                $report = new DailyReport();
-                $report->unit_position_id = $unit_position_id;
-                $report->date = $data['date'];
-                $report->time = $data['time'];
-                $report->sourcePress = $data['sourcePress'];
-                $report->suctionPress = $data['suctionPress'];
-                $report->dischargePress = $data['dischargePress'];
-                $report->speed = $data['speed'];
-                $report->manifoldPress = $data['manifoldPress'];
-                $report->oilPress = $data['oilPress'];
-                $report->oilDiff = $data['oilDiff'];
-                $report->runningHours = $data['runningHours'];
-                $report->voltage = $data['voltage'];
-                $report->waterTemp = $data['waterTemp'];
-                $report->befCooler = $data['befCooler'];
-                $report->aftCooler = $data['aftCooler'];
-                $report->staticPress = $data['staticPress'];
-                $report->diffPress = $data['diffPress'];
-                $report->mscfd = $data['mscfd'];
-
-                if ($statusRequest) {
-                    $report->request_id = $statusRequest->request_id;
-                }
-                $report->save();
-                $this->setCells($report);
-                // $report->unit_position_id = $unit_position_id;
-                // $report->fill($data)->save();
-            }
-
+        Log::debug('CSRF Token', ['header' => $request->header('X-CSRF-TOKEN')]);
+        Log::debug('Session', $request->session()->all());
+        if (!$unit_position_id) {
+            return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
-        // if ($report->speed > 0) {
-        //     WhatsAppService::sendMessage('082113837546, 081359113349', 'Speed Input at ' . $report->date . ' is ' . $report->speed);
-        // }
-        return back();
+
+        $fieldsToNormalize = $request->fields ?? [];
+        $data = $request->data ?? [];
+
+        // 🔧 Normalisasi angka (ganti koma ke titik)
+        foreach ($fieldsToNormalize as $field) {
+            if (isset($data[$field])) {
+                $data[$field] = str_replace(',', '.', $data[$field]);
+            }
+        }
+
+        // Gabungkan hasil normalisasi ke request->data
+        $request->merge(['data' => $data]);
+
+        // 🔍 Buat rules validasi dinamis
+        $rules = [];
+        foreach ($fieldsToNormalize as $field) {
+            $rules["data.$field"] = in_array($field, ['date', 'time'])
+                ? 'required|string'
+                : 'required|numeric';
+        }
+
+        $validatedData = $request->validate($rules);
+        $validated = $validatedData['data']; // 🎯 langsung ambil bagian data
+
+        // Hitung jam sebelumnya
+        $validatedTime = $validated['time'];
+        $oneHourBefore = \Carbon\Carbon::createFromFormat('H:i', $validatedTime)
+            ->subHour()
+            ->format('H:i');
+
+        // Cek status request
+        $statusRequest = StatusRequest::where('unit_position_id', $unit_position_id)
+            ->where('start_date', $validated['date'])
+            ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
+            ->first();
+
+        Log::debug('status ' . $statusRequest);
+
+        // 🚨 Cek warning dari input
+        $warnings = collect($request->input('warn', []))->filter();
+        if ($warnings->isNotEmpty()) {
+            $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
+            $warningMessage = "{$validated['date']},\n📍Unit: {$unit->unit->unit}:\n";
+
+            foreach ($warnings as $field => $message) {
+                $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
+            }
+
+            $technicians = UserSetting::with('user')
+                ->where('unit_position_id', $unit_position_id)
+                ->get()
+                ->filter(fn($allocation) => $allocation->user?->role === 'technician');
+
+            $numbers = $technicians
+                ->pluck('user.whatsAppNum')
+                ->filter()
+                ->implode(',');
+
+            if (!empty($numbers)) {
+                WhatsAppService::sendMessage($numbers, $warningMessage);
+            }
+            WhatsAppService::sendMessage('082113837546', $warningMessage);
+        }
+        try {
+            $report = new DailyReport();
+            $report->unit_position_id = $unit_position_id;
+            $report->date = $validated['date'];
+            $report->time = $validated['time'];
+            $report->data = json_encode($validated);
+            if ($statusRequest) {
+                $report->request_id = $statusRequest->request_id;
+            }
+
+            Log::info('DEBUG', $report->toArray());
+            $report->save();
+
+            Log::info('Report tersimpan:', $report->toArray());
+
+            return response()->json(['type' => 'success', 'text' => 'Report berhasil disimpan.']);
+        } catch (\Throwable $e) {
+            Log::error('Gagal simpan report: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return back()->withErrors('Gagal menyimpan report: ' . $e->getMessage());
+        }
     }
 
     public function editReport(Request $request)
     {
-        $val = $request->validate([
-            'id' => 'required|exists:daily_reports,id',
-            'date' => 'required|string',
-            'time' => 'required|string',
-            'sourcePress' => 'required|numeric',
-            'suctionPress' => 'required|numeric',
-            'dischargePress' => 'required|numeric',
-            'speed' => 'required|numeric',
-            'manifoldPress' => 'required|numeric',
-            'oilPress' => 'required|numeric',
-            'oilDiff' => 'required|numeric',
-            'runningHours' => 'required|numeric',
-            'voltage' => 'required|numeric',
-            'waterTemp' => 'required|numeric',
-            'befCooler' => 'required|numeric',
-            'aftCooler' => 'required|numeric',
-            'staticPress' => 'required|numeric',
-            'diffPress' => 'required|numeric',
-            'mscfd' => 'required|numeric',
-        ]);
-        if (!$val) {
-            return response()->json(['type' => 'error', 'text' => 'Validation failed'], 422);
+        $fieldsToNormalize = $request->fields ?? [];
+        $data = $request->data ?? [];
+
+        // 🧩 Normalisasi angka (ubah koma → titik)
+        foreach ($fieldsToNormalize as $field) {
+            if (isset($data[$field])) {
+                $data[$field] = str_replace(',', '.', $data[$field]);
+            }
         }
-        $report = DailyReport::find($request->id);
-        $report->update($request->all());
-        $this->setCells($report);
-        return response()->json(['type' => 'success', 'text' => 'Report updated successfully'], 200);
+
+        // Gabungkan hasil normalisasi ke request->data
+        $request->merge(['data' => $data]);
+
+        // 🔍 Validasi dinamis
+        $rules = [];
+        foreach ($fieldsToNormalize as $field) {
+            $rules["data.$field"] = in_array($field, ['date', 'time'])
+                ? 'required|string'
+                : 'required|numeric';
+        }
+
+        // id boleh kosong, karena bisa record baru
+        if (!empty($data['id'])) {
+            $rules["data.id"] = 'exists:daily_reports,id';
+        }
+
+        $validated = $request->validate($rules);
+        $val = $validated['data'];
+
+        // 🧠 Coba cari report berdasarkan id (kalau ada)
+        $report = !empty($val['id']) ? DailyReport::find($val['id']) : null;
+        Log::debug($request->unit_position_id);
+        if ($report) {
+            // 📝 Update data lama
+            $report->update([
+                'data' => json_encode($val),
+                'time' => $val['time'],
+                'date' => $val['date'],
+            ]);
+            $message = 'Report updated successfully';
+        } else {
+            // 🆕 Kalau belum ada, buat baru
+            $report = DailyReport::create([
+                'unit_position_id' => $request->unit_position_id,
+                'date' => $val['date'],
+                'time' => $val['time'],
+                'data' => json_encode($val),
+            ]);
+            $message = 'Report created successfully';
+        }
+
+        return response()->json([
+            'type' => 'success',
+            'text' => $message,
+            'report' => $report,
+        ], 200);
     }
 
     public function index($unit_position_id)
@@ -323,16 +310,25 @@ class DailyReportController extends Controller
 
     public function getDataReportBasedOnDate(Request $request)
     {
-        $data = DailyReport::with('request')->where('unit_position_id', $request->unit_position_id)
-            ->where('date', $request->date)->orderBy('time')->get()->map(function ($item) {
-                return collect($item)->except([
-                    "created_at",
-                    "updated_at",
-                    "approval1",
-                    "approval2",
-                    "unit_position_id"
+        $data = DailyReport::with('request')
+            ->where('unit_position_id', $request->unit_position_id)
+            ->where('date', $request->date)
+            ->orderBy('time')
+            ->get()
+            ->map(function ($item) {
+                // Decode JSON data
+                $decoded = json_decode($item->data, true) ?? [];
+
+                // Gabungkan semua field di data + tambahkan request
+                return array_merge($decoded, [
+                    'unit_position_id' => $item->unit_position_id,
+                    'id' => $item->id,
+                    'date' => $item->date,
+                    'time' => $item->time,
+                    'request' => $item->request,
                 ]);
             });
+
         return response()->json($data);
     }
 

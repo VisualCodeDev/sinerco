@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Card from "../Card";
 import {
-    formItems,
     DateInput,
     getCurrDateTime,
     TimeInput,
@@ -26,6 +25,7 @@ const DailyReportForm = (props) => {
         interval,
         duration,
         gmt_offset,
+        fields,
         isDown = true,
     } = props;
     const [data, setData] = useState({});
@@ -33,6 +33,7 @@ const DailyReportForm = (props) => {
     const [isConfirmationModal, setConfirmationModal] = useState(false);
     const [saving, setSaving] = useState(false);
     const { addToast } = useToast();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setConfirmationModal(true);
@@ -41,20 +42,28 @@ const DailyReportForm = (props) => {
     const handleSetReport = async (e) => {
         try {
             setSaving(true);
+            const normalizedField = [
+                "date",
+                "time",
+                ...fields.flatMap((item) =>
+                    item.subfields.length > 0
+                        ? item?.subfields.map((sub) => sub.slug)
+                        : item?.slug
+                ),
+            ];
             const resp = await axios.post(
-                route("daily.add", unitData?.unit_position_id),
-                data
+                route("daily.add",  Number(unitData?.unit_position_id)),
+                { data: data, fields: normalizedField },
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
-                route("daily", unitData?.unit_position_id);
+                addToast(resp.data);
                 setConfirmationModal(false);
                 setSaving(false);
             } else {
                 setConfirmationModal(false);
                 setSaving(false);
             }
-            addToast({ type: "success", text: "Report Added" });
         } catch (err) {
             console.error("Error creating report:", err);
             addToast({ type: "error", text: err.response.data.message });
@@ -91,9 +100,10 @@ const DailyReportForm = (props) => {
     };
 
     const formList = list({
+        fields: fields,
         handleChange: handleChange,
         isDown: isDown,
-        formData: formData,
+        formData: data,
         reportSettings: unitData?.daily_report_setting,
         role: user?.role,
         interval: interval,
@@ -120,7 +130,7 @@ const DailyReportForm = (props) => {
                 if (currentHour < 0) currentHour = 23;
                 if (currentHour > 24) currentHour = 0;
             }
-            
+
             const time = String(currentHour).padStart(2, "0") + ":00";
             const date = dateTime.date;
 
@@ -141,7 +151,7 @@ const DailyReportForm = (props) => {
             {saving || (loading && <LoadingSpinner text="Saving..." />)}
             <div className="w-full lg:md:pt-10 pt-4 lg:md:px-32 px-5 text-[#3A3541]">
                 <form onSubmit={handleSubmit}>
-                    <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 lg:md:items-center h-full">
+                    <div className="lg:md:grid grid-cols-2 lg:md:gap-x-10 gap-x-4 lg:md:gap-y-8 gap-y-4 mb-4 h-full">
                         {formList.map((item) => (
                             <div
                                 key={item.header}

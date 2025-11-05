@@ -4,7 +4,7 @@ export const formItems = [
         header: "Time",
     },
     {
-        name: "sourcePress",
+        name: "source_press",
         default: {
             decimalSetting: "1",
         },
@@ -18,7 +18,7 @@ export const formItems = [
     //     header: "Discharge Header Press.",
     // },
     {
-        name: "suctionPress",
+        name: "suction_press",
         default: {
             decimalSetting: "1",
             minSetting: -9,
@@ -27,7 +27,7 @@ export const formItems = [
         header: "Suction Press.",
     },
     {
-        name: "dischargePress",
+        name: "discharge_press",
         default: {
             decimalSetting: "1",
             minSetting: 0,
@@ -45,7 +45,7 @@ export const formItems = [
         header: "Speed",
     },
     {
-        name: "manifoldPress",
+        name: "manifold_press",
         default: {
             decimalSetting: "1",
             minSetting: -6,
@@ -54,7 +54,7 @@ export const formItems = [
         header: "Manifold Press.",
     },
     {
-        name: "oilPress",
+        name: "oil_press",
         default: {
             decimalSetting: "1",
             minSetting: 30,
@@ -63,14 +63,14 @@ export const formItems = [
         header: "Oil Press.",
     },
     {
-        name: "oilDiff",
+        name: "oil_diff",
         default: {
             decimalSetting: "1",
         },
         header: "Oil Diff.",
     },
     {
-        name: "runningHours",
+        name: "running_hours",
         default: {
             decimalSetting: "0",
         },
@@ -86,7 +86,7 @@ export const formItems = [
         header: "Voltage",
     },
     {
-        name: "waterTemp",
+        name: "water_temp",
         default: {
             decimalSetting: "1",
             minSetting: -194,
@@ -94,12 +94,12 @@ export const formItems = [
         header: "Water Temp",
     },
     {
-        name: "dischargeTemp",
+        name: "discharge_temp",
 
         header: "Discharge Temp",
         subheader: [
             {
-                name: "befCooler",
+                name: "bef_cooler",
                 sub: "Bef. Cooler",
                 default: {
                     minSetting: 350,
@@ -107,7 +107,7 @@ export const formItems = [
                 },
             },
             {
-                name: "aftCooler",
+                name: "aft_cooler",
                 sub: "Aft. Cooler",
                 default: {
                     minSetting: 120,
@@ -117,21 +117,21 @@ export const formItems = [
         ],
     },
     {
-        name: "staticPress",
+        name: "static_press",
         default: {
             decimalSetting: "1",
         },
         header: "Static Press. Reading",
     },
     {
-        name: "diffPress",
+        name: "diff_press",
         default: {
             decimalSetting: "1",
         },
         header: "Diff. Press. Reading",
     },
     {
-        name: "flowRate",
+        name: "flow_rate",
         default: {
             decimalSetting: "6",
         },

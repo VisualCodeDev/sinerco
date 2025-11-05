@@ -19,23 +19,9 @@ class DailyReport extends Model
         return $this->hasMany(TableCell::class);
     }
     protected $fillable = [
+        'unit_position_id',
+        'data',
         'date',
-        'time',
-        'sourcePress',
-        'suctionPress',
-        'dischargePress',
-        'speed',
-        'manifoldPress',
-        'oilPress',
-        'oilDiff',
-        'runningHours',
-        'voltage',
-        'waterTemp',
-        'befCooler',
-        'arfCooler',
-        'staticPress',
-        'diffPress',
-        'mscfd',
-        'request_id'
+        'time'
     ];
 }

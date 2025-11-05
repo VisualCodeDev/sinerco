@@ -1,3 +1,4 @@
+import { getFields } from "@/Components/db";
 import LoadingSpinner from "@/Components/Loading";
 import MultiSelectDropdown from "@/Components/MultiSelectDropdown";
 import { useToast } from "@/Components/Toast/ToastProvider";
@@ -10,14 +11,21 @@ const InputValidationSetting = (props) => {
     const { data, clientData, selectedClients } = props;
     const [formData, setFormData] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [fields, setFields] = useState([]);
     const { addToast } = useToast();
     // const { data: clients, loading, error } = fetch("client.get");
     // const [selectedClients, setSelectedClients] = useState([]);
-   // const clientOptions = clients.map((client) => ({
+    // const clientOptions = clients.map((client) => ({
     //     value: client.clientId,
     //     label: client.name,
     // }));
     useEffect(() => {
+        const fetchFields = async () => {
+            const data = await getFields();
+            setFields(data);
+        };
+        fetchFields();
+
         let defaultDecimalSetting = {};
         let defaultMinMaxSetting = {};
 
@@ -42,7 +50,7 @@ const InputValidationSetting = (props) => {
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
         }));
     }, []);
-    
+
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -87,6 +95,7 @@ const InputValidationSetting = (props) => {
             setSaving(false);
         }
     };
+
     const options = [];
     for (let i = 0; i <= 10; i++) {
         options.push(
@@ -98,7 +107,7 @@ const InputValidationSetting = (props) => {
     if (!formData) {
         return <LoadingSpinner />;
     }
- 
+
     return (
         <div className="flex flex-col gap-6 p-5">
             {/* <h2 className="text-xl font-semibold text-gray-800">
@@ -129,14 +138,14 @@ const InputValidationSetting = (props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {formItems
+                        {fields
                             .filter(
                                 (item) =>
                                     item.name !== "time" &&
                                     item.name !== "remarks"
                             )
                             .flatMap((item) => {
-                                const fields = item.subheader || [item];
+                                const fields = item.subfields.length > 0 ? item?.subfields : [item];
                                 return fields.map((field, idx) => {
                                     return (
                                         <tr
@@ -144,7 +153,7 @@ const InputValidationSetting = (props) => {
                                             className="border-b border-[#e5e7eb]"
                                         >
                                             <td className="py-10 md:py-6 px-4 font-semibold">
-                                                {field.header || field.sub}
+                                                {field.name}
                                             </td>
                                             <td>
                                                 <select
@@ -152,14 +161,14 @@ const InputValidationSetting = (props) => {
                                                     onChange={(e) =>
                                                         handleChange(
                                                             "decimalSetting",
-                                                            field.name,
+                                                            field.slug,
                                                             e.target.value
                                                         )
                                                     }
                                                     value={
                                                         formData
                                                             ?.decimalSetting[
-                                                            field.name
+                                                            field.slug
                                                         ] || ""
                                                     }
                                                 >
@@ -175,7 +184,7 @@ const InputValidationSetting = (props) => {
                                                         onChange={(e) =>
                                                             handleChange(
                                                                 "minMaxSetting",
-                                                                field.name,
+                                                                field.slug,
                                                                 {
                                                                     min: e
                                                                         .target
@@ -186,7 +195,7 @@ const InputValidationSetting = (props) => {
                                                         value={
                                                             formData
                                                                 ?.minMaxSetting?.[
-                                                                field.name
+                                                                field.slug
                                                             ]?.min || ""
                                                         }
                                                     />
@@ -197,7 +206,7 @@ const InputValidationSetting = (props) => {
                                                         onChange={(e) =>
                                                             handleChange(
                                                                 "minMaxSetting",
-                                                                field.name,
+                                                                field.slug,
                                                                 {
                                                                     max: e
                                                                         .target

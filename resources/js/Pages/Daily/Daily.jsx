@@ -1,4 +1,3 @@
-import Heading from "@/Components/AdminPage/Heading";
 import { useAuth } from "@/Components/Auth/auth";
 import DailyReport from "@/Components/Dashboard/DailyReport";
 import DailyReportForm from "@/Components/Dashboard/DailyReportForm";
@@ -11,7 +10,6 @@ import {
     getDDMMYYDate,
 } from "@/Components/utils/dashboard-util";
 import { fetch } from "@/Components/utils/database-util";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import PageLayout from "@/Layouts/PageLayout";
 import { Head, router, usePage } from "@inertiajs/react";
 import axios from "axios";
@@ -37,99 +35,129 @@ export default function Dashboard({ unit_position_id }) {
     const [unitData, setUnitData] = useState();
     const [isUnitRunning, setIsUnitRunning] = useState(true);
     const [clientName, setClientName] = useState();
+    const [fields, setFields] = useState([]);
     const { data: allUnits, loading: isLoading, error } = fetch("unit.get");
 
     const [expanded, setExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
-            : "report"
+            : "unit_information"
     );
+
+    useEffect(() => {
+        setActiveTab(
+            user?.role === "technician" || user?.role === "operator"
+                ? "form"
+                : "unit_information"
+        );
+    }, [user]);
 
     const tabs = [
         {
-            key: "data_unit",
-            label: "Data unit",
+            key: "unit_information",
+            label: "Unit Information",
             icon: <BsGear className="mr-2" />,
+            condition: user?.role === "super_admin",
         },
         {
             key: "report",
             label: "Daily Report",
             icon: <FaRegCalendarAlt className="mr-2" />,
+            condition: true,
         },
         {
             key: "form",
             label: "Fill Report",
             icon: <FaRegFileAlt className="mr-2" />,
+            condition: true,
         },
         {
-            key: "dataUnit",
+            key: "data_unit",
             label: "Data Unit",
             icon: <FaRegCalendarAlt className="mr-2" />,
+            condition: true,
         },
         {
             key: "gasComposition",
             label: "Gas Composition",
             icon: <FaRegCalendarAlt className="mr-2" />,
+            condition: true,
         },
         {
             key: "contract",
             label: "Contract",
             icon: <FaFileContract className="mr-2" />,
+            condition: true,
         },
         {
             key: "classifiedContract",
             label: "Classified Contract",
             icon: <FaLock className="mr-2" />,
+            condition: true,
         },
     ];
 
     const setInitReport = async (reportData, gmt_offset, interval) => {
         const fullDay = await generatePrevHour(gmt_offset, interval);
+        let finalReportData = reportData;
         const reportTimes = reportData?.map((r) => r.time) || [];
-
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
         if (missingHours.length > 0) {
-            try {
-                const resp = await axios.post(route("fill.report"), {
-                    missingHours: missingHours,
-                    date: getDDMMYYDate(currDate, "YYYY-MM-DD"),
-                    unit_position_id: unit_position_id,
-                });
+            const formattedData = missingHours.map((time) => {
+                return {
+                    time,
+                    unit_position_id,
+                    date: selectedDate,
+                    ...fields.reduce((acc, field) => {
+                        acc[field.slug] = 0;
+                        return acc;
+                    }, {}),
+                };
+            });
+            finalReportData = [...reportData, ...formattedData];
 
-                setData([...reportData, ...resp?.data]);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            setData(reportData);
+            finalReportData.sort((a, b) => {
+                const timeA = parseInt(a.time.split(":")[0], 10);
+                const timeB = parseInt(b.time.split(":")[0], 10);
+                return timeA - timeB;
+            });
         }
+
+        setData(finalReportData);
     };
 
     const setInitPrevReport = async (reportData) => {
         let fullDay = [];
-        for (let i = 0; i < 24; i++) {
+        for (let i = 1; i <= 24; i++) {
             fullDay.push(`${String(i).padStart(2, "0")}:00`);
         }
         const reportTimes = reportData?.map((r) => r.time);
 
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
-        console.log(missingHours);
-        if (missingHours.length > 0) {
-            try {
-                const resp = await axios.post(route("fill.report"), {
-                    missingHours: missingHours,
-                    date: getDDMMYYDate(new Date(selectedDate), "YYYY-MM-DD"),
-                    unit_position_id: unit_position_id,
-                });
+        let finalReportData = reportData;
 
-                setData([...reportData, ...resp?.data]);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            setData(reportData);
+        if (missingHours.length > 0) {
+            const formattedData = missingHours.map((time) => {
+                return {
+                    time,
+                    unit_position_id,
+                    date: selectedDate,
+                    ...fields.reduce((acc, field) => {
+                        acc[field.slug] = 0;
+                        return acc;
+                    }, {}),
+                };
+            });
+            finalReportData = [...reportData, ...formattedData];
+
+            finalReportData.sort((a, b) => {
+                const timeA = parseInt(a.time.split(":")[0], 10);
+                const timeB = parseInt(b.time.split(":")[0], 10);
+                return timeA - timeB;
+            });
         }
+        setData(finalReportData);
     };
 
     const fetchData = async () => {
@@ -151,7 +179,12 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-            await initCurrDate(reportData?.data, unit?.data?.gmt_offset, unit?.data?.input_interval);
+
+            await initCurrDate(
+                reportData?.data,
+                unit?.data?.gmt_offset,
+                unit?.data?.input_interval
+            );
         } catch (e) {
             console.error(e);
         } finally {
@@ -168,6 +201,7 @@ export default function Dashboard({ unit_position_id }) {
         await setInitReport(reportData, gmt_offset, interval);
         setLoading(false);
     };
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -204,6 +238,30 @@ export default function Dashboard({ unit_position_id }) {
     useEffect(() => {
         if (!unitData?.status) return;
         const status = unitData?.status === "running" ? true : false;
+
+        const getFields = async () => {
+            if (!unitData?.unit_id) return;
+            try {
+                setLoading(true);
+                const response = await axios.get(
+                    route("unit.fields.get", { unit_id: unitData.unit_id }),
+                    {
+                        headers: { Accept: "application/json" },
+                    }
+                );
+
+                const data = response?.data?.data || response?.data;
+
+                setFields(data);
+            } catch (error) {
+                console.error(
+                    "Gagal mengambil field:",
+                    error.response?.data || error
+                );
+            }
+            setLoading(false);
+        };
+        getFields();
         setIsUnitRunning(status);
     }, [unitData]);
 
@@ -219,27 +277,32 @@ export default function Dashboard({ unit_position_id }) {
             <div className="flex">
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
-                    <div className="flex w-screen overflow-x-auto">
-                        {tabs.map(({ key, label, icon }) => (
-                            <div
-                                key={key}
-                                className={`flex justify-center items-center px-4 py-2 whitespace-nowrap ${
-                                    activeTab === key
-                                        ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
-                                        : "text-gray-500"
-                                }`}
-                            >
-                                {icon}
-                                <button
-                                    className={`py-2 font-semibold ${
-                                        activeTab === key ? "" : "text-gray-500"
-                                    }`}
-                                    onClick={() => setActiveTab(key)}
-                                >
-                                    {label}
-                                </button>
-                            </div>
-                        ))}
+                    <div className="flex overflow-x-auto">
+                        {tabs.map(
+                            ({ key, label, icon, condition }) =>
+                                condition && (
+                                    <div
+                                        key={key}
+                                        className={`flex justify-center items-center px-4 py-2 whitespace-nowrap ${
+                                            activeTab === key
+                                                ? "bg-primary rounded-tr-lg rounded-tl-lg text-white"
+                                                : "text-gray-500"
+                                        }`}
+                                    >
+                                        {icon}
+                                        <button
+                                            className={`py-2 font-semibold ${
+                                                activeTab === key
+                                                    ? ""
+                                                    : "text-gray-500"
+                                            }`}
+                                            onClick={() => setActiveTab(key)}
+                                        >
+                                            {label}
+                                        </button>
+                                    </div>
+                                )
+                        )}
                     </div>
 
                     {/* TABS CONTENT */}
@@ -314,9 +377,10 @@ export default function Dashboard({ unit_position_id }) {
                             </>
                         )}
 
-                        {activeTab === "data_unit" && (
+                        {activeTab === "unit_information" && (
                             <UnitInfo
-                                unitData={unitData}
+                                unitId={unitData?.unit_id}
+                                unitData={unitData?.info}
                                 setName={setName}
                                 name={name}
                             />
@@ -324,6 +388,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "form" && (
                             <DailyReportForm
+                                fields={fields}
                                 isDown={!isUnitRunning}
                                 clientData={clientName}
                                 interval={unitData?.input_interval}
@@ -342,6 +407,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "report" && (
                             <DailyReport
+                                fields={fields}
                                 selectedDate={selectedDate}
                                 setSelectedDate={setSelectedDate}
                                 formData={data}
@@ -350,7 +416,7 @@ export default function Dashboard({ unit_position_id }) {
                             />
                         )}
 
-                        {activeTab === "dataUnit" && (
+                        {activeTab === "data_unit" && (
                             <UnitTable data={allUnits} />
                         )}
                     </div>

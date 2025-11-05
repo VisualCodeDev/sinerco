@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { getRequestTypeName } from "../utils/dashboard-util";
 
-const Notification = ({ message }) => {
+const Notification = ({ message, alert = true }) => {
     const [animate, setAnimate] = useState("slideIn");
     const [visible, setVisible] = useState(true);
 
     useEffect(() => {
+        if (alert && message?.request_type) playAlertSound();
         const timeout = setTimeout(() => {
             setAnimate("slideOut");
             setTimeout(() => setVisible(false), 400);
@@ -13,8 +14,28 @@ const Notification = ({ message }) => {
         return () => clearTimeout(timeout);
     }, []);
 
-    if (!visible) return null;
+    const playAlertSound = () => {
+        const sound = new Audio("/sounds/alarm.mp3");
+        sound.volume = 0.3;
 
+        const playPromise = sound.play();
+
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    setTimeout(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }, 3000);
+                })
+                .catch((err) => {
+                    console.warn("Autoplay dicegah browser:", err);
+                });
+        }
+    };
+
+    if (!visible) return null;
+    if (!message?.request_type) return;
     return (
         <div
             className={`${
@@ -53,18 +74,24 @@ const Notification = ({ message }) => {
     );
 };
 
-const NotificationContainer = ({ messages, removeMessage, isCentered }) => {
+const NotificationContainer = ({
+    messages,
+    removeMessage,
+    isCentered,
+    alert,
+}) => {
     return (
         <div
             className={`fixed ${
                 isCentered
                     ? "top-5 left-1/2 transform -translate-x-1/2"
                     : "top-5 right-5"
-            } z-[1000]`}
+            } z-[1000] ${alert && "animate-blink"}`}
         >
-            {Array.isArray(messages) ? (
+            {Array.isArray(messages) && messages.length > 0 ? (
                 messages.map((message, index) => (
                     <Notification
+                        alert={alert}
                         key={message.id}
                         message={message}
                         // onClose={() => removeMessage(message.id)}

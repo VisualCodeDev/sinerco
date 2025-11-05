@@ -6,6 +6,7 @@ use App\Models\Client;
 use App\Models\DataUnit;
 use App\Models\Location;
 use App\Models\Area;
+use App\Models\UnitField;
 use App\Models\UnitPosition;
 use App\Models\Workshop;
 use DB;
@@ -172,6 +173,18 @@ class DataUnitController extends Controller
             'location' => $unit->location?->location ?? null,
             'area' => $unit->location?->area?->area ?? null,
             'unit_position_id' => $unit->id ?? null,
+            'info' => [
+                'unit' => $unit->unit->unit ?? null,
+                'unit_sn' => $unit->unit->unit_sn ?? null,
+                'client' => $unit->client?->name ?? $unit->workshop?->name ?? null,
+                'area' => $unit->location?->area?->area ?? null,
+                'contract_ref' => $unit->unit->contract_ref ?? 'Booster',
+                'location' => $unit->location?->location ?? null,
+                'application' => $unit->unit->application ?? 'Booster',
+                'engine_sn' => $unit->unit->engine_sn ?? null,
+                'office_size' => $unit->unit->office_size ?? null,
+                'config' => $unit->unit->config ?? null,
+            ]
         ];
 
 
@@ -355,13 +368,11 @@ class DataUnitController extends Controller
     {
         $val = $request->validate([
             "unit_id" => "required|exists:data_units,unit_id",
-            "name" => "required|string"
+            "data" => "required|array"
         ]);
 
         DataUnit::where("unit_id", $val["unit_id"])
-            ->update([
-                "unit" => $val["name"]
-            ]);
+            ->update($val["data"]);
 
         return response()->json([
             "type" => "success",
@@ -369,4 +380,14 @@ class DataUnitController extends Controller
         ]);
     }
 
+
+    public function getUnitFields(Request $request)
+    {
+        $fields = UnitField::where("unit_id", $request->unit_id)
+            ->with('fields.subfields')
+            ->get()
+            ->pluck('fields');
+
+        return response()->json($fields);
+    }
 }

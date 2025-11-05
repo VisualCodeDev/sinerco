@@ -35,10 +35,15 @@ export default {
                     "0%": { transform: "translateX(0)", opacity: "1" },
                     "100%": { transform: "translateX(100%)", opacity: "0" },
                 },
+                blink: {
+                    "0%, 100%": { opacity: "1" },
+                    "50%": { opacity: "0.1" },
+                },
             },
             animation: {
                 slideIn: "slideIn 0.5s ease-in-out",
                 slideOut: "slideOut 0.5s ease-in-out",
+                blink: "blink .5s linear infinite",
                 "spin-slow": "spin 1.5s linear infinite",
             },
         },
