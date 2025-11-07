@@ -20,6 +20,16 @@ class UnitPosition extends Model
             ->select('client_id', 'minMaxSetting', 'decimalSetting', 'unitSetting');
     }
 
+    public function requests()
+    {
+        return $this->hasMany(StatusRequest::class, 'unit_position_id', 'id');
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(DailyReport::class, 'unit_position_id', 'id');
+    }
+
     public function unit()
     {
         return $this->belongsTo(DataUnit::class, 'unit_id', 'unit_id');
@@ -34,7 +44,13 @@ class UnitPosition extends Model
         return $this->belongsTo(Client::class, 'client_id', 'client_id');
     }
 
-    public function workshop() {
+    public function workers()
+    {
+        return $this->hasMany(UserSetting::class, 'unit_position_id', 'id');
+
+    }
+    public function workshop()
+    {
         return $this->belongsTo(Workshop::class, 'workshop_id', 'workshop_id');
     }
 }
