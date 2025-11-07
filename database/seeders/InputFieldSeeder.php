@@ -22,6 +22,7 @@ class InputFieldSeeder extends Seeder
             'Running Hours',
             'Voltage',
             'Water Temp',
+            'Flowrate',
             'Static Press Reading',
             'Diff Press Reading',
         ];
@@ -48,19 +49,19 @@ class InputFieldSeeder extends Seeder
             ]);
         }
 
-        $flowrate = DailyField::create([
-            'name' => 'Flowrate',
-            'slug' => 'flowrate',
-        ]);
+        // $flowrate = DailyField::create([
+        //     'name' => 'Flowrate',
+        //     'slug' => 'flowrate',
+        // ]);
 
-        $flowSubfields = ['MSCFD'];
-        foreach ($flowSubfields as $subName) {
-            Subfield::create([
-                'field_id' => $flowrate->id,
-                'name' => $subName,
-                'slug' => Str::slug($subName, '_'),
-            ]);
-        }
+        // $flowSubfields = ['MSCFD'];
+        // foreach ($flowSubfields as $subName) {
+        //     Subfield::create([
+        //         'field_id' => $flowrate->id,
+        //         'name' => $subName,
+        //         'slug' => Str::slug($subName, '_'),
+        //     ]);
+        // }
     }
 }
 

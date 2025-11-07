@@ -17,7 +17,7 @@ class UnitPosition extends Model
     public function dailyReportSetting()
     {
         return $this->belongsTo(DailyReportSettings::class, 'client_id', 'client_id')
-            ->select('client_id', 'minMaxSetting', 'decimalSetting');
+            ->select('client_id', 'minMaxSetting', 'decimalSetting', 'unitSetting');
     }
 
     public function unit()

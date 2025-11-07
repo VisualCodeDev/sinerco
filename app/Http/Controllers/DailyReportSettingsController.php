@@ -19,10 +19,12 @@ class DailyReportSettingsController extends Controller
 
     public function setSetting(Request $request)
     {
+        Log::debug('Request Data: ', $request->all());
         $rules = [
             'client_id' => 'required|array',
             'decimalSetting' => 'required|array',
             'minMaxSetting' => 'required|array',
+            'unitSetting' => 'required|array',
         ];
 
         foreach ($request->input('decimalSetting', []) as $key => $value) {
@@ -33,7 +35,9 @@ class DailyReportSettingsController extends Controller
             $rules["minMaxSetting.$key.min"] = 'required|numeric';
             $rules["minMaxSetting.$key.max"] = 'nullable|numeric';
         }
-
+        foreach ($request->input('unitSetting', []) as $key => $value) {
+            $rules["unitSetting.$key"] = 'required|string';
+        }
         $validated = $request->validate($rules);
 
         $client_ids = $validated['client_id'];
@@ -44,6 +48,7 @@ class DailyReportSettingsController extends Controller
                 [
                     'decimalSetting' => $validated['decimalSetting'],
                     'minMaxSetting' => $validated['minMaxSetting'],
+                    'unitSetting' => $validated['unitSetting'],
                 ]
             );
         }

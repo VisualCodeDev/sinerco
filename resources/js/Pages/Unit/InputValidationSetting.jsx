@@ -28,10 +28,32 @@ const InputValidationSetting = (props) => {
 
         let defaultDecimalSetting = {};
         let defaultMinMaxSetting = {};
+        let defaultUnitSetting = {};
 
         formItems
             .filter((item) => item.name !== "time")
             .forEach((item) => {
+                if (item?.subheader && item.subheader.length > 0) {
+                    item.subheader.forEach((sub) => {
+                        if (sub?.default?.decimalSetting) {
+                            defaultDecimalSetting[sub.name] =
+                                sub.default.decimalSetting;
+                        }
+                        if (
+                            sub?.default?.minSetting ||
+                            sub?.default?.maxSetting
+                        ) {
+                            defaultMinMaxSetting[sub.name] = {
+                                min: sub.default.minSetting,
+                                max: sub.default.maxSetting,
+                            };
+                        }
+                        if (sub?.default?.unitSetting) {
+                            defaultUnitSetting[sub.name] = sub.default.unitSetting;
+                        }
+                    });
+                    return;
+                }
                 if (item?.default?.decimalSetting) {
                     defaultDecimalSetting[item.name] =
                         item.default.decimalSetting;
@@ -42,15 +64,20 @@ const InputValidationSetting = (props) => {
                         max: item.default.maxSetting,
                     };
                 }
+                if (item?.default?.unitSetting) {
+                    defaultUnitSetting[item.name] = item.default.unitSetting;
+                }
             });
-
+        console.log(defaultUnitSetting);
         setFormData((prev) => ({
             ...prev,
             decimalSetting: data?.decimalSetting ?? defaultDecimalSetting,
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
+            unitSetting: data?.unitSetting ?? defaultUnitSetting,
         }));
     }, []);
 
+    console.log(formData);
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting") {
             setFormData({
@@ -71,9 +98,16 @@ const InputValidationSetting = (props) => {
                     },
                 },
             }));
+        } else if (settingType === "unitSetting") {
+            setFormData((prev) => ({
+                ...prev,
+                [settingType]: {
+                    ...formData[settingType],
+                    [field]: value,
+                },
+            }));
         }
     };
-
     const handleSave = async () => {
         try {
             setSaving(true);
@@ -135,6 +169,9 @@ const InputValidationSetting = (props) => {
                             <th className="font-semibold text-left py-3">
                                 Min Max Settings
                             </th>
+                            <th className="font-semibold text-left py-3">
+                                Unit Settings
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -145,7 +182,10 @@ const InputValidationSetting = (props) => {
                                     item.name !== "remarks"
                             )
                             .flatMap((item) => {
-                                const fields = item.subfields.length > 0 ? item?.subfields : [item];
+                                const fields =
+                                    item.subfields.length > 0
+                                        ? item?.subfields
+                                        : [item];
                                 return fields.map((field, idx) => {
                                     return (
                                         <tr
@@ -219,6 +259,29 @@ const InputValidationSetting = (props) => {
                                                                 ?.minMaxSetting?.[
                                                                 field.name
                                                             ]?.max || ""
+                                                        }
+                                                    />
+                                                </div>
+                                            </td>
+                                            {/* UNIT SETTING */}
+                                            <td>
+                                                <div className="flex flex-col md:flex-row gap-2">
+                                                    <input
+                                                        className="md:w-[150px] rounded-lg border-[#e8edfc] p-2"
+                                                        type="string"
+                                                        placeholder="unit"
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "unitSetting",
+                                                                field.slug,
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        value={
+                                                            formData
+                                                                ?.unitSetting?.[
+                                                                field.slug
+                                                            ] || ""
                                                         }
                                                     />
                                                 </div>

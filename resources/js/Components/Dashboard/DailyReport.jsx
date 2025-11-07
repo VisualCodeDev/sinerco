@@ -304,15 +304,15 @@ const ExportModal = (props) => {
 
         return dateArray;
     };
-
+    
     const handleGenerate = async () => {
         try {
             const { start, end } = selectedDate;
             const res = await fetch(
-                `/api/daily-report?start=${start}&end=${end}`
+                `/api/daily-report?id=${unitData.unit_position_id}&start=${start}&end=${end}&unit_id=${unitData.unit_id}`
             );
             const data = await res.json();
-            console.log(start, end, data);
+            console.log(data);
             const range = getDateRange(start, end);
             await ExportXlsm("Report.xlsx", data, range, unitData);
         } catch (err) {

@@ -14,12 +14,13 @@ class DataUnitFieldSeeder extends Seeder
         $units = DataUnit::all();
 
         $fields = DailyField::all();
-
+        
         foreach ($units as $unit) {
             foreach ($fields as $field) {
                 DB::table('unit_fields')->insert([
                     'unit_id' => $unit->unit_id,
                     'field_id' => $field->id,
+                    'column' => $field->id + 1 ?? null,
                     'required' => true,
                 ]);
             }

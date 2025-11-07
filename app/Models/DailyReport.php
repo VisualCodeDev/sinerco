@@ -14,10 +14,7 @@ class DailyReport extends Model
     {
         return $this->belongsTo(StatusRequest::class, 'request_id', 'request_id');
     }
-    public function cells()
-    {
-        return $this->hasMany(TableCell::class);
-    }
+   
     protected $fillable = [
         'unit_position_id',
         'data',

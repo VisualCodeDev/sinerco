@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->string('client_id', 10)->unique();
             $table->json('decimalSetting');
             $table->json('minMaxSetting');
+            $table->json('unitSetting');
             $table->timestamps();
 
             $table->foreign('client_id')->references('client_id')->on('clients')->onDelete('cascade');

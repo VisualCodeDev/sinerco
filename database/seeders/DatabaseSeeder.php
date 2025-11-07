@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             WorkshopSeeder::class,
             InputFieldSeeder::class,
             DataUnitFieldSeeder::class,
+            DailyReportSettingSeeder::class,
             SettingSeeder::class,
         ]);
 

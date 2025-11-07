@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('unit_id', 10);
             $table->unsignedBigInteger('field_id');
+            $table->integer('column');
             $table->unique(['unit_id', 'field_id']);
+            $table->unique(['unit_id', 'column']);
             $table->boolean('required')->default(true);
 
             $table->foreign('unit_id')->references('unit_id')->on('data_units')->onDelete('CASCADE')->onUpdate('CASCADE');

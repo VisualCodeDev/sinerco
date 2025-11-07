@@ -11,11 +11,13 @@ class DailyReportSettings extends Model
         'client_id',
         'decimalSetting',
         'minMaxSetting',
+        'unitSetting',
     ];
 
     protected $casts = [
         'decimalSetting' => 'array',
         'minMaxSetting' => 'array',
+        'unitSetting' => 'array',
     ];
 
      public function unitPositions()

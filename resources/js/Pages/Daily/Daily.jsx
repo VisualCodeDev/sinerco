@@ -191,7 +191,6 @@ export default function Dashboard({ unit_position_id }) {
             setLoading(false);
         }
     };
-
     const initCurrDate = async (reportData, gmt_offset, interval) => {
         setLoading(true);
         const { date } = await getCurrDateTime(gmt_offset);

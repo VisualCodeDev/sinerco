@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
 use App\Models\StatusRequest;
-use App\Models\TableCell;
+use App\Models\UnitField;
 use App\Models\UnitPosition;
 use App\Models\UserSetting;
 use App\Services\WhatsAppService;
@@ -19,26 +19,43 @@ class DailyReportController extends Controller
     {
         $start = $request->query('start');
         $end = $request->query('end');
+        $unit_position_id = $request->query('id');
+        $unit_id = $request->query('unit_id');
 
-        $reports = TableCell::with('report')
-            ->whereHas('report', function ($q) use ($start, $end) {
-                $q->whereDate('date', '>=', $start)
-                    ->whereDate('date', '<=', $end);
-            })
-            ->orderBy('daily_report_id')
-            ->get();
-            
-        $reportFormat = $reports->map(function ($item) {
+        if (!$unit_position_id || !$start || !$end || !$unit_id) {
+            return response()->json(['error' => 'Missing required parameters'], 400);
+        }
+
+        $fields = UnitField::with('fields.subfields')->where('unit_id', $unit_id)->get()->map(function ($item) {
             return [
-                'date' => $item->report->date, // hanya ambil date dari report
-                'time' => $item->report->time, // hanya ambil date dari report
-                // ambil semua kolom TableCell
-                ...$item->toArray(),
+                'column' => $item->column,
+                'field_name' => $item->fields['name'],
+                'field_slug' => $item->fields['slug'],
+                'subfields' => $item->fields['subfields'] ?? [],
             ];
         });
 
-        return response()->json($reportFormat);
+        $reports = DailyReport::where('unit_position_id', $unit_position_id)
+            ->whereBetween('date', [$start, $end])
+            ->with('request')
+            ->get()
+            ->map(function ($item) {
+                $data = json_decode($item->data, true) ?? [];
+
+                return array_merge([
+                    'id' => $item->id,
+                    'unit_position_id' => $item->unit_position_id,
+                    'date' => $item->date,
+                    'time' => $item->time,
+                ], $data, [
+                    'request' => $item->request,
+                ]);
+            });
+
+
+        return response()->json(['reports' => $reports, 'fields' => $fields]);
     }
+
 
     // public function unitList()
     // {
@@ -67,59 +84,9 @@ class DailyReportController extends Controller
 
     //     return Inertia::render('Daily/DailyList', ['data' => $data]);
     // }
-    public $fields = [
-        ['param' => 'sourcePress', 'cell' => 'B'],
-        ['param' => 'dischargePress', 'cell' => 'C'],
-        ['param' => 'suctionPress', 'cell' => 'D'],
-        ['param' => 'speed', 'cell' => 'E'],
-        ['param' => 'manifoldPress', 'cell' => 'F'],
-        ['param' => 'oilPress', 'cell' => 'G'],
-        ['param' => 'oilDiff', 'cell' => 'H'],
-        ['param' => 'runningHours', 'cell' => 'I'],
-        ['param' => 'voltage', 'cell' => 'J'],
-        ['param' => 'waterTemp', 'cell' => 'K'],
-        ['param' => 'befCooler', 'cell' => 'L'],
-        ['param' => 'aftCooler', 'cell' => 'M'],
-        ['param' => 'staticPress', 'cell' => 'N'],
-        ['param' => 'diffPress', 'cell' => 'O'],
-        ['param' => 'mscfd', 'cell' => 'P'],
-        ['param' => 'remarks', 'cell' => 'Q']
-    ];
-
-    public function setCells($reportData)
-    {
-        $cellsData = [];
-
-        foreach ($this->fields as $field) {
-            $param = $field['param'];
-            $cell = $field['cell']; // selalu ambil dari fields
-            $value = $reportData[$param] ?? 0; // kalau $reportData array, pakai ini. Kalau model, pakai $reportData->$param
-
-            $cellsData[] = [
-                'daily_report_id' => $reportData['id'] ?? $reportData->id,
-                'parameter' => $param,
-                'value' => $value,
-                'cell' => $cell,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        if (!empty($cellsData)) {
-            TableCell::upsert(
-                $cellsData,
-                ['daily_report_id', 'parameter'], // key unik untuk cek apakah update atau insert
-                ['value', 'cell', 'updated_at']   // fields yang diupdate kalau record sudah ada
-            );
-        }
-    }
-
-
 
     public function setReport(Request $request, $unit_position_id)
     {
-        Log::debug('CSRF Token', ['header' => $request->header('X-CSRF-TOKEN')]);
-        Log::debug('Session', $request->session()->all());
         if (!$unit_position_id) {
             return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
@@ -175,17 +142,17 @@ class DailyReportController extends Controller
             $technicians = UserSetting::with('user')
                 ->where('unit_position_id', $unit_position_id)
                 ->get()
-                ->filter(fn($allocation) => $allocation->user?->role === 'technician');
-
+                ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
+           
             $numbers = $technicians
                 ->pluck('user.whatsAppNum')
                 ->filter()
                 ->implode(',');
-
-            if (!empty($numbers)) {
-                WhatsAppService::sendMessage($numbers, $warningMessage);
-            }
-            WhatsAppService::sendMessage('082113837546', $warningMessage);
+            Log::debug('Nomor WhatsApp untuk peringatan: ' . $numbers);
+            // if (!empty($numbers)) {
+            //     WhatsAppService::sendMessage($numbers, $warningMessage);
+            // }
+            WhatsAppService::sendMessage('081281995158', $warningMessage);
         }
         try {
             $report = new DailyReport();

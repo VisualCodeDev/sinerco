@@ -61,9 +61,7 @@ const PageLayout = ({ children }) => {
             <AuthGuard>
                 <div className="relative h-full">
                     <NotificationContainer messages={messages} alert={alert}/>
-                    {user &&
-                        (user?.role === "operator" ||
-                            user?.role === "technician") && (
+                    {user && (
                             <div className="fixed bottom-0 right-0 z-[100] md:m-12 m-5">
                                 {/* Mobile button */}
                                 <button

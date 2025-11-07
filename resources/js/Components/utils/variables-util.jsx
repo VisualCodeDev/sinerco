@@ -2,11 +2,15 @@ export const formItems = [
     {
         name: "time",
         header: "Time",
+        default: {
+            unitSetting: "psig",
+        },
     },
     {
         name: "source_press",
         default: {
             decimalSetting: "1",
+            unitSetting: "psig",
         },
         header: "Source Press.",
     },
@@ -23,6 +27,7 @@ export const formItems = [
             decimalSetting: "1",
             minSetting: -9,
             maxSetting: 60,
+            unitSetting: "psig",
         },
         header: "Suction Press.",
     },
@@ -32,6 +37,7 @@ export const formItems = [
             decimalSetting: "1",
             minSetting: 0,
             maxSetting: 400,
+            unitSetting: "psig",
         },
         header: "Discharge Press.",
     },
@@ -41,6 +47,7 @@ export const formItems = [
             decimalSetting: "0",
             minSetting: 1500,
             maxSetting: 2200,
+            unitSetting: "RPM",
         },
         header: "Speed",
     },
@@ -50,6 +57,7 @@ export const formItems = [
             decimalSetting: "1",
             minSetting: -6,
             maxSetting: -2,
+            unitSetting: "psig",
         },
         header: "Manifold Press.",
     },
@@ -59,6 +67,7 @@ export const formItems = [
             decimalSetting: "1",
             minSetting: 30,
             maxSetting: 70,
+            unitSetting: "psig",
         },
         header: "Oil Press.",
     },
@@ -66,6 +75,7 @@ export const formItems = [
         name: "oil_diff",
         default: {
             decimalSetting: "1",
+            unitSetting: "psig",
         },
         header: "Oil Diff.",
     },
@@ -73,6 +83,7 @@ export const formItems = [
         name: "running_hours",
         default: {
             decimalSetting: "0",
+            unitSetting: "hour",
         },
         header: "Running Hours",
     },
@@ -82,6 +93,7 @@ export const formItems = [
             decimalSetting: "1",
             minSetting: 27,
             maxSetting: 28,
+            unitSetting: "V",
         },
         header: "Voltage",
     },
@@ -90,6 +102,7 @@ export const formItems = [
         default: {
             decimalSetting: "1",
             minSetting: -194,
+            unitSetting: "°F",
         },
         header: "Water Temp",
     },
@@ -104,6 +117,7 @@ export const formItems = [
                 default: {
                     minSetting: 350,
                     decimalSetting: "1",
+                    unitSetting: "°F",
                 },
             },
             {
@@ -112,31 +126,35 @@ export const formItems = [
                 default: {
                     minSetting: 120,
                     decimalSetting: "1",
+                    unitSetting: "°F",
                 },
             },
         ],
     },
     {
-        name: "static_press",
+        name: "static_press_reading",
         default: {
             decimalSetting: "1",
+            unitSetting: "psig",
         },
         header: "Static Press. Reading",
     },
     {
-        name: "diff_press",
+        name: "diff_press_reading",
         default: {
             decimalSetting: "1",
+            unitSetting: "in H2O",
         },
         header: "Diff. Press. Reading",
     },
     {
-        name: "flow_rate",
+        name: "flowrate",
         default: {
             decimalSetting: "6",
+            unitSetting: "MSCFD",
         },
         header: "Flowrate",
-        subheader: [{ name: "mscfd", sub: "MSCFD" }],
+        // subheader: [{ name: "mscfd", sub: "MSCFD" }],
     },
     {
         name: "remarks",
