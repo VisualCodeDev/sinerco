@@ -112,6 +112,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             timeCell.font = { bold: true };
 
             // Kolom Remarks
+            console.log(Object.keys(fieldHeaderColumnMap).length + 1);
+            
             const remarkCell = newSheet.getCell(
                 `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
             );
