@@ -19,6 +19,7 @@ const InputValidationSetting = (props) => {
     //     value: client.clientId,
     //     label: client.name,
     // }));
+
     useEffect(() => {
         const fetchFields = async () => {
             const data = await getFields();
@@ -85,7 +86,7 @@ const InputValidationSetting = (props) => {
             unitSetting: data?.unitSetting ?? defaultUnitSetting,
             thresholdSetting: data?.thresholdSetting ?? defaultThresholdSetting,
         }));
-    }, []);
+    }, [data]);
 
     const handleChange = (settingType, field, value) => {
         if (settingType === "decimalSetting" || settingType === "unitSetting") {
@@ -164,7 +165,7 @@ const InputValidationSetting = (props) => {
             <div className="overflow-y-auto w-screen overflow-x-auto">
                 <table className="w-full">
                     <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
-                        <tr>
+                        <tr className="sticky top-0">
                             <th className="font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">
                                 Item
                             </th>

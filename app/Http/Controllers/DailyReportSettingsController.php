@@ -19,7 +19,6 @@ class DailyReportSettingsController extends Controller
 
     public function setSetting(Request $request)
     {
-        Log::debug('Request Data: ', $request->all());
         $rules = [
             'client_id' => 'required|array',
             'decimalSetting' => 'required|array',

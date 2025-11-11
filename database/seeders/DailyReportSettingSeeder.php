@@ -89,10 +89,10 @@ class DailyReportSettingSeeder extends Seeder
         foreach ($clients as $client) {
             DailyReportSettings::create([
                 'client_id' => $client->client_id,
-                'decimalSetting' => json_encode($decimalSetting),
-                'minMaxSetting' => json_encode($minMaxSetting),
-                'unitSetting' => json_encode($units),
-                'thresholdSetting' => json_encode($thresholdSetting)
+                'decimalSetting' => $decimalSetting,
+                'minMaxSetting' => $minMaxSetting,
+                'unitSetting' => $units,
+                'thresholdSetting' => $thresholdSetting
             ]);
         }
 
