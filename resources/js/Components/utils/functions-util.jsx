@@ -640,7 +640,7 @@ export function chr(num) {
   while (Number(num) > 0) {
     let rem = (Number(num) - 1) % 26;
     str = String.fromCharCode(65 + rem) + str;
-    Number(num) = Math.floor((num - 1) / 26);
+    num = Math.floor((num - 1) / 26);
   }
   return str;
 }
