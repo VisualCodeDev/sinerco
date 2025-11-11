@@ -78,7 +78,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
 
-                    console.log(col, stopCol);
+                    console.log(col);
 
                     newSheet.mergeCells(`${col}2:${col}3`);
                     const fieldCell = newSheet.getCell(`${col}2`);
