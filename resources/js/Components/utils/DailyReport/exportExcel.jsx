@@ -113,6 +113,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
             // Kolom Remarks
             console.log(Object.keys(fieldHeaderColumnMap).length + 1);
+            console.log(chr(Object.keys(fieldHeaderColumnMap).length + 1));
             
             const remarkCell = newSheet.getCell(
                 `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
