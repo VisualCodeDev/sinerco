@@ -116,7 +116,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
             );
             newSheet.mergeCells(
-                `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2:${chr(
+                `${chr(Number(Object.keys(fieldHeaderColumnMap).length + 1))}2:${chr(
                     Object.keys(fieldHeaderColumnMap).length + 5
                 )}4`
             );
