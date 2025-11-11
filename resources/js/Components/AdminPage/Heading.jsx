@@ -32,15 +32,10 @@ const Heading = ({ children, alert, setAlert }) => {
     let menuItems = [];
     const { user, loading } = useAuth();
 
-    const handleAlert = async () => {
-        try {
-            setLoading(true);
-            const res = await axios.post(route("setting.set"));
-            setAlert(res.data);
-        } catch (e) {
-            console.error(e);
-        }
-        setLoading(false);
+    const handleAlert = () => {
+        const newAlert = !alert;
+        setAlert(newAlert);
+        localStorage.setItem("alertData", JSON.stringify(newAlert));
     };
 
     if (isLoading || loading) return <LoadingSpinner />;
@@ -364,7 +359,7 @@ const Heading = ({ children, alert, setAlert }) => {
             {/* Main Area */}
             <div className="flex-1 flex flex-col w-full relative lg:ps-10 h-screen">
                 {/* Top Header */}
-                <div className="bg-white flex items-center justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10 h-[10%]">
+                <div className="bg-white flex items-center px-6 pe-12 py-4 shadow sticky top-0 z-10 h-[10%] gap-3">
                     <div className="h-8">
                         <img
                             src="/logo_horizontal.webp"

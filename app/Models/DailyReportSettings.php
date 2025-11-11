@@ -12,12 +12,14 @@ class DailyReportSettings extends Model
         'decimalSetting',
         'minMaxSetting',
         'unitSetting',
+        'thresholdSetting'
     ];
 
     protected $casts = [
         'decimalSetting' => 'array',
         'minMaxSetting' => 'array',
         'unitSetting' => 'array',
+        'thresholdSetting' => 'array'
     ];
 
      public function unitPositions()

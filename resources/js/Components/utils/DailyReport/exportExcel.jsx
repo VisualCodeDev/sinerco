@@ -141,12 +141,9 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         vertical: "middle",
                         wrapText: true,
                     };
-
+                    const time = `${String(hour).padStart(2, "0")}:00`;
                     if (!timeRowCell.value && timeRowCell.value !== 0)
-                        timeRowCell.value = `${String(hour).padStart(
-                            2,
-                            "0"
-                        )}:00`;
+                        timeRowCell.value = time;
                 });
                 hour++;
                 for (
@@ -161,6 +158,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         vertical: "middle",
                         wrapText: true,
                     };
+                    // REMARKS COLOMN
                     if (c === Object.keys(fieldHeaderColumnMap).length + 1) {
                         newSheet.mergeCells(
                             `${chr(
@@ -306,7 +304,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 },
             ];
             const headerStartCol = chr(remarksStart + 1);
-            const headerEndCol = chr(remarksStart + remarksHeader.length + 1);
 
             const headerCell = newSheet.getCell(`${headerStartCol}3`);
             headerCell.value = "REMARKS TIME";
@@ -323,26 +320,29 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 )}3`
             );
 
+            const cellItems = [];
             remarksHeader.forEach((remark, index) => {
                 const remarkCol = chr(remarksStart + 1 + index);
                 const remarkCell = newSheet.getCell(`${remarkCol}4`);
                 remarkCell.value = remark?.label;
+
+                if (remark.label === "REMARKS") {
+                    newSheet.getCell(`${remarkCol}3`).value = remark.label;
+                    newSheet.mergeCells(`${remarkCol}3:${remarkCol}4`);
+                }
+
+                remarkCell.border = ExcelStyle.borderAll;
                 remarkCell.font = { bold: true };
                 remarkCell.alignment = {
                     horizontal: "center",
                     vertical: "middle",
                     wrapText: true,
                 };
-                if (remark.label === "REMARKS") {
-                    newSheet.getCell(`${remarkCol}3`).value = remark.label;
-                    newSheet.mergeCells(`${remarkCol}3:${remarkCol}4`);
-                }
-                remarkCell.border = ExcelStyle.borderAll;
-
+                const currCell = remarksStart + 1 + index;
+                cellItems.push(chr(currCell));
                 for (let r = 5; r < 29; r++) {
-                    const cell = newSheet
-                        .getRow(r)
-                        .getCell(remarksStart + 1 + index);
+                    const cell = newSheet.getRow(r).getCell(currCell);
+
                     requestedData.forEach((req) => {
                         if (req.time === newSheet.getRow(r).getCell(1).value) {
                             cell.value = req[remark.value] || "";
@@ -354,15 +354,47 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         vertical: "middle",
                         wrapText: true,
                     };
+                    if (remark.label === "REMARKS") {
+                        cell.font = {
+                            color: { argb: "FF0000FF" },
+                        };
+                    }
                 }
             });
+
+            const dataRemarksCol = Number(
+                Object.keys(fieldHeaderColumnMap)?.length + 1
+            );
+
+            for (let r = 5; r < 29; r++) {
+                const remarksDataForPrevTable = newSheet
+                    .getRow(r)
+                    .getCell(dataRemarksCol);
+
+                remarksDataForPrevTable.value = {
+                    formula: `IF(${cellItems[1]}${r}="",IF(${cellItems[5]}${r}="","",${cellItems[5]}${r}),CONCATENATE(TEXT(${cellItems[1]}${r},"[hh]:mm"),IF(${cellItems[2]}${r}="",""," - "&TEXT(${cellItems[2]}${r},"[hh]:mm")))&IF(${cellItems[0]}${r}="",""," "&${cellItems[0]}${r}&"/")&" "&${cellItems[5]}${r})`,
+                };
+
+                remarksDataForPrevTable.font = {
+                    color: { argb: "FF0000FF" },
+                };
+            }
         }
 
         // Simpan file
+        workbook.eachSheet((sheet) => {
+            sheet.eachRow((row) => {
+                row.eachCell((cell) => {
+                    if (!cell.font) cell.font = {};
+                    cell.font.name = "Arial";
+                    cell.font.size = 10;
+                });
+            });
+        });
         const buffer = await workbook.xlsx.writeBuffer();
         saveAs(
             new Blob([buffer], {
-                type: "application/vnd.ms-excel.sheet.macroEnabled.12",
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             }),
             fileName
         );

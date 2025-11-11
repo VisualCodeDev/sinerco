@@ -120,11 +120,6 @@ Route::controller(DailyFieldController::class)->middleware(['auth', 'roles:super
     Route::get('/get/field', 'getFields')->name('input.field.get');
 });
 
-Route::controller(SettingController::class)->middleware(['auth'])->group(function () {
-    Route::get('/get/setting', 'index')->name('setting.get');
-    Route::post('/set/setting', 'setSetting')->name('setting.set')->middleware(['roles:super_admin']);
-});
-
 Route::get('/get/server-time', function () {
     return response()->json(['server_time' => now()->toDateTimeString()]);
 })->name('server.time');
@@ -169,6 +164,7 @@ Route::controller(AdminNotificationController::class)->group(function () {
 Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
     Route::get('/profile/{user_id}/', 'index')->name('profile');
     Route::get('/fetch/roles', 'getAllRoles')->name('roles.get');
+    Route::post('/profile/update/phone', 'updatePhone')->name('user.phone.update');
 });
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {

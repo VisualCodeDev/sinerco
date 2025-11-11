@@ -80,12 +80,12 @@ class ClientController extends Controller
         ]);
         foreach ($request->clientSettings as $client_id => $settings) {
             $client = Client::where('client_id', $client_id)->first();
-
             if ($client) {
                 $client->update([
                     'input_interval' => $settings['input_interval'] ?? $client->input_interval,
                     'input_duration' => $settings['input_duration'] ?? $client->input_duration,
                     'gmt_offset' => $settings['gmt_offset'] ?? $client->gmt_offset,
+                    'auto_send_interval' => $settings['auto_send_interval'] ?? $client->auto_send_interval,
                 ]);
             } else {
                 return response()->json(['type' => 'error', 'text' => 'Client not found']);

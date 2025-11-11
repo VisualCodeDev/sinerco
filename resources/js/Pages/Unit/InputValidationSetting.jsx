@@ -29,6 +29,7 @@ const InputValidationSetting = (props) => {
         let defaultDecimalSetting = {};
         let defaultMinMaxSetting = {};
         let defaultUnitSetting = {};
+        let defaultThresholdSetting = {};
 
         formItems
             .filter((item) => item.name !== "time")
@@ -49,8 +50,13 @@ const InputValidationSetting = (props) => {
                             };
                         }
                         if (sub?.default?.unitSetting) {
-                            defaultUnitSetting[sub.name] = sub.default.unitSetting;
+                            defaultUnitSetting[sub.name] =
+                                sub.default.unitSetting;
                         }
+                        defaultThresholdSetting[sub.name] = {
+                            value: 0,
+                            type: "number",
+                        };
                     });
                     return;
                 }
@@ -67,19 +73,22 @@ const InputValidationSetting = (props) => {
                 if (item?.default?.unitSetting) {
                     defaultUnitSetting[item.name] = item.default.unitSetting;
                 }
+                defaultThresholdSetting[item.name] = {
+                    value: 0,
+                    type: "number",
+                };
             });
-        console.log(defaultUnitSetting);
         setFormData((prev) => ({
             ...prev,
             decimalSetting: data?.decimalSetting ?? defaultDecimalSetting,
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
             unitSetting: data?.unitSetting ?? defaultUnitSetting,
+            thresholdSetting: data?.thresholdSetting ?? defaultThresholdSetting,
         }));
     }, []);
 
-    console.log(formData);
     const handleChange = (settingType, field, value) => {
-        if (settingType === "decimalSetting") {
+        if (settingType === "decimalSetting" || settingType === "unitSetting") {
             setFormData({
                 ...formData,
                 [settingType]: {
@@ -87,7 +96,10 @@ const InputValidationSetting = (props) => {
                     [field]: value,
                 },
             });
-        } else if (settingType === "minMaxSetting") {
+        } else if (
+            settingType === "minMaxSetting" ||
+            settingType === "thresholdSetting"
+        ) {
             setFormData((prev) => ({
                 ...prev,
                 [settingType]: {
@@ -98,16 +110,9 @@ const InputValidationSetting = (props) => {
                     },
                 },
             }));
-        } else if (settingType === "unitSetting") {
-            setFormData((prev) => ({
-                ...prev,
-                [settingType]: {
-                    ...formData[settingType],
-                    [field]: value,
-                },
-            }));
         }
     };
+
     const handleSave = async () => {
         try {
             setSaving(true);
@@ -143,7 +148,7 @@ const InputValidationSetting = (props) => {
     }
 
     return (
-        <div className="flex flex-col gap-6 p-5">
+        <div className="flex flex-col gap-6">
             {/* <h2 className="text-xl font-semibold text-gray-800">
                 Input Validation Settings
             </h2>
@@ -156,24 +161,28 @@ const InputValidationSetting = (props) => {
                 />
             </div> */}
 
-            <div className="overflow-y-auto">
-                <table className="w-full table-fixed">
-                    <thead className="sticky top-0 bg-primary text-white z-10">
-                        <tr className="">
-                            <th className="font-semibold md:w-1/3 text-left px-4 py-3">
+            <div className="overflow-y-auto w-screen overflow-x-auto">
+                <table className="w-full">
+                    <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
+                        <tr>
+                            <th className="font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">
                                 Item
                             </th>
-                            <th className="font-semibold text-left py-3">
+                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
                                 Decimal Settings
                             </th>
-                            <th className="font-semibold text-left py-3">
+                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[25%]">
                                 Min Max Settings
                             </th>
-                            <th className="font-semibold text-left py-3">
+                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
                                 Unit Settings
+                            </th>
+                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[20%] rounded-tr-lg">
+                                Input Threshold
                             </th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {fields
                             .filter(
@@ -190,14 +199,17 @@ const InputValidationSetting = (props) => {
                                     return (
                                         <tr
                                             key={field.name + idx}
-                                            className="border-b border-[#e5e7eb]"
+                                            className="border-b border-[#E4E7EC] bg-[#F9FAFB] hover:bg-[#F3F4F6] transition-colors"
                                         >
-                                            <td className="py-10 md:py-6 px-4 font-semibold">
+                                            {/* ITEM NAME */}
+                                            <td className="py-6 px-6 font-medium text-[#101828] whitespace-nowrap">
                                                 {field.name}
                                             </td>
-                                            <td>
+
+                                            {/* DECIMAL SETTINGS */}
+                                            <td className="px-6 py-4">
                                                 <select
-                                                    className="py-1 md:w-[150px] rounded-lg border-[#e8edfc]"
+                                                    className="w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                                                     onChange={(e) =>
                                                         handleChange(
                                                             "decimalSetting",
@@ -207,7 +219,7 @@ const InputValidationSetting = (props) => {
                                                     }
                                                     value={
                                                         formData
-                                                            ?.decimalSetting[
+                                                            ?.decimalSetting?.[
                                                             field.slug
                                                         ] || ""
                                                     }
@@ -215,12 +227,14 @@ const InputValidationSetting = (props) => {
                                                     {options}
                                                 </select>
                                             </td>
-                                            <td>
-                                                <div className="flex flex-col md:flex-row gap-2">
+
+                                            {/* MIN & MAX SETTINGS */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex gap-3">
                                                     <input
-                                                        className="md:w-[150px] rounded-lg border-[#e8edfc]"
                                                         type="number"
-                                                        placeholder="min."
+                                                        placeholder="Min"
+                                                        className="w-[100px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                                                         onChange={(e) =>
                                                             handleChange(
                                                                 "minMaxSetting",
@@ -240,9 +254,9 @@ const InputValidationSetting = (props) => {
                                                         }
                                                     />
                                                     <input
-                                                        className="md:w-[150px] rounded-lg border-[#e8edfc]"
                                                         type="number"
-                                                        placeholder="max."
+                                                        placeholder="Max"
+                                                        className="w-[100px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                                                         onChange={(e) =>
                                                             handleChange(
                                                                 "minMaxSetting",
@@ -257,33 +271,100 @@ const InputValidationSetting = (props) => {
                                                         value={
                                                             formData
                                                                 ?.minMaxSetting?.[
-                                                                field.name
+                                                                field.slug
                                                             ]?.max || ""
                                                         }
                                                     />
                                                 </div>
                                             </td>
-                                            {/* UNIT SETTING */}
-                                            <td>
-                                                <div className="flex flex-col md:flex-row gap-2">
+
+                                            {/* UNIT SETTINGS */}
+                                            <td className="px-6 py-4">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Unit"
+                                                    className="w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
+                                                    onChange={(e) =>
+                                                        handleChange(
+                                                            "unitSetting",
+                                                            field.slug,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    value={
+                                                        formData?.unitSetting?.[
+                                                            field.slug
+                                                        ] || ""
+                                                    }
+                                                />
+                                            </td>
+
+                                            {/* INPUT THRESHOLD */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex gap-3">
                                                     <input
-                                                        className="md:w-[150px] rounded-lg border-[#e8edfc] p-2"
-                                                        type="string"
-                                                        placeholder="unit"
+                                                        type="text"
+                                                        inputMode="decimal"
+                                                        placeholder="Threshold"
+                                                        className="w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                                                         onChange={(e) =>
                                                             handleChange(
-                                                                "unitSetting",
+                                                                "thresholdSetting",
                                                                 field.slug,
-                                                                e.target.value
+                                                                {
+                                                                    value: e
+                                                                        .target
+                                                                        .value,
+                                                                }
                                                             )
                                                         }
                                                         value={
                                                             formData
-                                                                ?.unitSetting?.[
+                                                                ?.thresholdSetting?.[
                                                                 field.slug
-                                                            ] || ""
+                                                            ]?.value || ""
                                                         }
                                                     />
+                                                    <select
+                                                        className="w-[80px] h-[40px] border border-[#D0D5DD] rounded-lg px-2 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
+                                                        value={
+                                                            formData
+                                                                ?.thresholdSetting?.[
+                                                                field.slug
+                                                            ]?.type || ""
+                                                        }
+                                                        onChange={(e) =>
+                                                            handleChange(
+                                                                "thresholdSetting",
+                                                                field.slug,
+                                                                {
+                                                                    type: e
+                                                                        .target
+                                                                        .value,
+                                                                }
+                                                            )
+                                                        }
+                                                    >
+                                                        {[
+                                                            {
+                                                                label: "%",
+                                                                value: "percentage",
+                                                            },
+                                                            {
+                                                                label: "Number",
+                                                                value: "number",
+                                                            },
+                                                        ].map((item) => (
+                                                            <option
+                                                                key={item.value}
+                                                                value={
+                                                                    item.value
+                                                                }
+                                                            >
+                                                                {item.label}
+                                                            </option>
+                                                        ))}
+                                                    </select>
                                                 </div>
                                             </td>
                                         </tr>

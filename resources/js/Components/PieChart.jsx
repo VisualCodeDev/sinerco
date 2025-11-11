@@ -69,7 +69,7 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
                                 strokeWidth={strokeWidth}
                                 strokeDasharray={dashArray}
                                 strokeDashoffset={offset}
-                                strokeLinecap="round"
+                                // strokeLinecap="round"
                                 transform={`rotate(-90 ${center} ${center})`}
                             />
                         );

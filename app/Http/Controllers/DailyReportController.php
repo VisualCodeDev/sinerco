@@ -139,20 +139,20 @@ class DailyReportController extends Controller
                 $warningMessage .= "- " . ucfirst($field) . ": " . $message . "\n";
             }
 
-            $technicians = UserSetting::with('user')
+            $workers = UserSetting::with('user')
                 ->where('unit_position_id', $unit_position_id)
                 ->get()
                 ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
            
-            $numbers = $technicians
+            $numbers = $workers
                 ->pluck('user.whatsAppNum')
                 ->filter()
                 ->implode(',');
-            Log::debug('Nomor WhatsApp untuk peringatan: ' . $numbers);
-            // if (!empty($numbers)) {
-            //     WhatsAppService::sendMessage($numbers, $warningMessage);
-            // }
-            WhatsAppService::sendMessage('081281995158', $warningMessage);
+
+                if (!empty($numbers)) {
+                WhatsAppService::sendMessage($numbers, $warningMessage);
+            }
+            // WhatsAppService::sendMessage('081281995158', $warningMessage);
         }
         try {
             $report = new DailyReport();

@@ -27,14 +27,15 @@ class ProfileController extends Controller
         return Inertia::render('User/UserList', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
     }
 
-    public function getAllRoles() { 
+    public function getAllRoles()
+    {
         $data = Role::all();
         return response()->json($data);
     }
     public function index($user_id)
     {
         $userData = User::where('user_id', $user_id)->first();
-        $permissionData = DataUnitController::getPermittedUnit(); // returns an array
+        $permissionData = DataUnitController::getPermittedUnit();
 
         $unitIds = collect($permissionData)->pluck('unit_id')->unique()->filter();
 
@@ -62,6 +63,25 @@ class ProfileController extends Controller
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
         ]);
+    }
+
+
+    public function updatePhone(Request $request)
+    {
+        $val = $request->validate(
+            [
+                'user_id' => 'required|string',
+                'whatsAppNum' => 'required|regex:/^08[0-9]+$/|min:10|max:13'
+            ]
+        );
+
+        $user = User::find($val['user_id']);
+        if ($user) {
+            $user->update(['whatsAppNum' => $val['whatsAppNum']]);
+            return response()->json(['type' => 'success', 'text' => 'Phone number updated']);
+        }
+        ;
+        return response()->json(['type' => 'error', 'text' => 'User not found']);
     }
 
     /**

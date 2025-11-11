@@ -11,6 +11,7 @@ const list = ({
     isDown,
     gmt_offset,
     disableDuration,
+    lastReport,
 }) => {
     const colItem = [
         {
@@ -769,13 +770,6 @@ const list = ({
         header: item?.name,
         subheader: item?.slug,
         Cell: () => {
-            const decimalSetting =
-                1 /
-                Math.pow(10, reportSettings?.decimalSetting?.[item?.slug] || 0);
-            const minMaxSetting = {
-                min: reportSettings?.minMaxSetting?.[item?.slug]?.min,
-                max: reportSettings?.minMaxSetting?.[item?.slug]?.max,
-            };
             if (item?.subfields?.length > 0) {
                 return (
                     <div className="flex flex-col">
@@ -787,39 +781,95 @@ const list = ({
                         </label>
 
                         <div className="flex gap-4 flex-wrap">
-                            {item?.subfields?.map((sub, index) => (
-                                <div
-                                    key={index}
-                                    className="flex flex-col w-full"
-                                >
-                                    <label className="text-sm">
-                                        {sub?.name}
-                                    </label>
-                                    <input
-                                        required
-                                        id={sub.slug}
-                                        type="text"
-                                        inputMode="decimal"
-                                        name={sub.slug}
-                                        value={formData[sub.slug] || ""}
-                                        step={decimalSetting}
-                                        onChange={(e) =>
-                                            handleChange(
-                                                [sub.slug],
-                                                e.target.value,
-                                                minMaxSetting
-                                            )
-                                        }
-                                        placeholder={decimalSetting}
-                                        className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
-                                    />
-                                </div>
-                            ))}
+                            {item?.subfields?.map((sub, index) => {
+                                const decimalSetting =
+                                    1 /
+                                    Math.pow(
+                                        10,
+                                        reportSettings?.decimalSetting?.[
+                                            sub?.slug
+                                        ] || 0
+                                    );
+                                const minMaxSetting = {
+                                    min: reportSettings?.minMaxSetting?.[
+                                        sub?.slug
+                                    ]?.min,
+                                    max: reportSettings?.minMaxSetting?.[
+                                        sub?.slug
+                                    ]?.max,
+                                };
+
+                                const thresholdSetting =
+                                    reportSettings?.thresholdSetting?.[
+                                        sub.slug
+                                    ];
+
+                                const lastReportData = Number(
+                                    lastReport?.[sub.slug]
+                                );
+
+                                const thresholdValue =
+                                    thresholdSetting?.type === "percentage"
+                                        ? lastReportData *
+                                          Number(thresholdSetting?.value)
+                                        : Number(thresholdSetting?.value);
+                                return (
+                                    <div
+                                        key={index}
+                                        className="flex flex-col w-full"
+                                    >
+                                        <label className="text-sm">
+                                            {sub?.name}
+                                        </label>
+                                        <input
+                                            required
+                                            id={sub.slug}
+                                            type="text"
+                                            inputMode="decimal"
+                                            name={sub.slug}
+                                            value={formData[sub.slug] || ""}
+                                            step={decimalSetting}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    [sub.slug],
+                                                    e.target.value,
+                                                    minMaxSetting,
+                                                    thresholdValue,
+                                                    lastReportData
+                                                )
+                                            }
+                                            placeholder={decimalSetting}
+                                            className="border-[#DBDCDE] px-4 py-2.5 rounded-lg bg-[#F4F5F9] lg:md:text-base text-sm"
+                                        />
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 );
             } else {
-                return (
+                const decimalSetting =
+                    1 /
+                    Math.pow(
+                        10,
+                        reportSettings?.decimalSetting?.[item?.slug] || 0
+                    );
+                const minMaxSetting = {
+                    min: reportSettings?.minMaxSetting?.[item?.slug]?.min,
+                    max: reportSettings?.minMaxSetting?.[item?.slug]?.max,
+                };
+
+                const thresholdSetting =
+                    reportSettings?.thresholdSetting?.[item.slug];
+
+                const lastReportData = Number(lastReport?.[item.slug]);
+
+                const thresholdValue =
+                    thresholdSetting?.type === "percentage"
+                        ? lastReportData * Number(thresholdSetting?.value)
+                        : Number(thresholdSetting?.value);
+
+                        return (
                     <div className="flex flex-col">
                         <label
                             htmlFor={item?.name}
@@ -842,7 +892,9 @@ const list = ({
                                 handleChange(
                                     [e.target.name],
                                     e.target.value,
-                                    minMaxSetting
+                                    minMaxSetting,
+                                    thresholdValue,
+                                    lastReportData
                                 )
                             }
                             placeholder={decimalSetting}

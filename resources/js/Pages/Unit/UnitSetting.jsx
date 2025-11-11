@@ -88,6 +88,7 @@ const UnitSetting = () => {
         handleCheckItem,
         handleUpdateDisable
     );
+
     const handleClientSetting = async (e) => {
         e.preventDefault();
 
@@ -97,7 +98,6 @@ const UnitSetting = () => {
                     clientSettings: formData?.clientSettings,
                 })
             );
-            console.log(resp);
             addToast(resp?.data);
         } catch (e) {
             console.log(e);

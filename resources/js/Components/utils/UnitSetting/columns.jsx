@@ -15,8 +15,8 @@ const columns = (
         {
             name: "id",
             header: "NO.",
-            headerClassName: "text-center bg-primary text-white",
-            cellClassName: "text-center",
+            headerClassName: "text-center bg-primary text-white text-nowrap",
+            cellClassName: "text-nowrap text-center",
             sortable: false,
             width: "3%",
             Cell: ({ index }) => {
@@ -30,9 +30,9 @@ const columns = (
         {
             name: "client",
             header: "Client",
-            headerClassName: "bg-primary text-white",
+            headerClassName: "bg-primary text-white text-nowrap",
             sortable: true,
-            width: "17%",
+            width: "16%",
             Cell: ({ name }) => {
                 return <div className="flex flex-col">{name}</div>;
             },
@@ -40,15 +40,14 @@ const columns = (
         {
             name: "gmt",
             header: "Time Zone (GMT)",
-            headerClassName: "bg-primary text-white",
+            headerClassName: "bg-primary text-white text-nowrap",
             sortable: false,
-            width: "15%",
+            width: "14%",
             Cell: ({ gmt_offset, client_id }) => {
                 return (
                     <select
                         value={
-                            formData?.clientSettings?.[client_id]
-                                ?.gmt_offset ||
+                            formData?.clientSettings?.[client_id]?.gmt_offset ||
                             gmt_offset ||
                             1
                         }
@@ -73,7 +72,7 @@ const columns = (
         {
             name: "interval",
             header: "Input Interval (Hours)",
-            headerClassName: "bg-primary text-white",
+            headerClassName: "bg-primary text-white text-nowrap",
             sortable: false,
             width: "15%",
             Cell: ({ input_interval, client_id }) => {
@@ -106,7 +105,7 @@ const columns = (
         {
             name: "duration",
             header: "Duration (mins)",
-            headerClassName: "bg-primary text-white",
+            headerClassName: "bg-primary text-white text-nowrap",
             sortable: false,
             width: "17%",
             Cell: ({ input_duration, client_id, disable_duration }) => {
@@ -119,7 +118,7 @@ const columns = (
                                 input_duration ||
                                 35
                             }
-                            className="flex flex-col rounded-xl border-[#EAECF0] w-1/2"
+                            className="flex flex-col rounded-xl border-[#EAECF0]"
                             onChange={(e) => {
                                 handleChange(
                                     "input_duration",
@@ -141,12 +140,49 @@ const columns = (
                         </select>
                         <button
                             className={`${
-                                !disable_duration ? "bg-red-500" : "bg-green-500"
+                                !disable_duration
+                                    ? "bg-red-500"
+                                    : "bg-green-500"
                             } text-white rounded-md px-2 py-1`}
                             onClick={() => handleUpdateDisable(client_id)}
                         >
                             {disable_duration ? "Enable" : "Disable"}
                         </button>
+                    </div>
+                );
+            },
+        },
+        {
+            name: "auto_send_interval",
+            header: "Summary Interval",
+            headerClassName: "bg-primary text-white text-nowrap",
+            sortable: false,
+            width: "15%",
+            Cell: ({ auto_send_interval, client_id }) => {
+                return (
+                    <div className="flex items-center">
+                        <select
+                            value={
+                                formData?.clientSettings?.[client_id]
+                                    ?.auto_send_interval ||
+                                auto_send_interval ||
+                                35
+                            }
+                            className="flex flex-col rounded-xl border-[#EAECF0]"
+                            onChange={(e) => {
+                                handleChange(
+                                    "auto_send_interval",
+                                    client_id,
+                                    e.target.value
+                                );
+                            }}
+                        >
+                            {["1h", "4h", "6h", "12h", "1d"].map((value) => (
+                                <option key={value} value={value}>
+                                    {value}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 );
             },
@@ -169,21 +205,23 @@ const columns = (
             },
             headerClassName: "bg-primary text-white text-center justify-center",
             sortable: false,
-            cellClassName: "text-center",
+            cellClassName: "text-nowraptext-center",
             width: "20%",
             Cell: ({ client_id }) => {
                 return (
-                    <input
-                        type="checkbox"
-                        className="w-5 h-5 rounded-sm"
-                        checked={formData?.selectedRows?.includes(
-                            client_id.toString()
-                        )}
-                        onChange={(e) => {
-                            e.stopPropagation();
-                            handleCheckItem(client_id);
-                        }}
-                    />
+                    <div className="flex justify-center">
+                        <input
+                            type="checkbox"
+                            className="w-5 h-5 rounded-sm"
+                            checked={formData?.selectedRows?.includes(
+                                client_id.toString()
+                            )}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                                handleCheckItem(client_id);
+                            }}
+                        />
+                    </div>
                 );
             },
         },

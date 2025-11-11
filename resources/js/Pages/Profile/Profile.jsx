@@ -16,12 +16,44 @@ import {
 import tColumns from "@/Components/utils/DataUnit/columns";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+import { FaPencil } from "react-icons/fa6";
+import { useToast } from "@/Components/Toast/ToastProvider";
 
 const Profile = ({ data, permissionData, requestList }) => {
     const [formData, setFormData] = useState({
         selectedRows: [],
     });
+    const [edit, setEdit] = useState(false);
+    const [phoneNum, setPhoneNum] = useState(data?.whatsAppNum || "");
+    const { addToast } = useToast();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
+        if (!/^08\d+$/.test(phoneNum)) {
+            alert("Phone number must start with 08 and contain only digits");
+            return;
+        }
+
+        if (phoneNum.length < 10 || phoneNum.length > 13) {
+            alert("Phone number must be between 10 and 13 digits");
+            return;
+        }
+
+        try {
+            const resp = await axios.post(route("user.phone.update"), {
+                whatsAppNum: phoneNum,
+                user_id: data?.user_id,
+            });
+            if (resp?.data?.type == "success") {
+                setEdit(false);
+            }
+
+            addToast(resp.data);
+        } catch (err) {
+            console.error(err);
+            addToast({ type: "error", text: "Failed to update" });
+        }
+    };
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row h-screen md:gap-10">
@@ -41,12 +73,6 @@ const Profile = ({ data, permissionData, requestList }) => {
                                     {data?.name}
                                 </p>
                             </div>
-                            <div className="flex flex-row justify-center items-center gap-2 text-sm md:text-md text-[#ccc]">
-                                <FaUserCog />
-                                <p className="">
-                                    {toCapitalizeFirstLetter(data?.role)}
-                                </p>
-                            </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <p>More Info</p>
@@ -55,7 +81,50 @@ const Profile = ({ data, permissionData, requestList }) => {
                         <div className="flex flex-col justify-start items-start text-md md:text-lg gap-4">
                             <div className="flex flex-row justify-center items-center">
                                 <FaPhoneAlt className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
-                                <p className="">{data?.whatsAppNum}</p>
+                                {edit ? (
+                                    <form
+                                        className="flex relative gap-2"
+                                        onSubmit={(e) => handleSubmit(e)}
+                                    >
+                                        <input
+                                            className="text-black"
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={phoneNum || ""}
+                                            minLength={10}
+                                            maxLength={13}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (
+                                                    /^$|^0$|^08[0-9]*$/.test(
+                                                        val
+                                                    )
+                                                ) {
+                                                    setPhoneNum(val);
+                                                }
+                                            }}
+                                            placeholder="Masukkan nomor diawali 08"
+                                            required
+                                        />
+                                        <span className="text-xs text-start absolute bottom-0 translate-y-[100%] left-0">
+                                            Must start with 08xxx
+                                        </span>
+                                        <button
+                                            type="submit"
+                                            className="bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                        >
+                                            Submit
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <p className="">{phoneNum}</p>
+                                )}
+                                <div
+                                    className="ms-3 text-sm cursor-pointer"
+                                    onClick={() => setEdit(!edit)}
+                                >
+                                    {!edit && <FaPencil />}
+                                </div>
                             </div>
                             <div className="flex flex-row justify-center items-center">
                                 <FaEnvelope className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
@@ -154,11 +223,14 @@ const Profile = ({ data, permissionData, requestList }) => {
                                             <div className="text-end">
                                                 <p
                                                     className={`text-base md:text-lg font-semibold ${
-                                                        request.unit.status ===
+                                                        request.unit_position
+                                                            ?.unit?.status ===
                                                         "running"
                                                             ? "text-green-600"
-                                                            : request.unit
-                                                                  .status ===
+                                                            : request
+                                                                  .unit_position
+                                                                  ?.unit
+                                                                  ?.status ===
                                                               "sd"
                                                             ? "text-red-600"
                                                             : "text-yellow-600"
@@ -166,7 +238,9 @@ const Profile = ({ data, permissionData, requestList }) => {
                                                 >
                                                     {toCapitalizeFirstLetter(
                                                         getRequestTypeName(
-                                                            request.unit.status
+                                                            request
+                                                                .unit_position
+                                                                ?.unit?.status
                                                         )
                                                     )}
                                                 </p>

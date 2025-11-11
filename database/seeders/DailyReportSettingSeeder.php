@@ -68,12 +68,31 @@ class DailyReportSettingSeeder extends Seeder
             "bef_cooler" => ["min" => 350, "max" => null],
         ];
 
+        $thresholdSetting = [
+            "source_press" => ["value" => 100, "type" => 'percentage'],
+            "suction_press" => ["value" => 100, "type" => 'percentage'],
+            "discharge_press" => ["value" => 100, "type" => 'percentage'],
+            "speed" => ["value" => 100, "type" => 'percentage'],
+            "manifold_press" => ["value" => 100, "type" => 'percentage'],
+            "oil_press" => ["value" => 100, "type" => 'percentage'],
+            "oil_diff" => ["value" => 100, "type" => 'percentage'],
+            "running_hours" => ["value" => 100, "type" => 'percentage'],
+            "voltage" => ["value" => 100, "type" => 'percentage'],
+            "water_temp" => ["value" => 100, "type" => 'percentage'],
+            "static_press" => ["value" => 100, "type" => 'percentage'],
+            "diff_press" => ["value" => 100, "type" => 'percentage'],
+            "flowrate" => ["value" => 100, "type" => 'percentage'],
+            "aft_cooler" => ["value" => 100, "type" => 'percentage'],
+            "bef_cooler" => ["value" => 100, "type" => 'percentage'],
+        ];
+
         foreach ($clients as $client) {
             DailyReportSettings::create([
                 'client_id' => $client->client_id,
                 'decimalSetting' => json_encode($decimalSetting),
                 'minMaxSetting' => json_encode($minMaxSetting),
                 'unitSetting' => json_encode($units),
+                'thresholdSetting' => json_encode($thresholdSetting)
             ]);
         }
 

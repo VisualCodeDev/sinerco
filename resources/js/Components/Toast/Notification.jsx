@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { getRequestTypeName } from "../utils/dashboard-util";
 
-const Notification = ({ message, alert = true }) => {
+const Notification = ({ message, alert }) => {
     const [animate, setAnimate] = useState("slideIn");
     const [visible, setVisible] = useState(true);
 
     useEffect(() => {
-        if (alert && message?.request_type) playAlertSound();
+        playAlertSound();
         const timeout = setTimeout(() => {
             setAnimate("slideOut");
             setTimeout(() => setVisible(false), 400);
@@ -19,6 +19,8 @@ const Notification = ({ message, alert = true }) => {
         sound.volume = 0.3;
 
         const playPromise = sound.play();
+        
+        if (!alert) sound.pause()
 
         if (playPromise !== undefined) {
             playPromise

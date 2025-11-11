@@ -30,7 +30,7 @@ const InputFieldSetting = () => {
 
         fetchData();
     }, []);
-    console.log(fields);
+
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}

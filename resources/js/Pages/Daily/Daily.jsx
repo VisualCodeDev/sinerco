@@ -32,6 +32,7 @@ export default function Dashboard({ unit_position_id }) {
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
+    const [lastReport, setLastReport] = useState({});
     const [unitData, setUnitData] = useState();
     const [isUnitRunning, setIsUnitRunning] = useState(true);
     const [clientName, setClientName] = useState();
@@ -191,6 +192,7 @@ export default function Dashboard({ unit_position_id }) {
             setLoading(false);
         }
     };
+
     const initCurrDate = async (reportData, gmt_offset, interval) => {
         setLoading(true);
         const { date } = await getCurrDateTime(gmt_offset);
@@ -233,6 +235,10 @@ export default function Dashboard({ unit_position_id }) {
         };
         changeReportData();
     }, [selectedDate]);
+
+    useEffect(() => {
+        if (data?.length > 0) setLastReport(data[data?.length - 1]);
+    }, [data]);
 
     useEffect(() => {
         if (!unitData?.status) return;
@@ -387,6 +393,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "form" && (
                             <DailyReportForm
+                                lastReport={lastReport}
                                 fields={fields}
                                 isDown={!isUnitRunning}
                                 clientData={clientName}

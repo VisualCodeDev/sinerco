@@ -124,7 +124,6 @@ const Request = ({ data }) => {
 
                 window.location.reload();
             }
-            console.log(validIds);
         } catch (e) {
             console.error(e);
             addToast(e.response?.data?.message || "Something went wrong");
@@ -247,7 +246,6 @@ const EditItem = ({
         updateData();
     }, [selectedItem]);
 
-    console.log(formData);
     const handleChange = async (field, value) => {
         let currDateTime = null;
 

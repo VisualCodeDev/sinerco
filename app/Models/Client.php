@@ -34,6 +34,7 @@ class Client extends Model
         'input_interval',
         'input_duration',
         'gmt_offset',
+        'auto_send_interval',
         'disable_duration'
     ];
 }

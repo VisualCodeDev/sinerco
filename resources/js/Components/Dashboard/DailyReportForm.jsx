@@ -15,6 +15,7 @@ import { FaAngleDown, FaCog } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
+import { FaTriangleExclamation } from "react-icons/fa6";
 
 const DailyReportForm = (props) => {
     const {
@@ -27,6 +28,7 @@ const DailyReportForm = (props) => {
         gmt_offset,
         fields,
         isDown = true,
+        lastReport,
     } = props;
     const [data, setData] = useState({});
     const [loading, setLoading] = useState(false);
@@ -52,8 +54,8 @@ const DailyReportForm = (props) => {
                 ),
             ];
             const resp = await axios.post(
-                route("daily.add",  Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField },
+                route("daily.add", Number(unitData?.unit_position_id)),
+                { data: data, fields: normalizedField }
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
@@ -72,8 +74,14 @@ const DailyReportForm = (props) => {
         }
     };
 
-    const handleChange = ([field], value, minMaxSetting) => {
-        let warn = "";
+    const handleChange = (
+        [field],
+        value,
+        minMaxSetting,
+        thresholdValue,
+        lastValue
+    ) => {
+        let warn = null;
 
         if (field === "date" || field === "time") {
             setData({
@@ -85,11 +93,17 @@ const DailyReportForm = (props) => {
 
         if (minMaxSetting) {
             if (minMaxSetting.min && value < minMaxSetting.min) {
-                warn = `Value for ${field} is ${value} (less than ${minMaxSetting.min})`;
+                // warn = `The value is less than ${minMaxSetting.min}`;
+                warn = `Value for ${splitCamelCase(field)} is ${value} (less than ${minMaxSetting.min})`;
             }
             if (minMaxSetting.max && value > minMaxSetting.max) {
-                warn = `Value for ${field} is ${value} (greater than ${minMaxSetting.max})`;
+                // warn = `The value is greater than ${minMaxSetting.max}`;
+                warn = `Value for ${splitCamelCase(field)} is ${value} (greater than ${minMaxSetting.max})`;
             }
+        }
+        if (Math.abs(value - lastValue) > thresholdValue) {
+            // perbedaan LEBIH BESAR dari threshold
+            warn = `${splitCamelCase(field)} value exceeds the threshold (${thresholdValue} from prev data)`;
         }
 
         setData((prevData) => ({
@@ -110,6 +124,7 @@ const DailyReportForm = (props) => {
         duration: duration,
         gmt_offset: gmt_offset,
         disableDuration: disableDuration,
+        lastReport: lastReport,
     });
 
     useEffect(() => {
@@ -197,6 +212,10 @@ const DailyReportForm = (props) => {
 const ConfirmationModal = (props) => {
     const { isModal, handleCloseModal, handleSubmit, formData, unitData } =
         props;
+    const [warning, setWawrning] = useState(null);
+
+    const warn = formData.warn;
+
     return (
         <Modal
             title="Are You Sure?"
@@ -222,15 +241,42 @@ const ConfirmationModal = (props) => {
                             Object.entries(formData)
                                 .filter(([key, item]) => key != "warn")
                                 .map(([key, item]) => (
-                                    <div className="flex justify-between capitalize lg:md:text-lg text-sm pb-2.5 border-b border-b-[#e5e5e5]">
+                                    <div className="flex justify-between items-center capitalize lg:md:text-lg text-sm pb-2.5 border-b border-b-[#e5e5e5] relative">
                                         <p className="font-semibold">
                                             {splitCamelCase(key)}
                                         </p>
-                                        <p>
-                                            {key === "date"
-                                                ? getFormattedDate(item)
-                                                : item}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <p>
+                                                {key === "date"
+                                                    ? getFormattedDate(item)
+                                                    : item}
+                                            </p>
+                                            {warn && warn[key] && (
+                                                <>
+                                                    <FaTriangleExclamation
+                                                        color="orange"
+                                                        onMouseEnter={() =>
+                                                            setWawrning(key)
+                                                        }
+                                                        onMouseLeave={() =>
+                                                            setWawrning(null)
+                                                        }
+                                                    />
+                                                    {warn[warning] &&
+                                                        key === warning && (
+                                                            <div className="absolute bg-[#ffaa00] text-nowrap right-0 bottom-0 translate-y-[100%] z-[100] md:px-3 px-1 md:py-2 md:text-sm text-xs rounded-lg font-semibold">
+                                                                <p>
+                                                                    {
+                                                                        warn[
+                                                                            warning
+                                                                        ]
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                     </div>
