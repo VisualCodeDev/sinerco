@@ -118,11 +118,11 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             const remarkCell = newSheet.getCell(
                 `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
             );
-            newSheet.mergeCells(
-                `${chr(Number(Object.keys(fieldHeaderColumnMap).length + 1))}2:${chr(
-                    Object.keys(fieldHeaderColumnMap).length + 5
-                )}4`
-            );
+            // newSheet.mergeCells(
+            //     `${chr(Number(Object.keys(fieldHeaderColumnMap).length + 1))}2:${chr(
+            //         Object.keys(fieldHeaderColumnMap).length + 5
+            //     )}4`
+            // );
 
             remarkCell.value = "Remarks";
             remarkCell.border = ExcelStyle.borderAll;
