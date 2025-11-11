@@ -21,11 +21,15 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
             // Buat header berdasarkan field
             fields.forEach((field) => {
-                if (field.subfields && field.subfields.length > 0) {
-                    const col = chr(field.column + i);
+                if (field.subfields && Number(field.subfields.length) > 0) {
+                    const col = chr(Number(field.column) + i);
                     const stopCol = chr(
-                        field.column + i + field.subfields.length - 1
+                        Number(field.column) +
+                            i +
+                            Number(field.subfields.length) -
+                            1
                     );
+                    console.log(col, stopCol);
 
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
@@ -43,7 +47,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
                     // Subfields
                     field.subfields.forEach((sub, index) => {
-                        const subCol = chr(field.column + index + i);
+                        const subCol = chr(Number(field.column) + index + i);
                         fieldHeaderColumnMap[sub.name] = `${subCol}3`;
                         fieldColumnMap[sub.slug] = subCol;
 
@@ -68,11 +72,13 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         unitCell.font = { bold: true };
                     });
 
-                    i += field.subfields.length - 1;
+                    i += Number(field.subfields.length) - 1;
                 } else {
-                    const col = chr(field.column + i);
+                    const col = chr(Number(field.column) + i);
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
+
+                    console.log(col, stopCol);
 
                     newSheet.mergeCells(`${col}2:${col}3`);
                     const fieldCell = newSheet.getCell(`${col}2`);
@@ -112,17 +118,14 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             timeCell.font = { bold: true };
 
             // Kolom Remarks
-            console.log(Object.keys(fieldHeaderColumnMap).length + 1);
-            console.log(chr(Object.keys(fieldHeaderColumnMap).length + 1));
-            
             const remarkCell = newSheet.getCell(
                 `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
             );
-            // newSheet.mergeCells(
-            //     `${chr(Number(Object.keys(fieldHeaderColumnMap).length + 1))}2:${chr(
-            //         Object.keys(fieldHeaderColumnMap).length + 5
-            //     )}4`
-            // );
+            newSheet.mergeCells(
+                `${chr(
+                    Number(Object.keys(fieldHeaderColumnMap).length + 1)
+                )}2:${chr(Object.keys(fieldHeaderColumnMap).length + 5)}4`
+            );
 
             remarkCell.value = "Remarks";
             remarkCell.border = ExcelStyle.borderAll;

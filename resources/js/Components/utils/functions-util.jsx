@@ -637,10 +637,10 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
 
 export function chr(num) {
   let str = "";
-  while (num > 0) {
-    let rem = (num - 1) % 26;
+  while (Number(num) > 0) {
+    let rem = (Number(num) - 1) % 26;
     str = String.fromCharCode(65 + rem) + str;
-    num = Math.floor((num - 1) / 26);
+    Number(num) = Math.floor((num - 1) / 26);
   }
   return str;
 }
