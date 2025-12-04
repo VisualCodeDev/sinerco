@@ -30,7 +30,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                             Number(field.subfields.length) -
                             1
                     );
-                    console.log(col, stopCol);
 
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
@@ -78,8 +77,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     const col = chr(Number(field.column) + i);
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
-
-                    console.log(col);
 
                     newSheet.mergeCells(`${col}2:${col}3`);
                     const fieldCell = newSheet.getCell(`${col}2`);
@@ -156,7 +153,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     )
                         timeRowCell.value = time;
                 });
-                console.log(hour);
                 hour += Number(unitData?.input_interval || 1);
                 for (
                     let c = 2;
