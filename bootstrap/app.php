@@ -42,8 +42,8 @@ return Application::configure(basePath: dirname(__DIR__))
             // Tentukan jadwal dinamis
             match ($interval) {
                 '1h' => $schedule->call($callback)->hourly(),
-                '4h' => $schedule->call($callback)->everyMinute(),
-                // '4h' => $schedule->call($callback)->everyFourHours(),
+                // '4h' => $schedule->call($callback)->everyMinute(),
+                '4h' => $schedule->call($callback)->everyFourHours(),
                 '6h' => $schedule->call($callback)->everySixHours(),
                 '12h' => $schedule->call($callback)->cron('0 */12 * * *'),
                 '1d' => $schedule->call($callback)->daily(),
