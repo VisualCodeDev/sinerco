@@ -112,7 +112,6 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
-
     const formList = list({
         fields: fields,
         handleChange: handleChange,

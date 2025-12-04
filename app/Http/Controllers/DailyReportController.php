@@ -127,9 +127,7 @@ class DailyReportController extends Controller
             ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
             ->first();
 
-        Log::debug('status ' . $statusRequest);
-
-        // 🚨 Cek warning dari input
+        // Cek warning dari input
         $warnings = collect($request->input('warn', []))->filter();
         if ($warnings->isNotEmpty()) {
             $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
@@ -141,8 +139,8 @@ class DailyReportController extends Controller
 
             $workers = UserSetting::with('user')
                 ->where('unit_position_id', $unit_position_id)
-                ->get()
-                ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
+                ->get();
+                // ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
            
             $numbers = $workers
                 ->pluck('user.whatsAppNum')

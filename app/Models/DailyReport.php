@@ -19,6 +19,7 @@ class DailyReport extends Model
         'unit_position_id',
         'data',
         'date',
-        'time'
+        'time',
+        'request_id',
     ];
 }

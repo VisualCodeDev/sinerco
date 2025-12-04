@@ -319,7 +319,7 @@ const ExportModal = (props) => {
             console.error("❌ Gagal ambil data:", err);
         }
     };
-
+    console.log(unitData)
     return (
         <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>

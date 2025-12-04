@@ -18,6 +18,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             const formattedDate = `${day}/${month}/${year}`;
             const newSheet = workbook.addWorksheet(`Day ${day}`);
             let i = 0;
+            let totalRow = 24 / (unitData?.input_interval || 1);
 
             // Buat header berdasarkan field
             fields.forEach((field) => {
@@ -137,8 +138,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             remarkCell.font = { bold: true };
 
             // Isi jam di kolom A dan nilai default 0
-            let hour = 1;
-            for (let r = 5; r < 29; r++) {
+            let hour = 1 + (Number(unitData?.input_interval || 1) - 1);
+            for (let r = 5; r < totalRow + 5; r++) {
                 [1, remarksStart].map((cell) => {
                     const timeRowCell = newSheet.getRow(r).getCell(cell);
                     timeRowCell.border = ExcelStyle.borderAll;
@@ -148,10 +149,14 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         wrapText: true,
                     };
                     const time = `${String(hour).padStart(2, "0")}:00`;
-                    if (!timeRowCell.value && timeRowCell.value !== 0)
+                    if (
+                        !timeRowCell.value &&
+                        timeRowCell.value !== 0 &&
+                        hour <= 24
+                    )
                         timeRowCell.value = time;
                 });
-                hour++;
+                hour += unitData?.input_interval || 1;
                 for (
                     let c = 2;
                     c <= Object.keys(fieldHeaderColumnMap).length + 1;
@@ -161,7 +166,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     cell.border = ExcelStyle.borderAll;
                     cell.alignment = {
                         horizontal: "center",
-                        vertical: "middle",
                         wrapText: true,
                     };
                     // REMARKS COLOMN
@@ -208,7 +212,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         targetCell.border = ExcelStyle.borderAll;
                         targetCell.alignment = {
                             horizontal: "center",
-                            vertical: "middle",
                             wrapText: true,
                         };
                         // Format angka Indonesia
@@ -218,9 +221,9 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             });
 
             // Avg, Min, dan Max
-            const avgRow = newSheet.getRow(29);
-            const minRow = newSheet.getRow(30);
-            const maxRow = newSheet.getRow(31);
+            const avgRow = newSheet.getRow(totalRow + 5);
+            const minRow = newSheet.getRow(totalRow + 6);
+            const maxRow = newSheet.getRow(totalRow + 7);
 
             avgRow.getCell(1).value = "Average";
             minRow.getCell(1).value = "Min";
@@ -236,15 +239,21 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
             Object.entries(fieldColumnMap).forEach(([_, col]) => {
                 avgRow.getCell(col).value = {
-                    formula: `IFERROR(ROUND(AVERAGE(${col}5:${col}28),2),"")`,
-                    // formula: `AVERAGE(${col}5:${col}28)`,
+                    formula: `IFERROR(ROUND(AVERAGE(${col}5:${col}${
+                        totalRow + 4
+                    }),2),"")`,
+                    // formula: `AVERAGE(${col}5:${col}${totalRow+4})`,
                 };
                 minRow.getCell(col).value = {
-                    formula: `IF(COUNT(${col}5:${col}28)>0,ROUND(MIN(${col}5:${col}28),2),"")`,
-                    // formula: `MIN(${col}5:${col}28)`,
+                    formula: `IF(COUNT(${col}5:${col}${
+                        totalRow + 4
+                    })>0,ROUND(MIN(${col}5:${col}${totalRow + 4}),2),"")`,
+                    // formula: `MIN(${col}5:${col}${totalRow+4})`,
                 };
                 maxRow.getCell(col).value = {
-                    formula: `IF(COUNT(${col}5:${col}28)>0,ROUND(MAX(${col}5:${col}28),2),"")`,
+                    formula: `IF(COUNT(${col}5:${col}${
+                        totalRow + 4
+                    })>0,ROUND(MAX(${col}5:${col}${totalRow + 4}),2),"")`,
                     // formula: `MAX(${col}5:${col}28)`,
                 };
 
@@ -346,7 +355,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 };
                 const currCell = remarksStart + 1 + index;
                 cellItems.push(chr(currCell));
-                for (let r = 5; r < 29; r++) {
+                for (let r = 5; r < totalRow + 5; r++) {
                     const cell = newSheet.getRow(r).getCell(currCell);
 
                     requestedData.forEach((req) => {
@@ -372,7 +381,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 Object.keys(fieldHeaderColumnMap)?.length + 1
             );
 
-            for (let r = 5; r < 29; r++) {
+            for (let r = 5; r < totalRow + 5; r++) {
                 const remarksDataForPrevTable = newSheet
                     .getRow(r)
                     .getCell(dataRemarksCol);

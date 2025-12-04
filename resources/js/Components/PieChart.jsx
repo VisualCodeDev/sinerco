@@ -30,7 +30,9 @@ const PieChart = ({ data, stroke, size = 200, totalData }) => {
         <div className="flex flex-row justify-center gap-5 items-center w-full text-center">
             {/* Title and Value */}
             <div className="flex flex-col gap-2 md:gap-3 mb-1 text-start">
-                <p className="text-base md:text-xl text-gray-500">Total Unit {chartData[0]?.label}</p>
+                <p className="text-base md:text-xl text-gray-500">Total Unit <span className="font-bold" style={{
+                    color: chartData[0].color
+                }}>{chartData[0]?.label}</span></p>
                 <p className="text-2xl md:text-4xl font-bold">
                     {chartData[0]?.value.toLocaleString()}{" "} <span className="text-base md:text-xl">Units</span>
                 </p>

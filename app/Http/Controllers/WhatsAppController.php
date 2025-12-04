@@ -14,7 +14,7 @@ class WhatsAppController extends Controller
     public function sendAutoMessage($clientId)
     {
         $currentDate = Carbon::today();
-
+        
         $unitReports = UnitPosition::select('id', 'location_id', 'unit_id', 'client_id')
             ->where('client_id', $clientId)
             ->with([
@@ -58,7 +58,7 @@ class WhatsAppController extends Controller
 
             // isi report tiap jam
             $lines = [];
-            for ($i = 1; $i <= 24; $i += $input_interval) {
+            for ($i = 1 + ($input_interval - 1); $i <= 24; $i += $input_interval) {
                 $time = str_pad($i, 2, '0', STR_PAD_LEFT) . ':00';
                 $data = $reportMap[$time] ?? null;
 
@@ -107,6 +107,8 @@ class WhatsAppController extends Controller
             ($unit) $engine_sn
             $remarksList
             TEXT;
+
+            // Log::debug($unitReport);
             if (count($phoneNumberList) > 0) {
                 Log::debug($message);
                 WhatsAppService::sendMessage(implode(', ', $phoneNumberList), $message);

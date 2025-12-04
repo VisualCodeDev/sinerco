@@ -47,6 +47,8 @@ class StatusRequestController extends Controller
             ->where('date', $val['start_date'])
             ->where('time', $formatted)
             ->first();
+        Log::debug($formatted);
+        Log::debug($unit);
 
         $unitPosition = UnitPosition::with('unit')->find($val['unit_position_id']);
 
@@ -65,9 +67,9 @@ class StatusRequestController extends Controller
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
         $status->save();
-
         $unitPosition->unit->update(['status' => $val['request_type']]);
         if ($unit) {
+            Log::debug($status);
             $unit->update(['request_id' => $status->request_id]);
 
             $unit->load(['request', 'unitPosition.unit']);
@@ -91,14 +93,15 @@ class StatusRequestController extends Controller
                 ->filter(fn($tech) => !empty($tech->user->whatsAppNum))
                 ->map(fn($tech) => $tech->user->whatsAppNum)
                 ->implode(',');
-
             if (!empty($numbers)) {
-                $link = route('request.seen', ['id' => $status->request_id]);
-
-                WhatsAppService::sendMessage($numbers, "TEST: A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here: {$link}");
+                // $link = route('request.seen', ['id' => $status->request_id]);
+                $link = "/request/seen/" . $status->request_id;
+                // $full = 'https://vncdev-sinerco.my.id/unit-setting';
+                $full = url($link);
+                WhatsAppService::sendMessage($numbers, "A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here:\n{$full}");
             }
-            $link = 'https://vncdev-sinerco.my.id/unit-setting';
-            WhatsAppService::sendMessage('082113837546', "A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here:\n{$link}\n");
+            // $link = 'https://vncdev-sinerco.my.id/unit-setting';
+            // WhatsAppService::sendMessage('082113837546', "A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here:\n{$link}\n");
 
             return response()->json(['type' => 'success', 'text' => 'Request created successfully.'], 201);
         } catch (\Exception $e) {
