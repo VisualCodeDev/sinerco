@@ -131,7 +131,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             remarkCell.value = "Remarks";
             remarkCell.border = ExcelStyle.borderAll;
             remarkCell.alignment = {
-                horizontal: "center",
+                horizontal: "start",
+                vertical: "middle",
                 wrapText: true,
             };
             remarkCell.font = { bold: true };
