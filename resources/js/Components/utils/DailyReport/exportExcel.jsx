@@ -138,7 +138,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             remarkCell.font = { bold: true };
 
             // Isi jam di kolom A dan nilai default 0
-            let hour = 1 + (Number(unitData?.input_interval || 1) - 1);
+            let hour = Number(unitData?.input_interval || 1);
             for (let r = 5; r < totalRow + 5; r++) {
                 [1, remarksStart].map((cell) => {
                     const timeRowCell = newSheet.getRow(r).getCell(cell);
