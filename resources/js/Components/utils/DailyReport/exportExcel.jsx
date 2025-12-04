@@ -156,7 +156,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     )
                         timeRowCell.value = time;
                 });
-                hour += unitData?.input_interval || 1;
+                console.log(hour);
+                hour += Number(unitData?.input_interval || 1);
                 for (
                     let c = 2;
                     c <= Object.keys(fieldHeaderColumnMap).length + 1;
