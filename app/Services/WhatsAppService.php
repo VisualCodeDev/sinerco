@@ -8,7 +8,7 @@ class WhatsAppService
 {
     public static function sendMessage(string $phoneNum, string $message): bool
     {
-        $token = 'ddy9iDW7oQhtWfJMWAN3';
+        $token = env('FONNTE_API');
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => 'https://api.fonnte.com/send',

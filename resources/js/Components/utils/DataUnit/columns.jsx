@@ -1,6 +1,6 @@
 import { getRequestTypeName, toCapitalizeFirstLetter } from "../dashboard-util";
 
-const columns = (type, formData, unitAreaData, handleSelectAll) => {
+const columns = (type, formData, unitAreaData, handleSelectAll, isEdit) => {
     const colItem = [
         {
             name: "id",
@@ -111,9 +111,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ area }) => {
-                return (
-                    <div className="flex flex-col">{area}</div>
-                );
+                return <div className="flex flex-col">{area}</div>;
             },
         },
         {
@@ -133,9 +131,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             sortable: true,
             width: "20%",
             Cell: ({ location }) => {
-                return (
-                    <div className="flex flex-col">{location}</div>
-                );
+                return <div className="flex flex-col">{location}</div>;
             },
         },
         {
@@ -245,6 +241,42 @@ const columns = (type, formData, unitAreaData, handleSelectAll) => {
             width: "20%",
             Cell: ({ location }) => {
                 return <div className="flex flex-col">{location}</div>;
+            },
+        },
+        {
+            name: "checkbox",
+            Header: (data) => {
+                return (
+                    <div
+                        className="text-center w-full"
+                        onClick={() => isEdit && handleSelectAll(data)}
+                        checked={
+                            formData?.selectedRows?.length ===
+                            formData?.data?.length
+                        }
+                    >
+                        {isEdit ? "Select All" : ""}
+                    </div>
+                );
+            },
+            headerClassName: "bg-primary text-white text-center justify-center",
+            sortable: false,
+            cellClassName: "text-center",
+            width: "10%",
+            Cell: ({ unit_id }) => {
+                if (isEdit) {
+                    return (
+                        <input
+                            type="checkbox"
+                            checked={formData?.selectedRows?.includes(
+                                String(unit_id)
+                            )}
+                            onChange={(e) => {
+                                e.stopPropagation();
+                            }}
+                        />
+                    );
+                }
             },
         },
     ];

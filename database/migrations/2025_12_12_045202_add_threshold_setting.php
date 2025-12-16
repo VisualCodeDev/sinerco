@@ -10,7 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('daily_report_settings', function (Blueprint $table) {
+        Schema::table('data_units', function (Blueprint $table) {
             $table->json('thresholdSetting');
         });
     }

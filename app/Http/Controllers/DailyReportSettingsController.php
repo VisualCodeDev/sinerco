@@ -24,7 +24,7 @@ class DailyReportSettingsController extends Controller
             'decimalSetting' => 'required|array',
             'minMaxSetting' => 'required|array',
             'unitSetting' => 'required|array',
-            'thresholdSetting' => 'required|array'
+            // 'thresholdSetting' => 'required|array'
         ];
 
         foreach ($request->input('decimalSetting', []) as $key => $value) {
@@ -36,10 +36,10 @@ class DailyReportSettingsController extends Controller
             $rules["minMaxSetting.$key.max"] = 'nullable|numeric';
         }
 
-        foreach ($request->input('thresholdSetting', []) as $key => $value) {
-            $rules["thresholdSetting.$key.value"] = 'required|numeric';
-            $rules["thresholdSetting.$key.type"] = 'required|string';
-        }
+        // foreach ($request->input('thresholdSetting', []) as $key => $value) {
+        //     $rules["thresholdSetting.$key.value"] = 'required|numeric';
+        //     $rules["thresholdSetting.$key.type"] = 'required|string';
+        // }
 
         foreach ($request->input('unitSetting', []) as $key => $value) {
             $rules["unitSetting.$key"] = 'required|string';
@@ -55,7 +55,7 @@ class DailyReportSettingsController extends Controller
                     'decimalSetting' => $validated['decimalSetting'],
                     'minMaxSetting' => $validated['minMaxSetting'],
                     'unitSetting' => $validated['unitSetting'],
-                    'thresholdSetting' => $validated['thresholdSetting']
+                    // 'thresholdSetting' => $validated['thresholdSetting']
                 ]
             );
         }

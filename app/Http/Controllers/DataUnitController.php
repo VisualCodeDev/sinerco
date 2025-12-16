@@ -26,7 +26,7 @@ class DataUnitController extends Controller
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unit_id', 'unit', 'status']);
+                    $q->select(['unit_id', 'unit', 'status', 'thresholdSetting']);
                 },
                 'client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -40,6 +40,7 @@ class DataUnitController extends Controller
                 return [
                     'unit_id' => $pos->unit->unit_id,
                     'unit' => $pos->unit->unit,
+                    'thresholdSetting' => $pos->unit->thresholdSetting,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
                     'gmt_offset' => $pos->client?->gmt_offset ?? $pos->workshop?->gmt_offset ?? 7,
@@ -58,12 +59,13 @@ class DataUnitController extends Controller
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-            ])->select(['unit_id', 'unit', 'status'])->get();
+            ])->select(['unit_id', 'unit', 'status', 'thresholdSetting'])->get();
 
             $data = $temp->map(function ($unit) {
                 return [
                     'unit_id' => $unit->unit_id,
                     'unit' => $unit->unit,
+                    'thresholdSetting' => $unit->thresholdSetting,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client->name ?? $unit->UnitPositions?->workshop->name,
                     'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
@@ -389,5 +391,33 @@ class DataUnitController extends Controller
             ->pluck('fields');
 
         return response()->json($fields);
+    }
+    public function setUnitSetting(Request $request)
+    {
+        $rules = [
+            'unit_id' => 'required|array',
+            'thresholdSetting' => 'required|array'
+        ];
+
+        foreach ($request->input('thresholdSetting', []) as $key => $value) {
+            $rules["thresholdSetting.$key.value"] = 'required|numeric';
+            $rules["thresholdSetting.$key.type"] = 'required|string';
+        }
+
+        $validated = $request->validate($rules);
+
+        $unit_ids = $validated['unit_id'];
+
+        foreach ((array) $unit_ids as $unit_id) {
+            $unit = DataUnit::where('unit_id', $unit_id)->first();
+            if (!$unit) {
+                continue; // Skip if unit not found
+            }
+            $unit->update([
+                'thresholdSetting' => $validated['thresholdSetting']
+            ]);
+        }
+
+        return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
     }
 }

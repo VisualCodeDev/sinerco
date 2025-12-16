@@ -18,7 +18,10 @@ import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
+        toggleEdit,
+        edit = true,
         isUserList = false,
+        isUnitList = false,
         newItemPlaceholder = "Add Unit",
         isModal = false,
         maxItemPerPage,
@@ -218,17 +221,29 @@ const TableComponent = (props) => {
                                 />
                             </div>
                         </div>
-                        {addNewItem && (
-                            <a
-                                href={handleNew}
-                                className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
-                            >
-                                <FaPlus />
-                                <span className="">
-                                    {newItemPlaceholder || "Add"}
-                                </span>
-                            </a>
-                        )}
+                        <div className="flex md:flex-row flex-col gap-4">
+                            {addNewItem && (
+                                <a
+                                    href={handleNew}
+                                    className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                >
+                                    <FaPlus />
+                                    <span className="">
+                                        {newItemPlaceholder || "Add"}
+                                    </span>
+                                </a>
+                            )}
+                            {toggleEdit && (
+                                <div
+                                    className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                    onClick={toggleEdit}
+                                >
+                                    <span className="">
+                                        {edit ? "Done" : "Edit"}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 <div
@@ -280,7 +295,6 @@ const TableComponent = (props) => {
                                             "border-" + onRowClick &&
                                             `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                         }
-                                      
                                         onMouseDown={(e) =>
                                             onRowClick
                                                 ? onRowClick(item, e)
@@ -348,7 +362,7 @@ const TableComponent = (props) => {
                     </div>
                 )}
 
-                {isUserList && (
+                {isUserList && edit && (
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-4">
@@ -383,6 +397,25 @@ const TableComponent = (props) => {
                                         }
                                     >
                                         Reset
+                                    </button>
+                                </div>
+                            </th>
+                        </tr>
+                    </div>
+                )}
+
+                {isUnitList && edit && (
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                        <tr>
+                            <th className="flex gap-4">
+                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative">
+                                    <button
+                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            handleSubmit({ type: "edit" })
+                                        }
+                                    >
+                                        Edit
                                     </button>
                                 </div>
                             </th>

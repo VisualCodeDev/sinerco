@@ -178,9 +178,9 @@ const InputValidationSetting = (props) => {
                             <th className="font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
                                 Unit Settings
                             </th>
-                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[20%] rounded-tr-lg">
+                            {/* <th className="font-semibold text-nowrap text-left px-6 py-4 w-[20%] rounded-tr-lg">
                                 Input Threshold
-                            </th>
+                            </th> */}
                         </tr>
                     </thead>
 
@@ -301,7 +301,7 @@ const InputValidationSetting = (props) => {
                                             </td>
 
                                             {/* INPUT THRESHOLD */}
-                                            <td className="px-6 py-4">
+                                            {/* <td className="px-6 py-4">
                                                 <div className="flex gap-3">
                                                     <input
                                                         type="text"
@@ -367,7 +367,7 @@ const InputValidationSetting = (props) => {
                                                         ))}
                                                     </select>
                                                 </div>
-                                            </td>
+                                            </td> */}
                                         </tr>
                                     );
                                 });
