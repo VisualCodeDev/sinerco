@@ -53,7 +53,7 @@ export default function Dashboard({ unit_position_id }) {
                 : "unit_information"
         );
     }, [user]);
-
+    
     const tabs = [
         {
             key: "unit_information",
@@ -180,7 +180,7 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-
+            
             await initCurrDate(
                 reportData?.data,
                 unit?.data?.gmt_offset,

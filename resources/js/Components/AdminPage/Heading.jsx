@@ -13,6 +13,7 @@ import {
     FaCalendarAlt,
     FaCog,
     FaWarehouse,
+    FaFile,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -40,6 +41,11 @@ const Heading = ({ children, alert, setAlert }) => {
 
     if (isLoading || loading) return <LoadingSpinner />;
     const menu = {
+        ba: {
+            icon: <FaFile/>,
+            label: "Berita Acara",
+            href: route('ba.page'),
+        },
         home: {
             icon: <FaHome />,
             label: "Home",
@@ -169,6 +175,7 @@ const Heading = ({ children, alert, setAlert }) => {
     if (user?.role === "super_admin") {
         menuItems = [
             menu.home,
+            menu.ba,
             menu.workshopList,
             menu.clientList,
             menu.eventHistory,

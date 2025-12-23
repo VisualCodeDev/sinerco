@@ -31,3 +31,20 @@ export const getSetting = async () => {
 
     return data;
 };
+
+export const getUnitBA = async () => {
+    let data;
+    try {
+        const response = await fetch(route("ba.unit.get"));
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        data = await response.json();
+        console.log(data)
+    } catch (error) {
+        console.error("Gagal ambil data:", error);
+    }
+
+    return data;
+};

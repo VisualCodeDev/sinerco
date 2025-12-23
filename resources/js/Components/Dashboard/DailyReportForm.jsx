@@ -117,7 +117,7 @@ const DailyReportForm = (props) => {
         handleChange: handleChange,
         isDown: isDown,
         formData: data,
-        reportSettings: unitData?.daily_report_setting,
+        reportSettings: {...unitData?.daily_report_setting, thresholdSetting: {...unitData.thresholdSetting}},
         role: user?.role,
         interval: interval,
         duration: duration,

@@ -164,6 +164,7 @@ class DataUnitController extends Controller
 
         $data = [
             'unit_id' => $unit->unit_id ?? null,
+            'thresholdSetting' => $unit->unit->thresholdSetting ?? null,
             'daily_report_setting' => $unit->dailyReportSetting ?? null,
             'unit' => $unit->unit->unit ?? null,
             'status' => $unit->unit->status ?? null,

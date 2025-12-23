@@ -20,6 +20,7 @@ const TableComponent = (props) => {
     const {
         toggleEdit,
         edit = true,
+        isBA = false,
         isUserList = false,
         isUnitList = false,
         newItemPlaceholder = "Add Unit",
@@ -408,7 +409,15 @@ const TableComponent = (props) => {
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-4">
-                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative">
+                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative flex gap-5">
+                                    <button
+                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            handleSubmit({ type: "export" })
+                                        }
+                                    >
+                                        Export BA
+                                    </button>
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
@@ -431,6 +440,33 @@ const TableComponent = (props) => {
                         >
                             Delete
                         </button>
+                    </div>
+                )}
+
+                {isBA && (
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                        <tr>
+                            <th className="flex gap-4">
+                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative flex gap-5">
+                                    <button
+                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            handleSubmit({ type: "export" })
+                                        }
+                                    >
+                                        Export BA
+                                    </button>
+                                    <button
+                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            handleSubmit({ type: "edit" })
+                                        }
+                                    >
+                                        Edit
+                                    </button>
+                                </div>
+                            </th>
+                        </tr>
                     </div>
                 )}
             </div>

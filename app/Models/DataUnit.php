@@ -54,5 +54,4 @@ class DataUnit extends Model
         return $this->belongsToMany(Workshop::class, 'workshop_units', 'unit_id', 'workshop_id')
             ->withTimestamps();
     }
-
 }

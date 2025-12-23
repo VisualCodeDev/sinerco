@@ -25,17 +25,20 @@ import { useToast } from "../Toast/ToastProvider";
 const UnitTable = (props) => {
     const { data: propsData } = props;
     const data = propsData;
-    const [formData, setFormData] = useState({ selectedRows: [], data: data });
+    const [formData, setFormData] = useState({
+        selectedRows: [],
+        data: data,
+        selectedUnitPositions: [],
+    });
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
+    const [isExportModal, setExportModal] = useState(false);
     const [edit, setEdit] = useState(false);
-
     const { addToast } = useToast();
 
     const handleClick = (item, e) => {
         if (!item.unit_position_id || edit) return;
-        console.log(e);
         const url = route("daily", item.unit_position_id);
 
         if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
@@ -52,6 +55,7 @@ const UnitTable = (props) => {
                 ...prev,
                 selectedRows: [],
                 selectedUnits: [],
+                selectedUnitPositions: [],
             }));
         } else {
             // Select all
@@ -59,13 +63,22 @@ const UnitTable = (props) => {
                 ...prev,
                 selectedRows: data.map((item) => item.unit_id),
                 selectedUnits: data.map((item) => item.unit),
+                selectedUnitPositions: data.map(
+                    (item) => item.unit_position_id
+                ),
             }));
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = ({ type }) => {
         if (formData.selectedRows.length === 0) return;
-        setIsSettingModal(true);
+        if (type === "export") {
+            setExportModal(true);
+            setIsSettingModal(false);
+        } else {
+            setIsSettingModal(true);
+            setExportModal(false);
+        }
     };
 
     const columns = tColumns("unitList", formData, null, handleSelectAll, edit);
@@ -73,6 +86,7 @@ const UnitTable = (props) => {
     const onSelect = (selected) => {
         const currSelected = formData?.selectedRows || [];
         const currSelectedUnits = formData?.selectedUnits || [];
+        const currSelectedUnitPositions = formData?.selectedUnitPositions || [];
         const isSelected = currSelected.includes(String(selected.unit_id));
         if (isSelected) {
             // Deselect
@@ -84,6 +98,9 @@ const UnitTable = (props) => {
                 selectedUnits: currSelectedUnits.filter(
                     (item) => item !== String(selected.unit)
                 ),
+                selectedUnitPositions: currSelectedUnitPositions.filter(
+                    (item) => item !== selected.unit_position_id
+                ),
             }));
             setThresholdSetting({});
             return;
@@ -93,8 +110,11 @@ const UnitTable = (props) => {
             ...prev,
             selectedRows: [...currSelected, String(selected.unit_id)],
             selectedUnits: [...(formData.selectedUnits || []), selected.unit],
+            selectedUnitPositions: [
+                ...(formData.selectedUnitPositions || []),
+                selected.unit_position_id,
+            ],
         }));
-        console.log(selected);
         setThresholdSetting(selected.thresholdSetting || null);
     };
 
@@ -145,8 +165,113 @@ const UnitTable = (props) => {
                 thresholdSetting={thresholdSetting}
                 selectedUnits={formData?.selectedRows}
             />
+            <ExportModal isModal={isExportModal} setIsModal={setExportModal} selectedUnitPositions={formData?.selectedUnitPositions}/>
         </>
         // <></>
+    );
+};
+
+const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
+    const [formData, setFormData] = useState({
+        name: "",
+        department: "",
+        clientName: "",
+        clientDepartment: "",
+    });
+    const handleExport = () => {
+        window.open(
+            route("export_doc", {
+                unit_pos_id: selectedUnitPositions,
+                client_name: formData?.clientName || 'client name',
+                client_department: formData?.clientDepartment || 'client department',
+                name: formData?.name || 'name',
+                department: formData?.department || 'department',
+            }),
+            "_blank"
+        );
+    };
+
+    const handleChange = (field, value) => {
+        setFormData({ ...formData, [field]: value });
+    };
+
+    return (
+        <Modal
+            showModal={isModal}
+            handleCloseModal={() => setIsModal(false)}
+            title="Export BA"
+        >
+            <Modal.Body>
+                <div className="space-y-4 p-4 rounded-lg shadow-sm">
+                    {/* From Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div className="col-span-1 flex items-center space-x-2">
+                            <span className="font-semibold w-24">From:</span>
+                            <input
+                                type="text"
+                                onChange={(e) =>
+                                    handleChange("name", e.target.value)
+                                }
+                                value={formData?.name}
+                                placeholder="Name"
+                                className="border border-gray-300 rounded px-2 py-1 w-full"
+                            />
+                        </div>
+                        <div className="col-span-1 flex items-center space-x-2">
+                            <input
+                                type="text"
+                                onChange={(e) =>
+                                    handleChange("department", e.target.value)
+                                }
+                                value={formData?.department}
+                                placeholder="Department"
+                                className="border border-gray-300 rounded px-2 py-1 w-full"
+                            />
+                        </div>
+                    </div>
+
+                    {/* To Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                        <div className="col-span-1 flex items-center space-x-2">
+                            <span className="font-semibold w-24">To:</span>
+                            <input
+                                type="text"
+                                onChange={(e) =>
+                                    handleChange("clientName", e.target.value)
+                                }
+                                value={formData?.clientName}
+                                placeholder="Client Name"
+                                className="border border-gray-300 rounded px-2 py-1 w-full"
+                            />
+                        </div>
+                        <div className="col-span-1 flex items-center space-x-2">
+                            <input
+                                type="text"
+                                onChange={(e) =>
+                                    handleChange(
+                                        "clientDepartment",
+                                        e.target.value
+                                    )
+                                }
+                                value={formData?.clientDepartment}
+                                placeholder="Client Department"
+                                className="border border-gray-300 rounded px-2 py-1 w-full"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex items-center justify-end">
+                    <button
+                        className="button-submit"
+                        onClick={handleExport}
+                    >
+                        Export
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 
@@ -228,7 +353,6 @@ const SettingModal = ({
             // setSaving(false);
         }
     };
-
     return (
         <div
             className={`${
@@ -246,9 +370,9 @@ const SettingModal = ({
             </div>
             <div className=" bg-white h-[70vh] scale-[.85] flex justify-center flex-col items-center gap-4 p-6">
                 <span className="font-bold">
-                    {unitName.length > 5
+                    {Array.isArray(unitName) && unitName?.length > 5
                         ? unitName.slice(0, 5).join(", ") + ", ..."
-                        : unitName.join(", ")}
+                        : unitName?.join(", ") || unitName}
                 </span>
                 <div className="overflow-y-auto overflow-x-auto w-full bg-white rounded-xl z-50">
                     <table className="w-full h-full table-auto border-collapse">

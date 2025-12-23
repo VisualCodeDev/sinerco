@@ -800,9 +800,9 @@ const list = ({
                                 };
 
                                 const thresholdSetting =
-                                    reportSettings?.thresholdSetting?.[
+                                    Number(reportSettings?.thresholdSetting?.[
                                         sub.slug
-                                    ];
+                                    ]);
 
                                 const lastReportData = Number(
                                     lastReport?.[sub.slug]

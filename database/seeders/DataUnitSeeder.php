@@ -13,6 +13,24 @@ class DataUnitSeeder extends Seeder
      */
     public function run(): void
     {
+        $thresholdSetting = [
+            "source_press" => ["value" => 100, "type" => 'percentage'],
+            "suction_press" => ["value" => 100, "type" => 'percentage'],
+            "discharge_press" => ["value" => 100, "type" => 'percentage'],
+            "speed" => ["value" => 100, "type" => 'percentage'],
+            "manifold_press" => ["value" => 100, "type" => 'percentage'],
+            "oil_press" => ["value" => 100, "type" => 'percentage'],
+            "oil_diff" => ["value" => 100, "type" => 'percentage'],
+            "running_hours" => ["value" => 100, "type" => 'percentage'],
+            "voltage" => ["value" => 100, "type" => 'percentage'],
+            "water_temp" => ["value" => 100, "type" => 'percentage'],
+            "static_press" => ["value" => 100, "type" => 'percentage'],
+            "diff_press" => ["value" => 100, "type" => 'percentage'],
+            "flowrate" => ["value" => 100, "type" => 'percentage'],
+            "aft_cooler" => ["value" => 100, "type" => 'percentage'],
+            "bef_cooler" => ["value" => 100, "type" => 'percentage'],
+        ];
+
         $units = [
             'MPI-5097-BC (A)',
             'MPI-5298-BC (B)',
@@ -51,7 +69,7 @@ class DataUnitSeeder extends Seeder
 
         foreach ($units as $unit) {
             DataUnit::firstOrCreate(
-                ['unit' => $unit, 'unit_sn' => $unit],
+                ['unit' => $unit, 'unit_sn' => $unit, 'thresholdSetting' => $thresholdSetting],
             );
         }
     }

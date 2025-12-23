@@ -68,23 +68,23 @@ class DailyReportSettingSeeder extends Seeder
             "bef_cooler" => ["min" => 350, "max" => null],
         ];
 
-        $thresholdSetting = [
-            "source_press" => ["value" => 100, "type" => 'percentage'],
-            "suction_press" => ["value" => 100, "type" => 'percentage'],
-            "discharge_press" => ["value" => 100, "type" => 'percentage'],
-            "speed" => ["value" => 100, "type" => 'percentage'],
-            "manifold_press" => ["value" => 100, "type" => 'percentage'],
-            "oil_press" => ["value" => 100, "type" => 'percentage'],
-            "oil_diff" => ["value" => 100, "type" => 'percentage'],
-            "running_hours" => ["value" => 100, "type" => 'percentage'],
-            "voltage" => ["value" => 100, "type" => 'percentage'],
-            "water_temp" => ["value" => 100, "type" => 'percentage'],
-            "static_press" => ["value" => 100, "type" => 'percentage'],
-            "diff_press" => ["value" => 100, "type" => 'percentage'],
-            "flowrate" => ["value" => 100, "type" => 'percentage'],
-            "aft_cooler" => ["value" => 100, "type" => 'percentage'],
-            "bef_cooler" => ["value" => 100, "type" => 'percentage'],
-        ];
+        // $thresholdSetting = [
+        //     "source_press" => ["value" => 100, "type" => 'percentage'],
+        //     "suction_press" => ["value" => 100, "type" => 'percentage'],
+        //     "discharge_press" => ["value" => 100, "type" => 'percentage'],
+        //     "speed" => ["value" => 100, "type" => 'percentage'],
+        //     "manifold_press" => ["value" => 100, "type" => 'percentage'],
+        //     "oil_press" => ["value" => 100, "type" => 'percentage'],
+        //     "oil_diff" => ["value" => 100, "type" => 'percentage'],
+        //     "running_hours" => ["value" => 100, "type" => 'percentage'],
+        //     "voltage" => ["value" => 100, "type" => 'percentage'],
+        //     "water_temp" => ["value" => 100, "type" => 'percentage'],
+        //     "static_press" => ["value" => 100, "type" => 'percentage'],
+        //     "diff_press" => ["value" => 100, "type" => 'percentage'],
+        //     "flowrate" => ["value" => 100, "type" => 'percentage'],
+        //     "aft_cooler" => ["value" => 100, "type" => 'percentage'],
+        //     "bef_cooler" => ["value" => 100, "type" => 'percentage'],
+        // ];
 
         foreach ($clients as $client) {
             DailyReportSettings::create([
@@ -92,7 +92,7 @@ class DailyReportSettingSeeder extends Seeder
                 'decimalSetting' => $decimalSetting,
                 'minMaxSetting' => $minMaxSetting,
                 'unitSetting' => $units,
-                'thresholdSetting' => $thresholdSetting
+                // 'thresholdSetting' => $thresholdSetting
             ]);
         }
 

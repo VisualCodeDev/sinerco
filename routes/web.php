@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\AdminNotificationController;
+use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DailyFieldController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
 use App\Http\Controllers\DataUnitController;
+use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\UserSettingController;
 use App\Http\Controllers\UserUnitController;
 use App\Http\Controllers\WorkshopController;
 use App\Models\AdminNotification;
+use App\Models\BeritaAcara;
 use App\Models\DailyField;
 use App\Models\DailyReportSettings;
 use Illuminate\Foundation\Application;
@@ -176,4 +179,13 @@ Route::controller(WorkshopController::class)->group(function () {
     Route::get('/workshop/list', 'index')->name('workshops');
     Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
 });
+
+Route::controller(BeritaAcaraController::class)->group(function () {
+    Route::post('/berita-acara/set/field-setting', 'SetFieldBA')->name('ba.set.setting');
+    Route::get('/berita-acara', 'index')->name('ba.page');
+    Route::get('/berita-acara/get/units', 'getBaUnits')->name('ba.unit.get');
+});
+
+Route::get('/export-doc', [ExportController::class, 'exportDoc'])->name('export_doc')->middleware('auth');
+
 require __DIR__ . '/auth.php';
