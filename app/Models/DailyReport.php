@@ -14,7 +14,10 @@ class DailyReport extends Model
     {
         return $this->belongsTo(StatusRequest::class, 'request_id', 'request_id');
     }
-   
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     protected $fillable = [
         'unit_position_id',
         'data',

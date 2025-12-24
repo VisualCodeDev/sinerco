@@ -14,7 +14,7 @@ class WhatsAppController extends Controller
     public function sendAutoMessage($clientId)
     {
         $currentDate = Carbon::today();
-        
+
         $unitReports = UnitPosition::select('id', 'location_id', 'unit_id', 'client_id')
             ->where('client_id', $clientId)
             ->with([
@@ -38,7 +38,7 @@ class WhatsAppController extends Controller
 
             $reports = $unitReport->reports ?? collect();
             $reportMap = $reports->mapWithKeys(function ($r) {
-                return [$r->time => json_decode($r->data, true)];
+                return [$r->time => $r->data];
             });
 
             // Ambil field dari salah satu report (kalau ada)

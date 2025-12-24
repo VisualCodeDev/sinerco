@@ -10,10 +10,17 @@ import {
 } from "@/Components/utils/dashboard-util";
 import { useAuth } from "@/Components/Auth/auth";
 import LoadingSpinner from "@/Components/Loading";
+import { getAllUnits, getUnitReports } from "@/Components/db";
+import DynamicLineChart from "@/Components/DynamicLineChart";
+
+const csrfToken = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
 
 export default function Home() {
     const { user, loading } = useAuth();
     const [data, setData] = useState(null);
+    const [requestUnitData, setRequestUnitData] = useState([]);
     const [unitData, setUnitData] = useState([]);
     const [total, setTotal] = useState(0);
     const [dateTime, setDateTime] = useState(new Date());
@@ -27,16 +34,16 @@ export default function Home() {
     }, []);
 
     const fetchData = async () => {
-        const [response, respUnitData] = await Promise.all([
+        const [response, respRequestUnitData] = await Promise.all([
             axios.get(route("getUnitStatus")),
             axios.get(route("getRequestUnitStatus")),
         ]);
-        
-        if (respUnitData.data) {
-            const filteredData = respUnitData?.data?.filter(
+
+        if (respRequestUnitData.data) {
+            const filteredData = respRequestUnitData?.data?.filter(
                 (item) => item.status === "Ongoing"
             );
-            setUnitData(respUnitData.data || []);
+            setRequestUnitData(respRequestUnitData.data || []);
         }
         if (response.data) {
             let running = 0;
@@ -85,6 +92,8 @@ export default function Home() {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
+
+
     if (!data || loading) {
         return <LoadingSpinner />;
     }
@@ -209,8 +218,9 @@ export default function Home() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {unitData && unitData.length > 0 ? (
-                                    unitData.map((item, index) => (
+                                {requestUnitData &&
+                                requestUnitData.length > 0 ? (
+                                    requestUnitData.map((item, index) => (
                                         <tr
                                             class="bg-white border-b border-gray-200 hover:bg-gray-50 cursor-pointer md:text-sm text-xs"
                                             // key={item?.id || index}
@@ -223,15 +233,11 @@ export default function Home() {
                                                 class="flex h-full items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                                             >
                                                 <div class="md:text-base font-semibold">
-                                                    {
-                                                        item?.unit
-                                                    }
+                                                    {item?.unit}
                                                 </div>
                                             </th>
                                             <td class="px-6 py-4">
-                                                {
-                                                    item?.location
-                                                }
+                                                {item?.location}
                                             </td>
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center whitespace-nowrap gap-2">
@@ -298,6 +304,12 @@ export default function Home() {
                         </table>
                     </div>
                 </div>
+                
+                {/* STATISTIK */}
+                <div>
+                    <DynamicLineChart />
+                </div>
+
                 <div className="flex md:flex-row flex-col w-full md:gap-10 gap-5 justify-between items-center">
                     {/* <div className="md:w-1/2 flex justify-between items-center gap-4 bg-white p-4 md:p-10 rounded-lg shadow-md">
                         <MultiRingChart

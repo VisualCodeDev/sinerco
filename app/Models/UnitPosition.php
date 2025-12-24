@@ -17,7 +17,7 @@ class UnitPosition extends Model
     public function dailyReportSetting()
     {
         return $this->belongsTo(DailyReportSettings::class, 'client_id', 'client_id')
-            ->select('client_id', 'minMaxSetting', 'decimalSetting', 'unitSetting', 'thresholdSetting');
+            ->select('client_id', 'minMaxSetting', 'decimalSetting', 'unitSetting');
     }
 
     public function requests()
@@ -58,4 +58,5 @@ class UnitPosition extends Model
     {
         return $this->belongsTo(Workshop::class, 'workshop_id', 'workshop_id');
     }
+
 }

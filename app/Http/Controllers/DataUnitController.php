@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\DailyReport;
 use App\Models\DataUnit;
 use App\Models\Location;
 use App\Models\Area;
@@ -421,4 +422,17 @@ class DataUnitController extends Controller
 
         return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
     }
+
+    public function getUnitReports($unit_position_id)
+    {
+        $reports = DailyReport::where('unit_position_id', $unit_position_id)
+            ->pluck('data'); // kolom JSON
+
+        return response()->json([
+            'success' => true,
+            'data' => $reports
+        ]);
+    }
+
+
 }

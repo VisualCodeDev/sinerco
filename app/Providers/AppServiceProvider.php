@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Auth;
+use Carbon\Carbon;
 use Cookie;
 use Event;
 use Illuminate\Auth\Events\Login;
@@ -25,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        Carbon::setLocale('id');
         Event::listen(Login::class, function (Login $event) {
             if (request()->boolean('remember')) {
                 $cookieName = Auth::getRecallerName();

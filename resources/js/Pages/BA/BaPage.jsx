@@ -1,9 +1,15 @@
+import Checkbox from "@/Components/Checkbox";
 import { getUnitBA } from "@/Components/db";
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
+import { useToast } from "@/Components/Toast/ToastProvider";
 import columns from "@/Components/utils/BA/column";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+
+const csrfToken = document
+    .querySelector('meta[name="csrf-token"]')
+    .getAttribute("content");
 
 const BaPage = () => {
     const [formData, setFormData] = useState({
@@ -14,6 +20,8 @@ const BaPage = () => {
     const [data, setData] = useState([]);
     const [editModal, setEditModal] = useState(false);
     const [exportModal, setExportModal] = useState(false);
+
+    const { addToast } = useToast();
 
     useEffect(() => {
         const fetch = async () => {
@@ -101,6 +109,7 @@ const BaPage = () => {
             />
 
             <SettingModal
+                addToast={addToast}
                 isModal={editModal}
                 handleClose={() => setEditModal(false)}
                 pic_name={BaData?.pic_name}
@@ -114,6 +123,8 @@ const BaPage = () => {
 
             <ExportModal
                 isModal={exportModal}
+                addToast={addToast}
+                selectedUnits={formData.selectedRows}
                 handleClose={() => setExportModal(false)}
             />
         </PageLayout>
@@ -122,6 +133,7 @@ const BaPage = () => {
 
 const SettingModal = (props) => {
     const {
+        addToast,
         selectedUnits,
         isModal,
         handleClose,
@@ -164,10 +176,6 @@ const SettingModal = (props) => {
     const handleChange = (field, value) => {
         setFormData({ ...formData, [field]: value });
     };
-
-    const csrfToken = document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content");
 
     const formSections = [
         {
@@ -234,8 +242,11 @@ const SettingModal = (props) => {
                 },
                 body: JSON.stringify({ selectedUnits, ...formData }),
             });
-            console.log(res);
             if (!res.ok) throw new Error("Request failed");
+            else {
+                addToast({ type: "success", text: "Save Successfully" });
+                handleClose();
+            }
         } catch (e) {
             console.error(e);
         }
@@ -297,7 +308,40 @@ const SettingModal = (props) => {
 };
 
 const ExportModal = (props) => {
-    const { selectedUnits, isModal, handleClose } = props;
+    const { selectedUnits, isModal, handleClose, addToast } = props;
+
+    const [data, setData] = useState({
+        ba_req: false,
+        bap: false,
+        bapm: false,
+        month: new Date().getMonth() + 1,
+        template: 1,
+    });
+
+    const handleSubmit = async (e) => {
+        if (selectedUnits?.length === 0)
+            return addToast({
+                type: "error",
+                text: "Please Choose Unit(s) to Export",
+            });
+        if (!data?.ba_req && !data?.bapm && !data?.bap)
+            return addToast({
+                type: "error",
+                text: "Please Choose BA to Export",
+            });
+        try {
+            window.open(
+                route("export_doc", {
+                    unit_pos_id: selectedUnits,
+                    ...data,
+                }),
+                "_blank"
+            );
+        } catch (e) {
+            console.error(e);
+        }
+    };
+    console.log(data);
     return (
         <Modal
             showModal={isModal}
@@ -305,9 +349,122 @@ const ExportModal = (props) => {
             title={"Export BA"}
         >
             <Modal.Body>
-                
-            </Modal.Body>
+                <div className="flex flex-col gap-3">
+                    <div className="mb-5 flex gap-2">
+                        <div class="w-full max-w-xs ">
+                            <label class="block mb-1 text-sm font-medium text-gray-700">
+                                Choose Month
+                            </label>
+                            <select
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm
+                            focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                            transition duration-150 ease-in-out"
+                                onChange={(e) =>
+                                    setData({
+                                        ...data,
+                                        month: Number(e.target.value),
+                                    })
+                                }
+                                value={data?.month}
+                            >
+                                <option value="" disabled selected>
+                                    Choose Month
+                                </option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
 
+                        <div class="w-full max-w-xs ">
+                            <label class="block mb-1 text-sm font-medium text-gray-700">
+                                Choose BAP Template
+                            </label>
+                            <select
+                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm
+                            focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+                            transition duration-150 ease-in-out"
+                                onChange={(e) =>
+                                    setData({
+                                        ...data,
+                                        template: Number(e.target.value),
+                                    })
+                                }
+                                value={data?.template}
+                            >
+                                <option value="" disabled selected>
+                                    Choose Template
+                                </option>
+                                <option value="1">
+                                    Template 1 (Avg Flow + avail + Sign)
+                                </option>
+                                <option value="2">
+                                    Template 2 (Avg Flow + avail)
+                                </option>
+                                <option value="3">
+                                    Template 3 (Location + Sign)
+                                </option>
+                                <option value="4">
+                                    Template 4 (Location + Engine S/N)
+                                </option>
+                                <option value="5">
+                                    Template 5 (Location + Table Sign)
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    {[
+                        { name: "ba_req", label: "Berita Acara SD/STDBY" },
+                        {
+                            name: "bapm",
+                            label: "Berita Acara Service Preventive Maintenance Program (BAPM)",
+                        },
+                        {
+                            name: "bap",
+                            label: "Berita Acara Penyelesaian Pekerjaan (BAP)",
+                        },
+                    ].map((item) => (
+                        <div
+                            key={item.name}
+                            className="flex gap-4 items-center cursor-pointer w-full"
+                            onClick={() =>
+                                setData((prev) => ({
+                                    ...prev,
+                                    [item.name]: !prev[item.name],
+                                }))
+                            }
+                        >
+                            <Checkbox
+                                name={item.name}
+                                checked={data[item.name]}
+                                onChange={(e) =>
+                                    setData((prev) => ({
+                                        ...prev,
+                                        [item.name]: e.target.checked,
+                                    }))
+                                }
+                            />
+                            <span>{item.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex align-items-center justify-end">
+                    <button className="button-submit" onClick={handleSubmit}>
+                        Export
+                    </button>
+                </div>
+            </Modal.Footer>
         </Modal>
     );
 };

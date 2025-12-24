@@ -40,7 +40,7 @@ class DailyReportController extends Controller
             ->with('request')
             ->get()
             ->map(function ($item) {
-                $data = json_decode($item->data, true) ?? [];
+                $data = $item->data ?? [];
 
                 return array_merge([
                     'id' => $item->id,
@@ -281,8 +281,7 @@ class DailyReportController extends Controller
             ->orderBy('time')
             ->get()
             ->map(function ($item) {
-                // Decode JSON data
-                $decoded = json_decode($item->data, true) ?? [];
+                $decoded = $item->data ?? [];
 
                 // Gabungkan semua field di data + tambahkan request
                 return array_merge($decoded, [

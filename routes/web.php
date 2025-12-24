@@ -109,6 +109,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/api/get-selected-unit-data', 'getSelectedUnit')->name('getSelectedUnit');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
     Route::get('/get/fields', 'getUnitFields')->name('unit.fields.get');
+    Route::get('/get/reports/{unit_position_id}', 'getUnitReports')->name('unit.position.report.get');
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
