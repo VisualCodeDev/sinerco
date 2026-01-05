@@ -74,6 +74,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     });
 
                     i += Number(field.subfields.length) - 1;
+                    startColumn++;
                 } else {
                     const col = chr(Number(startColumn) + i);
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
@@ -100,9 +101,9 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     };
                     unitCell.font = { bold: true };
                 }
-                startColumn++
+                startColumn++;
             });
-            console.log(fieldUnits)
+            console.log(fieldHeaderColumnMap, chr(startColumn));
             const remarksStart = startColumn + 6;
 
             // Kolom waktu
@@ -118,9 +119,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             timeCell.font = { bold: true };
 
             // Kolom Remarks
-            const remarkCell = newSheet.getCell(
-                `${chr(startColumn)}2`
-            );
+            const remarkCell = newSheet.getCell(`${chr(startColumn)}2`);
             newSheet.mergeCells(
                 `${chr(startColumn)}2:${chr(startColumn + 4)}4`
             );
@@ -154,11 +153,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         timeRowCell.value = time;
                 });
                 hour += Number(unitData?.input_interval || 1);
-                for (
-                    let c = 2;
-                    c <= startColumn;
-                    c++
-                ) {
+                for (let c = 2; c <= startColumn; c++) {
                     const cell = newSheet.getRow(r).getCell(c);
                     cell.border = ExcelStyle.borderAll;
                     cell.alignment = {
@@ -168,9 +163,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     // REMARKS COLOMN
                     if (c === startColumn) {
                         newSheet.mergeCells(
-                            `${chr(
-                                startColumn
-                            )}${r}:${chr(
+                            `${chr(startColumn)}${r}:${chr(
                                 startColumn + 4
                             )}${r}`
                         );
@@ -374,9 +367,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 }
             });
 
-            const dataRemarksCol = Number(
-                startColumn
-            );
+            const dataRemarksCol = Number(startColumn);
 
             for (let r = 5; r < totalRow + 5; r++) {
                 const remarksDataForPrevTable = newSheet
