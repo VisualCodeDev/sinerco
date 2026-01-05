@@ -176,12 +176,12 @@ Route::controller(LocationController::class)->middleware('auth')->group(function
     Route::get('/area', 'index')->name('areas');
 });
 
-Route::controller(WorkshopController::class)->group(function () {
+Route::controller(WorkshopController::class)->middleware('auth')->group(function () {
     Route::get('/workshop/list', 'index')->name('workshops');
     Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
 });
 
-Route::controller(BeritaAcaraController::class)->group(function () {
+Route::controller(BeritaAcaraController::class)->middleware('auth')->group(function () {
     Route::post('/berita-acara/set/field-setting', 'SetFieldBA')->name('ba.set.setting');
     Route::get('/berita-acara', 'index')->name('ba.page');
     Route::get('/berita-acara/get/units', 'getBaUnits')->name('ba.unit.get');

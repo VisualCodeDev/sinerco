@@ -25,18 +25,42 @@ import { useToast } from "../Toast/ToastProvider";
 const UnitTable = (props) => {
     const { data: propsData } = props;
     const data = propsData;
+    const [unitData, setUnitData] = useState(data);
     const [formData, setFormData] = useState({
         selectedRows: [],
-        data: data,
+        data: unitData,
         selectedUnitPositions: [],
     });
+
     const [thresholdSetting, setThresholdSetting] = useState(null);
+    const [visibilitySetting, setVisibilitySetting] = useState(null);
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
     const [isExportModal, setExportModal] = useState(false);
     const [edit, setEdit] = useState(false);
     const { addToast } = useToast();
+    useEffect(() => {
+        setFormData({ ...formData, data: unitData });
+    }, [unitData]);
 
+    useEffect(() => {
+        setThresholdSetting(
+            data.find(
+                (item) =>
+                    formData?.selectedRows[
+                        formData?.selectedRows.length - 1
+                    ] === item?.unit_id
+            )?.thresholdSetting || null
+        );
+        setVisibilitySetting(
+            data.find(
+                (item) =>
+                    formData?.selectedRows[
+                        formData?.selectedRows.length - 1
+                    ] === item?.unit_id
+            )?.visibilitySetting || null
+        );
+    }, [formData?.selectedRows]);
     const handleClick = (item, e) => {
         if (!item.unit_position_id || edit) return;
         const url = route("daily", item.unit_position_id);
@@ -82,7 +106,6 @@ const UnitTable = (props) => {
     };
 
     const columns = tColumns("unitList", formData, null, handleSelectAll, edit);
-
     const onSelect = (selected) => {
         const currSelected = formData?.selectedRows || [];
         const currSelectedUnits = formData?.selectedUnits || [];
@@ -102,20 +125,20 @@ const UnitTable = (props) => {
                     (item) => item !== selected.unit_position_id
                 ),
             }));
-            setThresholdSetting({});
-            return;
+            return
         }
         // Select
-        setFormData((prev) => ({
-            ...prev,
+        setFormData({
+            ...formData,
             selectedRows: [...currSelected, String(selected.unit_id)],
             selectedUnits: [...(formData.selectedUnits || []), selected.unit],
             selectedUnitPositions: [
                 ...(formData.selectedUnitPositions || []),
                 selected.unit_position_id,
             ],
-        }));
-        setThresholdSetting(selected.thresholdSetting || null);
+        });
+        // setThresholdSetting(selected.thresholdSetting || null);
+        // setVisibilitySetting(selected.visibilitySetting || null);
     };
 
     if (!propsData) {
@@ -158,14 +181,21 @@ const UnitTable = (props) => {
                 handleNew={route("unit.add")}
             />
             <SettingModal
+                data={unitData}
+                setData={setUnitData}
                 addToast={addToast}
                 isModal={isSettingModal}
                 setIsModal={setIsSettingModal}
                 unitName={formData?.selectedUnits}
                 thresholdSetting={thresholdSetting}
+                visibilitySetting={visibilitySetting}
                 selectedUnits={formData?.selectedRows}
             />
-            <ExportModal isModal={isExportModal} setIsModal={setExportModal} selectedUnitPositions={formData?.selectedUnitPositions}/>
+            <ExportModal
+                isModal={isExportModal}
+                setIsModal={setExportModal}
+                selectedUnitPositions={formData?.selectedUnitPositions}
+            />
         </>
         // <></>
     );
@@ -182,10 +212,11 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
         window.open(
             route("export_doc", {
                 unit_pos_id: selectedUnitPositions,
-                client_name: formData?.clientName || 'client name',
-                client_department: formData?.clientDepartment || 'client department',
-                name: formData?.name || 'name',
-                department: formData?.department || 'department',
+                client_name: formData?.clientName || "client name",
+                client_department:
+                    formData?.clientDepartment || "client department",
+                name: formData?.name || "name",
+                department: formData?.department || "department",
             }),
             "_blank"
         );
@@ -263,10 +294,7 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
             </Modal.Body>
             <Modal.Footer>
                 <div className="flex items-center justify-end">
-                    <button
-                        className="button-submit"
-                        onClick={handleExport}
-                    >
+                    <button className="button-submit" onClick={handleExport}>
                         Export
                     </button>
                 </div>
@@ -276,16 +304,21 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
 };
 
 const SettingModal = ({
+    setData,
+    data,
     isModal,
     setIsModal,
     thresholdSetting,
+    visibilitySetting,
     unitName,
     selectedUnits,
     addToast,
 }) => {
     const [formData, setFormData] = useState({
         thresholdSetting: {},
+        visibilitySetting: {},
     });
+
     const [fields, setFields] = useState([]);
 
     useEffect(() => {
@@ -296,6 +329,7 @@ const SettingModal = ({
         fetchFields();
 
         let defaultThresholdSetting = {};
+        let defaultVisibilitySetting = {};
 
         formItems
             .filter((item) => item.name !== "time")
@@ -306,6 +340,7 @@ const SettingModal = ({
                             value: 0,
                             type: "number",
                         };
+                        defaultVisibilitySetting[sub.name] = true;
                     });
                     return;
                 }
@@ -313,10 +348,12 @@ const SettingModal = ({
                     value: 0,
                     type: "number",
                 };
+                defaultVisibilitySetting[item.name] = true;
             });
         setFormData((prev) => ({
             ...prev,
             thresholdSetting: thresholdSetting ?? defaultThresholdSetting,
+            visibilitySetting: visibilitySetting ?? defaultVisibilitySetting,
         }));
     }, [thresholdSetting]);
 
@@ -333,6 +370,15 @@ const SettingModal = ({
         }));
     };
 
+    const handleClickVisibility = (section, field, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            [section]: {
+                ...prev[section],
+                [field]: value,
+            },
+        }));
+    };
     const handleSave = async () => {
         try {
             const resp = await axios.post(route("unit.setSettings"), {
@@ -341,6 +387,13 @@ const SettingModal = ({
             });
             if (resp.status === 200 || resp.status === 302) {
                 addToast(resp.data);
+                const updatedData = data.map((item) =>
+                    selectedUnits.includes(item.unit_id)
+                        ? { ...item, ...formData }
+                        : item
+                );
+                console.log(updatedData);
+                setData(updatedData);
             } else {
             }
         } catch (err) {
@@ -369,7 +422,7 @@ const SettingModal = ({
                 </div>
             </div>
             <div className=" bg-white h-[70vh] scale-[.85] flex justify-center flex-col items-center gap-4 p-6">
-                <span className="font-bold">
+                <span className="font-bold text-2xl">
                     {Array.isArray(unitName) && unitName?.length > 5
                         ? unitName.slice(0, 5).join(", ") + ", ..."
                         : unitName?.join(", ") || unitName}
@@ -378,11 +431,14 @@ const SettingModal = ({
                     <table className="w-full h-full table-auto border-collapse">
                         <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
                             <tr className="sticky top-0">
-                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[25%]">
+                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[45%]">
                                     Item
                                 </th>
-                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[20%]">
+                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[45%]">
                                     Input Threshold
+                                </th>
+                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[10%]">
+                                    Status
                                 </th>
                             </tr>
                         </thead>
@@ -402,10 +458,23 @@ const SettingModal = ({
                                         return (
                                             <tr
                                                 key={field.name + idx}
-                                                className="border-b border-[#E4E7EC] bg-[#F9FAFB] hover:bg-[#F3F4F6] transition-colors"
+                                                className={`${
+                                                    !formData.visibilitySetting[
+                                                        field.slug
+                                                    ]
+                                                        ? "bg-[#cecece]"
+                                                        : "bg-[#F9FAFB] hover:bg-[#F3F4F6]"
+                                                } border-b border-[#E4E7EC] transition-colors`}
                                             >
                                                 {/* ITEM NAME */}
-                                                <td className="py-6 px-6 font-medium text-[#101828] whitespace-nowrap">
+                                                <td
+                                                    className={`py-6 px-6 font-medium text-[#101828] whitespace-nowrap ${
+                                                        !formData
+                                                            .visibilitySetting[
+                                                            field.slug
+                                                        ] && "text-gray-400"
+                                                    }`}
+                                                >
                                                     {field.name}
                                                 </td>
 
@@ -416,7 +485,19 @@ const SettingModal = ({
                                                             type="text"
                                                             inputMode="decimal"
                                                             placeholder="Threshold"
-                                                            className="w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
+                                                            disabled={
+                                                                !formData
+                                                                    .visibilitySetting[
+                                                                    field.slug
+                                                                ]
+                                                            }
+                                                            className={`w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition ${
+                                                                !formData
+                                                                    .visibilitySetting[
+                                                                    field.slug
+                                                                ] &&
+                                                                "text-gray-400"
+                                                            }`}
                                                             onChange={(e) =>
                                                                 handleChange(
                                                                     "thresholdSetting",
@@ -436,6 +517,12 @@ const SettingModal = ({
                                                             }
                                                         />
                                                         <select
+                                                            disabled={
+                                                                !formData
+                                                                    .visibilitySetting[
+                                                                    field.slug
+                                                                ]
+                                                            }
                                                             className="w-[80px] h-[40px] border border-[#D0D5DD] rounded-lg px-2 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                                                             value={
                                                                 formData
@@ -477,6 +564,50 @@ const SettingModal = ({
                                                                 </option>
                                                             ))}
                                                         </select>
+                                                    </div>
+                                                </td>
+
+                                                {/* Hide */}
+                                                <td className="px-6 py-4">
+                                                    <div className="">
+                                                        {formData
+                                                            ?.visibilitySetting?.[
+                                                            field.slug
+                                                        ] ? (
+                                                            <button
+                                                                onClick={(e) =>
+                                                                    handleClickVisibility(
+                                                                        "visibilitySetting",
+                                                                        field.slug,
+                                                                        !formData
+                                                                            ?.visibilitySetting?.[
+                                                                            field
+                                                                                .slug
+                                                                        ]
+                                                                    )
+                                                                }
+                                                                className="text-red-50 bg-success font-bold px-2 py-1 rounded-lg"
+                                                            >
+                                                                Active
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={(e) =>
+                                                                    handleClickVisibility(
+                                                                        "visibilitySetting",
+                                                                        field.slug,
+                                                                        !formData
+                                                                            ?.visibilitySetting?.[
+                                                                            field
+                                                                                .slug
+                                                                        ]
+                                                                    )
+                                                                }
+                                                                className="text-red-50 bg-danger font-bold px-2 py-1 rounded-lg"
+                                                            >
+                                                                Hidden
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </td>
                                             </tr>

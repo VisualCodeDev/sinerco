@@ -27,7 +27,7 @@ class DataUnitController extends Controller
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unit_id', 'unit', 'status', 'thresholdSetting']);
+                    $q->select(['unit_id', 'unit', 'status', 'thresholdSetting', 'visibilitySetting']);
                 },
                 'client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -42,6 +42,7 @@ class DataUnitController extends Controller
                     'unit_id' => $pos->unit->unit_id,
                     'unit' => $pos->unit->unit,
                     'thresholdSetting' => $pos->unit->thresholdSetting,
+                    'visibilitySetting' => $pos->unit->visibilitySetting,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
                     'gmt_offset' => $pos->client?->gmt_offset ?? $pos->workshop?->gmt_offset ?? 7,
@@ -60,13 +61,14 @@ class DataUnitController extends Controller
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-            ])->select(['unit_id', 'unit', 'status', 'thresholdSetting'])->get();
+            ])->select(['unit_id', 'unit', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
 
             $data = $temp->map(function ($unit) {
                 return [
                     'unit_id' => $unit->unit_id,
                     'unit' => $unit->unit,
                     'thresholdSetting' => $unit->thresholdSetting,
+                    'visibilitySetting' => $unit->visibilitySetting,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client->name ?? $unit->UnitPositions?->workshop->name,
                     'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
@@ -165,6 +167,7 @@ class DataUnitController extends Controller
 
         $data = [
             'unit_id' => $unit->unit_id ?? null,
+            'visibilitySetting' => $unit->unit->visibilitySetting ?? null,
             'thresholdSetting' => $unit->unit->thresholdSetting ?? null,
             'daily_report_setting' => $unit->dailyReportSetting ?? null,
             'unit' => $unit->unit->unit ?? null,
@@ -398,12 +401,17 @@ class DataUnitController extends Controller
     {
         $rules = [
             'unit_id' => 'required|array',
-            'thresholdSetting' => 'required|array'
+            'thresholdSetting' => 'required|array',
+            'visibilitySetting' => 'required|array'
         ];
 
         foreach ($request->input('thresholdSetting', []) as $key => $value) {
             $rules["thresholdSetting.$key.value"] = 'required|numeric';
             $rules["thresholdSetting.$key.type"] = 'required|string';
+        }
+
+        foreach ($request->input('visibilitySetting', []) as $key => $value) {
+            $rules["visibilitySetting.$key"] = 'required|boolean';
         }
 
         $validated = $request->validate($rules);
@@ -416,7 +424,8 @@ class DataUnitController extends Controller
                 continue; // Skip if unit not found
             }
             $unit->update([
-                'thresholdSetting' => $validated['thresholdSetting']
+                'thresholdSetting' => $validated['thresholdSetting'],
+                'visibilitySetting' => $validated['visibilitySetting']
             ]);
         }
 

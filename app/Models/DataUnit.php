@@ -28,11 +28,13 @@ class DataUnit extends Model
         'unit_id',
         'unit',
         'status',
-        'thresholdSetting'
+        'thresholdSetting',
+        'visibilitySetting'
     ];
 
     protected $casts = [
-        'thresholdSetting' => 'array'
+        'thresholdSetting' => 'array',
+        'visibilitySetting' => 'array'
     ];
     protected $appends = ['client', 'location'];
 

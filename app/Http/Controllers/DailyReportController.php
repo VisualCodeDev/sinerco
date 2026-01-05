@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
+use App\Models\DataUnit;
 use App\Models\StatusRequest;
 use App\Models\UnitField;
 use App\Models\UnitPosition;
@@ -25,15 +26,40 @@ class DailyReportController extends Controller
         if (!$unit_position_id || !$start || !$end || !$unit_id) {
             return response()->json(['error' => 'Missing required parameters'], 400);
         }
+        // $unitData = DataUnit::find($unit_id);
+        // $fields = UnitField::with('fields.subfields')->where('unit_id', $unit_id)->get()->map(function ($item) {
+        //     return [
+        //         'column' => $item->column,
+        //         'field_name' => $item->fields['name'],
+        //         'field_slug' => $item->fields['slug'],
+        //         'subfields' => $item->fields['subfields'] ?? [],
+        //     ];
+        // });
+        $unitData = DataUnit::find($unit_id);
 
-        $fields = UnitField::with('fields.subfields')->where('unit_id', $unit_id)->get()->map(function ($item) {
-            return [
-                'column' => $item->column,
-                'field_name' => $item->fields['name'],
-                'field_slug' => $item->fields['slug'],
-                'subfields' => $item->fields['subfields'] ?? [],
-            ];
-        });
+        $fields = UnitField::with('fields.subfields')
+            ->where('unit_id', $unit_id)
+            ->get()
+            ->map(function ($item) use ($unitData) {
+                $field = $item->fields;
+                $visibleSubfields = collect($field->subfields ?? [])
+                    ->filter(function ($sub) use ($unitData) {
+                    return $unitData->visibilitySetting[$sub->slug] ?? false;
+                })
+                    ->values();
+
+                return [
+                    'column' => $item->column,
+                    'field_name' => $field->name,
+                    'field_slug' => $field->slug,
+                    'visible' => $unitData->visibilitySetting[$field->slug] ?? false,
+                    'subfields' => $visibleSubfields,
+                ];
+            })
+            ->filter(function ($field) {
+                return $field['visible'] || $field['subfields']->isNotEmpty();
+            })
+            ->values();
 
         $reports = DailyReport::where('unit_position_id', $unit_position_id)
             ->whereBetween('date', [$start, $end])
@@ -140,14 +166,14 @@ class DailyReportController extends Controller
             $workers = UserSetting::with('user')
                 ->where('unit_position_id', $unit_position_id)
                 ->get();
-                // ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
-           
+            // ->filter(fn($allocation) => $allocation->user?->role === 'technician' || $allocation->user?->role === 'operator');
+
             $numbers = $workers
                 ->pluck('user.whatsAppNum')
                 ->filter()
                 ->implode(',');
 
-                if (!empty($numbers)) {
+            if (!empty($numbers)) {
                 WhatsAppService::sendMessage($numbers, $warningMessage);
             }
             // WhatsAppService::sendMessage('081281995158', $warningMessage);

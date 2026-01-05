@@ -53,7 +53,7 @@ export default function Dashboard({ unit_position_id }) {
                 : "unit_information"
         );
     }, [user]);
-    
+
     const tabs = [
         {
             key: "unit_information",
@@ -180,7 +180,7 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-            
+
             await initCurrDate(
                 reportData?.data,
                 unit?.data?.gmt_offset,
@@ -256,8 +256,28 @@ export default function Dashboard({ unit_position_id }) {
                 );
 
                 const data = response?.data?.data || response?.data;
-
-                setFields(data);
+                const visibleFields = data
+                    .map((field) => {
+                        if (
+                            Array.isArray(field.subfields) &&
+                            field.subfields.length > 0
+                        ) {
+                            const visibleSubfields = field.subfields.filter(
+                                (sub) => unitData.visibilitySetting[sub.slug]
+                            );
+                            if (visibleSubfields.length === 0) return null;
+                            return {
+                                ...field,
+                                subfields: visibleSubfields,
+                            };
+                        }
+                        return unitData.visibilitySetting[field.slug]
+                            ? field
+                            : null;
+                    })
+                    .filter(Boolean);
+                console.log()
+                setFields(visibleFields);
             } catch (error) {
                 console.error(
                     "Gagal mengambil field:",
@@ -393,6 +413,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "form" && (
                             <DailyReportForm
+                                visibilitySetting={unitData?.visibilitySetting}
                                 lastReport={lastReport}
                                 fields={fields}
                                 isDown={!isUnitRunning}
@@ -413,6 +434,7 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "report" && (
                             <DailyReport
+                                visibilitySetting={unitData?.visibilitySetting}
                                 fields={fields}
                                 selectedDate={selectedDate}
                                 setSelectedDate={setSelectedDate}

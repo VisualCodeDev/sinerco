@@ -17,15 +17,16 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             const [year, month, day] = date.split("-");
             const formattedDate = `${day}/${month}/${year}`;
             const newSheet = workbook.addWorksheet(`Day ${day}`);
+            let startColumn = 2;
             let i = 0;
             let totalRow = 24 / (unitData?.input_interval || 1);
 
             // Buat header berdasarkan field
             fields.forEach((field) => {
                 if (field.subfields && Number(field.subfields.length) > 0) {
-                    const col = chr(Number(field.column) + i);
+                    const col = chr(Number(startColumn) + i);
                     const stopCol = chr(
-                        Number(field.column) +
+                        Number(startColumn) +
                             i +
                             Number(field.subfields.length) -
                             1
@@ -47,7 +48,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
                     // Subfields
                     field.subfields.forEach((sub, index) => {
-                        const subCol = chr(Number(field.column) + index + i);
+                        const subCol = chr(Number(startColumn) + index + i);
                         fieldHeaderColumnMap[sub.name] = `${subCol}3`;
                         fieldColumnMap[sub.slug] = subCol;
 
@@ -74,7 +75,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
                     i += Number(field.subfields.length) - 1;
                 } else {
-                    const col = chr(Number(field.column) + i);
+                    const col = chr(Number(startColumn) + i);
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
 
@@ -99,9 +100,10 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     };
                     unitCell.font = { bold: true };
                 }
+                startColumn++
             });
-
-            const remarksStart = Object.keys(fieldHeaderColumnMap).length + 7;
+            console.log(fieldUnits)
+            const remarksStart = startColumn + 6;
 
             // Kolom waktu
             const timeCell = newSheet.getCell("A2");
@@ -117,12 +119,10 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
             // Kolom Remarks
             const remarkCell = newSheet.getCell(
-                `${chr(Object.keys(fieldHeaderColumnMap).length + 1)}2`
+                `${chr(startColumn)}2`
             );
             newSheet.mergeCells(
-                `${chr(
-                    Number(Object.keys(fieldHeaderColumnMap).length + 1)
-                )}2:${chr(Object.keys(fieldHeaderColumnMap).length + 5)}4`
+                `${chr(startColumn)}2:${chr(startColumn + 4)}4`
             );
 
             remarkCell.value = "Remarks";
@@ -156,7 +156,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 hour += Number(unitData?.input_interval || 1);
                 for (
                     let c = 2;
-                    c <= Object.keys(fieldHeaderColumnMap).length + 1;
+                    c <= startColumn;
                     c++
                 ) {
                     const cell = newSheet.getRow(r).getCell(c);
@@ -166,12 +166,12 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         wrapText: true,
                     };
                     // REMARKS COLOMN
-                    if (c === Object.keys(fieldHeaderColumnMap).length + 1) {
+                    if (c === startColumn) {
                         newSheet.mergeCells(
                             `${chr(
-                                Object.keys(fieldHeaderColumnMap).length + 1
+                                startColumn
                             )}${r}:${chr(
-                                Object.keys(fieldHeaderColumnMap).length + 5
+                                startColumn + 4
                             )}${r}`
                         );
                         continue;
@@ -375,7 +375,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             });
 
             const dataRemarksCol = Number(
-                Object.keys(fieldHeaderColumnMap)?.length + 1
+                startColumn
             );
 
             for (let r = 5; r < totalRow + 5; r++) {

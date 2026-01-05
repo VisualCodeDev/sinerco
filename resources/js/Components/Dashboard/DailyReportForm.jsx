@@ -19,6 +19,7 @@ import { FaTriangleExclamation } from "react-icons/fa6";
 
 const DailyReportForm = (props) => {
     const {
+        visibilitySetting,
         disableDuration = false,
         unitData,
         formData,
@@ -112,6 +113,7 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
+    
     const formList = list({
         fields: fields,
         handleChange: handleChange,
