@@ -31,6 +31,24 @@ class DataUnitSeeder extends Seeder
             "bef_cooler" => ["value" => 100, "type" => 'percentage'],
         ];
 
+        $visibilitySetting = [
+            "source_press" => true,
+            "suction_press" => true,
+            "discharge_press" => true,
+            "speed" => true,
+            "manifold_press" => true,
+            "oil_press" => true,
+            "oil_diff" => true,
+            "running_hours" => true,
+            "voltage" => true,
+            "water_temp" => true,
+            "static_press" => true,
+            "diff_press" => true,
+            "flowrate" => true,
+            "aft_cooler" => true,
+            "bef_cooler" => true,
+        ];
+
         $units = [
             'MPI-5097-BC (A)',
             'MPI-5298-BC (B)',
@@ -69,7 +87,7 @@ class DataUnitSeeder extends Seeder
 
         foreach ($units as $unit) {
             DataUnit::firstOrCreate(
-                ['unit' => $unit, 'unit_sn' => $unit, 'thresholdSetting' => $thresholdSetting],
+                ['unit' => $unit, 'unit_sn' => $unit, 'thresholdSetting' => $thresholdSetting, 'visibilitySetting' => $visibilitySetting],
             );
         }
     }
