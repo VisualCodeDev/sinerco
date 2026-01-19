@@ -99,7 +99,7 @@ const TableComponent = (props) => {
         }
         if (typeof value === "object" && value !== null) {
             return Object.values(value).some((val) =>
-                containsQuery(val, query)
+                containsQuery(val, query),
             );
         }
         return false;
@@ -336,7 +336,7 @@ const TableComponent = (props) => {
                     </table>
                 </div>
                 {isForm && !isUserList && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th>
                                 <div className="px-8 py-3 text-sm font-medium w-full flex gap-4">
@@ -364,10 +364,10 @@ const TableComponent = (props) => {
                 )}
 
                 {isUserList && edit && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-4">
-                                <div className=" py-3 text-sm font-medium w-full relative">
+                                <div className="ml-5 py-3 text-sm font-medium w-full relative">
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
@@ -406,18 +406,10 @@ const TableComponent = (props) => {
                 )}
 
                 {isUnitList && edit && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
-                            <th className="flex gap-4">
-                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative flex gap-5">
-                                    <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
-                                        onClick={() =>
-                                            handleSubmit({ type: "export" })
-                                        }
-                                    >
-                                        Export BA
-                                    </button>
+                            <th className="flex gap-2">
+                                <div className="ml-5 py-3 text-sm font-medium w-full relative flex gap-5">
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
@@ -425,6 +417,14 @@ const TableComponent = (props) => {
                                         }
                                     >
                                         Edit
+                                    </button>
+                                    <button
+                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            handleSubmit({ type: "export" })
+                                        }
+                                    >
+                                        Export BA
                                     </button>
                                 </div>
                             </th>
@@ -444,10 +444,10 @@ const TableComponent = (props) => {
                 )}
 
                 {isBA && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-4">
-                                <div className="mr-[11vw] py-3 text-sm font-medium w-full relative flex gap-5">
+                                <div className="ml-5 py-3 text-sm font-medium w-full relative flex gap-5">
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
@@ -557,7 +557,7 @@ const TableComponent = (props) => {
                                                         value={item.name}
                                                     >
                                                         {splitCamelCase(
-                                                            item.name
+                                                            item.name,
                                                         )}
                                                     </option>
                                                 ))}
@@ -590,7 +590,8 @@ const TableComponent = (props) => {
                             // Filter out 'checkbox' column
                             const mainCols = columns.filter(
                                 (c) =>
-                                    c.name !== "checkbox" && c.name !== "status"
+                                    c.name !== "checkbox" &&
+                                    c.name !== "status",
                             );
 
                             // Pick either 'status' or 'requestType' if exists
@@ -598,7 +599,7 @@ const TableComponent = (props) => {
                                 (c) =>
                                     c.name === "status" ||
                                     c.name === "requestType" ||
-                                    c.name === "checkbox"
+                                    c.name === "checkbox",
                             );
 
                             return (
@@ -703,7 +704,7 @@ const TableComponent = (props) => {
 
                 {/* Sticky Bottom Bar (kept the same) */}
                 {isForm && !isUserList && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th>
                                 <div className="px-8 py-3 text-sm font-medium w-full">
@@ -722,10 +723,10 @@ const TableComponent = (props) => {
                 )}
 
                 {isUserList && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl">
+                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-4">
-                                <div className="py-3 text-sm font-medium w-full relative">
+                                <div className="ml-5 py-3 text-sm font-medium w-full relative">
                                     <button
                                         className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
