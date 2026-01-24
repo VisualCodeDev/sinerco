@@ -500,16 +500,22 @@ class ExportController extends Controller
                 ];
 
                 $transformedUnits = $units->map(function ($item) use ($rangeDate) {
-                    $reports = $item->reports->map(function ($report) {
-                        $decoded = $report['data'];
+                    $reports = $item->reports
+                        ->map(function ($report) {
+                            $decoded = $report['data'];
 
-                        return is_array($decoded) ? $decoded : null;
-                    })->filter();
+                            if (is_string($decoded)) {
+                                $decoded = json_decode($decoded, true);
+                            }
+
+                            return is_array($decoded) ? $decoded : null;
+                        })
+                        ->filter()
+                        ->values();
                     $availability = $this->calculateAvailabilityByRange(
                         $item->requests,
                         $rangeDate
                     );
-                    // dd($item->requests);
                     return [
                         'unit_sn' => $item->unit->unit_sn,
                         'engine_sn' => $item->unit->engine_sn || '',
