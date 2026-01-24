@@ -44,8 +44,8 @@ class DailyReportController extends Controller
                 $field = $item->fields;
                 $visibleSubfields = collect($field->subfields ?? [])
                     ->filter(function ($sub) use ($unitData) {
-                    return $unitData->visibilitySetting[$sub->slug] ?? false;
-                })
+                        return $unitData->visibilitySetting[$sub->slug] ?? false;
+                    })
                     ->values();
 
                 return [
@@ -307,9 +307,16 @@ class DailyReportController extends Controller
             ->orderBy('time')
             ->get()
             ->map(function ($item) {
-                $decoded = $item->data ?? [];
+                $decoded = $item->data;
 
-                // Gabungkan semua field di data + tambahkan request
+                if (is_string($decoded)) {
+                    $decoded = json_decode($decoded, true);
+                }
+
+                if (!is_array($decoded)) {
+                    $decoded = [];
+                }
+
                 return array_merge($decoded, [
                     'unit_position_id' => $item->unit_position_id,
                     'id' => $item->id,
@@ -318,6 +325,7 @@ class DailyReportController extends Controller
                     'request' => $item->request,
                 ]);
             });
+
 
         return response()->json($data);
     }

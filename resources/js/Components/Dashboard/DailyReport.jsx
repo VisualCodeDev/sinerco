@@ -24,7 +24,6 @@ const DailyReport = (props) => {
     const { formData, unitData, user, setSelectedDate, selectedDate, fields } =
         props;
     const currDate = new Date();
-
     const [isClicked, setClick] = useState(false);
     const [isEditModal, setEditModal] = useState(false);
     const [selectedData, setSelectedData] = useState(null);

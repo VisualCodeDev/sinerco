@@ -294,7 +294,7 @@ export default function Home() {
                                     <tr>
                                         <td
                                             colSpan={6}
-                                            className="text-center text-gray-500 py-6"
+                                            className="text-center text-gray-500 py-6 bg-white"
                                         >
                                             All units are running.
                                         </td>
@@ -306,7 +306,7 @@ export default function Home() {
                 </div>
                 
                 {/* STATISTIK */}
-                <div>
+                <div className="bg-white rounded-lg p-2">
                     <DynamicLineChart />
                 </div>
 

@@ -180,7 +180,7 @@ export default function Dashboard({ unit_position_id }) {
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-
+            
             await initCurrDate(
                 reportData?.data,
                 unit?.data?.gmt_offset,
@@ -276,7 +276,6 @@ export default function Dashboard({ unit_position_id }) {
                             : null;
                     })
                     .filter(Boolean);
-                console.log()
                 setFields(visibleFields);
             } catch (error) {
                 console.error(
