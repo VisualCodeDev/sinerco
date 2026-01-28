@@ -120,8 +120,8 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::post('/unit/list/add', 'addNewUnit')->name('unit.add')->middleware('roles:super_admin');
 });
 
-Route::controller(DailyFieldController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
-    Route::get('/unit/input-field', 'index')->name('input.field.setting');
+Route::controller(DailyFieldController::class)->middleware(['auth'])->group(function () {
+    Route::get('/unit/input-field', 'index')->middleware('roles:super_admin')->name('input.field.setting');
     Route::get('/get/field', 'getFields')->name('input.field.get');
 });
 
