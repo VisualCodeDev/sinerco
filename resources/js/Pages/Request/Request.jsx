@@ -23,6 +23,7 @@ const Request = ({ data }) => {
     const [isModal, setModal] = useState(false);
     const [selectedItem, setItem] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
+    const [isEdit, setIsEdit] = useState(false);
     const [saving, setSaving] = useState(false);
     const [allData, setAllData] = useState(data);
     const [dateTime, setDateTime] = useState(new Date());
@@ -77,6 +78,7 @@ const Request = ({ data }) => {
         );
     };
 
+    console.log(selectedRows)
     const handleSelectAll = () => {
         if (selectedRows.length === allData.length) {
             // Unselect all
@@ -163,6 +165,7 @@ const Request = ({ data }) => {
         handleCheckItem,
         allData,
         getDuration,
+        isEdit: isEdit,
     });
 
     return (
@@ -173,7 +176,9 @@ const Request = ({ data }) => {
                 subtitle="Click on the row to edit the request"
                 columns={columns}
                 data={allData}
-                onRowClick={handleSelect}
+                edit={isEdit}
+                toggleEdit={() => setIsEdit(!isEdit)}
+                onRowClick={(item) => isEdit ? handleCheckItem(item?.request_id) : handleSelect}
                 handleMoveToHistory={handleMoveToHistory}
                 isRequestList={true}
             />

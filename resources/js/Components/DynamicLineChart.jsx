@@ -61,12 +61,14 @@ const DynamicLineChart = () => {
 
     const filterByDateOrMonth = (data) => {
         return data.filter((item) => {
-            if (selectedDate) {
-                return item.date === selectedDate;
-            } else if (selectedMonth) {
-                return item.date.startsWith(selectedMonth); // semua tanggal di bulan itu
+            if (item?.date) {
+                if (selectedDate) {
+                    return item.date === selectedDate;
+                } else if (selectedMonth) {
+                    return item.date.startsWith(selectedMonth);
+                }
             }
-            return true; // kalau tidak pilih apa-apa, ambil semua
+            return true;
         });
     };
 
@@ -122,7 +124,7 @@ const DynamicLineChart = () => {
         setLoading(true);
         const dataUnit = await getUnitReports(unit_position_id);
         const parsed = dataUnit.data.map((item) =>
-            typeof item === "string" ? JSON.parse(item) : item
+            typeof item === "string" ? JSON.parse(item) : item,
         );
         setReportData(parsed);
         setLoading(false);
@@ -162,7 +164,7 @@ const DynamicLineChart = () => {
     const chartData = selectedMonth
         ? fillMissingDates(
               aggregatePerDay(filterByDateOrMonth(reportData), selectedField),
-              selectedMonth
+              selectedMonth,
           )
         : fillMissingHours(filterByDateOrMonth(reportData), selectedField);
 

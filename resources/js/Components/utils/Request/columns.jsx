@@ -9,6 +9,7 @@ const columns = ({
     selectedRows,
     handleCheckItem,
     getDuration,
+    isEdit
 }) => {
     const colItem = [
         {
@@ -200,25 +201,27 @@ const columns = ({
         {
             name: "checkbox",
             header: () => (
-                <div className="text-center">
-                    <input
+                <div className={`${!isEdit ? 'hidden' : ''}`} onClick={handleSelectAll}>
+                    {/* <input
                         type="checkbox"
                         checked={
                             selectedRows.length === allData.length &&
                             allData.length > 0
                         }
                         onChange={() => handleSelectAll()}
-                    />
+                    /> */}
+                    Select All
                 </div>
             ),
-            headerClassName: "bg-primary text-white text-center",
-            cellClassName: "text-center",
+            headerClassName: `bg-primary text-white text-center ${!isEdit ? 'hidden' : ''}`,
+            cellClassName: `text-center ${!isEdit ? 'hidden' : ''}`,
             sortable: false,
             width: "5%",
             Cell: (rowData) => {
                 const request_id = rowData.request_id;
+                console.log(request_id)
                 return (
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div onClick={(e) => e.stopPropagation()} className={`${!isEdit && 'hidden'}`}>
                         <input
                             type="checkbox"
                             checked={selectedRows.includes(

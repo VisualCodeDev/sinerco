@@ -94,8 +94,6 @@ const TableComponent = (props) => {
             : bValue.localeCompare(aValue, "id", { sensitivity: "base" });
     });
 
-    console.log(sortedData);
-
     const handleSort = (key) => {
         setSortConfig((prev) => {
             if (prev.key === key) {

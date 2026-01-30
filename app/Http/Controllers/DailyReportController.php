@@ -120,17 +120,14 @@ class DailyReportController extends Controller
         $fieldsToNormalize = $request->fields ?? [];
         $data = $request->data ?? [];
 
-        // 🔧 Normalisasi angka (ganti koma ke titik)
         foreach ($fieldsToNormalize as $field) {
             if (isset($data[$field])) {
                 $data[$field] = str_replace(',', '.', $data[$field]);
             }
         }
 
-        // Gabungkan hasil normalisasi ke request->data
         $request->merge(['data' => $data]);
 
-        // 🔍 Buat rules validasi dinamis
         $rules = [];
         foreach ($fieldsToNormalize as $field) {
             $rules["data.$field"] = in_array($field, ['date', 'time'])
@@ -139,7 +136,7 @@ class DailyReportController extends Controller
         }
 
         $validatedData = $request->validate($rules);
-        $validated = $validatedData['data']; // 🎯 langsung ambil bagian data
+        $validated = $validatedData['data'];
 
         // Hitung jam sebelumnya
         $validatedTime = $validated['time'];
@@ -189,7 +186,7 @@ class DailyReportController extends Controller
             // }
 
             // Log::info('DEBUG', $report->toArray());
-            // $report->save();
+            $report->save();
 
             // Log::info('Report tersimpan:', $report->toArray());
 

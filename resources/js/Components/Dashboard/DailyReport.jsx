@@ -35,6 +35,7 @@ const DailyReport = (props) => {
     );
     const prevDateList = getDateLists(currDate);
     
+    console.log(formData)
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -65,7 +66,7 @@ const DailyReport = (props) => {
         setData(formData);
         setCurrData(formData);
     }, [formData]);
-
+    console.log(currData)
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
