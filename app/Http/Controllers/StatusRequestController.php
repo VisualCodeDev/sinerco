@@ -43,12 +43,10 @@ class StatusRequestController extends Controller
         }
         $formatted = $start->format('H:i');
 
-        $unit = DailyReport::whereRelation('unitPosition', 'unit_id', $val['unit_id'])
-            ->where('date', $val['start_date'])
-            ->where('time', $formatted)
-            ->first();
-        Log::debug($formatted);
-        Log::debug($unit);
+        // $unit = DailyReport::whereRelation('unitPosition', 'unit_id', $val['unit_id'])
+        //     ->where('date', $val['start_date'])
+        //     ->where('time', $formatted)
+        //     ->first();
 
         $unitPosition = UnitPosition::with('unit')->find($val['unit_position_id']);
 
@@ -68,18 +66,18 @@ class StatusRequestController extends Controller
         // $status->location_id = $val['location_id'];
         $status->save();
         $unitPosition->unit->update(['status' => $val['request_type']]);
-        if ($unit) {
-            Log::debug($status);
-            $unit->update(['request_id' => $status->request_id]);
+        // if ($unit) {
+        //     Log::debug($status);
+        //     $unit->update(['request_id' => $status->request_id]);
 
-            $unit->load(['request', 'unitPosition.unit']);
-            if ($unit->request && $unit->unit_position && $unit->unit_position->unit) {
-                $unit->unit_position->unit->update([
-                    'status' => $unit->request->request_type
-                ]);
-            }
-            // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
-        }
+        //     $unit->load(['request', 'unitPosition.unit']);
+        //     if ($unit->request && $unit->unit_position && $unit->unit_position->unit) {
+        //         $unit->unit_position->unit->update([
+        //             'status' => $unit->request->request_type
+        //         ]);
+        //     }
+        //     // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+        // }
 
         try {
             $technicians = UserSetting::with(['user', 'unitArea'])
@@ -222,6 +220,7 @@ class StatusRequestController extends Controller
             'end_date' => 'nullable|string',
             'remarks' => 'nullable|string',
         ]);
+        $status = StatusRequest::with('unitPosition.unit')->where('request_id', $request->request_id)->first();
         // $status = StatusRequest::with('unit_position')->where('request_id', $request->request_id)->first();
 
         // if ($val['start_time'] || $val['start_date']) {
@@ -235,27 +234,43 @@ class StatusRequestController extends Controller
         //         $start->minute(0)->second(0);
         //     }
         //     $formatted = $start->format('H:i');
-        //     $unit = DailyReport::whereRelation('unit_position', 'unit_position_id', $val['unit_position_id'])->where('date', $start_date)->where('time', $formatted)->first();
-        //     if (!$unit) {
-        //         return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
+        //     $formatted = $start->format('H:i');
+
+        //     $unit = DailyReport::whereRelation('unitPosition', 'unit_id', $status->unit_id)
+        //         ->where('date', $val['start_date'])
+        //         ->where('time', $formatted)
+        //         ->first();
+
+        //     if ($unit) {
+        //         Log::debug($status);
+        //         $unit->update(['request_id' => $status->request_id]);
+
+        //         $unit->load(['request', 'unitPosition.unit']);
+        //         if ($unit->request && $unit->unit_position && $unit->unit_position->unit) {
+        //             $unit->unit_position->unit->update([
+        //                 'status' => $unit->request->request_type
+        //             ]);
+        //         }
+        //         // return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
         //     }
         // }
-
-        $status = StatusRequest::with('unitPosition.unit')->where('request_id', $request->request_id)->first();
 
         if (!$status) {
             return back()->with('status', 'Request not found.');
         }
+
         $currStatus = $status->status;
         // Update status and end time
         if ($currStatus === "End") {
             $status->status = "Ongoing";
         }
         ;
-        if ($currStatus === "Ongoing") {
+        if ($currStatus === "Ongoing" && ($val['end_time'] && $val['end_date'])) {
             $status->status = "End";
         }
         ;
+        $status->start_time = $request->start_time ?? $status->start_time;
+        $status->start_date = $request->start_date ?? $status->start_date;
         $status->end_time = $request->end_time ?? null;
         $status->end_date = $request->end_date ?? null;
         $status->remarks = $request->remarks ?? $status->remarks;

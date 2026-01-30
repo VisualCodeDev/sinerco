@@ -15,7 +15,6 @@ const UserList = () => {
     const [formData, setFormData] = useState({
         selectedRows: [],
     });
-    console.log(formData)
     const [selectedRole, setSelectedRole] = useState(null);
     const [roles, setRoles] = useState([]);
     const [users, setUsers] = useState([]);

@@ -59,8 +59,8 @@ const Request = ({ data }) => {
                                   ...item,
                                   seenStatus: !item.seenStatus,
                               }
-                            : item
-                    )
+                            : item,
+                    ),
                 );
             }
         } catch (e) {
@@ -73,7 +73,7 @@ const Request = ({ data }) => {
         setSelectedRows((prev) =>
             prev.includes(id)
                 ? prev.filter((item) => item !== id)
-                : [...prev, id]
+                : [...prev, id],
         );
     };
 
@@ -98,7 +98,7 @@ const Request = ({ data }) => {
                 .filter(
                     (item) =>
                         selectedRows.includes(item.request_id) &&
-                        item.status === "End"
+                        item.status === "End",
                 )
                 .map((item) => item.request_id);
 
@@ -116,7 +116,7 @@ const Request = ({ data }) => {
 
                 // Remove only valid (moved) items from the table
                 setAllData((prev) =>
-                    prev.filter((item) => !validIds.includes(item.request_id))
+                    prev.filter((item) => !validIds.includes(item.request_id)),
                 );
 
                 // Clear selected rows
@@ -209,40 +209,46 @@ const EditItem = ({
     });
     const { addToast } = useToast();
     const [type, setType] = useState("Edit");
+    const accessEdit =
+        user?.role === "super_admin" || user?.role === "technician";
 
-    useEffect(() => {
-        const updateData = async () => {
-            if (selectedItem) {
-                setType(
-                    selectedItem?.status === "End"
-                        ? "Set to Ongoing Request"
-                        : "End Request"
-                );
+    const updateData = async (isEdit) => {
+        if (selectedItem) {
+            setType(
+                selectedItem?.status === "End"
+                    ? "Set to Ongoing Request"
+                    : "End Request",
+            );
 
-                let { end_date, end_time, status } = selectedItem;
-                const currDateTime = await getCurrDateTime();
+            let { end_date, end_time, status } = selectedItem;
+            const currDateTime = await getCurrDateTime();
 
-                if (status !== "End") {
-                    if (!end_date && !end_time && currDateTime) {
-                        end_date = currDateTime.date;
-                        end_time = currDateTime.time;
-                    }
+            if (status !== "End") {
+                if (!end_date && !end_time && currDateTime) {
+                    end_date = currDateTime.date;
+                    end_time = currDateTime.time;
                 }
-                if (status === "End") {
-                    if (end_date && end_time) {
-                        end_date = "";
-                        end_time = "";
-                    }
+            }
+            if (status === "End") {
+                if (end_date && end_time) {
+                    end_date = "";
+                    end_time = "";
                 }
-
+            }
+            if (accessEdit && !isEdit)
+                setData({
+                    ...selectedItem,
+                });
+            else
                 setData({
                     ...selectedItem,
                     end_date,
                     end_time,
                 });
-            }
-        };
+        }
+    };
 
+    useEffect(() => {
         updateData();
     }, [selectedItem]);
 
@@ -276,12 +282,12 @@ const EditItem = ({
     };
 
     const handleSave = async () => {
-        if (
-            formData?.status != "End" &&
-            (!formData?.end_date || !formData?.end_time)
-        ) {
-            return alert("Please fill all the fields");
-        }
+        // if (
+        //     formData?.status != "End" &&
+        //     (!formData?.end_date || !formData?.end_time)
+        // ) {
+        //     return alert("Please fill all the fields");
+        // }
         try {
             setSaving(true);
 
@@ -291,6 +297,13 @@ const EditItem = ({
 
             if (resp.status === 200 || resp.status === 302) {
                 setModal(false);
+                const newData = allData.map((item) => {
+                    if (item.request_id === formData.request_id) {
+                        return { ...item, ...formData };
+                    }
+                    return item;
+                });
+                setAllData(newData);
             }
 
             addToast(resp.data);
@@ -298,18 +311,12 @@ const EditItem = ({
             console.error("Failed to update request:", error);
             addToast({
                 type: "error",
-                text: "Something went wrong while saving.",
+                text:
+                    error?.response?.data?.message ||
+                    "Something went wrong while saving.",
             });
-        } finally {
-            const newData = allData.map((item) => {
-                if (item.request_id === formData.request_id) {
-                    return { ...item, ...formData };
-                }
-                return item;
-            });
-            setAllData(newData);
-            setSaving(false);
         }
+        setSaving(false);
     };
 
     return (
@@ -327,7 +334,7 @@ const EditItem = ({
                                   (item) =>
                                       item?.name === "Request" ||
                                       item?.name === "Remarks" ||
-                                      item?.name === "End Date Time"
+                                      item?.name === "End Date Time",
                               )
                               .map((item, index) => {
                                   const itemInputType = item?.isInput
@@ -347,7 +354,7 @@ const EditItem = ({
                                                           {getFormattedDate(
                                                               formData[
                                                                   item?.value
-                                                              ]
+                                                              ],
                                                           )}
                                                       </div>
                                                   ) : (
@@ -369,7 +376,7 @@ const EditItem = ({
                                                   onChange={(e) =>
                                                       handleChange(
                                                           item?.value,
-                                                          e.target.value
+                                                          e.target.value,
                                                       )
                                                   }
                                               />
@@ -401,7 +408,7 @@ const EditItem = ({
                                                       onChange={(e) =>
                                                           handleChange(
                                                               item?.value,
-                                                              e.target.value
+                                                              e.target.value,
                                                           )
                                                       }
                                                   >
@@ -420,7 +427,7 @@ const EditItem = ({
                                                                           item?.name
                                                                       }
                                                                   </option>
-                                                              )
+                                                              ),
                                                           )}
                                                   </select>
                                               </div>
@@ -428,12 +435,15 @@ const EditItem = ({
                                       </>
                                   );
                               })
-                        : editRequestItems
+                        : (user?.role === "super_admin" ||
+                              user?.role === "technician") &&
+                          editRequestItems
                               .filter(
                                   (item) =>
+                                      item?.name === "Start Date Time" ||
                                       item?.name === "Request" ||
                                       item?.name === "Remarks" ||
-                                      item?.name === "End Date Time"
+                                      item?.name === "End Date Time",
                               )
                               .map((item, index) => {
                                   const itemInputType = item?.isInput
@@ -453,7 +463,7 @@ const EditItem = ({
                                                           {getFormattedDate(
                                                               formData[
                                                                   item?.value
-                                                              ]
+                                                              ],
                                                           )}
                                                       </div>
                                                   ) : (
@@ -479,7 +489,7 @@ const EditItem = ({
                                                   onChange={(e) =>
                                                       handleChange(
                                                           item?.value,
-                                                          e.target.value
+                                                          e.target.value,
                                                       )
                                                   }
                                               />
@@ -515,7 +525,7 @@ const EditItem = ({
                                                       onChange={(e) =>
                                                           handleChange(
                                                               item?.value,
-                                                              e.target.value
+                                                              e.target.value,
                                                           )
                                                       }
                                                   >
@@ -534,7 +544,7 @@ const EditItem = ({
                                                                           item?.name
                                                                       }
                                                                   </option>
-                                                              )
+                                                              ),
                                                           )}
                                                   </select>
                                               </div>
@@ -545,8 +555,21 @@ const EditItem = ({
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <div className="flex items-center justify-end">
-                    <button onClick={() => handleSave()}>{type}</button>
+                <div className="flex items-center justify-end gap-3">
+                    {selectedItem?.status != "End" && accessEdit && (
+                        <button
+                            className="bg-secondary hover:bg-secondary/90 transition duration-100 text-white px-3 py-2 rounded-lg"
+                            onClick={() => updateData(true)}
+                        >
+                            Set Current Date
+                        </button>
+                    )}
+                    <button
+                        className="bg-white text-primary hover:bg-white/80 transition duration-100 px-3 py-2 rounded-lg"
+                        onClick={() => handleSave()}
+                    >
+                        {accessEdit ? "Save" : type}
+                    </button>
                 </div>
             </Modal.Footer>
         </Modal>

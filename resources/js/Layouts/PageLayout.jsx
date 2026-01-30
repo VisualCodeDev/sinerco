@@ -89,23 +89,6 @@ const PageLayout = ({ children }) => {
                                     </>
                                 )}
                             </button>
-
-                            {/* Desktop button */}
-                            <button
-                                onClick={() => setShowModal(true)}
-                                className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
-                            >
-                                <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
-                                    SD
-                                </span>
-                                <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
-                                    STDBY
-                                </span>
-                            </button>
-                            <RequestModal
-                                handleCloseModal={() => setShowModal(false)}
-                                showModal={showModal}
-                            />
                         </div>
                     )}
                     {children}

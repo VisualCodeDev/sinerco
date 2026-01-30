@@ -21,11 +21,13 @@ import { IoDocumentText, IoMap } from "react-icons/io5";
 import { FaTextSlash } from "react-icons/fa6";
 import { BsFillBellFill, BsFillBellSlashFill } from "react-icons/bs";
 import { getSetting } from "../db";
+import { RequestModal } from "../RequestComponents/RequestModal";
 
 const Heading = ({ children, alert, setAlert }) => {
     const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [openIndex, setOpenIndex] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     const handleSubMenu = (index) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -42,9 +44,9 @@ const Heading = ({ children, alert, setAlert }) => {
     if (isLoading || loading) return <LoadingSpinner />;
     const menu = {
         ba: {
-            icon: <FaFile/>,
+            icon: <FaFile />,
             label: "Berita Acara",
-            href: route('ba.page'),
+            href: route("ba.page"),
         },
         home: {
             icon: <FaHome />,
@@ -251,20 +253,21 @@ const Heading = ({ children, alert, setAlert }) => {
                                     item.submenu.length > 0 &&
                                     openIndex === index && (
                                         <div className="pl-6 font-semibold">
-                                            {item.submenu.map((sub, subIndex) =>
-                                                sub?.condition === false ||
-                                                sub?.condition ===
-                                                    null ? null : (
-                                                    <a
-                                                        key={subIndex}
-                                                        href={sub.href}
-                                                        className="flex items-center justify-between w-full mb-1 gap-3 px-3 py-1 hover:bg-gray-50 cursor-pointer transition"
-                                                    >
-                                                        <span className="text-sm text-gray-600">
-                                                            {sub.label}
-                                                        </span>
-                                                    </a>
-                                                )
+                                            {item.submenu.map(
+                                                (sub, subIndex) =>
+                                                    sub?.condition === false ||
+                                                    sub?.condition ===
+                                                        null ? null : (
+                                                        <a
+                                                            key={subIndex}
+                                                            href={sub.href}
+                                                            className="flex items-center justify-between w-full mb-1 gap-3 px-3 py-1 hover:bg-gray-50 cursor-pointer transition"
+                                                        >
+                                                            <span className="text-sm text-gray-600">
+                                                                {sub.label}
+                                                            </span>
+                                                        </a>
+                                                    ),
                                             )}
                                         </div>
                                     )}
@@ -352,7 +355,7 @@ const Heading = ({ children, alert, setAlert }) => {
                                                                     {sub.label}
                                                                 </span>
                                                             </a>
-                                                        )
+                                                        ),
                                                 )}
                                             </div>
                                         )}
@@ -366,26 +369,44 @@ const Heading = ({ children, alert, setAlert }) => {
             {/* Main Area */}
             <div className="flex-1 flex flex-col w-full relative lg:ps-10 h-screen">
                 {/* Top Header */}
-                <div className="bg-white flex items-center px-6 pe-12 py-4 shadow sticky top-0 z-10 h-[10%] gap-3">
-                    <div className="h-8">
-                        <img
-                            src="/logo_horizontal.webp"
-                            loading="lazy"
-                            alt="Logo Sinerco"
-                            className="h-full object-contain"
-                        />
+                <div className="bg-white flex justify-between px-6 pe-12 py-4 shadow sticky top-0 z-10 h-[10%] gap-3">
+                    <div className="flex items-center">
+                        <div className="h-8">
+                            <img
+                                src="/logo_horizontal.webp"
+                                loading="lazy"
+                                alt="Logo Sinerco"
+                                className="h-full object-contain"
+                            />
+                        </div>
+                        <p
+                            className="text-gray-700 text-xl font-medium cursor-pointer"
+                            onClick={() => handleAlert()}
+                        >
+                            {user?.role === "super_admin" &&
+                                (alert ? (
+                                    <BsFillBellFill />
+                                ) : (
+                                    <BsFillBellSlashFill />
+                                ))}
+                        </p>
                     </div>
-                    <p
-                        className="text-gray-700 text-xl font-medium cursor-pointer"
-                        onClick={() => handleAlert()}
+                    {/* Desktop button */}
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
                     >
-                        {user?.role === "super_admin" &&
-                            (alert ? (
-                                <BsFillBellFill />
-                            ) : (
-                                <BsFillBellSlashFill />
-                            ))}
-                    </p>
+                        <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
+                            SD
+                        </span>
+                        <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
+                            STDBY
+                        </span>
+                    </button>
+                    <RequestModal
+                        handleCloseModal={() => setShowModal(false)}
+                        showModal={showModal}
+                    />
                 </div>
 
                 {/* Page Content */}

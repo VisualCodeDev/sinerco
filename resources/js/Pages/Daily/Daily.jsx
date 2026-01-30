@@ -43,14 +43,14 @@ export default function Dashboard({ unit_position_id }) {
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
-            : "unit_information"
+            : "report"
     );
 
     useEffect(() => {
         setActiveTab(
             user?.role === "technician" || user?.role === "operator"
                 ? "form"
-                : "unit_information"
+                : "report"
         );
     }, [user]);
 
@@ -298,7 +298,7 @@ export default function Dashboard({ unit_position_id }) {
                 !unitData ||
                 !clientName ||
                 loading) && <LoadingSpinner />}
-            <div className="flex">
+            <div className="flex relative z-0">
                 <div className="w-full h-full flex flex-col">
                     {/* TABS DASHBOARD */}
                     <div className="flex overflow-x-auto">

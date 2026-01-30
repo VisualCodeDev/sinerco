@@ -49,24 +49,27 @@ const UnitTable = (props) => {
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
-                    ] === item?.unit_id
-            )?.thresholdSetting || null
+                    ] === item?.unit_id,
+            )?.thresholdSetting || null,
         );
         setVisibilitySetting(
             data.find(
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
-                    ] === item?.unit_id
-            )?.visibilitySetting || null
+                    ] === item?.unit_id,
+            )?.visibilitySetting || null,
         );
     }, [formData?.selectedRows]);
+
     const handleClick = (item, e) => {
         if (!item.unit_position_id || edit) return;
         const url = route("daily", item.unit_position_id);
 
         if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
             window.open(url, "_blank");
+            window.focus();
+            // window.open(url, "_blank");
         } else {
             router.visit(url);
         }
@@ -88,7 +91,7 @@ const UnitTable = (props) => {
                 selectedRows: data.map((item) => item.unit_id),
                 selectedUnits: data.map((item) => item.unit),
                 selectedUnitPositions: data.map(
-                    (item) => item.unit_position_id
+                    (item) => item.unit_position_id,
                 ),
             }));
         }
@@ -116,16 +119,16 @@ const UnitTable = (props) => {
             setFormData((prev) => ({
                 ...prev,
                 selectedRows: currSelected.filter(
-                    (item) => item !== String(selected.unit_id)
+                    (item) => item !== String(selected.unit_id),
                 ),
                 selectedUnits: currSelectedUnits.filter(
-                    (item) => item !== String(selected.unit)
+                    (item) => item !== String(selected.unit),
                 ),
                 selectedUnitPositions: currSelectedUnitPositions.filter(
-                    (item) => item !== selected.unit_position_id
+                    (item) => item !== selected.unit_position_id,
                 ),
             }));
-            return
+            return;
         }
         // Select
         setFormData({
@@ -155,6 +158,7 @@ const UnitTable = (props) => {
                 data={data}
                 columns={columns}
                 title={"List of Unit"}
+                route={route("daily", item.unit_position_id)}
                 // onRowClick={handleClick}
                 onRowClick={edit ? onSelect : handleClick}
                 addNewItem={true}
@@ -173,6 +177,7 @@ const UnitTable = (props) => {
                 data={data}
                 columns={columns}
                 title={"List of Unit"}
+                route={(item) => route("daily", item.unit_position_id)}
                 // onRowClick={handleClick}
                 onRowClick={edit ? onSelect : handleClick}
                 addNewItem={user && user.role === "super_admin" ? true : false}
@@ -218,7 +223,7 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
                 name: formData?.name || "name",
                 department: formData?.department || "department",
             }),
-            "_blank"
+            "_blank",
         );
     };
 
@@ -281,7 +286,7 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
                                 onChange={(e) =>
                                     handleChange(
                                         "clientDepartment",
-                                        e.target.value
+                                        e.target.value,
                                     )
                                 }
                                 value={formData?.clientDepartment}
@@ -390,7 +395,7 @@ const SettingModal = ({
                 const updatedData = data.map((item) =>
                     selectedUnits.includes(item.unit_id)
                         ? { ...item, ...formData }
-                        : item
+                        : item,
                 );
                 console.log(updatedData);
                 setData(updatedData);
@@ -447,7 +452,7 @@ const SettingModal = ({
                                 .filter(
                                     (item) =>
                                         item.name !== "time" &&
-                                        item.name !== "remarks"
+                                        item.name !== "remarks",
                                 )
                                 .flatMap((item) => {
                                     const fields =
@@ -506,7 +511,7 @@ const SettingModal = ({
                                                                         value: e
                                                                             .target
                                                                             .value,
-                                                                    }
+                                                                    },
                                                                 )
                                                             }
                                                             value={
@@ -538,7 +543,7 @@ const SettingModal = ({
                                                                         type: e
                                                                             .target
                                                                             .value,
-                                                                    }
+                                                                    },
                                                                 )
                                                             }
                                                         >
@@ -583,7 +588,7 @@ const SettingModal = ({
                                                                             ?.visibilitySetting?.[
                                                                             field
                                                                                 .slug
-                                                                        ]
+                                                                        ],
                                                                     )
                                                                 }
                                                                 className="text-red-50 bg-success font-bold px-2 py-1 rounded-lg"
@@ -600,7 +605,7 @@ const SettingModal = ({
                                                                             ?.visibilitySetting?.[
                                                                             field
                                                                                 .slug
-                                                                        ]
+                                                                        ],
                                                                     )
                                                                 }
                                                                 className="text-red-50 bg-danger font-bold px-2 py-1 rounded-lg"

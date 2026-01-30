@@ -148,10 +148,10 @@ class DailyReportController extends Controller
             ->format('H:i');
 
         // Cek status request
-        $statusRequest = StatusRequest::where('unit_position_id', $unit_position_id)
-            ->where('start_date', $validated['date'])
-            ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
-            ->first();
+        // $statusRequest = StatusRequest::where('unit_position_id', $unit_position_id)
+        //     ->where('start_date', $validated['date'])
+        //     ->whereBetween('start_time', [$oneHourBefore, $validatedTime])
+        //     ->first();
 
         // Cek warning dari input
         $warnings = collect($request->input('warn', []))->filter();
@@ -184,14 +184,14 @@ class DailyReportController extends Controller
             $report->date = $validated['date'];
             $report->time = $validated['time'];
             $report->data = json_encode($validated);
-            if ($statusRequest) {
-                $report->request_id = $statusRequest->request_id;
-            }
+            // if ($statusRequest) {
+            //     $report->request_id = $statusRequest->request_id;
+            // }
 
-            Log::info('DEBUG', $report->toArray());
-            $report->save();
+            // Log::info('DEBUG', $report->toArray());
+            // $report->save();
 
-            Log::info('Report tersimpan:', $report->toArray());
+            // Log::info('Report tersimpan:', $report->toArray());
 
             return response()->json(['type' => 'success', 'text' => 'Report berhasil disimpan.']);
         } catch (\Throwable $e) {

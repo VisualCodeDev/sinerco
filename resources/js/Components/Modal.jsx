@@ -5,23 +5,31 @@ const Modal = (props) => {
     const { size, title, handleCloseModal, showModal } = props;
 
     let selectedSize =
-    size === "responsive"
-        ? "w-[80%] md:w-1/3"
-        : size === "xl"
-        ? "w-2/3"
-        : size === "sm"
-        ? "w-[80%]"
-        : size === "md"
-        ? "w-1/3"
-        : "w-1/2";
+        size === "responsive"
+            ? "w-[80%] md:w-1/3"
+            : size === "xl"
+              ? "w-2/3"
+              : size === "sm"
+                ? "w-[80%]"
+                : size === "md"
+                  ? "w-1/3"
+                  : "w-1/2";
 
     return (
         <>
             {showModal && (
                 <>
-                    <div className="fixed inset-0 bg-black/50 z-[150] pointer-events-auto"></div>
+                    <div
+                        className="fixed inset-0 bg-black/50 pointer-events-auto"
+                        style={{
+                            zIndex: 2000,
+                        }}
+                    ></div>
                     <div
                         className={`fixed rounded-xl border shadow-sm top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${selectedSize} max-h-[80vh] flex flex-col z-[160] rounded-md overflow-hidden`}
+                        style={{
+                            zIndex: 2001,
+                        }}
                     >
                         <div className="bg-primary text-white w-full px-5 p-2.5 md:p-5 sticky top-0 left-0 flex justify-between">
                             <div className="w-full">

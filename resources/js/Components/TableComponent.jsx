@@ -18,6 +18,7 @@ import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
+        route = "",
         toggleEdit,
         edit = true,
         isBA = false,
@@ -47,39 +48,53 @@ const TableComponent = (props) => {
         isResponsive = false,
     } = props;
     const [sortConfig, setSortConfig] = useState({
-        key: null,
+        key:
+            (columns[0]?.name == "id" ? columns[1]?.name : columns[0].name) ||
+            null,
         direction: "asc",
     });
+
     const [filterConfig, setFilterConfig] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     const sortedData = data?.sort((a, b) => {
         if (!sortConfig.key) return 0;
+
+        const normalizeString = (value = "") =>
+            value
+                .toString()
+                .normalize("NFKD")
+                .replace(/[\u200B-\u200D\uFEFF]/g, "")
+                .trim()
+                .toLowerCase();
+
         const getNestedValue = (obj, key) => {
-            if (key === "user") return obj.user?.user?.toLowerCase() || "";
-            if (key === "role") return obj.user?.role?.toLowerCase() || "";
-            if (key === "unit") return obj.unit?.unit?.toLowerCase() || "";
-            if (key === "user_id") return obj.unit?.unit?.toLowerCase() || "";
+            if (key === "user") return normalizeString(obj.user?.user);
+            if (key === "role") return normalizeString(obj.user?.role);
+            if (key === "unit") return normalizeString(obj.unit?.unit);
+            if (key === "user_id") return normalizeString(obj.unit?.unit);
             if (key === "status")
-                return getRequestStatus(obj.unit?.status).toLowerCase() || "";
-            if (key === "location") return obj?.location?.location || "";
+                return normalizeString(getRequestStatus(obj.unit?.status));
+            if (key === "location")
+                return normalizeString(obj?.location?.location);
             if (key === "client")
-                return obj?.client?.name || obj?.client || obj?.name || "";
-            return (obj[key] || "").toString().toLowerCase();
+                return normalizeString(
+                    obj?.client?.name || obj?.client || obj?.name,
+                );
+
+            return normalizeString(obj[key]);
         };
 
         const aValue = getNestedValue(a, sortConfig.key);
         const bValue = getNestedValue(b, sortConfig.key);
 
-        if (aValue < bValue) {
-            return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-            return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
+        return sortConfig.direction === "asc"
+            ? aValue.localeCompare(bValue, "id", { sensitivity: "base" })
+            : bValue.localeCompare(aValue, "id", { sensitivity: "base" });
     });
+
+    console.log(sortedData);
 
     const handleSort = (key) => {
         setSortConfig((prev) => {
@@ -140,6 +155,10 @@ const TableComponent = (props) => {
     return (
         <>
             <div
+                style={{
+                    zIndex: 0,
+                    position: "relative",
+                }}
                 className={`${
                     isResponsive && "md:block hidden"
                 } bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto`}
@@ -289,39 +308,78 @@ const TableComponent = (props) => {
                         </thead>
                         <tbody>
                             {filteredData.length > 0 ? (
-                                filteredData?.map((item, rowIndex) => (
-                                    <tr
-                                        key={rowIndex}
-                                        className={
-                                            "border-" + onRowClick &&
-                                            `transition duration-100 hover:bg-gray-100 cursor-pointer`
-                                        }
-                                        onMouseDown={(e) =>
-                                            onRowClick
-                                                ? onRowClick(item, e)
-                                                : null
-                                        }
-                                    >
-                                        {columns.map((col, colIndex) => (
-                                            <td
-                                                key={colIndex}
-                                                className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
-                                                    col.cellClassName || ""
-                                                }`}
-                                                style={{
-                                                    width: col?.width || "auto",
-                                                }}
-                                            >
-                                                {typeof col.Cell === "function"
-                                                    ? col.Cell({
-                                                          ...item,
-                                                          index: rowIndex,
-                                                      })
-                                                    : col.Cell}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))
+                                filteredData?.map((item, rowIndex) =>
+                                    route ? (
+                                        <tr
+                                            className={
+                                                "border-" + onRowClick &&
+                                                `transition duration-100 hover:bg-gray-100 cursor-pointer`
+                                            }
+                                            onMouseDown={(e) =>
+                                                onRowClick
+                                                    ? onRowClick(item, e)
+                                                    : null
+                                            }
+                                        >
+                                            {columns.map((col, colIndex) => (
+                                                <td
+                                                    key={colIndex}
+                                                    className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
+                                                        col.cellClassName || ""
+                                                    }`}
+                                                    style={{
+                                                        width:
+                                                            col?.width ||
+                                                            "auto",
+                                                    }}
+                                                >
+                                                    {typeof col.Cell ===
+                                                    "function"
+                                                        ? col.Cell({
+                                                              ...item,
+                                                              index: rowIndex,
+                                                          })
+                                                        : col.Cell}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ) : (
+                                        <tr
+                                            key={rowIndex}
+                                            className={
+                                                "border-" + onRowClick &&
+                                                `transition duration-100 hover:bg-gray-100 cursor-pointer`
+                                            }
+                                            onMouseDown={(e) =>
+                                                onRowClick
+                                                    ? onRowClick(item, e)
+                                                    : null
+                                            }
+                                        >
+                                            {columns.map((col, colIndex) => (
+                                                <td
+                                                    key={colIndex}
+                                                    className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
+                                                        col.cellClassName || ""
+                                                    }`}
+                                                    style={{
+                                                        width:
+                                                            col?.width ||
+                                                            "auto",
+                                                    }}
+                                                >
+                                                    {typeof col.Cell ===
+                                                    "function"
+                                                        ? col.Cell({
+                                                              ...item,
+                                                              index: rowIndex,
+                                                          })
+                                                        : col.Cell}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ),
+                                )
                             ) : (
                                 <tr>
                                     <td
