@@ -178,7 +178,7 @@ const Request = ({ data }) => {
                 data={allData}
                 edit={isEdit}
                 toggleEdit={() => setIsEdit(!isEdit)}
-                onRowClick={(item) => isEdit ? handleCheckItem(item?.request_id) : handleSelect}
+                onRowClick={(item) => isEdit ? handleCheckItem(item?.request_id) : handleSelect(item)}
                 handleMoveToHistory={handleMoveToHistory}
                 isRequestList={true}
             />
