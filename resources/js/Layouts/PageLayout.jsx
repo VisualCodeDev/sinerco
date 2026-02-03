@@ -55,6 +55,10 @@ const PageLayout = ({ children }) => {
 
     return (
         <Heading alert={alert} setAlert={setAlert}>
+            <RequestModal
+                showModal={showModal}
+                handleCloseModal={() => setShowModal(false)}
+            />
             <AuthGuard>
                 <div className="relative h-full">
                     <NotificationContainer messages={messages} alert={alert} />
