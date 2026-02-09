@@ -14,21 +14,13 @@ class DataUnit extends Model
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($model) {
-            $fields = DailyField::all();
             if (empty($model->unit_id)) {
                 // Ambil last unit_id
                 $lastId = DataUnit::orderBy('unit_id', 'desc')->first()?->unit_id;
                 $number = $lastId ? (int) substr($lastId, 3) + 1 : 1;
                 $model->unit_id = 'UNT' . str_pad($number, 3, '0', STR_PAD_LEFT);
-            }
-            foreach ($fields as $field) {
-                DB::table('unit_fields')->insert([
-                    'unit_id' => $model->unit_id,
-                    'field_id' => $field->id,
-                    'column' => $field->id + 1 ?? null,
-                    'required' => true,
-                ]);
             }
             if (empty($model->thresholdSetting)) {
                 $model->thresholdSetting = [
@@ -69,6 +61,19 @@ class DataUnit extends Model
                     "aft_cooler" => true,
                     "bef_cooler" => true,
                 ];
+            }
+        });
+
+        static::created(function ($model) {
+            $fields = DailyField::all();
+
+            foreach ($fields as $field) {
+                DB::table('unit_fields')->insert([
+                    'unit_id' => $model->unit_id,
+                    'field_id' => $field->id,
+                    'column' => $field->id + 1,
+                    'required' => true,
+                ]);
             }
         });
     }
