@@ -21,6 +21,46 @@ class DataUnit extends Model
                 $number = $lastId ? (int) substr($lastId, 3) + 1 : 1;
                 $model->unit_id = 'UNT' . str_pad($number, 3, '0', STR_PAD_LEFT);
             }
+            if (empty($model->thresholdSetting)) {
+                $model->thresholdSetting = [
+                    "source_press" => ["value" => 100, "type" => 'percentage'],
+                    "suction_press" => ["value" => 100, "type" => 'percentage'],
+                    "discharge_press" => ["value" => 100, "type" => 'percentage'],
+                    "speed" => ["value" => 100, "type" => 'percentage'],
+                    "manifold_press" => ["value" => 100, "type" => 'percentage'],
+                    "oil_press" => ["value" => 100, "type" => 'percentage'],
+                    "oil_diff" => ["value" => 100, "type" => 'percentage'],
+                    "running_hours" => ["value" => 100, "type" => 'percentage'],
+                    "voltage" => ["value" => 100, "type" => 'percentage'],
+                    "water_temp" => ["value" => 100, "type" => 'percentage'],
+                    "static_press" => ["value" => 100, "type" => 'percentage'],
+                    "diff_press" => ["value" => 100, "type" => 'percentage'],
+                    "flowrate" => ["value" => 100, "type" => 'percentage'],
+                    "aft_cooler" => ["value" => 100, "type" => 'percentage'],
+                    "bef_cooler" => ["value" => 100, "type" => 'percentage'],
+                ];
+            }
+
+            // default visibility
+            if (empty($model->visibilitySetting)) {
+                $model->visibilitySetting = [
+                    "source_press" => true,
+                    "suction_press" => true,
+                    "discharge_press" => true,
+                    "speed" => true,
+                    "manifold_press" => true,
+                    "oil_press" => true,
+                    "oil_diff" => true,
+                    "running_hours" => true,
+                    "voltage" => true,
+                    "water_temp" => true,
+                    "static_press" => true,
+                    "diff_press" => true,
+                    "flowrate" => true,
+                    "aft_cooler" => true,
+                    "bef_cooler" => true,
+                ];
+            }
         });
     }
 

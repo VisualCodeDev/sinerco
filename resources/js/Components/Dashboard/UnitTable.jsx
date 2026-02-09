@@ -39,8 +39,13 @@ const UnitTable = (props) => {
     const [isExportModal, setExportModal] = useState(false);
     const [edit, setEdit] = useState(false);
     const { addToast } = useToast();
+    
     useEffect(() => {
-        setFormData({ ...formData, data: unitData });
+        const formattedUnitData = data.map((item) => ({
+            ...item,
+            url: route("daily", item.unit_position_id),
+        }));
+        setFormData({ ...formData, data: formattedUnitData });
     }, [unitData]);
 
     useEffect(() => {
@@ -62,17 +67,17 @@ const UnitTable = (props) => {
         );
     }, [formData?.selectedRows]);
 
-    const handleClick = (item, e) => {
+    const handleClick = (item) => {
         if (!item.unit_position_id || edit) return;
         const url = route("daily", item.unit_position_id);
 
-        if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
-            window.open(url, "_blank");
-            window.focus();
-            // window.open(url, "_blank");
-        } else {
+        // if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
+        //     window.open(url, "_blank");
+        //     window.focus();
+        //     // window.open(url, "_blank");
+        // } else {
             router.visit(url);
-        }
+        // }
     };
 
     const handleSelectAll = () => {
@@ -155,10 +160,9 @@ const UnitTable = (props) => {
                 handleSubmit={handleSubmit}
                 isUnitList={true}
                 filterStatus={true}
-                data={data}
+                data={formData?.data}
                 columns={columns}
                 title={"List of Unit"}
-                route={route("daily", item.unit_position_id)}
                 // onRowClick={handleClick}
                 onRowClick={edit ? onSelect : handleClick}
                 addNewItem={true}
@@ -174,7 +178,7 @@ const UnitTable = (props) => {
                 height={"55vh"}
                 isUnitList={true}
                 filterStatus={true}
-                data={data}
+                data={formData?.data}
                 columns={columns}
                 title={"List of Unit"}
                 route={(item) => route("daily", item.unit_position_id)}

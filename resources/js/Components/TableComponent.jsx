@@ -307,37 +307,43 @@ const TableComponent = (props) => {
                         <tbody>
                             {filteredData.length > 0 ? (
                                 filteredData?.map((item, rowIndex) =>
-                                    route ? (
+                                    item?.url ? (
                                         <tr
                                             className={
                                                 "border-" + onRowClick &&
                                                 `transition duration-100 hover:bg-gray-100 cursor-pointer`
                                             }
-                                            onMouseDown={(e) =>
-                                                onRowClick
-                                                    ? onRowClick(item, e)
-                                                    : null
-                                            }
+                                            onClick={() => onRowClick(item)}
+                                            // onMouseDown={(e) =>
+                                            //     onRowClick
+                                            //         ? onRowClick(item, e)
+                                            //         : null
+                                            // }
                                         >
                                             {columns.map((col, colIndex) => (
                                                 <td
                                                     key={colIndex}
-                                                    className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
-                                                        col.cellClassName || ""
-                                                    }`}
                                                     style={{
                                                         width:
                                                             col?.width ||
                                                             "auto",
                                                     }}
                                                 >
-                                                    {typeof col.Cell ===
-                                                    "function"
-                                                        ? col.Cell({
-                                                              ...item,
-                                                              index: rowIndex,
-                                                          })
-                                                        : col.Cell}
+                                                    <a
+                                                        href={item?.url}
+                                                        className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
+                                                            col.cellClassName ||
+                                                            ""
+                                                        }`}
+                                                    >
+                                                        {typeof col.Cell ===
+                                                        "function"
+                                                            ? col.Cell({
+                                                                  ...item,
+                                                                  index: rowIndex,
+                                                              })
+                                                            : col.Cell}
+                                                    </a>
                                                 </td>
                                             ))}
                                         </tr>

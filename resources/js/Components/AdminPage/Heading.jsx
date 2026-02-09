@@ -383,12 +383,13 @@ const Heading = ({ children, alert, setAlert }) => {
                             className="text-gray-700 text-xl font-medium cursor-pointer"
                             onClick={() => handleAlert()}
                         >
-                            {user?.role === "super_admin" &&
-                                (alert ? (
-                                    <BsFillBellFill />
-                                ) : (
-                                    <BsFillBellSlashFill />
-                                ))}
+                            {/* {user?.role === "super_admin" && */}
+                            {(alert ? (
+                            <BsFillBellFill />
+                            ) : (
+                            <BsFillBellSlashFill />
+                            ))}
+                            {/* } */}
                         </p>
                     </div>
                     {/* Desktop button */}
