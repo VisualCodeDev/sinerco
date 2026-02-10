@@ -75,9 +75,6 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
             Object.keys(payload).forEach((k) => {
                 if (payload[k] === "" || payload[k] === null) delete payload[k];
             });
-
-            console.log(payload);
-
             const resp = await axios.post(route("unit.add"), payload);
             if (resp?.data) {
                 setForm({
