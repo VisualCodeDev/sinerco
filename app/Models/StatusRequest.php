@@ -43,10 +43,9 @@ class StatusRequest extends Model
 
             if ($exists) {
                 throw new \Exception('A request already exists for this time.');
-                // atau ValidationException biar cakep
             }
 
-            // baru generate request_id
+            // generate request_id
             $status->request_id = (string) Str::uuid();
         });
 

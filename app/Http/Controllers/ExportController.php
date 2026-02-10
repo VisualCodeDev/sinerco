@@ -25,12 +25,10 @@ class ExportController extends Controller
             $reqStart = Carbon::parse($req->start_date . ' ' . $req->start_time);
             $reqEnd = Carbon::parse($req->end_date . ' ' . $req->end_time);
 
-            // ❌ skip kalau tidak overlap dengan tanggal ini
             if ($reqEnd <= $dayStart || $reqStart >= $dayEnd) {
                 continue;
             }
 
-            // ✂️ potong sesuai range tanggal
             $start = $reqStart->max($dayStart);
             $end = $reqEnd->min($dayEnd);
 
@@ -183,7 +181,7 @@ class ExportController extends Controller
         $template->setValue('curr_date', str($rangeDate['startLabel']));
         $template->setValue('range_date', str($rangeDate['label']));
 
-        // 3. Data list dinamis (Gunakan $events, bukan data dummy)
+        // 3. Data list dinamis
         $list = $listData; // Gunakan data yang dilewatkan
 
         // 4. Clone row tabel
@@ -198,7 +196,7 @@ class ExportController extends Controller
             $template->setValue("engine_sn#1", '');
         }
         foreach ($list as $index => $row) {
-            $i = $index + 1; // 1-based
+            $i = $index + 1;
             $template->setValue("no#$i", $i);
             $template->setValue("unit_sn#$i", $row['unit_sn']);
             $template->setValue("location#$i", $row['location']);
@@ -208,21 +206,17 @@ class ExportController extends Controller
         }
 
 
-        // Nama file perlu lebih unik per unit/request_type
         $safeUnitName = str_replace(' ', '_', $client);
         $filename = "{$safeUnitName}_BAPM_" . date('Ymd_His') . '.docx';
 
-        // Simpan ke direktori yang mudah diakses dan dihapus
         $path = storage_path("app/temp/$filename");
 
-        // Pastikan direktori 'temp' ada
         if (!is_dir(storage_path('app/temp'))) {
             mkdir(storage_path('app/temp'), 0777, true);
         }
 
         $template->saveAs($path);
 
-        // Kembalikan path file yang baru dibuat
         return $path;
     }
 
@@ -242,8 +236,8 @@ class ExportController extends Controller
         $template->setValue('client_name', strtoupper($client_name));
         $template->setValue('client_department', strtoupper($client_department));
 
-        // 3. Data list dinamis (Gunakan $events, bukan data dummy)
-        $list = $events; // Gunakan data yang dilewatkan
+        // 3. Data list dinamis
+        $list = $events; 
 
         // 4. Clone row tabel
         if (count($list) > 0) {
@@ -259,7 +253,7 @@ class ExportController extends Controller
 
 
         foreach ($list as $index => $row) {
-            $i = $index + 1; // 1-based
+            $i = $index + 1;
             $template->setValue("no#$i", $i);
             $template->setValue("start#$i", $row['start_bapm']);
             $template->setValue("end#$i", $row['end_bapm']);
@@ -268,11 +262,9 @@ class ExportController extends Controller
         }
 
 
-        // Nama file perlu lebih unik per unit/request_type
         $safeUnitName = str_replace(' ', '_', $unit);
         $filename = "{$safeUnitName}_BAPM_" . date('Ymd_His') . '.docx';
 
-        // Simpan ke direktori yang mudah diakses dan dihapus
         $path = storage_path("app/temp/$filename");
 
         // Pastikan direktori 'temp' ada
@@ -282,7 +274,6 @@ class ExportController extends Controller
 
         $template->saveAs($path);
 
-        // Kembalikan path file yang baru dibuat
         return $path;
     }
 
@@ -309,9 +300,6 @@ class ExportController extends Controller
         if (count($list) > 0) {
             $template->cloneRow('no', count($list));
         } else {
-            // Handle jika list kosong agar TemplateProcessor tidak error
-            // (tergantung template Anda)
-            // Di sini diasumsikan ada 1 baris placeholder minimal
             $template->cloneRow('no', 1);
             $template->setValue("no#1", '');
             $template->setValue("start_time#1", '');
@@ -322,10 +310,8 @@ class ExportController extends Controller
 
 
         foreach ($list as $index => $row) {
-            $i = $index + 1; // 1-based
+            $i = $index + 1;
             $template->setValue("no#$i", $i);
-            // Sesuaikan nama field jika Anda menggunakan $events dari exportDoc
-            // (Di sini fieldnya 'start', 'end', 'duration', 'remarks')
             $template->setValue("start_time#$i", $row['start']);
             $template->setValue("end_time#$i", $row['end']);
             $template->setValue("duration#$i", $row['duration']);
@@ -333,12 +319,10 @@ class ExportController extends Controller
         }
 
 
-        // Nama file perlu lebih unik per unit/request_type
         $safeUnitName = str_replace(' ', '_', $unit);
         $safeRequestType = str_replace(' ', '_', strtolower($request_type));
         $filename = "{$safeUnitName}_{$safeRequestType}_" . date('Ymd_His') . '.docx';
 
-        // Simpan ke direktori yang mudah diakses dan dihapus
         $path = storage_path("app/temp/$filename");
 
         // Pastikan direktori 'temp' ada
@@ -348,7 +332,6 @@ class ExportController extends Controller
 
         $template->saveAs($path);
 
-        // Kembalikan path file yang baru dibuat
         return $path;
     }
 
@@ -366,8 +349,6 @@ class ExportController extends Controller
         $unitPosIds = $validated['unit_pos_id'];
 
         $units = UnitPosition::whereIn('id', $unitPosIds)->with(['requests', 'unit', 'location.area', 'client', 'baSettings', 'reports'])->get();
-
-        // Persiapan ZIP
 
         $zipFileName = 'Laporan_' . date('Ymd_His') . '.zip';
         $zipPath = storage_path("app/public/$zipFileName");
