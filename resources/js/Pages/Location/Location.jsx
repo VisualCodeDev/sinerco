@@ -23,7 +23,6 @@ const Location = ({ data }) => {
         setLocations(filteredLocation);
     }, [data, selectedAreas]);
 
-    console.log;
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">

@@ -38,7 +38,6 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
 
     useEffect(() => {
         if (unselectedUnitArea?.length > 0) {
-            console.log('masuk')
             const unselectedItem = unitAreaData.filter((item) =>
                 permittedUnitArea?.every(
                     (permittedItem) =>
@@ -46,7 +45,6 @@ const UserAllocationSetting = ({ data, unitAreaData, roleData }) => {
                         permittedItem?.unit_position_id
                 )
             );
-            console.log(permittedUnitArea)
             // Filter out items that are already in permittedUnitArea
             setUnselectedUnitArea(unselectedItem);
         }

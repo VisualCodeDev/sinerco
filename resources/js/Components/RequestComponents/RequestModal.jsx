@@ -46,7 +46,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             setErrors({});
         } catch (error) {
             addToast({ type: "error", text: error?.response?.data?.message || "Failed to make request" });
-            console.log(error);
+            console.error(error);
         } finally {
             handleCloseModal();
             setData({});

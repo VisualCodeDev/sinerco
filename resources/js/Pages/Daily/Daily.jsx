@@ -203,7 +203,6 @@ export default function Dashboard({ unit_position_id }) {
     };
 
     useEffect(() => {
-        console.log("MASUIK")
         fetchData();
     }, []);
 
@@ -288,8 +287,6 @@ export default function Dashboard({ unit_position_id }) {
         getFields();
         setIsUnitRunning(status);
     }, [unitData]);
-
-    console.log(unitData);
 
     return (
         <PageLayout>

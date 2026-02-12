@@ -139,7 +139,7 @@ const UserList = () => {
             }
             if (resp) addToast(resp?.data);
         } catch (e) {
-            console.log(e);
+            console.error(e);
             addToast({ type: "error", text: e.response.data.message });
         }
     };
@@ -153,7 +153,7 @@ const UserList = () => {
             setDeleteConfirmationModal(false);
             window.location.reload();
         } catch (e) {
-            console.log(e);
+            console.error(e);
             addToast({ type: "error", text: e.response.data.message });
         }
     };

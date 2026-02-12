@@ -219,7 +219,6 @@ const columns = ({
             width: "5%",
             Cell: (rowData) => {
                 const request_id = rowData.request_id;
-                console.log(request_id)
                 return (
                     <div onClick={(e) => e.stopPropagation()} className={`${!isEdit && 'hidden'}`}>
                         <input

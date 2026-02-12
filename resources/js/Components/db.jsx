@@ -41,7 +41,6 @@ export const getUnitBA = async () => {
         }
 
         data = await response.json();
-        console.log(data);
     } catch (error) {
         console.error("Gagal ambil data:", error);
     }
@@ -58,7 +57,6 @@ export const getAllUnits = async () => {
         }
 
         data = await response.json();
-        console.log(data);
     } catch (error) {
         console.error("Gagal ambil data:", error);
     }
@@ -77,7 +75,6 @@ export const getUnitReports = async (unit_position_id) => {
         }
 
         const data = await response.json();
-        console.log(data)
         return data;
     } catch (error) {
         console.error("Gagal ambil data:", error);

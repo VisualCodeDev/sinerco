@@ -95,7 +95,6 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
             }
         } catch (e) {
             if (e.response?.status === 422) {
-                console.log("Validation Errors:", e.response.data.errors);
                 setErrors(e.response.data.errors);
             }
         } finally {

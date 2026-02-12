@@ -100,7 +100,7 @@ const UnitSetting = () => {
             );
             addToast(resp?.data);
         } catch (e) {
-            console.log(e);
+            console.error(e);
             addToast({ type: "error", text: e.response.data.message });
         }
     };

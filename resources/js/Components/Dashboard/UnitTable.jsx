@@ -401,7 +401,6 @@ const SettingModal = ({
                         ? { ...item, ...formData }
                         : item,
                 );
-                console.log(updatedData);
                 setData(updatedData);
             } else {
             }

@@ -38,7 +38,6 @@ const UnitPositionSetting = ({ data }) => {
 
     useEffect(() => {
         if (unitData.length === 0) return;
-        console.log(selectedItemUnits);
         const filtered = unitData.filter(
             (unit) =>
                 !selectedItemUnits?.some(

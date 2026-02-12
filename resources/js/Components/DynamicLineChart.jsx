@@ -172,7 +172,6 @@ const DynamicLineChart = () => {
         return <LoadingSpinner />;
     }
 
-    console.log(fields);
     return (
         <div className="p-5 font-sans">
             {/* Filter Controls */}

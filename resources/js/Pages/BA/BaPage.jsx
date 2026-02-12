@@ -341,7 +341,6 @@ const ExportModal = (props) => {
             console.error(e);
         }
     };
-    console.log(data);
     return (
         <Modal
             showModal={isModal}

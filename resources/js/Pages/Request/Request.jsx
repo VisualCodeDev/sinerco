@@ -78,7 +78,6 @@ const Request = ({ data }) => {
         );
     };
 
-    console.log(selectedRows)
     const handleSelectAll = () => {
         if (selectedRows.length === allData.length) {
             // Unselect all

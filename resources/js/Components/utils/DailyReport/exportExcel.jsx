@@ -103,7 +103,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 }
                 startColumn++;
             });
-            console.log(fieldHeaderColumnMap, chr(startColumn));
             const remarksStart = startColumn + 6;
 
             // Kolom waktu
