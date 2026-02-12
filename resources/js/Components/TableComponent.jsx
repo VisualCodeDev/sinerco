@@ -95,15 +95,17 @@ const TableComponent = (props) => {
     });
 
     const handleSort = (key) => {
-        setSortConfig((prev) => {
-            if (prev.key === key) {
-                return {
-                    key,
-                    direction: prev.direction === "asc" ? "desc" : "asc",
-                };
-            }
-            return { key, direction: "asc" };
-        });
+        let config;
+        if (sortConfig?.key === key) {
+            config = {
+                key,
+                direction: sortConfig.direction === "asc" ? "desc" : "asc",
+            };
+        } else {
+            config = { key, direction: "asc" };
+        }
+
+        setSortConfig(config);
     };
 
     const containsQuery = (value, query) => {
@@ -130,25 +132,44 @@ const TableComponent = (props) => {
     };
 
     useEffect(() => {
-        let filterData = [];
-        if (filterConfig) {
-            if (filterStatus) {
-                filterData = data?.filter((item) => {
-                    return item?.status === filterConfig;
-                });
-            } else if (filterUserRole) {
-                filterData = data?.filter((item) => {
-                    return item?.role === filterConfig;
-                });
-            }
-            return setFilteredData(filterData);
-        }
-        filterData = sortedData?.filter((item) => {
-            return containsQuery(item, query);
+        let tempData = [...(data || [])];
+
+        // SORT
+        tempData.sort((a, b) => {
+            if (!sortConfig.key) return 0;
+
+            const normalize = (v = "") => v.toString().toLowerCase().trim();
+
+            const aVal = normalize(a[sortConfig.key]);
+            const bVal = normalize(b[sortConfig.key]);
+
+            return sortConfig.direction === "asc"
+                ? aVal.localeCompare(bVal, "id")
+                : bVal.localeCompare(aVal, "id");
         });
 
-        setFilteredData(filterData);
-    }, [data, filterConfig, sortConfig?.direction, query]);
+        // FILTER
+        if (filterConfig) {
+            if (filterStatus) {
+                tempData = tempData.filter(
+                    (item) => item?.status === filterConfig,
+                );
+            }
+
+            if (filterUserRole) {
+                tempData = tempData.filter(
+                    (item) => item?.role === filterConfig,
+                );
+            }
+        }
+
+        // SEARCH
+        if (query) {
+            tempData = tempData.filter((item) => containsQuery(item, query));
+        }
+
+        setFilteredData(tempData);
+    }, [data, filterConfig, filterStatus, filterUserRole, sortConfig, query]);
 
     return (
         <>

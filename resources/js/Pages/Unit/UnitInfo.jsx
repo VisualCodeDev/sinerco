@@ -1,9 +1,9 @@
 import { useToast } from "@/Components/Toast/ToastProvider";
 import { splitCamelCase } from "@/Components/utils/dashboard-util";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const UnitInfo = (props) => {
-    const { unitData, name, setName, unitId } = props;
+    const { unitData, unitId, setUnitData } = props;
     const { addToast } = useToast();
     const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
@@ -11,6 +11,17 @@ const UnitInfo = (props) => {
     const handleChange = (field, value) => {
         setFormData({ ...formData, [field]: value });
     };
+
+    useEffect(() => {
+        const excludedKeys = ["client", "area", "location"];
+
+        const filteredData = Object.fromEntries(
+            Object.entries(unitData?.info).filter(
+                ([key]) => !excludedKeys.includes(key),
+            ),
+        );
+        setFormData(filteredData);
+    }, [unitData?.info]);
 
     const handleSave = async () => {
         try {
@@ -20,7 +31,11 @@ const UnitInfo = (props) => {
             });
             if (resp.status === 200) {
                 addToast(resp?.data);
-                setName(formData?.unit);
+                setUnitData((prev) => ({
+                    ...prev,
+                    info: {...formData},
+                }));
+
                 setIsEditing(false);
             }
         } catch (e) {
@@ -53,24 +68,38 @@ const UnitInfo = (props) => {
 
             <div className="">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                    {Object.keys(unitData).map((item) => (
-                        <div key={item} className="space-y-1">
-                            <label className={labelStyle}>
-                                {changeTextFormat(item)}
-                            </label>
-                            <input
-                                type="text"
-                                value={formData[item] || unitData[item]}
-                                onChange={(e) =>
-                                    handleChange(item, e.target.value)
-                                }
-                                readOnly={!isEditing}
-                                className={`${inputBaseStyle} ${
-                                    isEditing ? inputEditable : inputReadOnly
-                                }`}
-                            />
-                        </div>
-                    ))}
+                    {Object.keys(formData)
+                        .filter(
+                            (item) =>
+                                item !== "client" &&
+                                item !== "area" &&
+                                item !== "location",
+                        )
+                        .map((item) => (
+                            <div key={item} className="space-y-1">
+                                <label className={labelStyle}>
+                                    {changeTextFormat(item)}
+                                </label>
+                                <input
+                                    disabled={
+                                        item === "client" ||
+                                        item === "area" ||
+                                        item === "location"
+                                    }
+                                    type="text"
+                                    value={formData[item] || ""}
+                                    onChange={(e) =>
+                                        handleChange(item, e.target.value)
+                                    }
+                                    readOnly={!isEditing}
+                                    className={`${inputBaseStyle} ${
+                                        isEditing
+                                            ? inputEditable
+                                            : inputReadOnly
+                                    }`}
+                                />
+                            </div>
+                        ))}
                 </div>
 
                 <div className="flex justify-end gap-3 pt-6 border-t mt-8 w-full">

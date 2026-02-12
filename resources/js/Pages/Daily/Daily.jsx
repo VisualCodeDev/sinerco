@@ -27,13 +27,12 @@ import UnitInfo from "../Unit/UnitInfo";
 
 export default function Dashboard({ unit_position_id }) {
     const { user, loading: userLoding } = useAuth();
-    const [name, setName] = useState("");
     const [currDate, setCurrDate] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState([]);
     const [lastReport, setLastReport] = useState({});
-    const [unitData, setUnitData] = useState();
+    const [unitData, setUnitData] = useState({});
     const [isUnitRunning, setIsUnitRunning] = useState(true);
     const [clientName, setClientName] = useState();
     const [fields, setFields] = useState([]);
@@ -43,14 +42,14 @@ export default function Dashboard({ unit_position_id }) {
     const [activeTab, setActiveTab] = useState(
         user?.role === "technician" || user?.role === "operator"
             ? "form"
-            : "report"
+            : "report",
     );
 
     useEffect(() => {
         setActiveTab(
             user?.role === "technician" || user?.role === "operator"
                 ? "form"
-                : "report"
+                : "report",
         );
     }, [user]);
 
@@ -169,22 +168,22 @@ export default function Dashboard({ unit_position_id }) {
                     route("getDataReportBasedOnDate", {
                         unit_position_id: unit_position_id,
                         date: selectedDate,
-                    })
+                    }),
                 ),
                 axios.get(
                     route("getSelectedUnit", {
                         unit_position_id: unit_position_id,
-                    })
+                    }),
                 ),
             ]);
 
             setUnitData(unit?.data);
             setClientName(unit?.data?.client || "");
-            
+
             await initCurrDate(
                 reportData?.data,
                 unit?.data?.gmt_offset,
-                unit?.data?.input_interval
+                unit?.data?.input_interval,
             );
         } catch (e) {
             console.error(e);
@@ -204,6 +203,7 @@ export default function Dashboard({ unit_position_id }) {
     };
 
     useEffect(() => {
+        console.log("MASUIK")
         fetchData();
     }, []);
 
@@ -220,7 +220,7 @@ export default function Dashboard({ unit_position_id }) {
                     route("getDataReportBasedOnDate", {
                         unit_position_id: unit_position_id,
                         date: selectedDate,
-                    })
+                    }),
                 );
                 if (new Date(selectedDate) < currDate) {
                     await setInitPrevReport(reportData?.data);
@@ -252,7 +252,7 @@ export default function Dashboard({ unit_position_id }) {
                     route("unit.fields.get", { unit_id: unitData.unit_id }),
                     {
                         headers: { Accept: "application/json" },
-                    }
+                    },
                 );
 
                 const data = response?.data?.data || response?.data;
@@ -263,7 +263,7 @@ export default function Dashboard({ unit_position_id }) {
                             field.subfields.length > 0
                         ) {
                             const visibleSubfields = field.subfields.filter(
-                                (sub) => unitData.visibilitySetting[sub.slug]
+                                (sub) => unitData.visibilitySetting[sub.slug],
                             );
                             if (visibleSubfields.length === 0) return null;
                             return {
@@ -280,7 +280,7 @@ export default function Dashboard({ unit_position_id }) {
             } catch (error) {
                 console.error(
                     "Gagal mengambil field:",
-                    error.response?.data || error
+                    error.response?.data || error,
                 );
             }
             setLoading(false);
@@ -288,6 +288,8 @@ export default function Dashboard({ unit_position_id }) {
         getFields();
         setIsUnitRunning(status);
     }, [unitData]);
+
+    console.log(unitData);
 
     return (
         <PageLayout>
@@ -325,7 +327,7 @@ export default function Dashboard({ unit_position_id }) {
                                             {label}
                                         </button>
                                     </div>
-                                )
+                                ),
                         )}
                     </div>
 
@@ -341,7 +343,7 @@ export default function Dashboard({ unit_position_id }) {
                                                 setExpanded(!expanded)
                                             }
                                         >
-                                            {name || unitData?.unit}
+                                            {unitData?.info?.name || unitData?.unit}
                                             <div className="text-xs">
                                                 <StatusPill
                                                     request_type={
@@ -370,8 +372,8 @@ export default function Dashboard({ unit_position_id }) {
                                                                 router.visit(
                                                                     route(
                                                                         "daily",
-                                                                        item?.unit_position_id
-                                                                    )
+                                                                        item?.unit_position_id,
+                                                                    ),
                                                                 )
                                                             }
                                                         >
@@ -403,10 +405,9 @@ export default function Dashboard({ unit_position_id }) {
 
                         {activeTab === "unit_information" && (
                             <UnitInfo
+                                setUnitData={setUnitData}
                                 unitId={unitData?.unit_id}
-                                unitData={unitData?.info}
-                                setName={setName}
-                                name={name}
+                                unitData={unitData}
                             />
                         )}
 

@@ -35,7 +35,6 @@ const DailyReport = (props) => {
     );
     const prevDateList = getDateLists(currDate);
     
-    console.log(formData)
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -66,7 +65,6 @@ const DailyReport = (props) => {
         setData(formData);
         setCurrData(formData);
     }, [formData]);
-    console.log(currData)
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
             <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
@@ -312,14 +310,12 @@ const ExportModal = (props) => {
                 `/api/daily-report?id=${unitData.unit_position_id}&start=${start}&end=${end}&unit_id=${unitData.unit_id}`
             );
             const data = await res.json();
-            console.log(data);
             const range = getDateRange(start, end);
             await ExportXlsm("Report.xlsx", data, range, unitData);
         } catch (err) {
             console.error("❌ Gagal ambil data:", err);
         }
     };
-    console.log(unitData)
     return (
         <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>
