@@ -370,7 +370,6 @@ class DataUnitController extends Controller
         ]);
     }
 
-
     public function updateUnitInfo(Request $request)
     {
         $val = $request->validate([
@@ -378,8 +377,14 @@ class DataUnitController extends Controller
             "data" => "required|array"
         ]);
 
+        $data = collect($val['data'])
+            ->filter(function ($value) {
+                return $value !== null && $value !== '';
+            })
+            ->toArray();
+
         DataUnit::where("unit_id", $val["unit_id"])
-            ->update($val["data"]);
+            ->update($data);
 
         return response()->json([
             "type" => "success",
