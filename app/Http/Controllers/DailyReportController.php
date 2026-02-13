@@ -35,7 +35,13 @@ class DailyReportController extends Controller
         //         'subfields' => $item->fields['subfields'] ?? [],
         //     ];
         // });
-        $unitData = DataUnit::find($unit_id);
+        $unitData = DataUnit::where('unit_id', $unit_id)->first();
+        Log::debug($unitData);
+        if (!$unitData) {
+            return response()->json([
+                'error' => 'Unit not found'
+            ], 404);
+        }
 
         $fields = UnitField::with('fields.subfields')
             ->where('unit_id', $unit_id)
@@ -66,7 +72,11 @@ class DailyReportController extends Controller
             ->with('request')
             ->get()
             ->map(function ($item) {
-                $data = $item->data ?? [];
+                $data = $item->data;
+
+                if (is_string($data)) {
+                    $data = json_decode($data, true) ?? [];
+                }
 
                 return array_merge([
                     'id' => $item->id,
@@ -77,6 +87,7 @@ class DailyReportController extends Controller
                     'request' => $item->request,
                 ]);
             });
+
 
 
         return response()->json(['reports' => $reports, 'fields' => $fields]);
