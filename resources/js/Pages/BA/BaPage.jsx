@@ -39,7 +39,7 @@ const BaPage = () => {
             const lastId =
                 formData?.selectedRows?.[formData.selectedRows.length - 1];
             const initSetting = data?.find(
-                (item) => String(item?.unit_position_id) === String(lastId)
+                (item) => String(item?.unit_position_id) === String(lastId),
             );
             setBaData({
                 spv_name: initSetting?.spv_name || "",
@@ -61,7 +61,7 @@ const BaPage = () => {
             setFormData({
                 ...formData,
                 selectedRows: currData.map((item) =>
-                    String(item.unit_position_id)
+                    String(item.unit_position_id),
                 ),
             });
         }
@@ -73,7 +73,7 @@ const BaPage = () => {
             setFormData({
                 ...formData,
                 selectedRows: selected.filter(
-                    (item) => String(item) !== String(value.unit_position_id)
+                    (item) => String(item) !== String(value.unit_position_id),
                 ),
             });
         } else {
@@ -279,7 +279,7 @@ const SettingModal = (props) => {
                                             onChange={(e) =>
                                                 handleChange(
                                                     field.name,
-                                                    e.target.value
+                                                    e.target.value,
                                                 )
                                             }
                                             placeholder={field.placeholder}

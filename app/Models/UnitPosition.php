@@ -34,6 +34,11 @@ class UnitPosition extends Model
     {
         return $this->belongsTo(DataUnit::class, 'unit_id', 'unit_id');
     }
+    public function units()
+    {
+        return $this->hasMany(DataUnit::class, 'unit_id', 'unit_id');
+    }
+    
     public function baSettings()
     {
         return $this->hasOne(BeritaAcara::class, 'unit_position_id', 'id');

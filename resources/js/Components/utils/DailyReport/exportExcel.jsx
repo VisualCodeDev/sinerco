@@ -8,10 +8,10 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
         const workbook = new ExcelJS.Workbook();
         const fields = data.fields || [];
         const fieldUnits = unitData?.daily_report_setting.unitSetting || {};
-        const numberFormat = "#,##0.00"; // ribuan (.) dan desimal (,)
+        const numberFormat = "#,##0.00";
         const fieldHeaderColumnMap = {};
         const fieldColumnMap = {};
-
+        console.log(data, range, unitData)
         // Loop tiap tanggal
         for (const date of range) {
             const [year, month, day] = date.split("-");

@@ -17,12 +17,27 @@ class ClientController extends Controller
 
     public function getAllClient()
     {
-        $allData = Client::all()->map(function ($client) {
+        $allData = Client::with(['locations.area'])->get()->map(function ($client) {
+
+            // hilangkan duplicate location by id
+            $locations = $client->locations->unique('id')->values();
+
             return [
                 ...$client->toArray(),
+                'locations' => $locations
+                    ->pluck('location')
+                    ->unique()
+                    ->implode(', '),
+
+                'areas' => $locations
+                    ->pluck('area.area')
+                    ->filter()        // jaga-jaga kalau null
+                    ->unique()
+                    ->implode(', '),
                 'disable_duration' => (bool) $client->disable_duration,
             ];
         });
+
         return response()->json($allData);
     }
 

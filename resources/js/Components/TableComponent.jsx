@@ -18,6 +18,7 @@ import { router } from "@inertiajs/react";
 
 const TableComponent = (props) => {
     const {
+        Footer,
         route = "",
         toggleEdit,
         edit = true,
@@ -49,8 +50,9 @@ const TableComponent = (props) => {
     } = props;
     const [sortConfig, setSortConfig] = useState({
         key:
-            (columns[0]?.name == "id" ? columns[1]?.name : columns[0].name) ||
-            null,
+            (columns[0]?.name == "id" || columns[0]?.name == "no"
+                ? columns[1]?.name
+                : columns[0]?.name || null) || null,
         direction: "asc",
     });
 
@@ -58,41 +60,41 @@ const TableComponent = (props) => {
     const [filteredData, setFilteredData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const sortedData = data?.sort((a, b) => {
-        if (!sortConfig.key) return 0;
+    // const sortedData = data?.sort((a, b) => {
+    //     if (!sortConfig.key) return 0;
 
-        const normalizeString = (value = "") =>
-            value
-                .toString()
-                .normalize("NFKD")
-                .replace(/[\u200B-\u200D\uFEFF]/g, "")
-                .trim()
-                .toLowerCase();
+    //     const normalizeString = (value = "") =>
+    //         value
+    //             .toString()
+    //             .normalize("NFKD")
+    //             .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    //             .trim()
+    //             .toLowerCase();
 
-        const getNestedValue = (obj, key) => {
-            if (key === "user") return normalizeString(obj.user?.user);
-            if (key === "role") return normalizeString(obj.user?.role);
-            if (key === "unit") return normalizeString(obj.unit?.unit);
-            if (key === "user_id") return normalizeString(obj.unit?.unit);
-            if (key === "status")
-                return normalizeString(getRequestStatus(obj.unit?.status));
-            if (key === "location")
-                return normalizeString(obj?.location?.location);
-            if (key === "client")
-                return normalizeString(
-                    obj?.client?.name || obj?.client || obj?.name,
-                );
+    //     const getNestedValue = (obj, key) => {
+    //         if (key === "user") return normalizeString(obj.user?.user);
+    //         if (key === "role") return normalizeString(obj.user?.role);
+    //         if (key === "unit") return normalizeString(obj.unit?.unit);
+    //         if (key === "user_id") return normalizeString(obj.unit?.unit);
+    //         if (key === "status")
+    //             return normalizeString(getRequestStatus(obj.unit?.status));
+    //         if (key === "location")
+    //             return normalizeString(obj?.location?.location);
+    //         if (key === "client")
+    //             return normalizeString(
+    //                 obj?.client?.name || obj?.client || obj?.name,
+    //             );
 
-            return normalizeString(obj[key]);
-        };
+    //         return normalizeString(obj[key]);
+    //     };
 
-        const aValue = getNestedValue(a, sortConfig.key);
-        const bValue = getNestedValue(b, sortConfig.key);
+    //     const aValue = getNestedValue(a, sortConfig.key);
+    //     const bValue = getNestedValue(b, sortConfig.key);
 
-        return sortConfig.direction === "asc"
-            ? aValue.localeCompare(bValue, "id", { sensitivity: "base" })
-            : bValue.localeCompare(aValue, "id", { sensitivity: "base" });
-    });
+    //     return sortConfig.direction === "asc"
+    //         ? aValue.localeCompare(bValue, "id", { sensitivity: "base" })
+    //         : bValue.localeCompare(aValue, "id", { sensitivity: "base" });
+    // });
 
     const handleSort = (key) => {
         let config;
@@ -139,7 +141,7 @@ const TableComponent = (props) => {
             if (!sortConfig.key) return 0;
 
             const normalize = (v = "") => v.toString().toLowerCase().trim();
-
+            console.log(a[sortConfig.key]);
             const aVal = normalize(a[sortConfig.key]);
             const bVal = normalize(b[sortConfig.key]);
 
@@ -170,7 +172,6 @@ const TableComponent = (props) => {
 
         setFilteredData(tempData);
     }, [data, filterConfig, filterStatus, filterUserRole, sortConfig, query]);
-
     return (
         <>
             <div
@@ -418,6 +419,7 @@ const TableComponent = (props) => {
                         </tbody>
                     </table>
                 </div>
+                {Footer && Footer}
                 {isForm && !isUserList && (
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>

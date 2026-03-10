@@ -25,6 +25,10 @@ class Client extends Model
         });
     }
 
+    public function locations() {
+        return $this->belongsToMany(Location::class, 'unit_positions', 'client_id', 'location_id');
+    }
+
     public function units() {
         return $this->belongsToMany(DataUnit::class, 'unit_positions', 'client_id', 'unit_id');
     }

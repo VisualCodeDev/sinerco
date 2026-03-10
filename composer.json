@@ -11,6 +11,8 @@
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "maatwebsite/excel": "^1.1",
+        "phpoffice/phpspreadsheet": "^5.4",
         "phpoffice/phpword": "^1.4",
         "pusher/pusher-php-server": "^7.2",
         "tightenco/ziggy": "^2.0"

@@ -188,5 +188,6 @@ Route::controller(BeritaAcaraController::class)->middleware('auth')->group(funct
 });
 
 Route::get('/export-doc', [ExportController::class, 'exportDoc'])->name('export_doc')->middleware('auth');
+Route::get('/export-inv', [ExportController::class, 'exportInvoice'])->name('export_inv')->middleware('auth');
 
 require __DIR__ . '/auth.php';

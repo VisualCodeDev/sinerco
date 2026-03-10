@@ -22,16 +22,18 @@ import {
 } from "react-icons/fa";
 import InputValidationSetting from "../Unit/InputValidationSetting";
 import { MdClose } from "react-icons/md";
+import columns from "@/Components/utils/Client/columns";
 
 const ClientList = () => {
     // const columns = tColumns();
     const { data, loading, error } = fetch("client.get");
-    const [clients, setClients] = useState([]);
+    const [tableData, setTableData] = useState({});
     const [expanded, setExpanded] = useState(false);
     const [selectedClient, setSelectedClients] = useState(null);
     const [filteredArea, setArea] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState();
     const [isLoading, setLoading] = useState(false);
+    const [selectedRows, setSelectedRows] = useState([]);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
 
@@ -41,7 +43,7 @@ const ClientList = () => {
             if (selectedClient) {
                 try {
                     const response = await axios.get(
-                        route("unit.filter.get", selectedClient)
+                        route("unit.filter.get", selectedClient),
                     );
                     const data = response.data;
 
@@ -79,7 +81,7 @@ const ClientList = () => {
                             ...areaObj,
                             locations: Array.from(areaObj.locations.values()),
                             isExpanded: false,
-                        })
+                        }),
                     );
 
                     setArea(groupedAreas);
@@ -91,6 +93,7 @@ const ClientList = () => {
             }
             setLoading(false);
         };
+
         fetchUnits();
     }, [data, selectedClient]);
 
@@ -108,13 +111,77 @@ const ClientList = () => {
             prevAreas.map((area) =>
                 area.id === item.id
                     ? { ...area, isExpanded: !area.isExpanded }
-                    : area
-            )
+                    : area,
+            ),
+        );
+    };
+    const handleCheckItem = (item) => {
+        const id = item?.client_id;
+        setSelectedRows((prev) =>
+            prev.includes(id)
+                ? prev.filter((item) => item !== id)
+                : [...prev, id],
         );
     };
 
+    const handleSelectAll = () => {
+        if (selectedRows.length === data.length) {
+            // Unselect all
+            setSelectedRows([]);
+        } else {
+            // Select all
+            setSelectedRows(data.map((item) => item.client_id));
+        }
+    };
+
+    const handleInvoice = () => {
+        window.open(
+            route("export_inv", {
+                clients: selectedRows,
+                ...data,
+            }),
+            "_blank",
+        );
+    };
+
+    const col = columns({
+        selectedRows,
+        handleSelectAll,
+        data,
+    });
+
+    const Footer = Array.isArray(selectedRows) && selectedRows.length > 0 && (
+        <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
+            <tr>
+                <th>
+                    <div className="px-8 py-3 text-sm font-medium w-full flex gap-4">
+                        <button
+                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                            onClick={handleInvoice}
+                        >
+                            Invoice
+                        </button>
+                    </div>
+                </th>
+            </tr>
+        </div>
+    );
     return (
         <PageLayout>
+            {/* {Array.isArray(selectedRows) && selectedRows.length > 0 && (
+                <div className="fixed bottom-0 left-0 w-[100%] p-6 z-[100]">
+                    <div className="bg-primary rounded-xl p-2">
+                        <button>Invoice</button>
+                    </div>
+                </div>
+            )} */}
+            <TableComponent
+                title="Clients"
+                columns={col}
+                data={data}
+                Footer={Footer}
+                onRowClick={(value) => handleCheckItem(value)}
+            />
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
                 {/* Client List Desktop*/}
                 <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
@@ -158,9 +225,7 @@ const ClientList = () => {
                             className="flex justify-between items-center"
                             onClick={() => setExpanded(!expanded)}
                         >
-                            <div>
-                                {selectedClient?.name || clients[0]?.name}
-                            </div>
+                            <div>{selectedClient?.name || data[0]?.name}</div>
                             <FaAngleDown />
                         </div>
                         <div
@@ -293,12 +358,12 @@ const ClientList = () => {
                                                     item?.status === "stdby"
                                                         ? "bg-yellow-500"
                                                         : item?.status === "sd"
-                                                        ? "bg-red-500"
-                                                        : "bg-green-500"
+                                                          ? "bg-red-500"
+                                                          : "bg-green-500"
                                                 }`}
                                             >
                                                 {getRequestTypeName(
-                                                    item?.status
+                                                    item?.status,
                                                 ).toUpperCase()}
                                             </p>
                                         </div>
@@ -340,7 +405,7 @@ const SettingModal = (props) => {
             setLoading(true);
             try {
                 const resp = await axios.get(
-                    route("unit.setting.get", clientData?.client_id)
+                    route("unit.setting.get", clientData?.client_id),
                 );
                 setSettingData(resp.data);
             } catch (e) {
