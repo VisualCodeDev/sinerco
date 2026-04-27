@@ -17,26 +17,39 @@ class ClientController extends Controller
 
     public function getAllClient()
     {
-        $allData = Client::with(['locations.area'])->get()->map(function ($client) {
+        $allData = Client::with([
+            'locations.area',
+            'unitPositions.baSettings'
+        ])
+            ->get()
+            ->map(function ($client) {
 
-            // hilangkan duplicate location by id
-            $locations = $client->locations->unique('id')->values();
+                $locations = $client->locations->unique('id')->values();
 
-            return [
-                ...$client->toArray(),
-                'locations' => $locations
-                    ->pluck('location')
-                    ->unique()
-                    ->implode(', '),
+                $beritaAcaras = $client->unitPositions
+                    ->pluck('baSettings')
+                    ->filter()
+                    ->values();
 
-                'areas' => $locations
-                    ->pluck('area.area')
-                    ->filter()        // jaga-jaga kalau null
-                    ->unique()
-                    ->implode(', '),
-                'disable_duration' => (bool) $client->disable_duration,
-            ];
-        });
+                return [
+                    ...$client->toArray(),
+                    'is_invoice' => (bool) $client->is_invoice,
+                    'locations' => $locations
+                        ->pluck('location')
+                        ->unique()
+                        ->implode(', '),
+
+                    'areas' => $locations
+                        ->pluck('area.area')
+                        ->filter()
+                        ->unique()
+                        ->implode(', '),
+
+                    'disable_duration' => (bool) $client->disable_duration,
+
+                    'berita_acaras' => $beritaAcaras
+                ];
+            });
 
         return response()->json($allData);
     }
@@ -116,5 +129,31 @@ class ClientController extends Controller
 
         Log::debug($data);
         return response()->json($data);
+    }
+
+    public function updateClient(Request $request)
+    {
+        $val = $request->validate([
+            'client_id' => 'required|exists:clients,client_id',
+            'updateData' => 'required|array'
+        ]);
+        if(!$val) {
+            return response()->json([
+
+            ]);
+        }
+
+        $updateData = collect($request->updateData)
+            ->reduce(function ($carry, $item) {
+                return array_merge($carry, $item);
+            }, []);
+        
+        $client = Client::where('client_id', $request->client_id)->first();
+
+        $client->update($updateData);
+        return response()->json([
+            'response' => 'success',
+            'data' => $client
+        ]);
     }
 }

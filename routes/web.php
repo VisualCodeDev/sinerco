@@ -139,6 +139,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/client/list', 'index')->name('client.list');
     Route::get('/client/{client_id}', 'clientDetail')->name('client.detail');
 
+    Route::post('/client/update', 'updateClient')->name('client.update');
     Route::post('/client/settings', 'setSettings')->name('client.settings');
     Route::post('/client/settings/duration', 'updateDurationDisable')->name('duration.update.disable');
 });
@@ -189,5 +190,6 @@ Route::controller(BeritaAcaraController::class)->middleware('auth')->group(funct
 
 Route::get('/export-doc', [ExportController::class, 'exportDoc'])->name('export_doc')->middleware('auth');
 Route::get('/export-inv', [ExportController::class, 'exportInvoice'])->name('export_inv')->middleware('auth');
+Route::get('/export-penalty', [ExportController::class, 'exportPenalty'])->name('export_penalty')->middleware('auth');
 
 require __DIR__ . '/auth.php';

@@ -28,9 +28,14 @@ class ClientSeeder extends Seeder
         ];
 
         foreach ($clients as $client) {
-            Client::updateOrCreate(
-                ['name' => $client],
-            );
+            if ($client === 'PEP Prabumulih' || $client === 'PEP Tambun' || $client === 'PEP Subang' || $client === 'MEDCO (Tarakan)') {
+                Client::updateOrCreate(
+                    ['name' => $client, 'is_invoice' => true],
+                );
+            } else
+                Client::updateOrCreate(
+                    ['name' => $client, 'is_invoice' => false],
+                );
         }
     }
 }

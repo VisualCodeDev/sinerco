@@ -25,13 +25,32 @@ class Client extends Model
         });
     }
 
-    public function locations() {
+    public function locations()
+    {
         return $this->belongsToMany(Location::class, 'unit_positions', 'client_id', 'location_id');
     }
 
-    public function units() {
+    public function unitPositions()
+    {
+        return $this->hasMany(UnitPosition::class, 'client_id');
+    }
+
+    public function units()
+    {
         return $this->belongsToMany(DataUnit::class, 'unit_positions', 'client_id', 'unit_id');
     }
+    protected static function booted()
+    {
+        static::saving(function ($model) {
+            if (!$model->is_invoice) {
+                $model->is_clu = false;
+            }
+        });
+    }
+    protected $casts = [
+        'is_invoice' => 'boolean',
+        'is_clu' => 'boolean',
+    ];
     protected $fillable = [
         'client_id',
         'name',
@@ -39,6 +58,8 @@ class Client extends Model
         'input_duration',
         'gmt_offset',
         'auto_send_interval',
+        'is_invoice',
+        'is_clu',
         'disable_duration'
     ];
 }

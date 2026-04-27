@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\UnitPosition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -72,7 +73,7 @@ class ExportController extends Controller
     }
     private function calculateAvailabilityByRange($requests, array $rangeDate = null)
     {
-        if (empty($range)) {
+        if (empty($rangeDate)) {
             $year = now()->year;
             $month = now()->month;
 
@@ -154,40 +155,39 @@ class ExportController extends Controller
 
         return $hours > 0 ? $total / $hours : 0;
     }
-
     public function exportBap($client_name, $client_department, $client, $area, $pic_name, $pic_department, $listData, $spv_name, $spv_department, $rangeDate, $templateType)
     {
         // dd($area);
         // 1. Ambil template
         switch ($templateType) {
             case 1:
-                $templatePath = storage_path('../app/templates/Template_JAS_BAP.docx');
+                $templatePath = storage_path('templates/Template_JAS_BAP.docx');
                 break;
             case 2:
-                $templatePath = storage_path('../app/templates/Template_Kampar_BAP.docx');
+                $templatePath = storage_path('templates/Template_Kampar_BAP.docx');
                 break;
             case 3:
-                $templatePath = storage_path('../app/templates/Template_Sangasanga_BAP.docx');
+                $templatePath = storage_path('templates/Template_Sangasanga_BAP.docx');
                 break;
             case 4:
-                $templatePath = storage_path('../app/templates/Template_Sindang_BAP.docx');
+                $templatePath = storage_path('templates/Template_Sindang_BAP.docx');
                 break;
             default:
-                $templatePath = storage_path('../app/templates/Template_Tambun_BAP.docx');
+                $templatePath = storage_path('templates/Template_Tambun_BAP.docx');
                 break;
         }
         // switch ($area) {
         //     case 'Jati Asri':
-        //         $templatePath = storage_path('../app/templates/Template_JAS_BAP.docx');
+        //         $templatePath = storage_path('templates/Template_JAS_BAP.docx');
         //     case 'Kampar':
-        //         $templatePath = storage_path('../app/templates/Template_Kampar_BAP.docx');
+        //         $templatePath = storage_path('templates/Template_Kampar_BAP.docx');
         //     case 'Sangasanga':
-        //         $templatePath = storage_path('../app/templates/Template_Sangasanga_BAP.docx');
+        //         $templatePath = storage_path('templates/Template_Sangasanga_BAP.docx');
         //     case 'Sindang':
-        //         $templatePath = storage_path('../app/templates/Template_Sindang_BAP.docx');
+        //         $templatePath = storage_path('templates/Template_Sindang_BAP.docx');
         //     default:
-        //         // $templatePath = storage_path('../app/templates/Template_Sindang_BAP.docx');
-        //         $templatePath = storage_path('../app/templates/Template_Tambun_BAP.docx');
+        //         // $templatePath = storage_path('templates/Template_Sindang_BAP.docx');
+        //         $templatePath = storage_path('templates/Template_Tambun_BAP.docx');
 
         // }
         $template = new TemplateProcessor($templatePath);
@@ -242,11 +242,10 @@ class ExportController extends Controller
 
         return $path;
     }
-
     public function exportBapm($unit, $location, $area, $events, $client, $name, $department, $client_name, $client_department)
     {
         // 1. Ambil template
-        $templatePath = storage_path('../app/templates/Template_BAPM.docx');
+        $templatePath = storage_path('templates/Template_BAPM.docx');
         $template = new TemplateProcessor($templatePath);
 
         // 2. Set variabel statis
@@ -303,7 +302,7 @@ class ExportController extends Controller
     public function exportBa_stdby_sd($request_type, $unit, $location, $events, $client, $name, $department, $client_name, $client_department)
     {
         // 1. Ambil template
-        $templatePath = storage_path('../app/templates/TEMPLATE_SD_STDBY.docx');
+        $templatePath = storage_path('templates/TEMPLATE_SD_STDBY.docx');
         $template = new TemplateProcessor($templatePath);
 
         // 2. Set variabel statis
@@ -586,7 +585,6 @@ class ExportController extends Controller
             }
         }
     }
-
     private function hoursToHMS($hours)
     {
         $h = floor($hours);
@@ -599,28 +597,58 @@ class ExportController extends Controller
     {
         $validated = $request->validate([
             'clients' => 'required|array',
-            'clients.*' => 'exists:clients,client_id'
+            'clients.*' => 'exists:clients,client_id',
+            'start_date' => 'date|nullable',
         ]);
 
         if (ob_get_length()) {
             ob_end_clean();
         }
 
-        $year = $request->year ?? now()->year;
-        $month = $request->month ?? now()->month;
+        $startDate = isset($validated['start_date'])
+            ? Carbon::parse($validated['start_date'])
+            : Carbon::now()->startOfMonth();
 
+        $year = $startDate->year;
+        $month = $startDate->month;
+
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $formattedStartDate = $startDate->format('d/m/Y');
         $unitPositions = UnitPosition::whereIn('client_id', $validated['clients'])
             ->with([
                 'unit',
                 'reports.request',
-                'reports' => function ($q) use ($month, $year) {
-                    $q->whereYear('date', $year)
-                        ->whereMonth('date', $month)
-                        ->orderBy('date', 'asc');
+                'client',
+                'reports' => function ($q) {
+                    $q->orderBy('date', 'asc'); // TANPA filter
                 }
             ])
             ->get();
         $groupedByClient = $unitPositions->groupBy('client_id');
+
+        $cluData = $groupedByClient->map(function ($clientUnits) {
+            return $clientUnits
+                ->filter(fn($item) => $item->client->is_invoice && $item->client->is_clu)
+                ->values();
+        })->filter(fn($items) => $items->isNotEmpty());
+
+        $groupedByClient = $groupedByClient->map(function ($clientUnits) use ($month, $year) {
+            return $clientUnits
+                ->filter(fn($item) => $item->client->is_invoice && !$item->client->is_clu)
+                ->map(function ($item) use ($month, $year) {
+                    $item->reports = $item->reports
+                        ->filter(
+                            fn($r) =>
+                            Carbon::parse($r->date)->year == $year &&
+                            Carbon::parse($r->date)->month == $month
+                        )
+                        ->values();
+
+                    return $item;
+                })
+                ->values();
+        });
 
         if ($unitPositions->isEmpty()) {
             abort(404, 'Data not found');
@@ -634,16 +662,108 @@ class ExportController extends Controller
         $generatedFiles = [];
 
         foreach ($groupedByClient as $clientId => $clientUnits) {
-
-            $templatePath = storage_path('../app/templates/Template_inv.xlsx');
+            if ($clientUnits->count() === 0) {
+                continue;
+            }
+            // $templatePath = storage_path('templates/Template_CLU.xlsx');
+            // $templatePath = storage_path('templates/Template_inv_2.xlsx');
+            $templatePath = storage_path('templates/Template_inv.xlsx');
             $spreadsheet = IOFactory::load($templatePath);
 
-            $baseSheet = $spreadsheet->getActiveSheet();
+            $baseSheet = $spreadsheet->getSheet(1);
             $templateSheet = clone $baseSheet;
             $sheet = null;
             $sheetIndex = 0;
+            $lastRow = 0;
+            $lastPriceRow = 0;
+            $lastTotalPriceRow = 0;
             if (!empty($clientUnits)) {
+                $rekapInvSheet = $spreadsheet->getSheet(0);
+                // dd($rekapInvSheet->getCell('A5'));
+                $placeholderRow = null;
+                $placeholderCol = null;
+                $pricePlaceholderRow = null;
+                $pricePlaceholderCol = null;
+                $totalPricePlaceholderRow = null;
+                $totalPricePlaceholderCol = null;
+                foreach ($rekapInvSheet->getRowIterator() as $row) {
+                    foreach ($row->getCellIterator() as $cell) {
+
+                        $coordinate = $cell->getCoordinate();
+                        $isMerged = $rekapInvSheet->getMergeCells();
+                        $value = trim((string) $cell->getValue());
+
+                        foreach ($isMerged as $mergeRange) {
+                            if ($cell->isInRange($mergeRange)) {
+                                $topLeft = explode(':', $mergeRange)[0];
+                                $value = trim((string) $rekapInvSheet->getCell($topLeft)->getValue());
+                                $coordinate = $topLeft;
+                                break;
+                            }
+                        }
+
+                        if ($value === '{{unit_sn}}') {
+                            [$placeholderCol, $placeholderRow] =
+                                Coordinate::coordinateFromString($coordinate);
+
+                            $lastRow = $placeholderRow;
+                        }
+
+                        if ($value === '{{start_date}}') {
+                            $rekapInvSheet->setCellValue($coordinate, $formattedStartDate);
+                        }
+                        if ($value === '{{price_unit_sn}}') {
+                            [$pricePlaceholderCol, $pricePlaceholderRow] =
+                                Coordinate::coordinateFromString($coordinate);
+
+                            $lastPriceRow = $pricePlaceholderRow;
+                        }
+
+                        if ($value === '{{total_price}}') {
+                            [$totalPricePlaceholderCol, $totalPricePlaceholderRow] =
+                                Coordinate::coordinateFromString($coordinate);
+
+                            $lastTotalPriceRow = $totalPricePlaceholderRow;
+                        }
+                    }
+                }
+                if (!$placeholderRow) {
+                    abort(300, 'Placeholder {{unit_sn}} not found!');
+                }
                 foreach ($clientUnits as $unitPos) {
+                    $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+
+                    // insert row
+                    $rekapInvSheet->insertNewRowBefore($lastRow + 1, 1);
+
+                    $newRow = $lastRow + 1;
+                    if ($totalPricePlaceholderRow >= $newRow) {
+                        $totalPricePlaceholderRow++;
+                    }
+                    // copy style
+                    $rekapInvSheet->duplicateStyle(
+                        $rekapInvSheet->getStyle($placeholderCol . $placeholderRow),
+                        $placeholderCol . $newRow
+                    );
+
+                    $rekapInvSheet->duplicateStyle(
+                        $rekapInvSheet->getStyle($pricePlaceholderCol . $pricePlaceholderRow),
+                        $pricePlaceholderCol . $newRow
+                    );
+                    // isi value
+                    $rekapInvSheet->setCellValue(
+                        $placeholderCol . $newRow,
+                        "=\"Untuk 1 unit \"&'{$unitSn}'!\$D\$3"
+                    );
+
+                    $rekapInvSheet->setCellValue(
+                        $pricePlaceholderCol . $newRow,
+                        "='{$unitSn}'!S37"
+                    );
+
+                    // geser lastRow supaya next insert di bawahnya
+                    $lastRow++;
+
                     if ($sheetIndex == 0) {
                         $sheet = $baseSheet;
                     } else {
@@ -657,15 +777,8 @@ class ExportController extends Controller
 
                     $baseName = $unitSn;
                     $sheetName = $baseName;
-                    $i = 1;
-
-                    // while ($spreadsheet->sheetNameExists($sheetName)) {
-                    //     $sheetName = $baseName . '_' . $i;
-                    //     $i++;
-                    // }
 
                     $sheet->setTitle($sheetName);
-                    // dd($sheet->getTitle());
                     $reports = $unitPos->reports->sortBy('date')->values();
 
                     // replace {{unit_sn}}
@@ -676,29 +789,10 @@ class ExportController extends Controller
                             }
                         }
                     }
-                    // ===== cari template row =====
-                    $templateRow = null;
-
-                    foreach ($sheet->getRowIterator() as $row) {
-                        foreach ($row->getCellIterator() as $cell) {
-                            if ($cell->getValue() === '{{date}}') {
-                                $templateRow = $cell->getRow();
-                                break 2;
-                            }
-                        }
-                    }
-
-                    if (!$templateRow) {
-                        abort(300, 'Template row {{date}} not found.');
-                    }
 
                     // =====================
-                    // WRITE DATA (kode kamu tetap sama)
+                    // WRITE DATA
                     // =====================
-
-                    $currentRow = $templateRow;
-                    $totalRow = 37;
-
                     $startDate = Carbon::create($year, $month, 1);
                     $endDate = $startDate->copy()->endOfMonth();
                     $period = CarbonPeriod::create($startDate, $endDate);
@@ -712,11 +806,43 @@ class ExportController extends Controller
                         ->filter()
                         ->values();
 
-                    $availability = $this->calculateAvailabilityByRange($formattedRequests);
+                    $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
+                    $placeholders = [
+                        '{{date}}',
+                        '{{suction_press}}',
+                        '{{discharge_press}}',
+                        '{{flowrate}}',
+                        // '{{curve}}',
+                        '{{run}}',
+                        '{{stby}}',
+                        '{{down}}',
+                        '{{remarks}}'
+                    ];
 
+                    $columns = [];
+                    $startRow = 0;
+                    $index = 0;
+                    foreach ($spreadsheet->getAllSheets() as $nSheet) {
+                        foreach ($nSheet->getRowIterator() as $row) {
+                            foreach ($row->getCellIterator() as $cell) {
+
+                                $value = $cell->getValue();
+
+                                if (in_array($value, $placeholders)) {
+                                    $columns[$value] = $cell->getColumn();
+
+                                    if ($index == 0)
+                                        $startRow = $cell->getRow();
+                                    $index++;
+                                }
+                            }
+                        }
+                    }
+                    $currentRow = $startRow;
                     foreach ($period as $date) {
-
+                        // dd($availability["daily"]);
                         $dateString = $date->format('Y-m-d');
+                        // dd($availability["daily"][$dateString]['running']);
                         $run = $availability["daily"][$dateString]['running'] ?? 0;
                         $stdby = $availability["daily"][$dateString]['standby'] ?? 0;
                         $sd = $availability["daily"][$dateString]['down'] ?? 0;
@@ -777,24 +903,36 @@ class ExportController extends Controller
                                 'remarks' => $remarks,
                             ];
                         }
+                        $volume = $report->flowrate * ($run / 24);
+                        if (isset($columns['{{date}}']))
+                            $sheet->setCellValue($columns['{{date}}'] . $currentRow, $report->date);
+                        $sheet->setCellValue($columns['{{suction_press}}'] . $currentRow, $report->suction_p);
+                        $sheet->setCellValue($columns['{{discharge_press}}'] . $currentRow, $report->discharge_p);
+                        $sheet->setCellValue($columns['{{flowrate}}'] . $currentRow, $volume);
 
-                        $sheet->setCellValue("A$currentRow", $report->date);
-                        $sheet->setCellValue("C$currentRow", $report->suction_p);
-                        $sheet->setCellValue("D$currentRow", $report->discharge_p);
-                        $sheet->setCellValue("E$currentRow", $report->flowrate);
-                        $sheet->setCellValue("K$currentRow", $run / 24);
-                        $sheet->setCellValue("L$currentRow", $stdby / 24);
-                        $sheet->setCellValue("M$currentRow", $sd / 24);
-                        $sheet->getStyle("K$currentRow:M$currentRow")
-                            ->getNumberFormat()
-                            ->setFormatCode('[h]:mm:ss');
+                        $sheet->setCellValue($columns['{{run}}'] . $currentRow, $run / 24);
+                        $sheet->setCellValue($columns['{{stby}}'] . $currentRow, $stdby / 24);
+                        $sheet->setCellValue($columns['{{down}}'] . $currentRow, $sd / 24);
 
-                        $sheet->setCellValue("T$currentRow", $report->remarks);
+                        $sheet->getStyle(
+                            $columns['{{run}}'] . $currentRow . ':' .
+                            $columns['{{down}}'] . $currentRow
+                        )->getNumberFormat()->setFormatCode('[h]:mm:ss');
+
+                        $sheet->setCellValue($columns['{{remarks}}'] . $currentRow, $report->remarks);
 
                         $currentRow++;
                     }
                     $sheetIndex++;
                 }
+                $startRow = $pricePlaceholderRow + 1;
+                $endRow = $lastRow;
+                $rekapInvSheet->setCellValue(
+                    $totalPricePlaceholderCol . $totalPricePlaceholderRow,
+                    "=SUM({$pricePlaceholderCol}{$startRow}:{$pricePlaceholderCol}{$endRow})"
+                );
+
+                $rekapInvSheet->removeRow($placeholderRow);
             }
             // ======================
             // SAVE FILE PER CLIENT
@@ -803,11 +941,549 @@ class ExportController extends Controller
             $writer = new Xlsx($spreadsheet);
             $writer->setPreCalculateFormulas(false);
 
-            $fileName = "Monthly_Report_{$unitSn}.xlsx";
+            $fileName = "Invoice_{$unitPos->client->name}.xlsx";
             $filePath = $tempFolder . '/' . $fileName;
             $writer->save($filePath);
 
             $generatedFiles[] = $filePath;
+        }
+
+        foreach ($cluData as $clientId => $clientUnits) {
+            // CLU YEARLY
+            if ($clientUnits->count() === 0) {
+                continue;
+            }
+            $templatePath = storage_path('templates/Template_CLU.xlsx');
+            $spreadsheet = IOFactory::load($templatePath);
+            $templatePathCLUInv = storage_path('templates/Template_CLU_invoice.xlsx');
+            $spreadsheetCLUInv = IOFactory::load($templatePathCLUInv);
+
+            $baseSheet = $spreadsheet->getSheet(1);
+            $templateSheet = clone $baseSheet;
+            $sheet = null;
+            $sheetIndex = 0;
+            if (!empty($clientUnits)) {
+                foreach ($clientUnits as $unitPos) {
+                    $locationName = $unitPos->location?->location ?? 'UNKNOWN';
+                    $location = ">> {$locationName} <<";
+                    $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+
+                    if ($sheetIndex == 0) {
+                        $sheet = $baseSheet;
+                    } else {
+                        $tempSheet = clone $templateSheet;
+                        $spreadsheet->addSheet($tempSheet);
+                        $sheet = $spreadsheet->getSheet($spreadsheet->getSheetCount() - 1);
+                    }
+                    $sheetName = substr($unitSn, 0, 31);
+                    $sheetName = preg_replace('/[:\\/?*\[\]]/', '-', $sheetName);
+
+                    $baseName = $unitSn;
+                    $sheetName = $baseName;
+
+                    $sheet->setTitle($sheetName);
+                    $reports = $unitPos->reports->sortBy('date')->values();
+
+                    $reportsByDate = $reports->keyBy(function ($item) {
+                        return Carbon::parse($item->date)->toDateString();
+                    });
+
+
+                    $start = Carbon::create($year, 1, 1);
+                    $end = $start->copy()->endOfYear();
+                    foreach ($sheet->getRowIterator() as $row) {
+                        foreach ($row->getCellIterator() as $cell) {
+                            if ($cell->getValue() === '{{start_date}}') {
+                                $cell->setValue($start->format('d-M-y'));
+                            }
+                            if ($cell->getValue() === '{{location}}') {
+                                $cell->setValue($location);
+                            }
+                        }
+                    }
+                    $finalReports = collect();
+
+                    while ($start <= $end) {
+                        $dateKey = $start->toDateString();
+
+                        if ($reportsByDate->has($dateKey)) {
+                            $finalReports->push($reportsByDate[$dateKey]);
+                        } else {
+                            $finalReports->push((object) [
+                                'date' => $dateKey,
+                                'data' => null,
+                            ]);
+                        }
+
+                        $start->addDay();
+                    }
+
+                    // =====================
+                    // WRITE DATA
+                    // =====================
+                    $startDate = Carbon::create($year, 1, 1);
+                    $endDate = Carbon::create($year, 12, 1)->endOfMonth();
+                    $period = CarbonPeriod::create($startDate, $endDate);
+
+                    $reportsGrouped = $finalReports->groupBy(function ($r) {
+                        return Carbon::parse($r->date)->format('Y-m-d');
+                    });
+
+                    $formattedRequests = $reports
+                        ->map(fn($r) => $r->request)
+                        ->filter()
+                        ->values();
+
+                    $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
+                    $placeholders = [
+                        '{{date}}',
+                        '{{suction_press}}',
+                        '{{discharge_press}}',
+                        '{{flowrate}}',
+                        '{{bef_cooler}}',
+                        '{{aft_cooler}}',
+                        '{{run}}',
+                        '{{stby}}',
+                        '{{down}}',
+                        '{{remarks}}',
+                        '{{availability}}'
+                    ];
+                    $columns = [];
+                    $startRow = 0;
+                    $index = 0;
+                    foreach ($spreadsheet->getAllSheets() as $nSheet) {
+                        foreach ($nSheet->getRowIterator() as $row) {
+                            foreach ($row->getCellIterator() as $cell) {
+
+                                $value = $cell->getValue();
+
+                                if (in_array($value, $placeholders)) {
+                                    $columns[$value] = $cell->getColumn();
+                                    if ($index == 0)
+                                        $startRow = $cell->getRow();
+                                    $index++;
+                                }
+                            }
+                        }
+                    }
+                    $currentRow = $startRow;
+                    $prevMonth = null;
+
+                    foreach ($period as $date) {
+
+                        $currentMonth = $date->month;
+
+                        if ($prevMonth !== null && $prevMonth !== $currentMonth) {
+
+                            // default: skip 1 row
+                            $currentRow++;
+
+                            if ($prevMonth == 2 && $currentMonth == 3) {
+                                $currentRow++; // extra skip
+                            }
+                        }
+
+                        $prevMonth = $currentMonth;
+
+                        $dateString = $date->format('Y-m-d');
+                        $run = $availability["daily"][$dateString]['running'] ?? 0;
+                        $stdby = $availability["daily"][$dateString]['standby'] ?? 0;
+                        $sd = $availability["daily"][$dateString]['down'] ?? 0;
+                        $availabilityDay = $availability["daily"][$dateString]['availability'] ?? 0;
+                        $remarks = $availability["daily"][$dateString]['remarks'] ?? '';
+
+                        if (isset($reportsGrouped[$dateString])) {
+
+                            $dayReports = $reportsGrouped[$dateString];
+
+                            $formattedReports = $dayReports
+                                ->map(function ($r) {
+                                    $data = is_string($r->data)
+                                        ? json_decode($r->data, true)
+                                        : $r->data;
+
+                                    if (!is_array($data))
+                                        return null;
+
+                                    return [
+                                        'date' => $r->date,
+                                        'time' => $r->time,
+                                        'suction_press' => $data['suction_press'] ?? 0,
+                                        'discharge_press' => $data['discharge_press'] ?? 0,
+                                        'bef_cooler' => $data['bef_cooler'] ?? 0,
+                                        'aft_cooler' => $data['aft_cooler'] ?? 0,
+                                        'flowrate' => $data['flowrate'] ?? 0,
+                                    ];
+                                })
+                                ->filter()
+                                ->values();
+
+                            $report = (object) [
+                                'date' => $date->translatedFormat('j M'),
+                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press'), 2),
+                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press'), 2),
+                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate'), 2),
+                                'bef_cooler' => round($this->getAvgByHourRange($formattedReports, 'bef_cooler'), 2),
+                                'aft_cooler' => round($this->getAvgByHourRange($formattedReports, 'aft_cooler'), 2),
+                                'run' => $run,
+                                'stby' => $stdby,
+                                'down' => $sd,
+                                'remarks' => $remarks,
+                            ];
+
+                        } else {
+                            $report = (object) [
+                                'date' => $date->translatedFormat('j M'),
+                                'suction_p' => 0,
+                                'discharge_p' => 0,
+                                'flowrate' => 0,
+                                'bef_cooler' => 0,
+                                'aft_cooler' => 0,
+                                'run' => $run,
+                                'stby' => $stdby,
+                                'down' => $sd,
+                                'remarks' => $remarks,
+                            ];
+                        }
+
+                        $volume = $report->flowrate * ($run / 24);
+
+                        $sheet->setCellValue($columns['{{date}}'] . $currentRow, $report->date);
+                        $sheet->setCellValue($columns['{{suction_press}}'] . $currentRow, $report->suction_p);
+                        $sheet->setCellValue($columns['{{discharge_press}}'] . $currentRow, $report->discharge_p);
+                        $sheet->setCellValue($columns['{{bef_cooler}}'] . $currentRow, $report->bef_cooler);
+                        $sheet->setCellValue($columns['{{aft_cooler}}'] . $currentRow, $report->aft_cooler);
+                        $sheet->setCellValue($columns['{{flowrate}}'] . $currentRow, $volume);
+
+                        $sheet->setCellValue($columns['{{run}}'] . $currentRow, $run / 24);
+                        $sheet->setCellValue($columns['{{stby}}'] . $currentRow, $stdby / 24);
+                        $sheet->setCellValue($columns['{{down}}'] . $currentRow, $sd / 24);
+                        $sheet->setCellValue($columns['{{availability}}'] . $currentRow, $availabilityDay / 100);
+                        $sheet->setCellValue($columns['{{remarks}}'] . $currentRow, $report->remarks);
+
+                        $currentRow++;
+                    }
+                    $sheetIndex++;
+                }
+            }
+
+            // CLU INV PER UNIT
+            $baseSheetCLUInv = $spreadsheetCLUInv->getSheet(1);
+            $templateSheetCLUInv = clone $baseSheetCLUInv;
+            $sheetCLUInv = null;
+            $sheetIndexCLUInv = 0;
+
+            if (!empty($clientUnits)) {
+                $rekapInvSheet = $spreadsheetCLUInv->getSheet(0);
+                $placeholders = [
+                    '{{locations}}',
+                    '{{unit_sn}}',
+                    '{{price_unit_sn}}',
+                    '{{total_price}}',
+                ];
+                $coordinates = [];
+
+                $coordinates = [];
+
+                foreach ($rekapInvSheet->getRowIterator() as $row) {
+                    foreach ($row->getCellIterator() as $cell) {
+
+                        $cellCoordinate = $cell->getCoordinate();
+                        $value = trim((string) $cell->getValue());
+
+                        if ($value === '{{start_date}}') {
+                            $rekapInvSheet->setCellValue(
+                                $cellCoordinate,
+                                Carbon::create($year, $month, 1)->format('d-M-Y')
+                            );
+                            continue;
+                        }
+
+                        if (in_array($value, $placeholders)) {
+                            [$col, $rowNum] = Coordinate::coordinateFromString($cellCoordinate);
+
+                            $coordinates[$value] = [
+                                'column' => $col,
+                                'row' => $rowNum
+                            ];
+                        }
+                    }
+                }
+
+                foreach ($clientUnits as $unitPos) {
+                    $templateRow = $coordinates['{{unit_sn}}']['row'] + $sheetIndexCLUInv;
+
+                    $locationName = $unitPos->location?->location ?? 'UNKNOWN';
+                    $words = explode(' ', $locationName);
+                    $selected = array_slice($words, 1, 3);
+                    $result = implode(' ', $selected);
+
+                    $location = "$result";
+                    $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    $sheetName = substr($unitSn, 0, 31);
+                    // $sheetName = preg_replace('/[:\\/?*\[\]]/', '-', $sheetName);
+                    preg_match('/\d+/', $unitSn, $matches);
+
+                    $number = $matches[0] ?? 'UNKNOWN';
+                    $sheetName = "$location-$number";
+                    $sheetName = $unitSn;
+
+                    $rekapInvSheet->insertNewRowBefore($templateRow, 1);
+
+                    $rekapInvSheet->setCellValue($coordinates['{{unit_sn}}']['column'] . $templateRow, $unitSn);
+                    $rekapInvSheet->setCellValue($coordinates['{{locations}}']['column'] . $templateRow, $locationName);
+                    $formula = "=IF('{$sheetName}'!L42=\"\",\"\",'{$sheetName}'!L42)";
+
+                    $rekapInvSheet->setCellValue(
+                        $coordinates['{{price_unit_sn}}']['column'] . $templateRow,
+                        $formula
+                    );
+                    if ($sheetIndexCLUInv == 0) {
+                        $sheetCLUInv = $baseSheetCLUInv;
+                        $sheetCLUInv->setTitle($sheetName);
+                    } else {
+                        $tempSheetCLUInv = clone $templateSheetCLUInv;
+                        $tempSheetCLUInv->setTitle($sheetName);
+                        $spreadsheetCLUInv->addSheet($tempSheetCLUInv);
+                        $sheetCLUInv = $spreadsheetCLUInv->getSheet($spreadsheetCLUInv->getSheetCount() - 1);
+                    }
+
+
+                    $reports = $unitPos->reports->sortBy('date')->values();
+
+                    $reportsByDate = $reports->keyBy(function ($item) {
+                        return Carbon::parse($item->date)->toDateString();
+                    });
+
+
+                    $start = Carbon::create($year, $month, 1)->startOfMonth();
+                    $endCLU = Carbon::create($year, $month, 1)->endOfMonth();
+
+                    $finalReports = collect();
+
+                    while ($start <= $end) {
+                        $dateKey = $start->toDateString();
+
+                        if ($reportsByDate->has($dateKey)) {
+                            $finalReports->push($reportsByDate[$dateKey]);
+                        } else {
+                            $finalReports->push((object) [
+                                'date' => $dateKey,
+                                'data' => null,
+                            ]);
+                        }
+
+                        $start->addDay();
+                    }
+
+                    // =====================
+                    // WRITE DATA
+                    // =====================
+                    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                    $endDate = $endCLU;
+                    $period = CarbonPeriod::create($startDate, $endDate);
+
+                    $reportsGrouped = $finalReports->groupBy(function ($r) {
+                        return Carbon::parse($r->date)->format('Y-m-d');
+                    });
+
+                    $formattedRequests = $reports
+                        ->map(fn($r) => $r->request)
+                        ->filter()
+                        ->values();
+
+                    $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
+                    $placeholders = [
+                        '{{date}}',
+                        '{{suction_press}}',
+                        '{{discharge_press}}',
+                        '{{flowrate}}',
+                        '{{run}}',
+                        '{{stby}}',
+                        '{{down}}',
+                        '{{remarks}}',
+                        '{{avg_suction_press}}',
+                        '{{avg_suction_press}}',
+                        '{{avg_discharge_press}}',
+                        '{{avg_flowrate}}',
+                        '{{avg_run}}',
+                        '{{total_flowrate}}',
+                        '{{total_run}}',
+                        '{{total_stby}}',
+                        '{{total_down}}',
+
+                    ];
+                    $columns = [];
+                    $rows = [];
+                    $startRow = 0;
+                    $index = 0;
+                    foreach ($spreadsheetCLUInv->getAllSheets() as $nSheet) {
+                        foreach ($nSheet->getRowIterator() as $row) {
+                            foreach ($row->getCellIterator() as $cell) {
+
+                                $value = $cell->getValue();
+
+                                if (in_array($value, $placeholders)) {
+                                    $columns[$value] = $cell->getColumn();
+                                    $rows[$value] = $cell->getRow();
+                                    if ($index == 0)
+                                        $startRow = $cell->getRow();
+                                    $index++;
+                                }
+                            }
+                        }
+                    }
+                    $currentRow = $startRow;
+                    $prevMonth = null;
+
+                    foreach ($period as $date) {
+
+                        $currentMonth = $date->month;
+
+                        if ($prevMonth !== null && $prevMonth !== $currentMonth) {
+
+                            // default: skip 1 row
+                            $currentRow++;
+
+                            if ($prevMonth == 2 && $currentMonth == 3) {
+                                $currentRow++; // extra skip
+                            }
+                        }
+
+                        $prevMonth = $currentMonth;
+
+                        $dateString = $date->format('Y-m-d');
+                        $run = $availability["daily"][$dateString]['running'] ?? 0;
+                        $stdby = $availability["daily"][$dateString]['standby'] ?? 0;
+                        $sd = $availability["daily"][$dateString]['down'] ?? 0;
+                        $remarks = $availability["daily"][$dateString]['remarks'] ?? '';
+
+                        if (isset($reportsGrouped[$dateString])) {
+
+                            $dayReports = $reportsGrouped[$dateString];
+
+                            $formattedReports = $dayReports
+                                ->map(function ($r) {
+                                    $data = is_string($r->data)
+                                        ? json_decode($r->data, true)
+                                        : $r->data;
+
+                                    if (!is_array($data))
+                                        return null;
+
+                                    return [
+                                        'date' => $r->date,
+                                        'time' => $r->time,
+                                        'suction_press' => $data['suction_press'] ?? 0,
+                                        'discharge_press' => $data['discharge_press'] ?? 0,
+                                        'flowrate' => $data['flowrate'] ?? 0,
+                                    ];
+                                })
+                                ->filter()
+                                ->values();
+
+                            $report = (object) [
+                                'date' => $date->translatedFormat('j M'),
+                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press'), 2),
+                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press'), 2),
+                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate'), 2),
+                                'run' => $run,
+                                'stby' => $stdby,
+                                'down' => $sd,
+                                'remarks' => $remarks,
+                            ];
+
+                        } else {
+                            $report = (object) [
+                                'date' => $date->translatedFormat('j M'),
+                                'suction_p' => 0,
+                                'discharge_p' => 0,
+                                'flowrate' => 0,
+                                'run' => $run,
+                                'stby' => $stdby,
+                                'down' => $sd,
+                                'remarks' => $remarks,
+                            ];
+                        }
+
+                        $volume = $report->flowrate * ($run / 24);
+
+                        $sheetCLUInv->setCellValue($columns['{{date}}'] . $currentRow, $report->date);
+                        $sheetCLUInv->setCellValue($columns['{{suction_press}}'] . $currentRow, $report->suction_p);
+                        $sheetCLUInv->setCellValue($columns['{{discharge_press}}'] . $currentRow, $report->discharge_p);
+                        $sheetCLUInv->setCellValue($columns['{{flowrate}}'] . $currentRow, $volume);
+
+                        $sheetCLUInv->setCellValue($columns['{{run}}'] . $currentRow, $run);
+                        $sheetCLUInv->setCellValue($columns['{{stby}}'] . $currentRow, $stdby);
+                        $sheetCLUInv->setCellValue($columns['{{down}}'] . $currentRow, $sd);
+                        $sheetCLUInv->setCellValue($columns['{{remarks}}'] . $currentRow, $report->remarks);
+
+                        $currentRow++;
+                    }
+                    $sheetIndexCLUInv++;
+                    $cols = [
+                        '{{suction_press}}' => ['{{avg_suction_press}}'],
+                        '{{discharge_press}}' => ['{{avg_discharge_press}}'],
+                        '{{flowrate}}' => ['{{avg_flowrate}}', '{{total_flowrate}}'],
+                        '{{run}}' => ['{{avg_run}}', '{{total_run}}'],
+                        '{{stby}}' => ['{{total_stby}}'],
+                        '{{down}}' => ['{{total_down}}'],
+                    ];
+                    foreach ($cols as $sourceKey => $targets) {
+
+                        if (!isset($columns[$sourceKey]))
+                            continue;
+
+                        $col = $columns[$sourceKey];
+
+                        foreach ($targets as $targetKey) {
+
+                            if (!isset($columns[$targetKey], $rows[$targetKey]))
+                                continue;
+
+                            if (str_contains($targetKey, 'avg')) {
+                                $formula = "=AVERAGE({$col}{$startRow}:{$col}{$currentRow})";
+                            } else {
+                                $formula = "=SUM({$col}{$startRow}:{$col}{$currentRow})";
+                            }
+
+                            $sheetCLUInv->setCellValue(
+                                $columns[$targetKey] . $rows[$targetKey],
+                                $formula
+                            );
+                        }
+                    }
+                }
+                $rowToDelete = $coordinates['{{unit_sn}}']['row'] + $sheetIndexCLUInv;
+                $col = $coordinates['{{price_unit_sn}}']['column'];
+                $start = $coordinates['{{unit_sn}}']['row'];
+                $end = $rowToDelete - 1;
+
+                $formula = "=SUM({$col}{$start}:{$col}{$end})";
+                $rekapInvSheet->setCellValue(
+                    $coordinates['{{total_price}}']['column'] . $coordinates['{{total_price}}']['row'] + $sheetIndexCLUInv,
+                    $formula
+                );
+                
+                $rekapInvSheet->removeRow($rowToDelete, 1);
+
+            }
+
+            // ======================
+            // SAVE FILE PER CLIENT
+            // ======================
+            $filePathCLU = $tempFolder . '/' . $unitPos->client->name . '_yearly.xlsx';
+            $writerCLU = new Xlsx($spreadsheet);
+            $writerCLU->setPreCalculateFormulas(false);
+            $writerCLU->save($filePathCLU);
+
+            $filePathINV = $tempFolder . '/' . $unitPos->client->name . '_INV.xlsx';
+            $writerINV = new Xlsx($spreadsheetCLUInv);
+            $writerINV->setPreCalculateFormulas(false);
+            $writerINV->save($filePathINV);
+
+            $generatedFiles[] = $filePathCLU;
+            $generatedFiles[] = $filePathINV;
         }
 
 
@@ -828,7 +1504,7 @@ class ExportController extends Controller
         // MULTIPLE → ZIP
         // =====================
 
-        $zipPath = $tempFolder . '/Monthly_Reports.zip';
+        $zipPath = $tempFolder . '/Invoices.zip';
 
         $zip = new \ZipArchive;
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
@@ -842,11 +1518,678 @@ class ExportController extends Controller
 
         return response()->download(
             $zipPath,
-            'Monthly_Reports.zip',
+            'Invoices.zip',
             ['Content-Type' => 'application/zip']
         )->deleteFileAfterSend(true);
     }
 
+    public function exportPenalty(Request $request)
+    {
+        $validated = $request->validate([
+            'clients' => 'required|array',
+            'clients.*' => 'exists:clients,client_id',
+            'start_date' => 'date|nullable'
+        ]);
+
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+
+        $startDate = isset($validated['start_date'])
+            ? Carbon::parse($validated['start_date'])
+            : Carbon::now()->startOfMonth();
+
+        $year = $startDate->year;
+        $month = $startDate->month;
+
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $formattedStartDate = $startDate->format('d/m/Y');
+        $unitPositions = UnitPosition::whereIn('client_id', $validated['clients'])
+            ->with([
+                'unit',
+                'reports.request',
+                'client',
+                'reports' => function ($q) use ($month, $year) {
+                    $q->whereYear('date', $year)
+                        ->whereMonth('date', $month)
+                        ->orderBy('date', 'asc');
+                }
+            ])
+            ->get();
+        $groupedByClient = $unitPositions->groupBy('client_id');
+
+        if ($unitPositions->isEmpty()) {
+            abort(404, 'Data not found');
+        }
+
+        $tempFolder = storage_path('app/temp');
+        if (!file_exists($tempFolder)) {
+            mkdir($tempFolder, 0777, true);
+        }
+
+        $generatedFiles = [];
+        $firstColRow = [];
+        foreach ($groupedByClient as $clientId => $clientUnits) {
+
+            $templatePath = storage_path('templates/Template_Denda.xlsx');
+            $spreadsheet = IOFactory::load($templatePath);
+
+            $sheet = $spreadsheet->getActiveSheet();
+            if (!empty($clientUnits)) {
+                $unitIndex = 0;
+                $header1 = "SUCTION HEADER";
+                $header2 = "FLOWRATE";
+                $header3 = "PERFORMANCE PENALTY";
+                $rowIndex = 0;
+                // INSERT DATA
+                foreach ($clientUnits as $unitPos) {
+                    $dayIndex = 0;
+                    $reports = $unitPos->reports->sortBy('date')->values();
+                    $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    $formattedRequests = $reports
+                        ->map(fn($r) => $r->request)
+                        ->filter()
+                        ->values();
+
+                    $sheetName = substr($unitSn, 0, 31);
+                    $sheetName = preg_replace('/[:\\/?*\[\]]/', '-', $sheetName);
+
+                    $baseName = $unitSn;
+                    $sheetName = $baseName;
+
+                    // =====================
+                    // WRITE DATA
+                    // =====================
+                    $startDate = Carbon::create($year, $month, 1);
+                    $endDate = $startDate->copy()->endOfMonth();
+                    $period = CarbonPeriod::create($startDate, $endDate);
+
+                    $reportsGrouped = $reports->groupBy(function ($r) {
+                        return Carbon::parse($r->date)->format('Y-m-d');
+                    });
+
+                    $placeholders = [
+                        '{{header1}}',
+                        '{{header2}}',
+                        '{{header3}}',
+                        '{{header1_data}}',
+                        '{{header2_data}}',
+                        '{{header3_data}}',
+                        '{{unit_sn}}',
+                        '{{date}}',
+                    ];
+
+                    $columns = [];
+                    $unitSnPositions = [];
+                    $insertCol = 0;
+                    foreach ($spreadsheet->getAllSheets() as $nSheet) {
+                        foreach ($nSheet->getRowIterator() as $row) {
+                            foreach ($row->getCellIterator() as $cell) {
+
+                                $value = $cell->getValue();
+
+                                if (!in_array($value, $placeholders)) {
+                                    continue;
+                                }
+
+                                if ($value === '{{unit_sn}}') {
+
+                                    $unitSnPositions[] = [
+                                        'column' => $cell->getColumn(),
+                                        'row' => $cell->getRow(),
+                                    ];
+
+                                } else {
+
+                                    $columns[$value] = [
+                                        'column' => $cell->getColumn(),
+                                        'row' => $cell->getRow(),
+                                    ];
+
+                                    if ($unitIndex == 0) {
+                                        $firstColRow[$value] = [
+                                            'column' => $cell->getColumn(),
+                                            'row' => $cell->getRow(),
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if ($clientUnits->count() > 1 && $clientUnits->count() != $unitIndex) {
+                        $startCol = Coordinate::columnIndexFromString($columns['{{header1}}']['column']);
+                        $lastUnitSn = end($unitSnPositions);
+
+                        $endCol = Coordinate::columnIndexFromString($lastUnitSn['column']);
+                        $blockWidth = $endCol - $startCol + 1;
+                        $newBlockStart = $endCol + 1;
+                        $insertCol = $endCol;
+                        $startRow = $columns['{{header1}}']['row'];
+                        $highestRow = $sheet->getHighestRow();
+                        $sheet->insertNewColumnBefore(
+                            Coordinate::stringFromColumnIndex($newBlockStart),
+                            $blockWidth
+                        );
+
+                        for ($i = 0; $i < $blockWidth; $i++) {
+
+                            $srcCol = Coordinate::stringFromColumnIndex($startCol + $i);
+                            $dstCol = Coordinate::stringFromColumnIndex($newBlockStart + $i);
+
+                            for ($r = $startRow; $r <= $highestRow; $r++) {
+
+                                $srcCell = $srcCol . $r;
+                                $dstCell = $dstCol . $r;
+
+                                // copy value
+                                $sheet->setCellValue(
+                                    $dstCell,
+                                    $sheet->getCell($srcCell)->getValue()
+                                );
+
+                                // copy style
+                                $sheet->duplicateStyle(
+                                    $sheet->getStyle($srcCell),
+                                    $dstCell
+                                );
+
+                                // copy conditional formatting
+                                $conditionalStyles = $sheet->getConditionalStyles($srcCell);
+                                if (!empty($conditionalStyles)) {
+                                    $sheet->setConditionalStyles($dstCell, $conditionalStyles);
+                                }
+                            }
+                        }
+                        $header1StartRow = $columns['{{header1}}']['row'];
+                        $header2StartRow = $columns['{{header2}}']['row'];
+                        $header3StartRow = $columns['{{header3}}']['row'];
+
+                        $sheet->setCellValue($columns['{{header1}}']['column'] . $header1StartRow, $header1);
+                        $sheet->setCellValue($columns['{{header2}}']['column'] . $header2StartRow, $header2);
+                        $sheet->setCellValue($columns['{{header3}}']['column'] . $header3StartRow, $header3);
+                        foreach ($unitSnPositions as $pos) {
+                            $sheet->setCellValue(
+                                $pos['column'] . $pos['row'],
+                                $unitSn
+                            );
+                        }
+                        foreach ($period as $date) {
+
+                            $dateString = $date->format('Y-m-d');
+                            $formattedDate = $date->format('d-M-Y');
+                            if (isset($reportsGrouped[$dateString])) {
+
+                                $dayReports = $reportsGrouped[$dateString];
+
+                                $formattedReports = $dayReports
+                                    ->map(function ($r) {
+
+                                        $data = is_string($r->data)
+                                            ? json_decode($r->data, true)
+                                            : $r->data;
+
+                                        if (!is_array($data)) {
+                                            return null;
+                                        }
+
+                                        return [
+                                            'date' => $r->date,
+                                            'time' => $r->time,
+                                            'suction_press' => $data['suction_press'] ?? 0,
+                                            'discharge_press' => $data['discharge_press'] ?? 0,
+                                            'flowrate' => $data['flowrate'] ?? 0,
+                                        ];
+                                    })
+                                    ->filter()
+                                    ->values();
+
+                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
+                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
+
+                                $report = (object) [
+                                    'date' => $formattedDate,
+                                    'suction_p' => round($suctionTotal, 2),
+                                    'flowrate' => round($flowrateTotal, 2),
+                                ];
+
+                            } else {
+
+                                $report = (object) [
+                                    'date' => $formattedDate,
+                                    'suction_p' => 0,
+                                    'flowrate' => 0,
+                                ];
+                            }
+                            if ($unitIndex === 0) {
+                                $rowDate = $columns['{{date}}']['row'] + $dayIndex;
+                                $colDate = $columns['{{date}}']['column'];
+                                $sheet->setCellValue(
+                                    $colDate . $rowDate,
+                                    $report->date
+                                );
+                            }
+                            // suction row
+                            $rowSuction = $columns['{{header1_data}}']['row'] + $dayIndex;
+                            $colSuction = $columns['{{header1_data}}']['column'];
+
+                            $sheet->setCellValue(
+                                $colSuction . $rowSuction,
+                                $report->suction_p
+                            );
+
+                            // flowrate row
+                            $rowFlowrate = $columns['{{header2_data}}']['row'] + $dayIndex;
+                            $colFlowRate = $columns['{{header2_data}}']['column'];
+
+                            $sheet->setCellValue(
+                                $colFlowRate . $rowFlowrate,
+                                $report->flowrate
+                            );
+
+                            // flowrate row
+                            $performance_penalty = $columns['{{header3_data}}']['row'] + $dayIndex;
+                            $suction = $colSuction . $rowSuction;
+                            $flow = $colFlowRate . $rowFlowrate;
+
+                            $formula = "=IF(AND($suction>=10,$flow<0.2),ROUND((0.2-$flow)*\$C\$2,0),0)";
+
+                            $sheet->setCellValue(
+                                $columns['{{header3_data}}']['column'] . $performance_penalty,
+                                $formula
+                            );
+                            $dayIndex++;
+                        }
+                    } else {
+                        foreach ($period as $date) {
+
+                            $dateString = $date->format('Y-m-d');
+                            $formattedDate = $date->format('d-M-Y');
+
+                            if (isset($reportsGrouped[$dateString])) {
+
+                                $dayReports = $reportsGrouped[$dateString];
+
+                                $formattedReports = $dayReports
+                                    ->map(function ($r) {
+
+                                        $data = is_string($r->data)
+                                            ? json_decode($r->data, true)
+                                            : $r->data;
+
+                                        if (!is_array($data)) {
+                                            return null;
+                                        }
+
+                                        return [
+                                            'date' => $r->date,
+                                            'time' => $r->time,
+                                            'suction_press' => $data['suction_press'] ?? 0,
+                                            'discharge_press' => $data['discharge_press'] ?? 0,
+                                            'flowrate' => $data['flowrate'] ?? 0,
+                                        ];
+                                    })
+                                    ->filter()
+                                    ->values();
+
+                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
+                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
+
+                                $report = (object) [
+                                    'date' => $formattedDate,
+                                    'suction_p' => round($suctionTotal, 2),
+                                    'flowrate' => round($flowrateTotal, 2),
+                                ];
+
+                            } else {
+
+                                $report = (object) [
+                                    'date' => $formattedDate,
+                                    'suction_p' => 0,
+                                    'flowrate' => 0,
+                                ];
+                            }
+
+                            // suction row
+                            $rowSuction = $columns['{{header1_data}}']['row'] + $dayIndex;
+                            $colSuction = $columns['{{header1_data}}']['column'];
+
+                            $sheet->setCellValue(
+                                $colSuction . $rowSuction,
+                                $report->suction_p
+                            );
+
+                            // flowrate row
+                            $rowFlowrate = $columns['{{header2_data}}']['row'] + $dayIndex;
+                            $colFlowRate = $columns['{{header2_data}}']['column'];
+
+                            $sheet->setCellValue(
+                                $colFlowRate . $rowFlowrate,
+                                $report->flowrate
+                            );
+
+                            // flowrate row
+                            $performance_penalty = $columns['{{header3_data}}']['row'] + $dayIndex;
+                            $suction = $colSuction . $rowSuction;
+                            $flow = $colFlowRate . $rowFlowrate;
+
+                            $formula = "=IF(AND($suction>=10,$flow<0.2),ROUND((0.2-$flow)*\$C\$2,0),0)";
+
+                            $sheet->setCellValue(
+                                $columns['{{header3_data}}']['column'] . $performance_penalty,
+                                $formula
+                            );
+                            $dayIndex++;
+                        }
+                    }
+
+                    foreach ($sheet->getRowIterator() as $row) {
+                        foreach ($row->getCellIterator() as $cell) {
+                            if ($cell->getValue() === '{{start_date}}') {
+                                $cell->setValue($formattedStartDate);
+                            }
+
+                            // if ($cell->getValue() === '{{unit_sn}}') {
+                            //     $cell->setValue($unitSn);
+                            // }
+                        }
+                    }
+
+                    $unitIndex++;
+                }
+
+                $unitIndex = 0;
+                foreach ($clientUnits as $unitPos) {
+                    $reports = $unitPos->reports->sortBy('date')->values();
+                    $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    $formattedRequests = $reports
+                        ->map(fn($r) => $r->request)
+                        ->filter()
+                        ->values();
+
+                    $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
+                    $avgAvailability = $availability['average_availability'] ?? 0;
+                    $availPlaceholder = [
+                        '{{availability}}',
+                        '{{unit_sn_avail}}',
+                        '{{avail_penalty}}',
+                        '{{total_avail_penalty}}',
+                    ];
+
+                    foreach ($spreadsheet->getAllSheets() as $nSheet) {
+                        foreach ($nSheet->getRowIterator() as $row) {
+                            foreach ($row->getCellIterator() as $cell) {
+                                $value = $cell->getValue();
+                                if (!in_array($value, $availPlaceholder)) {
+                                    continue;
+                                }
+                                $columns[$value] = [
+                                    'column' => $cell->getColumn(),
+                                    'row' => $cell->getRow(),
+                                ];
+                                if ($unitIndex == 0) {
+                                    $firstColRow[$value] = [
+                                        'column' => $cell->getColumn(),
+                                        'row' => $cell->getRow(),
+                                    ];
+                                }
+                            }
+                        }
+                    }
+
+                    $templateRow = 0;
+                    $rowUnitSnAvail = $columns['{{unit_sn_avail}}']['row'] + $unitIndex;
+                    $colUnitSnAvail = $columns['{{unit_sn_avail}}']['column'];
+
+                    $rowAvailability = $columns['{{availability}}']['row'] + $unitIndex;
+                    $colAvailability = $columns['{{availability}}']['column'];
+
+                    $rowAvailPenalty = $columns['{{avail_penalty}}']['row'] + $unitIndex;
+                    $colAvailPenalty = $columns['{{avail_penalty}}']['column'];
+                    if (($clientUnits->count() > 1 && $clientUnits->count() != $unitIndex)) {
+                        $rowIndex = $rowAvailability;
+                        $insertRow = $rowUnitSnAvail;
+                        $insertRowData = $rowUnitSnAvail;
+                        $insertRow += 1;
+                        $templateRow = $rowUnitSnAvail - $unitIndex;
+                        $sheet->insertNewRowBefore($insertRow, 1);
+                        $sheet->setCellValue(
+                            $colUnitSnAvail . $insertRow,
+                            $unitSn
+                        );
+
+                        $sheet->setCellValue(
+                            $colAvailability . $insertRow,
+                            $avgAvailability / 100
+                        );
+
+                        $sheet->setCellValue(
+                            $colAvailPenalty . $insertRow,
+                            "=IF(AND({$colAvailability}{$insertRowData}<95%,{$colAvailability}{$insertRowData}<>\"\"),ROUND((95%-{$colAvailability}{$insertRowData})*\$C\$2*\$H\$5,0),0)"
+                        );
+                        $rowIndex = $insertRow;
+                    } else {
+                        $sheet->setCellValue(
+                            $colUnitSnAvail . $rowUnitSnAvail,
+                            $unitSn
+                        );
+
+                        $sheet->setCellValue(
+                            $colAvailability . $rowUnitSnAvail,
+                            $avgAvailability / 100
+                        );
+
+                        $sheet->setCellValue(
+                            $colAvailPenalty . $rowUnitSnAvail,
+                            "=IF(AND({$colAvailability}{$rowUnitSnAvail}<95%,{$colAvailability}{$rowUnitSnAvail}<>\"\"),ROUND((95%-{$colAvailability}{$rowUnitSnAvail})*\$C\$2*\$H\$5,0),0)"
+                        );
+                        $rowIndex = $columns['{{total_avail_penalty}}']['row'];
+                    }
+
+                    $lastAvailRow = $rowIndex;
+                    $unitIndex++;
+                }
+            }
+            $highestRow = $sheet->getHighestRow();
+            $startCol = $firstColRow['{{header1_data}}']['column'];
+            $startRow = $firstColRow['{{header1_data}}']['row'];
+
+            $totaAvailCol = $columns['{{avail_penalty}}']['column'];
+            $totalAvailStartRow = $firstColRow['{{avail_penalty}}']['row'];
+            $lastTotalAvailRow = $lastAvailRow;
+
+            if ($clientUnits->count() > 1) {
+                $shift = 0;
+                $row = $startRow;
+
+                while (
+                    $row <= $highestRow &&
+                    $sheet->getCell($columns['{{header2_data}}']['column'] . $row)->getValue() === null &&
+                    // $sheet->getCell($columns['{{date}}']['column'] . $row)->getValue() === null &&
+                    $sheet->getCell($columns['{{header1_data}}']['column'] . $row)->getValue() === null &&
+                    $sheet->getCell($columns['{{header3_data}}']['column'] . $row)->getValue() === null
+                ) {
+                    $shift++;
+                    $row++;
+                }
+
+                if ($shift > 0) {
+                    $startCol = Coordinate::columnIndexFromString($firstColRow['{{date}}']['column']);
+                    $endCol = Coordinate::columnIndexFromString($columns['{{header3_data}}']['column']);
+
+                    for ($dstRow = $startRow; $dstRow <= $highestRow - $shift; $dstRow++) {
+
+                        $srcRow = $dstRow + $shift;
+
+                        for ($col = $startCol; $col <= $endCol; $col++) {
+
+                            $colLetter = Coordinate::stringFromColumnIndex($col);
+
+                            $src = $colLetter . $srcRow;
+                            $dst = $colLetter . $dstRow;
+
+                            $srcCell = $sheet->getCell($src);
+
+                            if ($srcCell->isFormula()) {
+                                $sheet->copyFormula($src, $dst);
+                            } else {
+                                $sheet->setCellValue($dst, $srcCell->getValue());
+                            }
+
+                            $sheet->duplicateStyle(
+                                $sheet->getStyle($src),
+                                $dst
+                            );
+
+                            // copy conditional formatting
+                            $conditionalStyles = $sheet->getConditionalStyles($src);
+                            if (!empty($conditionalStyles)) {
+                                $sheet->setConditionalStyles($dst, $conditionalStyles);
+                            }
+                        }
+                    }
+
+                    for ($r = $highestRow - $shift + 1; $r <= $highestRow; $r++) {
+
+                        for ($col = $startCol; $col <= $endCol; $col++) {
+
+                            $colLetter = Coordinate::stringFromColumnIndex($col);
+                            $cell = $colLetter . $r;
+
+                            $sheet->getCell($cell)->setValue(null);
+                            // $sheet->getStyle($cell)->getBorders()->setAllBorders(null);
+                            $sheet->duplicateStyle(
+                                $sheet->getStyle('A1'),
+                                $cell
+                            );
+
+                            $sheet->removeConditionalStyles($cell);
+                        }
+                    }
+                }
+
+                for ($r = $templateRow; $r < $highestRow; $r++) {
+
+                    if ($r <= $lastAvailRow + 1) {
+
+                        $srcUnit = $colUnitSnAvail . ($r + 1);
+                        $dstUnit = $colUnitSnAvail . $r;
+
+                        $sheet->setCellValue($dstUnit, $sheet->getCell($srcUnit)->getValue());
+                        $sheet->duplicateStyle($sheet->getStyle($srcUnit), $dstUnit);
+                        $sheet->setCellValue($srcUnit, null);
+
+
+                        $srcAvail = $colAvailability . ($r + 1);
+                        $dstAvail = $colAvailability . $r;
+
+                        $sheet->setCellValue($dstAvail, $sheet->getCell($srcAvail)->getValue());
+                        $sheet->duplicateStyle($sheet->getStyle($srcAvail), $dstAvail);
+                        $sheet->setCellValue($srcAvail, null);
+
+
+                        $srcPenalty = $colAvailPenalty . ($r + 1);
+                        $dstPenalty = $colAvailPenalty . $r;
+
+                        $sheet->setCellValue($dstPenalty, $sheet->getCell($srcPenalty)->getValue());
+                        $sheet->duplicateStyle($sheet->getStyle($srcPenalty), $dstPenalty);
+                        $sheet->setCellValue($srcPenalty, null);
+                    }
+                }
+            }
+            $lastTouchColumns = [];
+            foreach ($spreadsheet->getAllSheets() as $nSheet) {
+                foreach ($nSheet->getRowIterator() as $row) {
+                    foreach ($row->getCellIterator() as $cell) {
+                        $value = $cell->getValue();
+                        if (!in_array($value, $placeholders)) {
+                            continue;
+                        }
+                        $lastTouchColumns[$value] = [
+                            'column' => $cell->getColumn(),
+                            'row' => $cell->getRow(),
+                        ];
+                    }
+                }
+            }
+            $columnsToDelete = [];
+
+            foreach ($lastTouchColumns as $data) {
+                $columnsToDelete[] = $data['column'];
+            }
+
+            // hapus duplikat
+            $columnsToDelete = array_unique($columnsToDelete);
+
+            usort($columnsToDelete, function ($a, $b) {
+                return Coordinate::columnIndexFromString($b)
+                    - Coordinate::columnIndexFromString($a);
+            });
+
+            // hapus kolom
+            foreach ($columnsToDelete as $col) {
+                $spreadsheet->getActiveSheet()->removeColumn($col, 1);
+            }
+
+            $sheet->setCellValue(
+                $columns['{{total_avail_penalty}}']['column'] . $lastAvailRow,
+                "=SUM({$totaAvailCol}{$totalAvailStartRow}:{$totaAvailCol}{$lastTotalAvailRow})"
+            );
+
+            // ======================
+            // SAVE FILE PER CLIENT
+            // ======================
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->setPreCalculateFormulas(false);
+
+            $fileName = "Denda_{$unitPos->client->name}.xlsx";
+            $filePath = $tempFolder . '/' . $fileName;
+            $writer->save($filePath);
+
+            $generatedFiles[] = $filePath;
+        }
+
+        // $sheet->setCellValue($colUnitSnAvail . $lastRow, null);
+        // $sheet->setCellValue($colAvailability . $lastRow, null);
+
+
+        // =====================
+        // SINGLE FILE
+        // =====================
+        if (count($generatedFiles) === 1) {
+            return response()->download(
+                $generatedFiles[0],
+                basename($generatedFiles[0]),
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                ]
+            )->deleteFileAfterSend(true);
+        }
+
+        // =====================
+        // MULTIPLE → ZIP
+        // =====================
+
+        $zipPath = $tempFolder . '/Penalty.zip';
+
+        $zip = new \ZipArchive;
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+
+            foreach ($generatedFiles as $file) {
+                $zip->addFile($file, basename($file));
+            }
+
+            $zip->close();
+        }
+
+        return response()->download(
+            $zipPath,
+            'Penalty.zip',
+            ['Content-Type' => 'application/zip']
+        )->deleteFileAfterSend(true);
+    }
     // public function exportInvoice()
     // {
     //     // MATIIN output buffering

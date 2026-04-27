@@ -22,6 +22,7 @@ const TableComponent = (props) => {
         route = "",
         toggleEdit,
         edit = true,
+        editPlaceHolder,
         isBA = false,
         isUserList = false,
         isUnitList = false,
@@ -135,13 +136,11 @@ const TableComponent = (props) => {
 
     useEffect(() => {
         let tempData = [...(data || [])];
-
-        // SORT
+        //
         tempData.sort((a, b) => {
             if (!sortConfig.key) return 0;
 
             const normalize = (v = "") => v.toString().toLowerCase().trim();
-            console.log(a[sortConfig.key]);
             const aVal = normalize(a[sortConfig.key]);
             const bVal = normalize(b[sortConfig.key]);
 
@@ -279,7 +278,11 @@ const TableComponent = (props) => {
                                     onClick={toggleEdit}
                                 >
                                     <span className="">
-                                        {edit ? "Done" : "Edit"}
+                                        {edit
+                                            ? "Done"
+                                            : editPlaceHolder
+                                              ? editPlaceHolder
+                                              : "Edit"}
                                     </span>
                                 </div>
                             )}
@@ -300,9 +303,14 @@ const TableComponent = (props) => {
                                             `px-6 py-3 md:px-8 text-sm font-medium text-left cursor-pointer uppercase` +
                                             (col.headerClassName || "")
                                         }
-                                        onClick={() => handleSort(col.name)}
+                                        onClick={() =>
+                                            col?.sortable &&
+                                            handleSort(col.name)
+                                        }
                                     >
-                                        <div className="flex items-center">
+                                        <div
+                                            className={`flex items-center ${col.headerClassName}`}
+                                        >
                                             {typeof col?.Header === "function"
                                                 ? col?.Header(filteredData)
                                                 : col?.header}

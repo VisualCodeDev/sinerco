@@ -1,4 +1,4 @@
-import { getFields } from "@/Components/db";
+import { getFields, updateClientData } from "@/Components/db";
 import LoadingSpinner from "@/Components/Loading";
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
@@ -26,8 +26,10 @@ import columns from "@/Components/utils/Client/columns";
 
 const ClientList = () => {
     // const columns = tColumns();
-    const { data, loading, error } = fetch("client.get");
-    const [tableData, setTableData] = useState({});
+    const { data: initData, loading, error } = fetch("client.get");
+    const [data, setData] = useState(initData);
+    const [isPenalty, setIsPenalty] = useState(false);
+    const [tableData, setTableData] = useState(data);
     const [expanded, setExpanded] = useState(false);
     const [selectedClient, setSelectedClients] = useState(null);
     const [filteredArea, setArea] = useState([]);
@@ -36,71 +38,120 @@ const ClientList = () => {
     const [selectedRows, setSelectedRows] = useState([]);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
+    const [isMonthModal, setMonthModal] = useState(false);
+    const [toggleExport, setToggleExport] = useState(false);
+    const { addToast } = useToast();
+
+    // useEffect(() => {
+    //     const fetchUnits = async () => {
+    //         setLoading(true);
+    //         if (selectedClient) {
+    //             try {
+    //                 const response = await axios.get(
+    //                     route("unit.filter.get", selectedClient),
+    //                 );
+    //                 const data = response.data;
+
+    //                 const areaMap = new Map();
+
+    //                 for (const item of data) {
+    //                     const area = item.location.area;
+    //                     const location = item.location;
+    //                     const unit = {
+    //                         ...item.unit,
+    //                         unitAreaLocationId: item.unitAreaLocationId,
+    //                     };
+
+    //                     if (!areaMap.has(area.id)) {
+    //                         areaMap.set(area.id, {
+    //                             ...area,
+    //                             locations: new Map(),
+    //                         });
+    //                     }
+
+    //                     const currentArea = areaMap.get(area.id);
+
+    //                     if (!currentArea.locations.has(location.id)) {
+    //                         currentArea.locations.set(location.id, {
+    //                             ...location,
+    //                             units: [],
+    //                         });
+    //                     }
+
+    //                     currentArea.locations.get(location.id).units.push(unit);
+    //                 }
+
+    //                 const groupedAreas = Array.from(areaMap.values()).map(
+    //                     (areaObj) => ({
+    //                         ...areaObj,
+    //                         locations: Array.from(areaObj.locations.values()),
+    //                         isExpanded: false,
+    //                     }),
+    //                 );
+
+    //                 setArea(groupedAreas);
+    //             } catch (err) {
+    //                 console.error("Error fetching unit:", err);
+    //             } finally {
+    //                 setLoading(false);
+    //             }
+    //         }
+    //         setLoading(false);
+    //     };
+
+    //     fetchUnits();
+    // }, [data, selectedClient]);
+    useEffect(() => {
+        setData(initData);
+    }, [initData]);
+    
+    useEffect(() => {
+        if (!data || toggleExport) return;
+        setTableData(data);
+    }, [data, toggleExport]);
 
     useEffect(() => {
-        const fetchUnits = async () => {
-            setLoading(true);
-            if (selectedClient) {
-                try {
-                    const response = await axios.get(
-                        route("unit.filter.get", selectedClient),
-                    );
-                    const data = response.data;
+        if (!data || !toggleExport) return;
 
-                    const areaMap = new Map();
+        const isInvoice = toggleExport;
+        const filteredData = data.filter(
+            (item) => Boolean(item?.is_invoice) === isInvoice,
+        );
 
-                    for (const item of data) {
-                        const area = item.location.area;
-                        const location = item.location;
-                        const unit = {
-                            ...item.unit,
-                            unitAreaLocationId: item.unitAreaLocationId,
-                        };
-
-                        if (!areaMap.has(area.id)) {
-                            areaMap.set(area.id, {
-                                ...area,
-                                locations: new Map(),
-                            });
-                        }
-
-                        const currentArea = areaMap.get(area.id);
-
-                        if (!currentArea.locations.has(location.id)) {
-                            currentArea.locations.set(location.id, {
-                                ...location,
-                                units: [],
-                            });
-                        }
-
-                        currentArea.locations.get(location.id).units.push(unit);
-                    }
-
-                    const groupedAreas = Array.from(areaMap.values()).map(
-                        (areaObj) => ({
-                            ...areaObj,
-                            locations: Array.from(areaObj.locations.values()),
-                            isExpanded: false,
-                        }),
-                    );
-
-                    setArea(groupedAreas);
-                } catch (err) {
-                    console.error("Error fetching unit:", err);
-                } finally {
-                    setLoading(false);
-                }
-            }
-            setLoading(false);
-        };
-
-        fetchUnits();
-    }, [data, selectedClient]);
+        setTableData(filteredData);
+    }, [toggleExport, data]);
 
     if (loading) {
         return <LoadingSpinner />;
     }
-
+    const handleToggleInvoice = async (id, is_invoice) => {
+        if (!id) return;
+        try {
+            const updateData = [{ is_invoice: !is_invoice }];
+            console.log(updateData);
+            const resp = await updateClientData(id, updateData);
+            if (resp.response === "success") {
+                const newTabData = data.map((item) =>
+                    item?.client_id === id
+                        ? {
+                              ...item,
+                              is_invoice: !is_invoice,
+                          }
+                        : item,
+                );
+                setData(newTabData);
+                addToast({
+                    type: "success",
+                    text: "Data Updated",
+                });
+            }
+        } catch (err) {
+            addToast({
+                type: "error",
+                text: err?.response?.data?.message || "Error updating data",
+            });
+        }
+    };
     const handleClick = (item) => {
         if (!item.unitAreaLocationId) return;
         router.visit(route("daily", item.unitAreaLocationId));
@@ -115,6 +166,7 @@ const ClientList = () => {
             ),
         );
     };
+
     const handleCheckItem = (item) => {
         const id = item?.client_id;
         setSelectedRows((prev) =>
@@ -124,42 +176,78 @@ const ClientList = () => {
         );
     };
 
-    const handleSelectAll = () => {
-        if (selectedRows.length === data.length) {
+    const handleSelectAll = (currData) => {
+        if (selectedRows.length === currData.length) {
             // Unselect all
             setSelectedRows([]);
         } else {
             // Select all
-            setSelectedRows(data.map((item) => item.client_id));
+            setSelectedRows(currData.map((item) => item.client_id));
         }
     };
 
-    const handleInvoice = () => {
+    const handleInvoice = (month = null) => {
+        if (!selectedRows.length > 0) alert("No client selected");
+        if (isPenalty)
+            window.open(
+                route("export_penalty", {
+                    start_date: month || null,
+                    clients: selectedRows,
+                    // ...data,
+                }),
+                "_blank",
+            );
         window.open(
             route("export_inv", {
+                start_date: month || null,
                 clients: selectedRows,
-                ...data,
+                // ...data,
             }),
             "_blank",
         );
+    };
+
+    const handleOpenSetting = (value) => {
+        setSelectedClients(value);
+        setSettingModal(true);
     };
 
     const col = columns({
         selectedRows,
         handleSelectAll,
         data,
+        setToggleExport,
+        toggleExport,
+        handleOpenSetting,
+        handleToggleInvoice,
     });
 
     const Footer = Array.isArray(selectedRows) && selectedRows.length > 0 && (
         <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
             <tr>
                 <th>
-                    <div className="px-8 py-3 text-sm font-medium w-full flex gap-4">
+                    <div className="ps-8 pe-4 py-3 text-sm font-medium w-full flex gap-4">
                         <button
                             className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
-                            onClick={handleInvoice}
+                            onClick={() => {
+                                setMonthModal(true);
+                                setIsPenalty(false);
+                            }}
                         >
                             Invoice
+                        </button>
+                    </div>
+                </th>
+                <th>
+                    <div className="py-3 text-sm font-medium w-full flex gap-4">
+                        <button
+                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                            onClick={() => {
+                                setMonthModal(true);
+                                setIsPenalty(true);
+                            }}
+                        >
+                            Penalty
                         </button>
                     </div>
                 </th>
@@ -176,15 +264,20 @@ const ClientList = () => {
                 </div>
             )} */}
             <TableComponent
+                toggleEdit={() => setToggleExport(!toggleExport)}
+                edit={toggleExport}
+                editPlaceHolder={"Document"}
                 title="Clients"
                 columns={col}
-                data={data}
+                data={tableData}
                 Footer={Footer}
-                onRowClick={(value) => handleCheckItem(value)}
+                onRowClick={(value) => {
+                    if (toggleExport) handleCheckItem(value);
+                }}
             />
-            <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
-                {/* Client List Desktop*/}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
+            {/* <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]"> */}
+            {/* Client List Desktop*/}
+            {/* <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
                     <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaUserFriends className="text-2xl md:text-3xl" />
@@ -208,10 +301,10 @@ const ClientList = () => {
                             </button>
                         ))}
                     </div>
-                </div>
+                </div> */}
 
-                {/* Client List Mobile*/}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
+            {/* Client List Mobile*/}
+            {/* <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
                     <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <FaUserFriends className="" />
@@ -251,10 +344,10 @@ const ClientList = () => {
                             ))}
                         </div>
                     </div>
-                </div>
+                </div> */}
 
-                {/* Unit Contract List */}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
+            {/* Unit Contract List */}
+            {/* <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
                     <div className="flex gap-2 py-4">
                         <div className="flex justify-between items-center mb-4 text-lg md:text-xl font-semibold w-full">
                             <div className="flex flex-row items-center gap-3 justify-between w-full">
@@ -323,10 +416,10 @@ const ClientList = () => {
                             </p>
                         )}
                     </div>
-                </div>
+                </div> */}
 
-                {/* UNIT LIST */}
-                {selectedLocation && selectedLocation?.units?.length > 0 && (
+            {/* UNIT LIST */}
+            {/* {selectedLocation && selectedLocation?.units?.length > 0 && (
                     <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
                         <div className="flex flex-row justify-between items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
                             <div className="flex items-center gap-3">
@@ -376,18 +469,62 @@ const ClientList = () => {
                             )}
                         </div>
                     </div>
-                )}
-            </div>
+                )} */}
+            {/* </div> */}
             {isSettingModal && (
                 <SettingModal
-                    // data={dailyReportSettingData}
+                    // data={data?.filter()}
                     clientData={selectedClient}
-                    isModal={isSettingModal}
                     handleCloseModal={() => setSettingModal(false)}
                     // handleConfirmSettings={handleConfirmSettings}
                 />
             )}
+            {isMonthModal && (
+                <InvoiceModal
+                    isPenalty={isPenalty}
+                    handleCloseModal={() => setMonthModal(false)}
+                    handleExport={handleInvoice}
+                />
+            )}
         </PageLayout>
+    );
+};
+
+const InvoiceModal = (props) => {
+    const { handleCloseModal, handleExport, isPenalty } = props;
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const handleSubmit = () => {
+        const startDate = selectedMonth + "-01";
+
+        handleExport(startDate);
+    };
+    return (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg">
+            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
+                Export {isPenalty ? "Penalty" : "Invoice"}
+                <div
+                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
+                    onClick={handleCloseModal}
+                >
+                    <MdClose />
+                </div>
+            </div>
+            <div className="bg-white p-6 flex flex-col gap-4">
+                <label className="text-sm font-medium">Select Month</label>
+                <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="border rounded-lg px-3 py-2"
+                />
+                <button
+                    onClick={handleSubmit}
+                    className="bg-primary text-white rounded-lg py-2 mt-2"
+                >
+                    Export
+                </button>
+            </div>
+        </div>
     );
 };
 
@@ -396,7 +533,6 @@ const SettingModal = (props) => {
     const [loading, setLoading] = useState({});
     const [settingData, setSettingData] = useState({});
     const [saving, setSaving] = useState(false);
-    const { addToast } = useToast();
     const [fields, setFields] = useState([]);
 
     useEffect(() => {
@@ -437,7 +573,8 @@ const SettingModal = (props) => {
                     <MdClose />
                 </div>
             </div>
-            <div className=" bg-white h-[70vh] scale-[.85] flex justify-center">
+
+            <div className="bg-white h-[70vh] scale-[.85] flex justify-center">
                 <InputValidationSetting
                     data={settingData}
                     clientData={clientData}
