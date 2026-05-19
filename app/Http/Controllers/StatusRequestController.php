@@ -261,7 +261,7 @@ class StatusRequestController extends Controller
 
         $currStatus = $status->status;
         // Update status and end time
-        if ($currStatus === "End") {
+        if (!$val['end_date'] || !$val['end_time']) {
             $status->status = "Ongoing";
         }
         ;

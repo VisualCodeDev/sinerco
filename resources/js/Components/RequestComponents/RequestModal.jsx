@@ -20,9 +20,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const newErrors = {};   
-        if(isUnitDown) {
-            addToast({type: "error", text: "The Unit is Already Reported, Please End the Previous Report"})
+        const newErrors = {};
+        if (isUnitDown) {
+            addToast({
+                type: "error",
+                text: "The Unit is Already Reported, Please End the Previous Report",
+            });
             return;
         }
 
@@ -45,7 +48,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
             }
             setErrors({});
         } catch (error) {
-            addToast({ type: "error", text: error?.response?.data?.message || "Failed to make request" });
+            addToast({
+                type: "error",
+                text:
+                    error?.response?.data?.message || "Failed to make request",
+            });
             console.error(error);
         } finally {
             handleCloseModal();
@@ -64,10 +71,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         const response = await axios.get(route("getUnitAreaLocation"));
         setUnitData(response.data);
     };
-    
+
     const fetchTime = async () => {
         setLoading(true);
-        const dataDateTime = await getCurrDateTime(unitData[0]?.gmt_offset || 7);
+        const dataDateTime = await getCurrDateTime(
+            unitData[0]?.gmt_offset || 7,
+        );
         setData((prevData) => ({
             ...prevData,
             start_date: dataDateTime.date,
@@ -85,9 +94,9 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
 
     useEffect(() => {
         const areaLocation = unitData.find(
-            (item) => item?.unit_id === data?.unit_id
+            (item) => item?.unit_id === data?.unit_id,
         );
-        setIsUnitDown(areaLocation?.status != "running")
+        setIsUnitDown(areaLocation?.status != "running");
         handleChange(["unit_position_id"], areaLocation?.unit_position_id);
     }, [data?.unit_id]);
 
@@ -95,7 +104,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         <>
             {loading && <LoadingSpinner />}
             <Modal
-                title="Report SD/STDBY"
+                title="Report SD / STBY"
                 size="responsive"
                 handleCloseModal={handleCloseModal}
                 showModal={showModal}
@@ -106,29 +115,30 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                     className="flex flex-col"
                 >
                     <Modal.Body>
-                        <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                            <label
-                                className="font-semibold mb-2"
-                                htmlFor="unit"
-                            >
-                                Unit:{" "}
-                            </label>
-                            <div className="md:w-3/5 w-full">
+                        <div className="space-y-6">
+                            {/* Unit */}
+                            <div>
+                                <label
+                                    className="block text-sm font-semibold text-gray-700 mb-2"
+                                    htmlFor="unit"
+                                >
+                                    Unit
+                                </label>
+
                                 <select
-                                    className="text-sm md:text-base w-full"
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary bg-white"
                                     required
                                     id="unit"
                                     value={data?.unit_id || ""}
                                     onChange={(e) => {
                                         handleChange(
                                             ["unit_id"],
-                                            e.target.value
+                                            e.target.value,
                                         );
                                     }}
                                 >
-                                    <option value={null}>
-                                        -- Select Unit --
-                                    </option>
+                                    <option value="">-- Select Unit --</option>
+
                                     {unitData?.map((item, index) => (
                                         <option
                                             value={item?.unit_id}
@@ -138,120 +148,129 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                         </option>
                                     ))}
                                 </select>
+
                                 {errors.unit && (
-                                    <p className="text-red-500 text-sm mt-1">
+                                    <p className="text-red-500 text-sm mt-2">
                                         {errors.unit}
                                     </p>
                                 )}
                             </div>
-                        </div>
-                        <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                            <label
-                                className="font-semibold mb-2"
-                                htmlFor="request"
-                            >
-                                Request:{" "}
-                            </label>
-                            <div className="md:w-3/5 w-full">
+
+                            {/* Request Type */}
+                            <div>
+                                <label
+                                    className="block text-sm font-semibold text-gray-700 mb-2"
+                                    htmlFor="request"
+                                >
+                                    Request Type
+                                </label>
+
                                 <select
-                                    className="md:text-base text-sm w-full"
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary bg-white"
                                     required
                                     id="request"
                                     value={data.request_type || ""}
                                     onChange={(e) =>
                                         handleChange(
                                             ["request_type"],
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
                                 >
-                                    <option value={null}>
+                                    <option value="">
                                         -- Select Request Type --
                                     </option>
+
                                     {requestType?.map((item, index) => (
                                         <option value={item?.value} key={index}>
                                             {item?.name}
                                         </option>
                                     ))}
                                 </select>
+
                                 {errors.request_type && (
-                                    <p className="text-red-500 text-sm mt-1">
+                                    <p className="text-red-500 text-sm mt-2">
                                         {errors.request_type}
                                     </p>
                                 )}
                             </div>
-                        </div>
-                        <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base mb-4">
-                            <label
-                                className="font-semibold mb-2"
-                                htmlFor="date"
-                            >
-                                Date Time:{" "}
-                            </label>
-                            <div className="md:w-3/5 w-full">
-                                <DateTimeInput
-                                    value={{
-                                        date: data?.start_date,
-                                        time: data?.start_time,
-                                    }}
-                                    name={{
-                                        date: "start_date",
-                                        time: "start_time",
-                                    }}
-                                    handleChange={handleChange}
-                                />
+
+                            {/* Date Time */}
+                            <div>
+                                <label
+                                    className="block text-sm font-semibold text-gray-700 mb-2"
+                                    htmlFor="date"
+                                >
+                                    Date Time
+                                </label>
+
+                                <div className="rounded-xl border border-gray-300 px-4 py-3 bg-white">
+                                    <DateTimeInput
+                                        value={{
+                                            date: data?.start_date,
+                                            time: data?.start_time,
+                                        }}
+                                        name={{
+                                            date: "start_date",
+                                            time: "start_time",
+                                        }}
+                                        handleChange={handleChange}
+                                    />
+                                </div>
                             </div>
-                            {/* <input
-                            required
-                            id="date"
-                            name="date"
-                            type="date"
-                            value={data.date || ""}
-                            onChange={(e) =>
-                                handleChange([e.target.name], e.target.value)
-                            }
-                        /> */}
-                        </div>
-                        {/* <div className="flex justify-between items-center"text-sm md:text-base >
-                        <label htmlFor="time">Time: </label>
-                        <input
-                            required
-                            id="time"
-                            name="time"
-                            type="time"
-                            value={data.time || ""}
-                            onChange={(e) =>
-                                handleChange([e.target.name], e.target.value)
-                            }
-                        />
-                    </div> */}
-                        <div className="flex flex-col md:flex-row justify-between md:items-center text-sm md:text-base">
-                            <label
-                                className="font-semibold mb-2"
-                                htmlFor="time"
-                            >
-                                Remarks:{" "}
-                            </label>
-                            <div className="md:w-3/5 w-full">
-                                <input
-                                    className="md:text-base text-sm w-full"
+
+                            {/* Remarks */}
+                            <div>
+                                <label
+                                    className="block text-sm font-semibold text-gray-700 mb-2"
+                                    htmlFor="remarks"
+                                >
+                                    Remarks
+                                </label>
+
+                                <textarea
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[120px]"
                                     required
                                     id="remarks"
                                     name="remarks"
-                                    type="text"
+                                    placeholder="Write remarks here..."
                                     value={data.remarks || ""}
                                     onChange={(e) =>
                                         handleChange(
                                             [e.target.name],
-                                            e.target.value
+                                            e.target.value,
                                         )
                                     }
                                 />
+
+                                {errors.remarks && (
+                                    <p className="text-red-500 text-sm mt-2">
+                                        {errors.remarks}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </Modal.Body>
+
                     <Modal.Footer>
-                        <button type="submit">Submit</button>
+                        <div className="flex justify-end gap-3 w-full">
+                            <div className="p-2 flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleCloseModal}
+                                    className="px-5 py-2.5 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="px-5 py-2.5 rounded-xl bg-secondary text-white hover:opacity-90 transition-all duration-200 shadow-sm"
+                                >
+                                    Submit Report
+                                </button>
+                            </div>
+                        </div>
                     </Modal.Footer>
                 </form>
             </Modal>

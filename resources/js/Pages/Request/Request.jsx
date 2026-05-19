@@ -26,6 +26,8 @@ const Request = ({ data }) => {
     const [isEdit, setIsEdit] = useState(false);
     const [saving, setSaving] = useState(false);
     const [allData, setAllData] = useState(data);
+    const [runningEvent, setRunningEvent] = useState([]);
+    const [eventHistory, setEventHistory] = useState([]);
     const [dateTime, setDateTime] = useState(new Date());
 
     useEffect(() => {
@@ -43,6 +45,16 @@ const Request = ({ data }) => {
 
     const { user, loading } = useAuth();
     const { addToast } = useToast();
+
+    useEffect(() => {
+        const currentRunningEvent = allData.filter(
+            (item) => item.status === "Ongoing",
+        );
+        setRunningEvent(currentRunningEvent);
+        const pastEvents = allData.filter((item) => item.status === "End");
+        setEventHistory(pastEvents);
+    }, [allData]);
+
     if (loading) {
         return <LoadingSpinner />;
     }
@@ -169,18 +181,36 @@ const Request = ({ data }) => {
 
     return (
         <PageLayout>
-            <TableComponent
-                height="55vh"
-                title="Request List"
-                subtitle="Click on the row to edit the request"
-                columns={columns}
-                data={allData}
-                edit={isEdit}
-                toggleEdit={() => setIsEdit(!isEdit)}
-                onRowClick={(item) => isEdit ? handleCheckItem(item?.request_id) : handleSelect(item)}
-                handleMoveToHistory={handleMoveToHistory}
-                isRequestList={true}
-            />
+            <div>
+                <TableComponent
+                    height="55vh"
+                    title="ONGOING EVENT"
+                    columns={columns}
+                    data={runningEvent ? runningEvent : []}
+                    onRowClick={(item) =>
+                        isEdit
+                            ? handleCheckItem(item?.request_id)
+                            : handleSelect(item)
+                    }
+                />
+            </div>
+            <div className="mt-2">
+                <TableComponent
+                    height="55vh"
+                    title="EVENT HISTORY"
+                    columns={columns}
+                    data={eventHistory || []}
+                    edit={isEdit}
+                    toggleEdit={() => setIsEdit(!isEdit)}
+                    onRowClick={(item) =>
+                        isEdit
+                            ? handleCheckItem(item?.request_id)
+                            : handleSelect(item)
+                    }
+                    handleMoveToHistory={handleMoveToHistory}
+                    isRequestList={true}
+                />
+            </div>
             <EditItem
                 user={user}
                 selectedItem={selectedItem}
@@ -219,9 +249,7 @@ const EditItem = ({
     const updateData = async (isEdit) => {
         if (selectedItem) {
             setType(
-                selectedItem?.status === "End"
-                    ? "Set to Ongoing Request"
-                    : "End Request",
+                selectedItem?.status === "End" ? "View Request" : "End Request",
             );
 
             let { end_date, end_time, status } = selectedItem;
@@ -331,249 +359,163 @@ const EditItem = ({
             size="responsive"
         >
             <Modal.Body>
-                <div className="grid grid-cols-2 gap-5 items-center">
-                    {user?.role === "operator"
-                        ? editRequestItems
-                              .filter(
-                                  (item) =>
-                                      item?.name === "Request" ||
-                                      item?.name === "Remarks" ||
-                                      item?.name === "End Date Time",
-                              )
-                              .map((item, index) => {
-                                  const itemInputType = item?.isInput
-                                      ? item?.type
-                                      : false;
-
-                                  return (
-                                      <>
-                                          <div className="font-semibold">
-                                              {item?.name}
-                                          </div>
-                                          {!itemInputType ? (
-                                              <>
-                                                  {item?.name ===
-                                                  "Start Date Time" ? (
-                                                      <div>
-                                                          {getFormattedDate(
-                                                              formData[
-                                                                  item?.value
-                                                              ],
-                                                          )}
-                                                      </div>
-                                                  ) : (
-                                                      <StatusPill
-                                                          request_type={
-                                                              formData[
-                                                                  item?.value
-                                                              ]
-                                                          }
-                                                      />
-                                                  )}
-                                              </>
-                                          ) : itemInputType &&
-                                            item?.type != "option" &&
-                                            item?.type != "dateTime" ? (
-                                              <input
-                                                  type={itemInputType}
-                                                  value={formData[item?.value]}
-                                                  onChange={(e) =>
-                                                      handleChange(
-                                                          item?.value,
-                                                          e.target.value,
-                                                      )
-                                                  }
-                                              />
-                                          ) : item?.type === "dateTime" ? (
-                                              <DateTimeInput
-                                                  value={{
-                                                      date: formData[
-                                                          item?.value?.date
-                                                      ],
-                                                      time: formData[
-                                                          item?.value?.time
-                                                      ],
-                                                  }}
-                                                  name={{
-                                                      date: item?.value?.date,
-                                                      time: item?.value?.time,
-                                                  }}
-                                                  required={
-                                                      formData?.status != "End"
-                                                  }
-                                                  handleChange={handleChange}
-                                              />
-                                          ) : (
-                                              <div key={index}>
-                                                  <select
-                                                      value={
-                                                          formData[item?.value]
-                                                      }
-                                                      onChange={(e) =>
-                                                          handleChange(
-                                                              item?.value,
-                                                              e.target.value,
-                                                          )
-                                                      }
-                                                  >
-                                                      {item?.options &&
-                                                          item?.options?.map(
-                                                              (item) => (
-                                                                  <option
-                                                                      value={
-                                                                          item?.value
-                                                                      }
-                                                                      key={
-                                                                          index
-                                                                      }
-                                                                  >
-                                                                      {
-                                                                          item?.name
-                                                                      }
-                                                                  </option>
-                                                              ),
-                                                          )}
-                                                  </select>
-                                              </div>
-                                          )}
-                                      </>
-                                  );
-                              })
+                <div className="space-y-5">
+                    {(user?.role === "operator"
+                        ? editRequestItems.filter(
+                              (item) =>
+                                  item?.name === "Request" ||
+                                  item?.name === "Remarks" ||
+                                  item?.name === "End Date Time",
+                          )
                         : (user?.role === "super_admin" ||
                               user?.role === "technician") &&
-                          editRequestItems
-                              .filter(
-                                  (item) =>
-                                      item?.name === "Start Date Time" ||
-                                      item?.name === "Request" ||
-                                      item?.name === "Remarks" ||
-                                      item?.name === "End Date Time",
-                              )
-                              .map((item, index) => {
-                                  const itemInputType = item?.isInput
-                                      ? item?.type
-                                      : false;
+                          editRequestItems.filter(
+                              (item) =>
+                                  item?.name === "Start Date Time" ||
+                                  item?.name === "Request" ||
+                                  item?.name === "Remarks" ||
+                                  item?.name === "End Date Time",
+                          )
+                    )?.map((item, index) => {
+                        const itemInputType = item?.isInput
+                            ? item?.type
+                            : false;
 
-                                  return (
-                                      <>
-                                          <div className="font-semibold">
-                                              {item?.name}
-                                          </div>
-                                          {!itemInputType ? (
-                                              <>
-                                                  {item?.name ===
-                                                  "Start Date Time" ? (
-                                                      <div>
-                                                          {getFormattedDate(
-                                                              formData[
-                                                                  item?.value
-                                                              ],
-                                                          )}
-                                                      </div>
-                                                  ) : (
-                                                      <StatusPill
-                                                          request_type={
-                                                              formData[
-                                                                  item?.value
-                                                              ]
-                                                          }
-                                                      />
-                                                  )}
-                                              </>
-                                          ) : itemInputType &&
-                                            item?.type != "option" &&
-                                            item?.type != "dateTime" ? (
-                                              <input
-                                                  disabled={
-                                                      selectedItem?.status ===
-                                                      "End"
-                                                  }
-                                                  type={itemInputType}
-                                                  value={formData[item?.value]}
-                                                  onChange={(e) =>
-                                                      handleChange(
-                                                          item?.value,
-                                                          e.target.value,
-                                                      )
-                                                  }
-                                              />
-                                          ) : item?.type === "dateTime" ? (
-                                              <DateTimeInput
-                                                  disabled={
-                                                      selectedItem?.status ===
-                                                      "End"
-                                                  }
-                                                  value={{
-                                                      date: formData[
-                                                          item?.value?.date
-                                                      ],
-                                                      time: formData[
-                                                          item?.value?.time
-                                                      ],
-                                                  }}
-                                                  name={{
-                                                      date: item?.value?.date,
-                                                      time: item?.value?.time,
-                                                  }}
-                                                  required={
-                                                      formData?.status != "End"
-                                                  }
-                                                  handleChange={handleChange}
-                                              />
-                                          ) : (
-                                              <div key={index}>
-                                                  <select
-                                                      value={
-                                                          formData[item?.value]
-                                                      }
-                                                      onChange={(e) =>
-                                                          handleChange(
-                                                              item?.value,
-                                                              e.target.value,
-                                                          )
-                                                      }
-                                                  >
-                                                      {item?.options &&
-                                                          item?.options?.map(
-                                                              (item) => (
-                                                                  <option
-                                                                      value={
-                                                                          item?.value
-                                                                      }
-                                                                      key={
-                                                                          index
-                                                                      }
-                                                                  >
-                                                                      {
-                                                                          item?.name
-                                                                      }
-                                                                  </option>
-                                                              ),
-                                                          )}
-                                                  </select>
-                                              </div>
-                                          )}
-                                      </>
-                                  );
-                              })}
+                        return (
+                            <div
+                                key={index}
+                                className="bg-[#f8fafc] border border-[#edf1f5] rounded-2xl p-4"
+                            >
+                                <div className="flex flex-col gap-3">
+                                    <label className="text-sm font-semibold text-gray-700">
+                                        {item?.name}
+                                    </label>
+
+                                    {/* Static View */}
+                                    {!itemInputType ? (
+                                        <>
+                                            {item?.name ===
+                                            "Start Date Time" ? (
+                                                <div className="text-gray-700 font-medium">
+                                                    {getFormattedDate(
+                                                        formData[item?.value],
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <StatusPill
+                                                        request_type={
+                                                            formData[
+                                                                item?.value
+                                                            ]
+                                                        }
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : item?.type != "option" &&
+                                      item?.type != "dateTime" ? (
+                                        /* Input */
+                                        <input
+                                            disabled={
+                                                selectedItem?.status === "End"
+                                            }
+                                            type={itemInputType}
+                                            value={formData[item?.value]}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    item?.value,
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:text-gray-500"
+                                        />
+                                    ) : item?.type === "dateTime" ? (
+                                        /* Date Time */
+                                        <div className="rounded-xl border border-gray-300 bg-white px-4 py-3">
+                                            <DateTimeInput
+                                                disabled={
+                                                    selectedItem?.status ===
+                                                    "End"
+                                                }
+                                                value={{
+                                                    date: formData[
+                                                        item?.value?.date
+                                                    ],
+                                                    time: formData[
+                                                        item?.value?.time
+                                                    ],
+                                                }}
+                                                name={{
+                                                    date: item?.value?.date,
+                                                    time: item?.value?.time,
+                                                }}
+                                                required={
+                                                    formData?.status != "End"
+                                                }
+                                                handleChange={handleChange}
+                                            />
+                                        </div>
+                                    ) : (
+                                        /* Select */
+                                        <select
+                                            disabled={
+                                                selectedItem?.status === "End"
+                                            }
+                                            value={formData[item?.value]}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    item?.value,
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary disabled:bg-gray-100 disabled:text-gray-500"
+                                        >
+                                            {item?.options &&
+                                                item?.options?.map(
+                                                    (option, optionIndex) => (
+                                                        <option
+                                                            value={
+                                                                option?.value
+                                                            }
+                                                            key={optionIndex}
+                                                        >
+                                                            {option?.name}
+                                                        </option>
+                                                    ),
+                                                )}
+                                        </select>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
                 </div>
             </Modal.Body>
+
             <Modal.Footer>
-                <div className="flex items-center justify-end gap-3">
-                    {selectedItem?.status != "End" && accessEdit && (
+                <div className="w-full flex justify-end">
+                    <div className=" rounded-2xl p-2 flex items-center gap-2">
+                        {selectedItem?.status != "End" && accessEdit && (
+                            <button
+                                className="bg-white hover:bg-white/90 transition duration-200 text-primary px-4 py-2.5 rounded-xl shadow-sm"
+                                onClick={() => updateData(true)}
+                            >
+                                Set Current Date
+                            </button>
+                        )}
+
                         <button
-                            className="bg-secondary hover:bg-secondary/90 transition duration-100 text-white px-3 py-2 rounded-lg"
-                            onClick={() => updateData(true)}
+                            className="bg-secondary text-white hover:opacity-90 transition duration-200 px-5 py-2.5 rounded-xl shadow-sm"
+                            onClick={() => {
+                                // setModal(false);
+
+                                handleSave();
+                            }}
                         >
-                            Set Current Date
+                            {accessEdit ? "Save Changes" : type}
                         </button>
-                    )}
-                    <button
-                        className="bg-white text-primary hover:bg-white/80 transition duration-100 px-3 py-2 rounded-lg"
-                        onClick={() => handleSave()}
-                    >
-                        {accessEdit ? "Save" : type}
-                    </button>
+                    </div>
                 </div>
             </Modal.Footer>
         </Modal>

@@ -12,6 +12,7 @@ import { useAuth } from "@/Components/Auth/auth";
 import LoadingSpinner from "@/Components/Loading";
 import { getAllUnits, getUnitReports } from "@/Components/db";
 import DynamicLineChart from "@/Components/DynamicLineChart";
+import UnitReportStatusTable from "@/Components/UnitReportStatusTable";
 
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
@@ -41,7 +42,7 @@ export default function Home() {
 
         if (respRequestUnitData.data) {
             const filteredData = respRequestUnitData?.data?.filter(
-                (item) => item.status === "Ongoing"
+                (item) => item.status === "Ongoing",
             );
             setRequestUnitData(respRequestUnitData.data || []);
         }
@@ -92,7 +93,6 @@ export default function Home() {
         }, 10000);
         return () => clearInterval(interval);
     }, []);
-
 
     if (!data || loading) {
         return <LoadingSpinner />;
@@ -256,13 +256,13 @@ export default function Home() {
                                                                 "stdby"
                                                                     ? "bg-yellow-500"
                                                                     : item?.request_type ===
-                                                                      "sd"
-                                                                    ? "bg-red-500"
-                                                                    : "bg-green-500"
+                                                                        "sd"
+                                                                      ? "bg-red-500"
+                                                                      : "bg-green-500"
                                                             }`}
                                                         >
                                                             {getRequestTypeName(
-                                                                item?.request_type
+                                                                item?.request_type,
                                                             )}
                                                         </p>
                                                     </div>
@@ -271,7 +271,7 @@ export default function Home() {
                                             <td class="px-6 py-4">
                                                 <p>
                                                     {getFormattedDate(
-                                                        item?.start_date
+                                                        item?.start_date,
                                                     ) || "-"}
                                                 </p>
                                                 <p>{item?.start_time}</p>
@@ -282,7 +282,7 @@ export default function Home() {
                                             <td class="px-6 py-4">
                                                 {getDuration(
                                                     item?.start_date,
-                                                    item?.start_time
+                                                    item?.start_time,
                                                 )}
                                             </td>
                                             <td class="px-6 py-4">
@@ -304,7 +304,8 @@ export default function Home() {
                         </table>
                     </div>
                 </div>
-                
+                {/* REPORT STATUS */}
+                <UnitReportStatusTable />
                 {/* STATISTIK */}
                 <div className="bg-white rounded-lg p-2">
                     <DynamicLineChart />

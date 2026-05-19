@@ -108,6 +108,7 @@ export const updateClientData = async (client_id, dataArr) => {
         return err;
     }
 };
+
 export const fetchWithAuth = async (url, options = {}) => {
     try {
         const response = await fetch(url, {
@@ -132,5 +133,68 @@ export const fetchWithAuth = async (url, options = {}) => {
     } catch (err) {
         console.error(err);
         throw err;
+    }
+};
+
+export const getAllReports = async () => {
+    try {
+        const response = await fetch(route("unit.get"));
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        let data = await response.json();
+        data = data
+            .map((unit) => {
+                const lastReport = [...(unit.reports || [])].sort(
+                    (a, b) =>
+                        new Date(`${b.date}T${b.time}`) -
+                        new Date(`${a.date}T${a.time}`),
+                )[0];
+
+                let lastReportTime = "No report";
+                let color = "red";
+                let sortDate = 0;
+
+                if (lastReport) {
+                    const reportDate = new Date(
+                        `${lastReport.date}T${lastReport.time}`,
+                    );
+
+                    sortDate = reportDate.getTime();
+
+                    lastReportTime = reportDate.toLocaleString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    });
+
+                    const now = new Date();
+                    const diffHours = (now - reportDate) / (1000 * 60 * 60);
+
+                    if (diffHours < 2) {
+                        color = "normal";
+                    }
+                }
+
+                return {
+                    unit: unit.unit,
+                    area: unit.area,
+                    location: unit.location,
+                    last_report_time: lastReportTime,
+                    color,
+                    sortDate,
+                };
+            })
+            .sort((a, b) => b.sortDate - a.sortDate)
+            .map(({ sortDate, ...rest }) => rest);
+
+        return data;
+    } catch (error) {
+        console.error("Gagal ambil data:", error);
+        return null;
     }
 };

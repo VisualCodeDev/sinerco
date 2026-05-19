@@ -119,7 +119,7 @@ const Heading = ({ children, alert, setAlert }) => {
         },
         eventHistory: {
             icon: <FaCalendarAlt />,
-            label: "Event History",
+            label: "SD / STBY Event",
             href: route("request"),
         },
         // classifiedContract: {
@@ -401,7 +401,7 @@ const Heading = ({ children, alert, setAlert }) => {
                             SD
                         </span>
                         <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
-                            STDBY
+                            STBY
                         </span>
                     </button>
                     <RequestModal

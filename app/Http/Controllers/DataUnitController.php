@@ -35,7 +35,8 @@ class DataUnitController extends Controller
                 'workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-                'location.area'
+                'location.area',
+                'reports'
             ])->get()->makeHidden(['created_at', 'updated_at']);
             $data = $temp->map(function ($pos) {
                 return [
@@ -50,6 +51,7 @@ class DataUnitController extends Controller
                     'location_id' => $pos->location_id ?? null,
                     'area' => $pos->location?->area?->area ?? null,
                     'unit_position_id' => $pos->id,
+                    'reports' => $pos->reports
                 ];
             });
         } else {
@@ -58,6 +60,7 @@ class DataUnitController extends Controller
                     $q->select(['client_id', 'name', 'gmt_offset']);
                 },
                 'UnitPositions.location.area',
+                'UnitPositions.reports',
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
@@ -76,6 +79,7 @@ class DataUnitController extends Controller
                     'location' => $unit->UnitPositions?->location->location ?? null,
                     'area' => $unit->UnitPositions?->location->area->area ?? null,
                     'unit_position_id' => $unit->UnitPositions?->id ?? null,
+                    'reports' => $unit->UnitPositions?->reports
                 ];
             });
         }
