@@ -1582,6 +1582,14 @@ class ExportController extends Controller
                 $header2 = "FLOWRATE";
                 $header3 = "PERFORMANCE PENALTY";
                 $rowIndex = 0;
+                $h3HeaderCol = null;
+                $h3HeaderRow = null;
+                $h3LastDataCol = null;
+                $h3ColIdx = null;
+                $h3DataColIdx = null;
+                $h3RowNum = null;
+                $h3DataRowNum = null;
+                $h3UnitSnRow = null;
                 // INSERT DATA
                 foreach ($clientUnits as $unitPos) {
                     $dayIndex = 0;
@@ -1660,9 +1668,16 @@ class ExportController extends Controller
 
                     if ($clientUnits->count() > 1 && $clientUnits->count() != $unitIndex) {
                         $startCol = Coordinate::columnIndexFromString($columns['{{header1}}']['column']);
-                        $lastUnitSn = end($unitSnPositions);
+                        // Determine H3 boundary to exclude its {{unit_sn}} from the H1/H2 block width.
+                        $h3BoundaryColIdx = $h3ColIdx ?? Coordinate::columnIndexFromString($columns['{{header3}}']['column']);
+                        $h1h2Sns = array_values(array_filter($unitSnPositions, fn($p) =>
+                            Coordinate::columnIndexFromString($p['column']) < $h3BoundaryColIdx
+                        ));
+                        $lastUnitSn = !empty($h1h2Sns) ? end($h1h2Sns) : null;
 
-                        $endCol = Coordinate::columnIndexFromString($lastUnitSn['column']);
+                        $endCol = $lastUnitSn
+                            ? Coordinate::columnIndexFromString($lastUnitSn['column'])
+                            : ($startCol + 1);
                         $blockWidth = $endCol - $startCol + 1;
                         $newBlockStart = $endCol + 1;
                         $insertCol = $endCol;
@@ -1702,18 +1717,70 @@ class ExportController extends Controller
                                 }
                             }
                         }
+
+                        // On the first unit, seed H3 tracking from the scan result.
+                        if ($h3ColIdx === null) {
+                            $h3ColIdx     = Coordinate::columnIndexFromString($columns['{{header3}}']['column']);
+                            $h3RowNum     = $columns['{{header3}}']['row'];
+                            $h3DataColIdx = Coordinate::columnIndexFromString($columns['{{header3_data}}']['column']);
+                            $h3DataRowNum = $columns['{{header3_data}}']['row'];
+                            // Find the {{unit_sn}} row in the H3 section (column >= H3 header column).
+                            foreach ($unitSnPositions as $pos) {
+                                if (Coordinate::columnIndexFromString($pos['column']) >= $h3ColIdx) {
+                                    $h3UnitSnRow = $pos['row'];
+                                    break;
+                                }
+                            }
+                        }
+
+                        // H3 is to the right of the H1/H2 block — shift it by $blockWidth.
+                        $h3ColIdx     += $blockWidth;
+                        $h3DataColIdx += $blockWidth;
+
+                        // Expand only the H3 data column for the next unit (header stays as one spanning cell).
+                        $h3DataColStr    = Coordinate::stringFromColumnIndex($h3DataColIdx);
+                        $h3NewDataColStr = Coordinate::stringFromColumnIndex($h3DataColIdx + 1);
+                        $highestRowH3    = $sheet->getHighestRow();
+
+                        $sheet->insertNewColumnBefore($h3NewDataColStr, 1);
+
+                        for ($r = $h3DataRowNum; $r <= $highestRowH3; $r++) {
+                            $sheet->setCellValue($h3NewDataColStr . $r, $sheet->getCell($h3DataColStr . $r)->getValue());
+                            $sheet->duplicateStyle($sheet->getStyle($h3DataColStr . $r), $h3NewDataColStr . $r);
+                            $cs = $sheet->getConditionalStyles($h3DataColStr . $r);
+                            if (!empty($cs)) {
+                                $sheet->setConditionalStyles($h3NewDataColStr . $r, $cs);
+                            }
+                        }
+
+                        // Keep $columns in sync so the data-write loop below uses the right H3_data column.
+                        $columns['{{header3_data}}']['column'] = $h3DataColStr;
+
+                        // Write unit_sn directly to the H3 data column (stale scan position can't be used
+                        // because insertions shifted H3 cells to the right).
+                        if ($h3UnitSnRow !== null) {
+                            $sheet->setCellValue($h3DataColStr . $h3UnitSnRow, $unitSn);
+                        }
+
                         $header1StartRow = $columns['{{header1}}']['row'];
                         $header2StartRow = $columns['{{header2}}']['row'];
-                        $header3StartRow = $columns['{{header3}}']['row'];
 
                         $sheet->setCellValue($columns['{{header1}}']['column'] . $header1StartRow, $header1);
                         $sheet->setCellValue($columns['{{header2}}']['column'] . $header2StartRow, $header2);
-                        $sheet->setCellValue($columns['{{header3}}']['column'] . $header3StartRow, $header3);
+                        // H3 header is written only on the first unit; it spans all units' penalty columns.
+                        if ($unitIndex === 0) {
+                            $h3HeaderCol = Coordinate::stringFromColumnIndex($h3ColIdx);
+                            $h3HeaderRow = $h3RowNum;
+                            $sheet->setCellValue($h3HeaderCol . $h3HeaderRow, $header3);
+                        }
+                        // Only write unit_sn to H1/H2 positions; H3 is handled directly via $h3DataColStr.
                         foreach ($unitSnPositions as $pos) {
-                            $sheet->setCellValue(
-                                $pos['column'] . $pos['row'],
-                                $unitSn
-                            );
+                            if (Coordinate::columnIndexFromString($pos['column']) < $h3BoundaryColIdx) {
+                                $sheet->setCellValue(
+                                    $pos['column'] . $pos['row'],
+                                    $unitSn
+                                );
+                            }
                         }
                         foreach ($period as $date) {
 
@@ -1801,6 +1868,10 @@ class ExportController extends Controller
                             );
                             $dayIndex++;
                         }
+                        // Record this unit's H3 data column, then advance the index to the copy
+                        // so the next unit's += blockWidth lands on the correct (shifted) copy.
+                        $h3LastDataCol = $h3DataColStr;
+                        $h3DataColIdx += 1;
                     } else {
                         foreach ($period as $date) {
 
@@ -1882,6 +1953,7 @@ class ExportController extends Controller
                             );
                             $dayIndex++;
                         }
+                        $h3LastDataCol = $columns['{{header3_data}}']['column'];
                     }
 
                     foreach ($sheet->getRowIterator() as $row) {
@@ -1897,6 +1969,15 @@ class ExportController extends Controller
                     }
 
                     $unitIndex++;
+                }
+
+                // Merge the H3 header to span all units' penalty data columns.
+                // $h3ColIdx accumulated all H1/H2 block shifts, so it is the final header column.
+                if ($clientUnits->count() > 1 && $h3ColIdx !== null && $h3LastDataCol !== null) {
+                    $finalH3HeaderCol = Coordinate::stringFromColumnIndex($h3ColIdx);
+                    if ($finalH3HeaderCol !== $h3LastDataCol) {
+                        $sheet->mergeCells("{$finalH3HeaderCol}{$h3RowNum}:{$h3LastDataCol}{$h3RowNum}");
+                    }
                 }
 
                 $unitIndex = 0;
@@ -2127,15 +2208,17 @@ class ExportController extends Controller
                     - Coordinate::columnIndexFromString($a);
             });
 
-            // hapus kolom
-            foreach ($columnsToDelete as $col) {
-                $spreadsheet->getActiveSheet()->removeColumn($col, 1);
-            }
-
+            // Write the total avail penalty SUM before removing columns, because removeColumn
+            // shifts the availability section left and would make the stored column reference stale.
             $sheet->setCellValue(
                 $columns['{{total_avail_penalty}}']['column'] . $lastAvailRow,
                 "=SUM({$totaAvailCol}{$totalAvailStartRow}:{$totaAvailCol}{$lastTotalAvailRow})"
             );
+
+            // hapus kolom
+            foreach ($columnsToDelete as $col) {
+                $spreadsheet->getActiveSheet()->removeColumn($col, 1);
+            }
 
             // ======================
             // SAVE FILE PER CLIENT
