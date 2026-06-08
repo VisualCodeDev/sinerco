@@ -198,3 +198,19 @@ export const getAllReports = async () => {
         return null;
     }
 };
+
+export const getAllRequests = async () => {
+    try {
+        const response = await fetch(route("request.history"));
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error while retrieving requests:", error);
+        return null;
+    }
+}

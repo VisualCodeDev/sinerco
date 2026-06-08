@@ -109,6 +109,11 @@ class StatusRequestController extends Controller
 
     public function getRequest()
     {
+        return Inertia::render('Request/Request');
+    }
+
+    public function getRequestHistory()
+    {
         $permissionData = DataUnitController::getPermittedUnit();
 
         $unit_ids = collect($permissionData)->pluck('unit_position_id')->unique()->filter();
@@ -137,7 +142,8 @@ class StatusRequestController extends Controller
                 'location' => $req->unitPosition->location->location,
             ];
         });
-        return Inertia::render('Request/Request', ['data' => $data]);
+
+        return response()->json($data);
     }
 
     public function getRequestedUnit()

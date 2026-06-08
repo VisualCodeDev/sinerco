@@ -473,7 +473,7 @@ const TableComponent = (props) => {
 
                                 <div className="py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className={`${edit ? "" : "hidden"} flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all`}
                                         onClick={() =>
                                             handleSubmit({ type: "delete" })
                                         }
@@ -526,7 +526,7 @@ const TableComponent = (props) => {
                 )}
 
                 {isRequestList && (
-                    <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl p-4">
+                    <div className={`${edit ? "" : "hidden"} sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl p-4`}>
                         <button
                             className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                             onClick={handleMoveToHistory}

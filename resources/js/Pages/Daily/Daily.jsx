@@ -90,12 +90,7 @@ export default function Dashboard({ unit_position_id }) {
             icon: <FaFileContract className="mr-2" />,
             condition: true,
         },
-        {
-            key: "classifiedContract",
-            label: "Classified Contract",
-            icon: <FaLock className="mr-2" />,
-            condition: true,
-        },
+       
     ];
 
     const setInitReport = async (reportData, gmt_offset, interval) => {

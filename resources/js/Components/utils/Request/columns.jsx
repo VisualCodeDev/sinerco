@@ -32,7 +32,7 @@ const columns = ({
             header: "Unit",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
-            sortable: false,
+            sortable: true,
             width: "15%",
             Cell: ({ unit }) => {
                 return (
@@ -47,7 +47,7 @@ const columns = ({
             header: "Location",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
-            sortable: false,
+            sortable: true,
             width: "15%",
             Cell: ({ location }) => {
                 return (
@@ -129,7 +129,7 @@ const columns = ({
             header: "Start Time",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
-            sortable: false,
+            sortable: true,
             width: "10%",
             Cell: ({ start_date, start_time }) => {
                 return (
@@ -147,7 +147,7 @@ const columns = ({
             header: "End Date",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
-            sortable: false,
+            sortable: true,
             width: "10%",
             Cell: ({ end_date, end_time }) => {
                 return (

@@ -18,28 +18,18 @@ import { useAuth } from "@/Components/Auth/auth";
 import axios from "axios";
 import LoadingSpinner from "@/Components/Loading";
 import StatusPill from "@/Components/StatusPill";
-import OnGoingEvent from "@/Components/Events/OnGoingEvent";
-import { getAllRequests } from "@/Components/db";
 
-const Request = () => {
+const OnGoingEvent = ({ data }) => {
     const [isModal, setModal] = useState(false);
     const [selectedItem, setItem] = useState(false);
     const [selectedRows, setSelectedRows] = useState([]);
     const [isEdit, setIsEdit] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [allData, setAllData] = useState([]);
+    const [allData, setAllData] = useState(data);
     const [runningEvent, setRunningEvent] = useState([]);
     const [eventHistory, setEventHistory] = useState([]);
     const [dateTime, setDateTime] = useState(new Date());
 
-    const getData = async () => {
-        await getAllRequests().then((res) => {
-            setAllData(res);
-        });
-    }
-    useEffect(() => {
-        getData();
-    }, []);
     useEffect(() => {
         const interval = setInterval(() => {
             setDateTime(new Date());
@@ -190,25 +180,18 @@ const Request = () => {
     });
 
     return (
-        <PageLayout>
-            <OnGoingEvent data={allData} />
-            <div className="mt-2">
-                <TableComponent
-                    height="55vh"
-                    title="EVENT HISTORY"
-                    columns={columns}
-                    data={eventHistory || []}
-                    edit={isEdit}
-                    toggleEdit={() => setIsEdit(!isEdit)}
-                    onRowClick={(item) =>
-                        isEdit
-                            ? handleCheckItem(item?.request_id)
-                            : handleSelect(item)
-                    }
-                    handleMoveToHistory={handleMoveToHistory}
-                    isRequestList={true}
-                />
-            </div>
+        <div>
+            <TableComponent
+                height="35vh"
+                title="ONGOING EVENT"
+                columns={columns}
+                onRowClick={(item) =>
+                    isEdit
+                        ? handleCheckItem(item?.request_id)
+                        : handleSelect(item)
+                }
+                data={runningEvent ? runningEvent : []}
+            />
             <EditItem
                 user={user}
                 selectedItem={selectedItem}
@@ -219,7 +202,7 @@ const Request = () => {
                 setAllData={setAllData}
             />
             {saving && <SavingView />}
-        </PageLayout>
+        </div>
     );
 };
 
@@ -520,4 +503,4 @@ const EditItem = ({
     );
 };
 
-export default Request;
+export default OnGoingEvent;
