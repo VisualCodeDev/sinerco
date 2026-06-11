@@ -50,7 +50,7 @@ const UnitReportStatusTable = () => {
             {/* Table */}
             <div className="overflow-auto max-h-[450px]">
                 <table className="w-full text-sm text-left">
-                    <thead className="sticky top-0 bg-[#f8fafc] border-b border-[#eceff3] z-10">
+                    <thead className="sticky top-0 bg-[#f8fafc] border-b border-[#eceff3] z-1">
                         <tr className="text-gray-500 uppercase text-xs tracking-wider">
                             <th className="px-6 py-4 font-semibold">Unit</th>
                             <th className="px-6 py-4 font-semibold">

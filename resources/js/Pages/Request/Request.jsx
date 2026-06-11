@@ -5,6 +5,7 @@ import {
     getCurrDateTime,
     getFormattedDate,
     getRequestTypeName,
+    TimePicker24,
 } from "@/Components/utils/dashboard-util";
 import Modal from "@/Components/Modal";
 import PageLayout from "@/Layouts/PageLayout";
@@ -36,7 +37,7 @@ const Request = () => {
         await getAllRequests().then((res) => {
             setAllData(res);
         });
-    }
+    };
     useEffect(() => {
         getData();
     }, []);
@@ -223,7 +224,7 @@ const Request = () => {
     );
 };
 
-const EditItem = ({
+export const EditItem = ({
     selectedItem,
     setModal,
     isModal,
@@ -431,28 +432,44 @@ const EditItem = ({
                                     ) : item?.type === "dateTime" ? (
                                         /* Date Time */
                                         <div className="rounded-xl border border-gray-300 bg-white px-4 py-3">
-                                            <DateTimeInput
-                                                disabled={
-                                                    selectedItem?.status ===
-                                                    "End"
-                                                }
-                                                value={{
-                                                    date: formData[
-                                                        item?.value?.date
-                                                    ],
-                                                    time: formData[
-                                                        item?.value?.time
-                                                    ],
-                                                }}
-                                                name={{
-                                                    date: item?.value?.date,
-                                                    time: item?.value?.time,
-                                                }}
-                                                required={
-                                                    formData?.status != "End"
-                                                }
-                                                handleChange={handleChange}
-                                            />
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <input
+                                                    type="date"
+                                                    name={item?.value?.date}
+                                                    value={
+                                                        formData[
+                                                            item?.value?.date
+                                                        ] || ""
+                                                    }
+                                                    onChange={(e) => handleChange(
+                                                        item?.value?.date,
+                                                        e.target.value
+                                                    )}
+                                                    disabled={
+                                                        selectedItem?.status ===
+                                                        "End"
+                                                    }
+                                                    required={
+                                                        formData?.status !==
+                                                        "End"
+                                                    }
+                                                    className="rounded-lg border border-gray-300 px-3 py-2"
+                                                />
+
+                                                <TimePicker24
+                                                    value={
+                                                        formData[
+                                                            item?.value?.time
+                                                        ] || ""
+                                                    }
+                                                    onChange={(value) =>
+                                                        handleChange(
+                                                            item?.value?.time,
+                                                            value,
+                                                        )
+                                                    }
+                                                />
+                                            </div>
                                         </div>
                                     ) : (
                                         /* Select */

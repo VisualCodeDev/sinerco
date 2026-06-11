@@ -50,6 +50,92 @@ export const DateTimeInput = ({
     );
 };
 
+export function TimePicker24({ value = "", onChange, name }) {
+    const [hour = "", minute = ""] = (value || ":").split(":");
+    const handleHourChange = (e) => {
+        const newHour = e.target.value;
+
+        if (newHour === "24") {
+            onChange("24:00");
+            return;
+        }
+
+        onChange(`${newHour}:${minute || ""}`);
+    };
+
+    const handleMinuteChange = (e) => {
+        onChange(`${hour}:${e.target.value}`);
+    };
+
+    const availableMinutes =
+        hour === "24"
+            ? ["00"]
+            : Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+    return (
+        <div className="flex items-center gap-2">
+            <select
+                value={hour}
+                onChange={handleHourChange}
+                className="rounded-lg border border-gray-300 px-3 py-2"
+                style={{
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    backgroundImage: "none",
+                }}
+            >
+                <option value="" disabled>
+                    --
+                </option>
+
+                {Array.from({ length: 25 }, (_, i) => {
+                    const value = String(i).padStart(2, "0");
+
+                    return (
+                        <option key={value} value={value}>
+                            {value}
+                        </option>
+                    );
+                })}
+            </select>
+
+            <span className="font-semibold">:</span>
+
+            <select
+                value={minute}
+                onChange={handleMinuteChange}
+                disabled={!hour}
+                className="rounded-lg border border-gray-300 px-3 py-2 disabled:bg-gray-100"
+                style={{
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    backgroundImage: "none",
+                }}
+            >
+                <option value="" disabled>
+                    --
+                </option>
+
+                {availableMinutes.map((m) => (
+                    <option key={m} value={m}>
+                        {m}
+                    </option>
+                ))}
+            </select>
+
+            {name && (
+                <input
+                    type="hidden"
+                    name={name}
+                    value={hour && minute ? `${hour}:${minute}` : ""}
+                />
+            )}
+        </div>
+    );
+}
+
 export const TimeInput = ({
     isModal = false,
     formData,
@@ -130,7 +216,7 @@ export const TimeInput = ({
                         value={`${i.toString().padStart(2, "0")}:00`}
                     >
                         {i.toString().padStart(2, "0")}:00
-                    </option>
+                    </option>,
                 );
             }
         }
@@ -147,7 +233,7 @@ export const TimeInput = ({
                         value={`${i.toString().padStart(2, "0")}:00`}
                     >
                         {i.toString().padStart(2, "0")}:00
-                    </option>
+                    </option>,
                 );
             }
         }
@@ -168,7 +254,7 @@ export const TimeInput = ({
                 <span className="text-sm text-slate-400">
                     Available from {permittedTime}:00 to {permittedTimeAfter}:
                     {String(
-                        hourDuration === 0 ? minuteDuration : "00"
+                        hourDuration === 0 ? minuteDuration : "00",
                     ).padStart(2, "0")}
                 </span>
             )}
@@ -353,7 +439,7 @@ export const generateExcel = (fileName, formData, checkedItems) => {
 export const exportToExcel = (
     fileName = "Report.xlsx",
     formData,
-    checkedItems
+    checkedItems,
 ) => {
     const workbook = XLSX.utils.book_new();
 
@@ -377,18 +463,18 @@ export const exportToExcel = (
             formattedDate,
             formItems,
             data,
-            averages
+            averages,
         );
 
         const ws = XLSX.utils.table_to_sheet(
             new DOMParser().parseFromString(tableHTML, "text/html").body
-                .firstChild
+                .firstChild,
         );
 
         XLSX.utils.book_append_sheet(
             workbook,
             ws,
-            "Day " + formattedDate.split("/")[0]
+            "Day " + formattedDate.split("/")[0],
         );
     });
 
@@ -419,7 +505,7 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                                         !item.subheader ? 'rowspan="2"' : ""
                                     } colspan="${item.subheader?.length || 1}">
                                     ${item.header}
-                                </th>`
+                                </th>`,
                             )
                             .join("")
                     }
@@ -433,7 +519,7 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                                     ? item.subheader
                                           .map((sub) => `<th>${sub.sub}</th>`)
                                           .join("")
-                                    : ""
+                                    : "",
                             )
                             .join("")
                     }
@@ -461,7 +547,7 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                 <td class="table-content">${value.diffPress || 0.0}</td>
                 <td class="table-content">${value.mscfd || 0.0}</td>
             </tr>
-        `
+        `,
                     )
                     ?.join("")}
 
@@ -481,11 +567,11 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                                         "approval1",
                                         "approval2",
                                         "id",
-                                    ].includes(field)
+                                    ].includes(field),
                             )
                             .map(
                                 (field) =>
-                                    `<th class="table-content">${averages[field]}</th>`
+                                    `<th class="table-content">${averages[field]}</th>`,
                             )
                             .join("")}
                     </tr>
@@ -636,13 +722,13 @@ export const getFormattedDate = (value, format = "DD MMM YYYY") => {
 };
 
 export function chr(num) {
-  let str = "";
-  while (Number(num) > 0) {
-    let rem = (Number(num) - 1) % 26;
-    str = String.fromCharCode(65 + rem) + str;
-    num = Math.floor((num - 1) / 26);
-  }
-  return str;
+    let str = "";
+    while (Number(num) > 0) {
+        let rem = (Number(num) - 1) % 26;
+        str = String.fromCharCode(65 + rem) + str;
+        num = Math.floor((num - 1) / 26);
+    }
+    return str;
 }
 
 dayjs.extend(utc);

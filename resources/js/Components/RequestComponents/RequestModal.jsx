@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import Modal from "../Modal";
-import { DateTimeInput, getCurrDateTime } from "../utils/dashboard-util";
+import {
+    DateTimeInput,
+    getCurrDateTime,
+    TimePicker24,
+} from "../utils/dashboard-util";
 import { useForm } from "@inertiajs/react";
 import { requestStatus, requestType } from "@/Components/utils/dashboard-util";
 import { useToast } from "../Toast/ToastProvider";
@@ -61,10 +65,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     };
 
     const handleChange = ([field], value) => {
-        setData((prevData) => ({
-            ...prevData,
+        setData({
+            ...data,
             [field]: value,
-        }));
+        });
     };
 
     const fetchDataUnit = async () => {
@@ -205,17 +209,30 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                 </label>
 
                                 <div className="rounded-xl border border-gray-300 px-4 py-3 bg-white">
-                                    <DateTimeInput
-                                        value={{
-                                            date: data?.start_date,
-                                            time: data?.start_time,
-                                        }}
-                                        name={{
-                                            date: "start_date",
-                                            time: "start_time",
-                                        }}
-                                        handleChange={handleChange}
-                                    />
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <input
+                                            type="date"
+                                            name="start_date"
+                                            value={data?.start_date || ""}
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    ["start_date"],
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className="rounded-lg border border-gray-300 px-3 py-2"
+                                        />
+
+                                        <TimePicker24
+                                            value={data?.start_time}
+                                            onChange={(value) =>
+                                                handleChange(
+                                                    ["start_time"],
+                                                    value,
+                                                )
+                                            }
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
