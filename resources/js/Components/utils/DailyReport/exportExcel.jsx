@@ -11,7 +11,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
         const numberFormat = "#,##0.00";
         const fieldHeaderColumnMap = {};
         const fieldColumnMap = {};
-        console.log(data, range, unitData)
+        console.log(data, range, unitData);
         // Loop tiap tanggal
         for (const date of range) {
             const [year, month, day] = date.split("-");
@@ -29,7 +29,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                         Number(startColumn) +
                             i +
                             Number(field.subfields.length) -
-                            1
+                            1,
                     );
 
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
@@ -80,7 +80,14 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
 
-                    newSheet.mergeCells(`${col}2:${col}3`);
+                    const hasUnit = !!fieldUnits[field.field_slug];
+
+                    if (hasUnit) {
+                        newSheet.mergeCells(`${col}2:${col}3`);
+                    } else {
+                        newSheet.mergeCells(`${col}2:${col}4`);
+                    }
+
                     const fieldCell = newSheet.getCell(`${col}2`);
                     fieldCell.value = field.field_name;
                     fieldCell.border = ExcelStyle.borderAll;
@@ -91,15 +98,17 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     };
                     fieldCell.font = { bold: true };
 
-                    const unitCell = newSheet.getCell(`${col}4`);
-                    unitCell.value = fieldUnits[field.field_slug] || "";
-                    unitCell.border = ExcelStyle.borderAll;
-                    unitCell.alignment = {
-                        horizontal: "center",
-                        vertical: "middle",
-                        wrapText: true,
-                    };
-                    unitCell.font = { bold: true };
+                    if (hasUnit) {
+                        const unitCell = newSheet.getCell(`${col}4`);
+                        unitCell.value = fieldUnits[field.field_slug];
+                        unitCell.border = ExcelStyle.borderAll;
+                        unitCell.alignment = {
+                            horizontal: "center",
+                            vertical: "middle",
+                            wrapText: true,
+                        };
+                        unitCell.font = { bold: true };
+                    }
                 }
                 startColumn++;
             });
@@ -120,7 +129,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             // Kolom Remarks
             const remarkCell = newSheet.getCell(`${chr(startColumn)}2`);
             newSheet.mergeCells(
-                `${chr(startColumn)}2:${chr(startColumn + 4)}4`
+                `${chr(startColumn)}2:${chr(startColumn + 4)}4`,
             );
 
             remarkCell.value = "Remarks";
@@ -163,8 +172,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     if (c === startColumn) {
                         newSheet.mergeCells(
                             `${chr(startColumn)}${r}:${chr(
-                                startColumn + 4
-                            )}${r}`
+                                startColumn + 4,
+                            )}${r}`,
                         );
                         continue;
                     }
@@ -195,7 +204,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     const hour = Number(items.time.split(":")[0]);
                     if (formatted) {
                         const targetCell = newSheet.getCell(
-                            `${formatted}${hour + 4}`
+                            `${formatted}${hour + 4}`,
                         );
                         targetCell.value = Number(v) || 0;
                         targetCell.border = ExcelStyle.borderAll;
@@ -320,8 +329,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             headerCell.border = ExcelStyle.borderAll;
             newSheet.mergeCells(
                 `${headerStartCol}3:${chr(
-                    remarksStart + remarksHeader.length - 1
-                )}3`
+                    remarksStart + remarksHeader.length - 1,
+                )}3`,
             );
 
             const cellItems = [];
@@ -398,7 +407,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             new Blob([buffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             }),
-            fileName
+            fileName,
         );
     } catch (err) {
         console.error("❌ Gagal ambil data:", err);

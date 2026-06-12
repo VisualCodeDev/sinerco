@@ -24,6 +24,7 @@ import {
     FaLock,
 } from "react-icons/fa";
 import UnitInfo from "../Unit/UnitInfo";
+import { getUnitField } from "@/Components/db";
 
 export default function Dashboard({ unit_position_id }) {
     const { user, loading: userLoding } = useAuth();
@@ -242,14 +243,7 @@ export default function Dashboard({ unit_position_id }) {
             if (!unitData?.unit_id) return;
             try {
                 setLoading(true);
-                const response = await axios.get(
-                    route("unit.fields.get", { unit_id: unitData.unit_id }),
-                    {
-                        headers: { Accept: "application/json" },
-                    },
-                );
-
-                const data = response?.data?.data || response?.data;
+                const data = await getUnitField(unitData?.unit_id)
                 const visibleFields = data
                     .map((field) => {
                         if (
@@ -270,7 +264,8 @@ export default function Dashboard({ unit_position_id }) {
                             : null;
                     })
                     .filter(Boolean);
-                setFields(visibleFields);
+
+                    setFields(visibleFields);
             } catch (error) {
                 console.error(
                     "Gagal mengambil field:",

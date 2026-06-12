@@ -21,6 +21,7 @@ class DailyReportSettingSeeder extends Seeder
         $units = [
             "source_press" => 'psig',
             "suction_press" => 'psig',
+            'discharge_header_press' => 'psig',
             "discharge_press" => 'psig',
             "speed" => 'RPM',
             "manifold_press" => 'psig',

@@ -13,6 +13,7 @@ class InputFieldSeeder extends Seeder
     {
         $fields = [
             'Source Press',
+            'Discharge Header Press',
             'Suction Press',
             'Discharge Press',
             'Speed',
@@ -22,31 +23,27 @@ class InputFieldSeeder extends Seeder
             'Running Hours',
             'Voltage',
             'Water Temp',
-            'Flowrate',
+            'Discharge Temp.',
             'Static Press Reading',
             'Diff Press Reading',
+            'Flowrate',
         ];
 
         foreach ($fields as $fieldName) {
-            DailyField::create([
+            $field = DailyField::create([
                 'name' => $fieldName,
                 'slug' => Str::slug($fieldName, '_'),
             ]);
-        }
 
-        $dischargeTemp = DailyField::create([
-            'name' => 'Discharge Temp.',
-            'slug' => 'discharge_temp',
-        ]);
-
-        // Tambahkan subfields-nya
-        $disTempSubfields = ['Bef. Cooler', 'Aft. Cooler'];
-        foreach ($disTempSubfields as $subName) {
-            Subfield::create([
-                'field_id' => $dischargeTemp->id,
-                'name' => $subName,
-                'slug' => Str::slug($subName, '_'),
-            ]);
+            if ($fieldName === 'Discharge Temp.') {
+                foreach (['Bef. Cooler', 'Aft. Cooler'] as $subName) {
+                    Subfield::create([
+                        'field_id' => $field->id,
+                        'name' => $subName,
+                        'slug' => Str::slug($subName, '_'),
+                    ]);
+                }
+            }
         }
 
         // $flowrate = DailyField::create([

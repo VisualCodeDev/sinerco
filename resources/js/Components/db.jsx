@@ -213,4 +213,28 @@ export const getAllRequests = async () => {
         console.error("Error while retrieving requests:", error);
         return null;
     }
-}
+};
+
+export const getUnitField = async (id) => {
+    try {
+        const response = await fetch(
+            route("unit.fields.get", { unit_id: id }),
+            {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    Accept: "application/json",
+                },
+            },
+        );
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data);
+        return data;
+    } catch (error) {
+        console.error("Error while retrieving requests:", error);
+        return null;
+    }
+};

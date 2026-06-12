@@ -166,7 +166,7 @@ const UnitTable = (props) => {
                 // onRowClick={handleClick}
                 onRowClick={edit ? onSelect : handleClick}
                 addNewItem={true}
-                toggleEdit={() => setEdit((prev) => !prev)}
+                toggleEdit={() => setEdit(!edit)}
                 edit={edit}
             />
         );
