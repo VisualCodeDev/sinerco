@@ -11,7 +11,6 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
         const numberFormat = "#,##0.00";
         const fieldHeaderColumnMap = {};
         const fieldColumnMap = {};
-        console.log(data, range, unitData);
         // Loop tiap tanggal
         for (const date of range) {
             const [year, month, day] = date.split("-");
@@ -74,14 +73,11 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     });
 
                     i += Number(field.subfields.length) - 1;
-                    startColumn++;
                 } else {
                     const col = chr(Number(startColumn) + i);
                     fieldHeaderColumnMap[field.field_name] = `${col}2`;
                     fieldColumnMap[field.field_slug] = col;
-
                     const hasUnit = !!fieldUnits[field.field_slug];
-
                     if (hasUnit) {
                         newSheet.mergeCells(`${col}2:${col}3`);
                     } else {
@@ -112,6 +108,7 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 }
                 startColumn++;
             });
+            startColumn++;
             const remarksStart = startColumn + 6;
 
             // Kolom waktu
@@ -125,9 +122,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                 wrapText: true,
             };
             timeCell.font = { bold: true };
-
             // Kolom Remarks
-            const remarkCell = newSheet.getCell(`${chr(startColumn)}2`);
+            const remarkCell = newSheet.getCell(`${chr(startColumn )}2`);
             newSheet.mergeCells(
                 `${chr(startColumn)}2:${chr(startColumn + 4)}4`,
             );
