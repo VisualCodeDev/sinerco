@@ -16,6 +16,7 @@ import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 import { FaTriangleExclamation } from "react-icons/fa6";
+import dayjs from "dayjs";
 
 const DailyReportForm = (props) => {
     const {
@@ -51,12 +52,12 @@ const DailyReportForm = (props) => {
                 ...fields.flatMap((item) =>
                     item.subfields.length > 0
                         ? item?.subfields.map((sub) => sub.slug)
-                        : item?.slug
+                        : item?.slug,
                 ),
             ];
             const resp = await axios.post(
                 route("daily.add", Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField }
+                { data: data, fields: normalizedField },
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
@@ -80,7 +81,7 @@ const DailyReportForm = (props) => {
         value,
         minMaxSetting,
         thresholdValue,
-        lastValue
+        lastValue,
     ) => {
         let warn = null;
 
@@ -113,13 +114,16 @@ const DailyReportForm = (props) => {
             warn: { ...prevData.warn, [field]: warn },
         }));
     };
-    
+
     const formList = list({
         fields: fields,
         handleChange: handleChange,
         isDown: isDown,
         formData: data,
-        reportSettings: {...unitData?.daily_report_setting, thresholdSetting: {...unitData.thresholdSetting}},
+        reportSettings: {
+            ...unitData?.daily_report_setting,
+            thresholdSetting: { ...unitData.thresholdSetting },
+        },
         role: user?.role,
         interval: interval,
         duration: duration,
@@ -147,8 +151,12 @@ const DailyReportForm = (props) => {
                 if (currentHour > 24) currentHour = 0;
             }
 
-            const time = String(currentHour).padStart(2, "0") + ":00";
-            const date = dateTime.date;
+            let time = String(currentHour).padStart(2, "0") + ":00";
+            let date = dateTime.date;
+            if (String(time) === "00:00") {
+                time = "24:00"
+                date = dayjs(dateTime.date).subtract(1, "day").format("YYYY-MM-DD");
+            }
 
             setData((prevData) => ({
                 ...prevData,
@@ -182,7 +190,7 @@ const DailyReportForm = (props) => {
                                               header: item.header,
                                               name: item.name,
                                               subheader: item?.subheader || [],
-                                          } || ""
+                                          } || "",
                                       )
                                     : item.Cell}
                             </div>
