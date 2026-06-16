@@ -23,7 +23,11 @@ class DataUnitController extends Controller
      */
     public static function getPermittedUnit()
     {
-        $user = Auth::user()->load('roleData');
+        $user = Auth::user()?->load('roleData');
+
+        if (!$user) {
+            return collect();
+        }
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
