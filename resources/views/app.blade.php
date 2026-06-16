@@ -36,12 +36,7 @@
     <!-- Scripts -->
     @routes
 
-    @production
-        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
-    @else
-        @viteReactRefresh
-        @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
-    @endproduction
+    @vite('resources/js/app.jsx')
 
     @inertiaHead
 
