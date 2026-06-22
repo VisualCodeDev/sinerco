@@ -530,7 +530,7 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                     ?.map(
                         (value, index) => `
             <tr>
-                <td class="table-content">${value.time || index + 1` : 00`}</td>
+                <td class="table-content">${value.time || (index + 1) + ':00'}</td>
                 <td class="table-content">${value.sourcePress || 0.0}</td>
                 <td class="table-content">${value.suctionPress || 0.0}</td>
                 <td class="table-content">${value.dischargePress || 0.0}</td>

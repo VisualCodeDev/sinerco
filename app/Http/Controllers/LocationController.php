@@ -2,66 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Area;
 use App\Models\Location;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class LocationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $data = Location::with(['area'])->get();
-        return Inertia::render('Location/Location', ['data' => $data]);
+        $areas = Area::with(['locations'])->get();
+        return Inertia::render('Location/Location', ['areas' => $areas]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function storeArea(Request $request)
     {
-        //
+        $request->validate(['area' => 'required|string|max:255']);
+        $area = Area::create(['area' => $request->area]);
+        return response()->json(['type' => 'success', 'text' => 'Area added.', 'area' => $area], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function updateArea(Request $request, Area $area)
     {
-        //
+        $request->validate(['area' => 'required|string|max:255']);
+        $area->update(['area' => $request->area]);
+        return response()->json(['type' => 'success', 'text' => 'Area updated.'], 200);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Location $location)
+    public function destroyArea(Area $area)
     {
-        //
+        $hasUnits = $area->locations()->whereHas('unitPositions')->exists();
+        if ($hasUnits) {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'Cannot delete area with locations that have units assigned.',
+            ], 422);
+        }
+        $area->delete();
+        return response()->json(['type' => 'success', 'text' => 'Area deleted.'], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Location $location)
+    public function storeLocation(Request $request)
     {
-        //
+        $request->validate([
+            'location' => 'required|string|max:255',
+            'area_id'  => 'required|exists:areas,id',
+        ]);
+        $location = Location::create([
+            'location' => $request->location,
+            'area_id'  => $request->area_id,
+        ]);
+        return response()->json(['type' => 'success', 'text' => 'Location added.', 'location' => $location], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Location $location)
+    public function updateLocation(Request $request, Location $location)
     {
-        //
+        $request->validate(['location' => 'required|string|max:255']);
+        $location->update(['location' => $request->location]);
+        return response()->json(['type' => 'success', 'text' => 'Location updated.'], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Location $location)
+    public function destroyLocation(Location $location)
     {
-        //
+        if ($location->unitPositions()->exists()) {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'Cannot delete location with units assigned to it.',
+            ], 422);
+        }
+        $location->delete();
+        return response()->json(['type' => 'success', 'text' => 'Location deleted.'], 200);
     }
 }

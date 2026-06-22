@@ -1,121 +1,475 @@
-import TableComponent from "@/Components/TableComponent";
-import { FaMapPin, FaMapMarkedAlt, FaAngleDown } from "react-icons/fa";
+import {
+    FaMapPin,
+    FaMapMarkedAlt,
+    FaAngleDown,
+    FaAngleUp,
+    FaPlus,
+    FaTrash,
+    FaPencilAlt,
+    FaCheck,
+    FaTimes,
+} from "react-icons/fa";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+import { useToast } from "@/Components/Toast/ToastProvider";
 
-const Location = ({ data }) => {
-    const [areas, setAreas] = useState([]);
-    const [expanded, setExpanded] = useState(false);
-    const [selectedAreas, setSelectedAreas] = useState([]);
-    const [filteredLocation, setLocations] = useState([]);
+const Location = ({ areas: initialAreas }) => {
+    const [areas, setAreas] = useState(initialAreas || []);
+    const [selectedArea, setSelectedArea] = useState(null);
+    const { addToast } = useToast();
+
+    const [editingAreaId, setEditingAreaId] = useState(null);
+    const [editingAreaName, setEditingAreaName] = useState("");
+    const [addingArea, setAddingArea] = useState(false);
+    const [newAreaName, setNewAreaName] = useState("");
+
+    const [editingLocationId, setEditingLocationId] = useState(null);
+    const [editingLocationName, setEditingLocationName] = useState("");
+    const [addingLocation, setAddingLocation] = useState(false);
+    const [newLocationName, setNewLocationName] = useState("");
+
+    const [mobileExpanded, setMobileExpanded] = useState(false);
+
     useEffect(() => {
-        if (!data) return;
+        if (areas.length > 0 && !selectedArea) {
+            setSelectedArea(areas[0]);
+        }
+    }, [areas]);
 
-        const uniqueAreas = [
-            ...new Map(data.map((item) => [item.area.id, item.area])).values(),
-        ];
-        setAreas(uniqueAreas);
+    const filteredLocations = selectedArea
+        ? areas.find((a) => a.id === selectedArea.id)?.locations || []
+        : [];
 
-        const filteredLocation = data?.filter(
-            (item) =>
-                item?.area?.id === (selectedAreas?.id || uniqueAreas[0]?.id)
-        );
-        setLocations(filteredLocation);
-    }, [data, selectedAreas]);
+    const handleError = (e) => {
+        const msg =
+            e.response?.data?.text ||
+            Object.values(e.response?.data?.errors || {}).flat()[0] ||
+            "Operation failed.";
+        addToast({ type: "error", text: msg });
+    };
+
+    // --- Area CRUD ---
+    const handleAddArea = async () => {
+        if (!newAreaName.trim()) return;
+        try {
+            const resp = await axios.post(route("area.store"), {
+                area: newAreaName.trim(),
+            });
+            const newArea = { ...resp.data.area, locations: [] };
+            setAreas((prev) => [...prev, newArea]);
+            if (!selectedArea) setSelectedArea(newArea);
+            setNewAreaName("");
+            setAddingArea(false);
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
+
+    const handleUpdateArea = async (areaId) => {
+        if (!editingAreaName.trim()) return;
+        try {
+            const resp = await axios.put(
+                route("area.update", { area: areaId }),
+                { area: editingAreaName.trim() }
+            );
+            setAreas((prev) =>
+                prev.map((a) =>
+                    a.id === areaId ? { ...a, area: editingAreaName.trim() } : a
+                )
+            );
+            if (selectedArea?.id === areaId) {
+                setSelectedArea((prev) => ({ ...prev, area: editingAreaName.trim() }));
+            }
+            setEditingAreaId(null);
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
+
+    const handleDeleteArea = async (areaId) => {
+        if (!window.confirm("Delete this area? All its locations will also be deleted.")) return;
+        try {
+            const resp = await axios.delete(route("area.destroy", { area: areaId }));
+            const newAreas = areas.filter((a) => a.id !== areaId);
+            setAreas(newAreas);
+            if (selectedArea?.id === areaId) setSelectedArea(newAreas[0] || null);
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
+
+    // --- Location CRUD ---
+    const handleAddLocation = async () => {
+        if (!newLocationName.trim() || !selectedArea) return;
+        try {
+            const resp = await axios.post(route("location.store"), {
+                location: newLocationName.trim(),
+                area_id: selectedArea.id,
+            });
+            const newLoc = resp.data.location;
+            setAreas((prev) =>
+                prev.map((a) =>
+                    a.id === selectedArea.id
+                        ? { ...a, locations: [...(a.locations || []), newLoc] }
+                        : a
+                )
+            );
+            setNewLocationName("");
+            setAddingLocation(false);
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
+
+    const handleUpdateLocation = async (locationId) => {
+        if (!editingLocationName.trim()) return;
+        try {
+            const resp = await axios.put(
+                route("location.update", { location: locationId }),
+                { location: editingLocationName.trim() }
+            );
+            setAreas((prev) =>
+                prev.map((a) => ({
+                    ...a,
+                    locations: (a.locations || []).map((l) =>
+                        l.id === locationId
+                            ? { ...l, location: editingLocationName.trim() }
+                            : l
+                    ),
+                }))
+            );
+            setEditingLocationId(null);
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
+
+    const handleDeleteLocation = async (locationId) => {
+        if (!window.confirm("Delete this location?")) return;
+        try {
+            const resp = await axios.delete(
+                route("location.destroy", { location: locationId })
+            );
+            setAreas((prev) =>
+                prev.map((a) => ({
+                    ...a,
+                    locations: (a.locations || []).filter((l) => l.id !== locationId),
+                }))
+            );
+            addToast(resp.data);
+        } catch (e) {
+            handleError(e);
+        }
+    };
 
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
-                {/* Area List Desktop*/}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
-                    <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
-                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                            <FaMapPin className="text-2xl md:text-3xl" />
+                {/* Area panel — desktop */}
+                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-6 md:p-10 lg:block hidden">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
+                                <FaMapPin className="text-2xl md:text-3xl" />
+                            </div>
+                            <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                Area
+                            </h2>
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">Area</h2>
+                        <button
+                            onClick={() => { setAddingArea(true); setNewAreaName(""); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
+                        >
+                            <FaPlus className="text-xs" /> Add
+                        </button>
                     </div>
-                    <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-                        {areas?.map((item) => (
-                            <button
-                                key={item?.id}
-                                onClick={() => setSelectedAreas(item)}
-                                className={`w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
-                                    selectedAreas?.id === item?.id
+
+                    {addingArea && (
+                        <div className="flex items-center gap-2 mb-3">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newAreaName}
+                                onChange={(e) => setNewAreaName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleAddArea();
+                                    if (e.key === "Escape") setAddingArea(false);
+                                }}
+                                placeholder="New area name"
+                                className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <button onClick={handleAddArea} className="text-green-600 hover:text-green-800">
+                                <FaCheck />
+                            </button>
+                            <button onClick={() => setAddingArea(false)} className="text-red-500 hover:text-red-700">
+                                <FaTimes />
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+                        {areas.map((item) => (
+                            <div
+                                key={item.id}
+                                className={`flex items-center gap-2 w-full px-3 py-2 rounded-md transition-all duration-150 group ${
+                                    selectedArea?.id === item.id
                                         ? "bg-blue-100"
-                                        : "bg-gray-100"
+                                        : "bg-gray-100 hover:bg-blue-50"
                                 }`}
                             >
-                                {item?.area}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Area List Mobile*/}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
-                    <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
-                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                            <FaMapPin className="" />
-                        </div>
-                        <h2 className="text-lg font-semibold text-gray-700">
-                            Area
-                        </h2>
-                    </div>
-                    <div className="space-y-2 max-h-[10vh] relative px-2">
-                        <div className="flex justify-between items-center" onClick={() => setExpanded(!expanded)}>
-                            <div>
-                                {selectedAreas?.area || areas[0]?.area}
+                                {editingAreaId === item.id ? (
+                                    <>
+                                        <input
+                                            autoFocus
+                                            type="text"
+                                            value={editingAreaName}
+                                            onChange={(e) => setEditingAreaName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") handleUpdateArea(item.id);
+                                                if (e.key === "Escape") setEditingAreaId(null);
+                                            }}
+                                            className="flex-1 px-2 py-0.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                        />
+                                        <button
+                                            onClick={() => handleUpdateArea(item.id)}
+                                            className="text-green-600 hover:text-green-800 flex-shrink-0"
+                                        >
+                                            <FaCheck className="text-xs" />
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingAreaId(null)}
+                                            className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                        >
+                                            <FaTimes className="text-xs" />
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => setSelectedArea(item)}
+                                            className="flex-1 text-left text-gray-800 font-medium text-sm truncate"
+                                        >
+                                            {item.area}
+                                        </button>
+                                        <button
+                                            onClick={() => { setEditingAreaId(item.id); setEditingAreaName(item.area); }}
+                                            className="text-gray-300 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <FaPencilAlt className="text-xs" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteArea(item.id)}
+                                            className="text-gray-300 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <FaTrash className="text-xs" />
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                            <FaAngleDown />
-                        </div>
-                        <div
-                            className={`absolute top-5 left-0 max-h-[20vh] overflow-y-auto ${
-                                expanded ? "block" : "hidden"
-                            }`}
-                        >
-                            {areas?.map((item) => (
-                                <button
-                                    key={item?.id}
-                                    onClick={() => {
-                                        setSelectedAreas(item);
-                                        setExpanded(false);
-                                    }}
-                                    className={`w-full text-left px-4 py-2 hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
-                                        selectedAreas?.id === item?.id
-                                            ? "bg-blue-100"
-                                            : "bg-gray-100"
-                                    }`}
-                                >
-                                    {item?.area}
-                                </button>
-                            ))}
-                        </div>
+                        ))}
+                        {areas.length === 0 && (
+                            <p className="text-gray-400 italic text-sm">No areas yet.</p>
+                        )}
                     </div>
                 </div>
 
-                {/* Location List */}
-                <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10 space-y-2">
-                    <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
-                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                            <FaMapMarkedAlt className="text-2xl md:text-3xl" />
+                {/* Area panel — mobile */}
+                <div className="w-full bg-white shadow-md rounded-lg p-4 lg:hidden block">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
+                                <FaMapPin />
+                            </div>
+                            <h2 className="text-lg font-semibold text-gray-700">Area</h2>
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                            Locations
-                        </h2>
+                        <button
+                            onClick={() => { setAddingArea(true); setNewAreaName(""); setMobileExpanded(false); }}
+                            className="flex items-center gap-1 px-2 py-1 bg-primary text-white text-xs rounded-md hover:bg-blue-800"
+                        >
+                            <FaPlus className="text-xs" /> Add
+                        </button>
                     </div>
-                    <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-                        {filteredLocation?.length > 0 ? (
-                            filteredLocation.map((item) => (
+
+                    {addingArea && (
+                        <div className="flex items-center gap-2 mb-2">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newAreaName}
+                                onChange={(e) => setNewAreaName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleAddArea();
+                                    if (e.key === "Escape") setAddingArea(false);
+                                }}
+                                placeholder="New area name"
+                                className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                            <button onClick={handleAddArea} className="text-green-600 hover:text-green-800">
+                                <FaCheck />
+                            </button>
+                            <button onClick={() => setAddingArea(false)} className="text-red-500 hover:text-red-700">
+                                <FaTimes />
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="relative px-2">
+                        <div
+                            className="flex justify-between items-center cursor-pointer py-1"
+                            onClick={() => setMobileExpanded(!mobileExpanded)}
+                        >
+                            <span className="font-medium text-gray-800">
+                                {selectedArea?.area || "Select area"}
+                            </span>
+                            {mobileExpanded ? <FaAngleUp /> : <FaAngleDown />}
+                        </div>
+                        {mobileExpanded && (
+                            <div className="absolute top-8 left-0 right-0 z-10 bg-white border border-gray-200 rounded-md shadow-lg max-h-[30vh] overflow-y-auto">
+                                {areas.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center gap-1 px-3 py-2 hover:bg-blue-50"
+                                    >
+                                        <button
+                                            onClick={() => { setSelectedArea(item); setMobileExpanded(false); }}
+                                            className="flex-1 text-left text-sm font-medium text-gray-800"
+                                        >
+                                            {item.area}
+                                        </button>
+                                        <button
+                                            onClick={() => { setEditingAreaId(item.id); setEditingAreaName(item.area); setMobileExpanded(false); }}
+                                            className="text-gray-400 hover:text-primary"
+                                        >
+                                            <FaPencilAlt className="text-xs" />
+                                        </button>
+                                        <button
+                                            onClick={() => { handleDeleteArea(item.id); setMobileExpanded(false); }}
+                                            className="text-gray-400 hover:text-red-500"
+                                        >
+                                            <FaTrash className="text-xs" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Location panel */}
+                <div className="md:w-2/3 w-full bg-white shadow-md rounded-lg p-4 md:p-10">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
+                                <FaMapMarkedAlt className="text-2xl md:text-3xl" />
+                            </div>
+                            <div>
+                                <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                    Locations
+                                </h2>
+                                {selectedArea && (
+                                    <p className="text-xs text-gray-400 mt-0.5">
+                                        {selectedArea.area}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        {selectedArea && (
+                            <button
+                                onClick={() => { setAddingLocation(true); setNewLocationName(""); }}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                            >
+                                <FaPlus className="text-xs" /> Add
+                            </button>
+                        )}
+                    </div>
+
+                    {addingLocation && (
+                        <div className="flex items-center gap-2 mb-3">
+                            <input
+                                autoFocus
+                                type="text"
+                                value={newLocationName}
+                                onChange={(e) => setNewLocationName(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") handleAddLocation();
+                                    if (e.key === "Escape") setAddingLocation(false);
+                                }}
+                                placeholder="New location name"
+                                className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+                            />
+                            <button onClick={handleAddLocation} className="text-green-600 hover:text-green-800">
+                                <FaCheck />
+                            </button>
+                            <button onClick={() => setAddingLocation(false)} className="text-red-500 hover:text-red-700">
+                                <FaTimes />
+                            </button>
+                        </div>
+                    )}
+
+                    <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
+                        {filteredLocations.length > 0 ? (
+                            filteredLocations.map((item) => (
                                 <div
-                                    key={item?.id}
-                                    className="px-4 py-2 rounded-md bg-blue-50 text-blue-800 font-medium shadow-sm"
+                                    key={item.id}
+                                    className="flex items-center gap-2 px-4 py-2.5 rounded-md bg-blue-50 shadow-sm group"
                                 >
-                                    {item?.location}
+                                    {editingLocationId === item.id ? (
+                                        <>
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                value={editingLocationName}
+                                                onChange={(e) => setEditingLocationName(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") handleUpdateLocation(item.id);
+                                                    if (e.key === "Escape") setEditingLocationId(null);
+                                                }}
+                                                className="flex-1 px-2 py-0.5 border border-blue-300 rounded text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-primary"
+                                            />
+                                            <button
+                                                onClick={() => handleUpdateLocation(item.id)}
+                                                className="text-green-600 hover:text-green-800 flex-shrink-0"
+                                            >
+                                                <FaCheck className="text-xs" />
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingLocationId(null)}
+                                                className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                            >
+                                                <FaTimes className="text-xs" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="flex-1 text-sm text-blue-800 font-medium">
+                                                {item.location}
+                                            </span>
+                                            <button
+                                                onClick={() => { setEditingLocationId(item.id); setEditingLocationName(item.location); }}
+                                                className="text-blue-200 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <FaPencilAlt className="text-xs" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteLocation(item.id)}
+                                                className="text-blue-200 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <FaTrash className="text-xs" />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             ))
                         ) : (
-                            <p className="text-gray-400 italic">
-                                No locations available.
+                            <p className="text-gray-400 italic text-sm">
+                                {selectedArea
+                                    ? "No locations for this area."
+                                    : "Select an area to view locations."}
                             </p>
                         )}
                     </div>

@@ -183,11 +183,11 @@ const Heading = ({ children, alert, setAlert }) => {
             menu.eventHistory,
             menu.unitList,
             menu.unitLocationSetting,
+            menu.area,
             menu.inputSetting,
             menu.inputField,
             menu.accountList,
             menu.logHistory,
-            // menu.area,
             // menu.editUnit,
             menu.profile,
         ];

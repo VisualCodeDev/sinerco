@@ -178,6 +178,15 @@ Route::controller(LocationController::class)->middleware('auth')->group(function
     Route::get('/area', 'index')->name('areas');
 });
 
+Route::controller(LocationController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::post('/area', 'storeArea')->name('area.store');
+    Route::put('/area/{area}', 'updateArea')->name('area.update');
+    Route::delete('/area/{area}', 'destroyArea')->name('area.destroy');
+    Route::post('/location', 'storeLocation')->name('location.store');
+    Route::put('/location/{location}', 'updateLocation')->name('location.update');
+    Route::delete('/location/{location}', 'destroyLocation')->name('location.destroy');
+});
+
 Route::controller(WorkshopController::class)->middleware('auth')->group(function () {
     Route::get('/workshop/list', 'index')->name('workshops');
     Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
