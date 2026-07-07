@@ -168,7 +168,7 @@ Route::controller(AdminNotificationController::class)->group(function () {
     Route::get('/api/notifications', 'getNotifications');
 });
 
-Route::controller(ProfileController::class)->middleware(['auth', "roles:super_admin,technician"])->group(function () {
+Route::controller(ProfileController::class)->middleware(['auth'])->group(function () {
     Route::get('/profile/{user_id}/', 'index')->name('profile');
     Route::get('/fetch/roles', 'getAllRoles')->name('roles.get');
     Route::post('/profile/update/phone', 'updatePhone')->name('user.phone.update');
