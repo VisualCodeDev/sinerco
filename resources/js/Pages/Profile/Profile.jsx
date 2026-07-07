@@ -5,6 +5,7 @@ import {
     FaEnvelope,
     FaPhoneAlt,
     FaKey,
+    FaLock,
     FaFileSignature,
 } from "react-icons/fa";
 import {
@@ -25,7 +26,53 @@ const Profile = ({ data, permissionData, requestList }) => {
     });
     const [edit, setEdit] = useState(false);
     const [phoneNum, setPhoneNum] = useState(data?.whatsAppNum || "");
+    const [passwordEdit, setPasswordEdit] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        current_password: "",
+        password: "",
+        password_confirmation: "",
+    });
     const { addToast } = useToast();
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+
+        if (passwordForm.password !== passwordForm.password_confirmation) {
+            alert("New password and confirmation do not match");
+            return;
+        }
+
+        if (passwordForm.password.length < 8) {
+            alert("New password must be at least 8 characters");
+            return;
+        }
+
+        try {
+            const resp = await axios.post(route("user.password.update"), {
+                user_id: data?.user_id,
+                current_password: passwordForm.current_password,
+                password: passwordForm.password,
+                password_confirmation: passwordForm.password_confirmation,
+            });
+
+            if (resp?.data?.type == "success") {
+                setPasswordEdit(false);
+                setPasswordForm({
+                    current_password: "",
+                    password: "",
+                    password_confirmation: "",
+                });
+            }
+
+            addToast(resp.data);
+        } catch (err) {
+            console.error(err);
+            const message =
+                err?.response?.data?.errors?.current_password?.[0] ||
+                err?.response?.data?.errors?.password?.[0] ||
+                "Failed to update password";
+            addToast({ type: "error", text: message });
+        }
+    };
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -129,6 +176,99 @@ const Profile = ({ data, permissionData, requestList }) => {
                             <div className="flex flex-row justify-center items-center">
                                 <FaEnvelope className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
                                 <p className="">{data?.email}</p>
+                            </div>
+                            <div className="flex flex-row justify-center items-center">
+                                <FaLock className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
+                                {passwordEdit ? (
+                                    <form
+                                        className="flex flex-col relative gap-2"
+                                        onSubmit={handlePasswordSubmit}
+                                    >
+                                        <input
+                                            className="text-black"
+                                            type="password"
+                                            value={
+                                                passwordForm.current_password
+                                            }
+                                            onChange={(e) =>
+                                                setPasswordForm({
+                                                    ...passwordForm,
+                                                    current_password:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            placeholder="Current password"
+                                            autoComplete="current-password"
+                                            required
+                                        />
+                                        <input
+                                            className="text-black"
+                                            type="password"
+                                            value={passwordForm.password}
+                                            minLength={8}
+                                            onChange={(e) =>
+                                                setPasswordForm({
+                                                    ...passwordForm,
+                                                    password: e.target.value,
+                                                })
+                                            }
+                                            placeholder="New password"
+                                            autoComplete="new-password"
+                                            required
+                                        />
+                                        <input
+                                            className="text-black"
+                                            type="password"
+                                            value={
+                                                passwordForm.password_confirmation
+                                            }
+                                            minLength={8}
+                                            onChange={(e) =>
+                                                setPasswordForm({
+                                                    ...passwordForm,
+                                                    password_confirmation:
+                                                        e.target.value,
+                                                })
+                                            }
+                                            placeholder="Confirm new password"
+                                            autoComplete="new-password"
+                                            required
+                                        />
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="submit"
+                                                className="bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                            >
+                                                Submit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="bg-white/20 px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                                onClick={() => {
+                                                    setPasswordEdit(false);
+                                                    setPasswordForm({
+                                                        current_password: "",
+                                                        password: "",
+                                                        password_confirmation:
+                                                            "",
+                                                    });
+                                                }}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <p className="">Reset Password</p>
+                                )}
+                                <div
+                                    className="ms-3 text-sm cursor-pointer"
+                                    onClick={() =>
+                                        setPasswordEdit(!passwordEdit)
+                                    }
+                                >
+                                    {!passwordEdit && <FaPencil />}
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -81,6 +83,23 @@ class ProfileController extends Controller
             return response()->json(['type' => 'success', 'text' => 'Phone number updated']);
         }
         ;
+        return response()->json(['type' => 'error', 'text' => 'User not found']);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $val = $request->validate([
+            'user_id' => 'required|string',
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        $user = User::find($val['user_id']);
+        if ($user) {
+            $user->update(['password' => Hash::make($val['password'])]);
+            return response()->json(['type' => 'success', 'text' => 'Password updated']);
+        }
+
         return response()->json(['type' => 'error', 'text' => 'User not found']);
     }
 

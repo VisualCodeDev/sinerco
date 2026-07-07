@@ -172,6 +172,7 @@ Route::controller(ProfileController::class)->middleware(['auth', "roles:super_ad
     Route::get('/profile/{user_id}/', 'index')->name('profile');
     Route::get('/fetch/roles', 'getAllRoles')->name('roles.get');
     Route::post('/profile/update/phone', 'updatePhone')->name('user.phone.update');
+    Route::post('/profile/update/password', 'updatePassword')->name('user.password.update');
 });
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {
