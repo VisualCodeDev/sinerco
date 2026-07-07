@@ -193,13 +193,13 @@ const Heading = ({ children, alert, setAlert }) => {
         ];
     }
     if (user?.role === "technician") {
-        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+        menuItems = [menu.home, menu.unitList, menu.eventHistory, menu.profile];
     }
     if (user?.role === "operator") {
-        menuItems = [menu.unitList, menu.eventHistory];
+        menuItems = [menu.unitList, menu.eventHistory, menu.profile];
     }
     if (user?.role === "client") {
-        menuItems = [menu.home, menu.unitList, menu.eventHistory];
+        menuItems = [menu.home, menu.unitList, menu.eventHistory, menu.profile];
     }
     if (user?.role === "workshop") {
         menuItems = [menu.home, menu.unitList];
