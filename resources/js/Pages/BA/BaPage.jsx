@@ -1,17 +1,353 @@
 import Checkbox from "@/Components/Checkbox";
-import { getUnitBA } from "@/Components/db";
+import { getUnitBA, updateClientData } from "@/Components/db";
+import LoadingSpinner from "@/Components/Loading";
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
 import { useToast } from "@/Components/Toast/ToastProvider";
 import columns from "@/Components/utils/BA/column";
+import { fetch as useFetchData } from "@/Components/utils/database-util";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+import { MdClose } from "react-icons/md";
 
 const csrfToken = document
     .querySelector('meta[name="csrf-token"]')
     .getAttribute("content");
 
+const INVOICE_TEMPLATE_OPTIONS = [
+    { value: "1", label: "Template 1" },
+    { value: "2", label: "Template 2" },
+    { value: "3", label: "Template 3 (CLU - Yearly)" },
+    { value: "4", label: "Template 4" },
+];
+
+const BA_TEMPLATE_OPTIONS = [
+    { value: "1", label: "Template 1 (Avg Flow + avail + Sign)" },
+    { value: "2", label: "Template 2 (Avg Flow + avail)" },
+    { value: "3", label: "Template 3 (Location + Sign)" },
+    { value: "4", label: "Template 4 (Location + Engine S/N)" },
+    { value: "5", label: "Template 5 (Location + Table Sign)" },
+];
+
+const TABS = [
+    { key: "invoice", label: "Invoice" },
+    { key: "penalty", label: "Penalty" },
+    { key: "ba", label: "Berita Acara" },
+    { key: "settings", label: "Settings" },
+];
+
 const BaPage = () => {
+    const [activeTab, setActiveTab] = useState("invoice");
+    const { addToast } = useToast();
+
+    return (
+        <PageLayout>
+            <div className="flex gap-2 mb-6 border-b border-gray-200">
+                {TABS.map((tab) => (
+                    <button
+                        key={tab.key}
+                        onClick={() => setActiveTab(tab.key)}
+                        className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                            activeTab === tab.key
+                                ? "border-primary text-primary"
+                                : "border-transparent text-gray-500 hover:text-primary"
+                        }`}
+                    >
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === "invoice" && (
+                <ClientExportTab
+                    addToast={addToast}
+                    exportRoute="export_inv"
+                    label="Invoice"
+                    showTemplateColumn={true}
+                />
+            )}
+            {activeTab === "penalty" && (
+                <ClientExportTab
+                    addToast={addToast}
+                    exportRoute="export_penalty"
+                    label="Penalty"
+                    showTemplateColumn={false}
+                />
+            )}
+            {activeTab === "ba" && <BeritaAcaraTab addToast={addToast} />}
+            {activeTab === "settings" && <SettingsTab addToast={addToast} />}
+        </PageLayout>
+    );
+};
+
+const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) => {
+    const { data: clientsData, loading } = useFetchData("client.get");
+    const [clients, setClients] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [isMonthModal, setMonthModal] = useState(false);
+
+    useEffect(() => {
+        setClients(
+            Array.isArray(clientsData)
+                ? clientsData.filter((item) => Boolean(item?.is_invoice))
+                : [],
+        );
+    }, [clientsData]);
+
+    const handleCheckItem = (item) => {
+        const id = item?.client_id;
+        setSelectedRows((prev) =>
+            prev.includes(id)
+                ? prev.filter((row) => row !== id)
+                : [...prev, id],
+        );
+    };
+
+    const handleSelectAll = (currData) => {
+        if (selectedRows.length === currData.length) {
+            setSelectedRows([]);
+        } else {
+            setSelectedRows(currData.map((item) => item.client_id));
+        }
+    };
+
+    const handleExport = (month = null) => {
+        if (selectedRows.length === 0) {
+            return addToast({ type: "error", text: "No client selected" });
+        }
+        window.open(
+            route(exportRoute, {
+                start_date: month || null,
+                clients: selectedRows,
+            }),
+            "_blank",
+        );
+        setMonthModal(false);
+    };
+
+    const exportColumns = [
+        {
+            name: "no",
+            header: "No",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-center",
+            width: "5%",
+            Cell: ({ index }) => <div>{index + 1}</div>,
+        },
+        {
+            name: "name",
+            header: "Client",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            Cell: ({ name }) => <div className="font-medium">{name}</div>,
+        },
+        ...(showTemplateColumn
+            ? [
+                  {
+                      name: "template_inv",
+                      header: "Template",
+                      headerClassName: "text-center bg-primary text-white",
+                      cellClassName: "text-center",
+                      width: "20%",
+                      Cell: ({ template_inv }) => {
+                          const option = INVOICE_TEMPLATE_OPTIONS.find(
+                              (opt) => opt.value === String(template_inv ?? "1"),
+                          );
+                          return (
+                              <div>{option?.label || `Template ${template_inv}`}</div>
+                          );
+                      },
+                  },
+              ]
+            : []),
+        {
+            name: "checkbox",
+            Header: (data) => (
+                <div className="text-center w-full" onClick={() => handleSelectAll(data)}>
+                    Select All
+                </div>
+            ),
+            headerClassName: "bg-primary text-white text-center",
+            cellClassName: "text-center",
+            width: "10%",
+            Cell: ({ client_id }) => (
+                <input
+                    type="checkbox"
+                    checked={selectedRows.includes(client_id)}
+                    onChange={(e) => e.stopPropagation()}
+                />
+            ),
+        },
+    ];
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    return (
+        <>
+            <TableComponent
+                title={label}
+                subtitle="Select clients to export"
+                columns={exportColumns}
+                data={clients}
+                onRowClick={handleCheckItem}
+            />
+            <div className="flex justify-end mt-4">
+                <button className="button-submit" onClick={() => setMonthModal(true)}>
+                    Export {label}
+                </button>
+            </div>
+            {isMonthModal && (
+                <MonthExportModal
+                    title={`Export ${label}`}
+                    handleCloseModal={() => setMonthModal(false)}
+                    handleExport={handleExport}
+                />
+            )}
+        </>
+    );
+};
+
+const MonthExportModal = ({ title, handleCloseModal, handleExport }) => {
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const handleSubmit = () => {
+        handleExport(selectedMonth ? `${selectedMonth}-01` : null);
+    };
+    return (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg z-[110]">
+            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
+                {title}
+                <div
+                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
+                    onClick={handleCloseModal}
+                >
+                    <MdClose />
+                </div>
+            </div>
+            <div className="bg-white p-6 flex flex-col gap-4">
+                <label className="text-sm font-medium">Select Month</label>
+                <input
+                    type="month"
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="border rounded-lg px-3 py-2"
+                />
+                <button
+                    onClick={handleSubmit}
+                    className="bg-primary text-white rounded-lg py-2 mt-2"
+                >
+                    Export
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const SettingsTab = ({ addToast }) => {
+    const { data: clientsData, loading } = useFetchData("client.get");
+    const [clients, setClients] = useState([]);
+
+    useEffect(() => {
+        setClients(Array.isArray(clientsData) ? clientsData : []);
+    }, [clientsData]);
+
+    const handleTemplateChange = async (client_id, field, value) => {
+        try {
+            const resp = await updateClientData(client_id, [{ [field]: value }]);
+            if (resp?.response === "success") {
+                setClients((prev) =>
+                    prev.map((item) =>
+                        item.client_id === client_id
+                            ? { ...item, [field]: value }
+                            : item,
+                    ),
+                );
+                addToast({ type: "success", text: "Template updated" });
+            } else {
+                addToast({ type: "error", text: "Failed to update template" });
+            }
+        } catch (err) {
+            console.error(err);
+            addToast({ type: "error", text: "Failed to update template" });
+        }
+    };
+
+    const settingsColumns = [
+        {
+            name: "no",
+            header: "No",
+            headerClassName: "text-center bg-primary text-white",
+            cellClassName: "text-center",
+            width: "5%",
+            Cell: ({ index }) => <div>{index + 1}</div>,
+        },
+        {
+            name: "name",
+            header: "Client",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            Cell: ({ name }) => <div className="font-medium">{name}</div>,
+        },
+        {
+            name: "template_inv",
+            header: "Invoice Template",
+            headerClassName: "bg-primary text-white",
+            width: "30%",
+            Cell: ({ client_id, template_inv }) => (
+                <select
+                    value={String(template_inv ?? "1")}
+                    onChange={(e) =>
+                        handleTemplateChange(client_id, "template_inv", e.target.value)
+                    }
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                >
+                    {INVOICE_TEMPLATE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            ),
+        },
+        {
+            name: "template_ba",
+            header: "Berita Acara Template",
+            headerClassName: "bg-primary text-white",
+            width: "35%",
+            Cell: ({ client_id, template_ba }) => (
+                <select
+                    value={String(template_ba ?? "1")}
+                    onChange={(e) =>
+                        handleTemplateChange(client_id, "template_ba", e.target.value)
+                    }
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                >
+                    {BA_TEMPLATE_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            ),
+        },
+    ];
+
+    if (loading) {
+        return <LoadingSpinner />;
+    }
+
+    return (
+        <TableComponent
+            title="Template Settings"
+            subtitle="Default invoice & Berita Acara template per client"
+            columns={settingsColumns}
+            data={clients}
+        />
+    );
+};
+
+const BeritaAcaraTab = ({ addToast }) => {
     const [formData, setFormData] = useState({
         selectedRows: [],
     });
@@ -20,8 +356,6 @@ const BaPage = () => {
     const [data, setData] = useState([]);
     const [editModal, setEditModal] = useState(false);
     const [exportModal, setExportModal] = useState(false);
-
-    const { addToast } = useToast();
 
     useEffect(() => {
         const fetch = async () => {
@@ -97,7 +431,7 @@ const BaPage = () => {
     const tColumns = columns({ handleSelectAll: selectAll, formData });
 
     return (
-        <PageLayout>
+        <>
             <TableComponent
                 handleSubmit={handleClick}
                 isBA={true}
@@ -108,7 +442,7 @@ const BaPage = () => {
                 columns={tColumns}
             />
 
-            <SettingModal
+            <BaSettingModal
                 addToast={addToast}
                 isModal={editModal}
                 handleClose={() => setEditModal(false)}
@@ -121,17 +455,17 @@ const BaPage = () => {
                 selectedUnits={formData.selectedRows}
             />
 
-            <ExportModal
+            <BaExportModal
                 isModal={exportModal}
                 addToast={addToast}
                 selectedUnits={formData.selectedRows}
                 handleClose={() => setExportModal(false)}
             />
-        </PageLayout>
+        </>
     );
 };
 
-const SettingModal = (props) => {
+const BaSettingModal = (props) => {
     const {
         addToast,
         selectedUnits,
@@ -307,15 +641,14 @@ const SettingModal = (props) => {
     );
 };
 
-const ExportModal = (props) => {
+const BaExportModal = (props) => {
     const { selectedUnits, isModal, handleClose, addToast } = props;
 
     const [data, setData] = useState({
         ba_req: false,
-        bap: false,
         bapm: false,
+        bap: false,
         month: new Date().getMonth() + 1,
-        template: 1,
     });
 
     const handleSubmit = async (e) => {
@@ -381,43 +714,6 @@ const ExportModal = (props) => {
                                 <option value="10">October</option>
                                 <option value="11">November</option>
                                 <option value="12">December</option>
-                            </select>
-                        </div>
-
-                        <div class="w-full max-w-xs ">
-                            <label class="block mb-1 text-sm font-medium text-gray-700">
-                                Choose BAP Template
-                            </label>
-                            <select
-                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm
-                            focus:border-blue-500 focus:ring-2 focus:ring-blue-200
-                            transition duration-150 ease-in-out"
-                                onChange={(e) =>
-                                    setData({
-                                        ...data,
-                                        template: Number(e.target.value),
-                                    })
-                                }
-                                value={data?.template}
-                            >
-                                <option value="" disabled selected>
-                                    Choose Template
-                                </option>
-                                <option value="1">
-                                    Template 1 (Avg Flow + avail + Sign)
-                                </option>
-                                <option value="2">
-                                    Template 2 (Avg Flow + avail)
-                                </option>
-                                <option value="3">
-                                    Template 3 (Location + Sign)
-                                </option>
-                                <option value="4">
-                                    Template 4 (Location + Engine S/N)
-                                </option>
-                                <option value="5">
-                                    Template 5 (Location + Table Sign)
-                                </option>
                             </select>
                         </div>
                     </div>

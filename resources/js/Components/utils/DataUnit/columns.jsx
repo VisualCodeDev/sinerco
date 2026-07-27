@@ -187,8 +187,8 @@ const columns = (type, formData, unitAreaData, handleSelectAll, isEdit) => {
             },
         },
         {
-            name: "user",
-            header: "User",
+            name: "client",
+            header: "Client",
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "17%",

@@ -10,7 +10,6 @@ use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatusRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\UserPermissionController;

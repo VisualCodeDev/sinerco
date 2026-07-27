@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Curve;
 use App\Models\DailyReport;
 use App\Models\DataUnit;
 use App\Models\StatusRequest;
@@ -149,6 +150,18 @@ class DailyReportController extends Controller
         $validatedData = $request->validate($rules);
         $validated = $validatedData['data'];
 
+        if (isset($validated['suction_press'], $validated['discharge_press'])) {
+            $unit = UnitPosition::find($unit_position_id)?->unit;
+            $curveValue = Curve::interpolate(
+                (float) $validated['suction_press'],
+                (float) $validated['discharge_press'],
+                $unit?->valve ?? '4/0'
+            );
+            $validated['curve_24h'] = $curveValue === null
+                ? null
+                : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+        }
+
         // Hitung jam sebelumnya
         $validatedTime = $validated['time'];
         $oneHourBefore = \Carbon\Carbon::createFromFormat('H:i', $validatedTime)
@@ -244,6 +257,19 @@ class DailyReportController extends Controller
         // 🧠 Coba cari report berdasarkan id (kalau ada)
         $report = !empty($val['id']) ? DailyReport::find($val['id']) : null;
         Log::debug($request->unit_position_id);
+
+        if (isset($val['suction_press'], $val['discharge_press'])) {
+            $unitPositionId = $report->unit_position_id ?? $request->unit_position_id;
+            $unit = UnitPosition::find($unitPositionId)?->unit;
+            $curveValue = Curve::interpolate(
+                (float) $val['suction_press'],
+                (float) $val['discharge_press'],
+                $unit?->valve ?? '4/0'
+            );
+            $val['curve_24h'] = $curveValue === null
+                ? null
+                : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+        }
         if ($report) {
             // 📝 Update data lama
             $report->update([

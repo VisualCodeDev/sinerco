@@ -415,7 +415,8 @@ class DataUnitController extends Controller
         $rules = [
             'unit_id' => 'required|array',
             'thresholdSetting' => 'required|array',
-            'visibilitySetting' => 'required|array'
+            'visibilitySetting' => 'required|array',
+            'curve_percentage' => 'nullable|numeric|min:0|max:200'
         ];
 
         foreach ($request->input('thresholdSetting', []) as $key => $value) {
@@ -438,7 +439,8 @@ class DataUnitController extends Controller
             }
             $unit->update([
                 'thresholdSetting' => $validated['thresholdSetting'],
-                'visibilitySetting' => $validated['visibilitySetting']
+                'visibilitySetting' => $validated['visibilitySetting'],
+                'curve_percentage' => $validated['curve_percentage'] ?? $unit->curve_percentage,
             ]);
         }
 

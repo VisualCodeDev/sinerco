@@ -60,6 +60,8 @@ class Client extends Model
         'auto_send_interval',
         'is_invoice',
         'is_clu',
-        'disable_duration'
+        'disable_duration',
+        'template_ba',
+        'template_inv',
     ];
 }

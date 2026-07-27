@@ -20,12 +20,62 @@ use PhpOffice\PhpWord\TemplateProcessor;
 
 class ExportController extends Controller
 {
+    /** Merge overlapping [start, end] (unix timestamp) pairs into non-overlapping ranges. */
+    private function mergeIntervals(array $intervals): array
+    {
+        if (empty($intervals)) {
+            return [];
+        }
+
+        usort($intervals, fn($a, $b) => $a[0] <=> $b[0]);
+
+        $merged = [$intervals[0]];
+        foreach (array_slice($intervals, 1) as $interval) {
+            $lastIndex = count($merged) - 1;
+            if ($interval[0] <= $merged[$lastIndex][1]) {
+                $merged[$lastIndex][1] = max($merged[$lastIndex][1], $interval[1]);
+            } else {
+                $merged[] = $interval;
+            }
+        }
+
+        return $merged;
+    }
+
+    /** Remove any portion of $base intervals that falls inside $subtract intervals. */
+    private function subtractIntervals(array $base, array $subtract): array
+    {
+        foreach ($subtract as $sub) {
+            $next = [];
+            foreach ($base as $seg) {
+                if ($sub[1] <= $seg[0] || $sub[0] >= $seg[1]) {
+                    $next[] = $seg;
+                    continue;
+                }
+                if ($sub[0] > $seg[0]) {
+                    $next[] = [$seg[0], $sub[0]];
+                }
+                if ($sub[1] < $seg[1]) {
+                    $next[] = [$sub[1], $seg[1]];
+                }
+            }
+            $base = $next;
+        }
+
+        return $base;
+    }
+
+    private function intervalsDurationSeconds(array $intervals): int
+    {
+        return array_sum(array_map(fn($i) => $i[1] - $i[0], $intervals));
+    }
+
     private function calculateDailyStatus($requests, string $date)
     {
         $dayStart = Carbon::parse($date)->startOfDay();
         $dayEnd = Carbon::parse($date)->endOfDay();
-        $downSeconds = 0;
-        $standbySeconds = 0;
+        $downIntervals = [];
+        $standbyIntervals = [];
         $remarksArr = [];
 
         foreach ($requests as $req) {
@@ -40,14 +90,13 @@ class ExportController extends Controller
             // hitung overlap jam di hari ini
             $start = $reqStart->max($dayStart);
             $end = $reqEnd->min($dayEnd);
-            $durationSeconds = $start->diffInSeconds($end);
 
-            // assign durasi
+            // assign durasi (per interval, di-merge nanti supaya request yang overlap tidak dihitung dobel)
             if ($req->request_type === 'sd') {
-                $downSeconds += $durationSeconds;
+                $downIntervals[] = [$start->timestamp, $end->timestamp];
             }
             if ($req->request_type === 'stdby') {
-                $standbySeconds += $durationSeconds;
+                $standbyIntervals[] = [$start->timestamp, $end->timestamp];
             }
 
             // remarks per hari disesuaikan dengan jam overlap
@@ -60,8 +109,13 @@ class ExportController extends Controller
             );
         }
 
-        $downHours = round($downSeconds / 3600, 2);
-        $standbyHours = round($standbySeconds / 3600, 2);
+        // Gabungkan interval yang overlap dalam tipe yang sama, lalu prioritaskan 'sd' di atas 'stdby'
+        // supaya rentang waktu yang sama tidak pernah dihitung dobel (down+standby tidak akan pernah > 24 jam/hari).
+        $downIntervals = $this->mergeIntervals($downIntervals);
+        $standbyIntervals = $this->subtractIntervals($this->mergeIntervals($standbyIntervals), $downIntervals);
+
+        $downHours = round($this->intervalsDurationSeconds($downIntervals) / 3600, 2);
+        $standbyHours = round($this->intervalsDurationSeconds($standbyIntervals) / 3600, 2);
         $runningHours = round(24 - ($downHours + $standbyHours), 2);
 
         return [
@@ -364,7 +418,6 @@ class ExportController extends Controller
             'bapm' => 'required|boolean',
             'bap' => 'required|boolean',
             'month' => 'required_if:bap,true|integer|between:1,12',
-            'template' => 'required_if:bap,true|integer|between:1,5',
         ]);
         // dd($validated['bapm']);
         $unitPosIds = $validated['unit_pos_id'];
@@ -541,7 +594,7 @@ class ExportController extends Controller
                     $spv_name,
                     $spv_department,
                     $rangeDate,
-                    $validated['template']
+                    (int) ($client->template_ba ?? 1)
                 );
 
                 $allFiles[] = [
@@ -629,13 +682,13 @@ class ExportController extends Controller
 
         $cluData = $groupedByClient->map(function ($clientUnits) {
             return $clientUnits
-                ->filter(fn($item) => $item->client->is_invoice && $item->client->is_clu)
+                ->filter(fn($item) => $item->client->is_invoice && $item->client->template_inv === '3')
                 ->values();
         })->filter(fn($items) => $items->isNotEmpty());
 
         $groupedByClient = $groupedByClient->map(function ($clientUnits) use ($month, $year) {
             return $clientUnits
-                ->filter(fn($item) => $item->client->is_invoice && !$item->client->is_clu)
+                ->filter(fn($item) => $item->client->is_invoice && $item->client->template_inv !== '3')
                 ->map(function ($item) use ($month, $year) {
                     $item->reports = $item->reports
                         ->filter(
@@ -665,9 +718,10 @@ class ExportController extends Controller
             if ($clientUnits->count() === 0) {
                 continue;
             }
-            // $templatePath = storage_path('templates/Template_CLU.xlsx');
-            // $templatePath = storage_path('templates/Template_inv_2.xlsx');
-            $templatePath = storage_path('templates/Template_inv.xlsx');
+            $templateInv = $clientUnits->first()->client->template_inv;
+            $templatePath = $templateInv === '2'
+                ? storage_path('templates/Template_inv_2.xlsx')
+                : storage_path('templates/Template_inv.xlsx');
             $spreadsheet = IOFactory::load($templatePath);
 
             $baseSheet = $spreadsheet->getSheet(1);
@@ -804,6 +858,7 @@ class ExportController extends Controller
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
+                        ->unique('request_id')
                         ->values();
 
                     $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
@@ -812,7 +867,7 @@ class ExportController extends Controller
                         '{{suction_press}}',
                         '{{discharge_press}}',
                         '{{flowrate}}',
-                        // '{{curve}}',
+                        '{{curve}}',
                         '{{run}}',
                         '{{stby}}',
                         '{{down}}',
@@ -872,6 +927,7 @@ class ExportController extends Controller
                                         'suction_press' => $data['suction_press'] ?? 0,
                                         'discharge_press' => $data['discharge_press'] ?? 0,
                                         'flowrate' => $data['flowrate'] ?? 0,
+                                        'curve' => $data['curve_24h'] ?? 0,
                                     ];
                                 })
                                 ->filter()
@@ -880,11 +936,13 @@ class ExportController extends Controller
                             $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
                             $dischargeTotal = $this->getAvgByHourRange($formattedReports, 'discharge_press');
                             $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
+                            $curveTotal = $this->getAvgByHourRange($formattedReports, 'curve');
                             $report = (object) [
                                 'date' => $date->translatedFormat('j M'),
                                 'suction_p' => round($suctionTotal, 2),
                                 'discharge_p' => round($dischargeTotal, 2),
                                 'flowrate' => round($flowrateTotal, 2),
+                                'curve' => round($curveTotal, 2),
                                 'run' => $this->hoursToHMS($run),
                                 'stby' => $this->hoursToHMS($stdby),
                                 'down' => $this->hoursToHMS($sd),
@@ -897,6 +955,7 @@ class ExportController extends Controller
                                 'suction_p' => 0,
                                 'discharge_p' => 0,
                                 'flowrate' => 0,
+                                'curve' => 0,
                                 'run' => $this->hoursToHMS($run),
                                 'stby' => $this->hoursToHMS($stdby),
                                 'down' => $this->hoursToHMS($sd),
@@ -904,11 +963,14 @@ class ExportController extends Controller
                             ];
                         }
                         $volume = $report->flowrate * ($run / 24);
+                        $curveValue = $report->curve * ($run / 24);
                         if (isset($columns['{{date}}']))
                             $sheet->setCellValue($columns['{{date}}'] . $currentRow, $report->date);
                         $sheet->setCellValue($columns['{{suction_press}}'] . $currentRow, $report->suction_p);
                         $sheet->setCellValue($columns['{{discharge_press}}'] . $currentRow, $report->discharge_p);
                         $sheet->setCellValue($columns['{{flowrate}}'] . $currentRow, $volume);
+                        if (isset($columns['{{curve}}']))
+                            $sheet->setCellValue($columns['{{curve}}'] . $currentRow, $curveValue);
 
                         $sheet->setCellValue($columns['{{run}}'] . $currentRow, $run / 24);
                         $sheet->setCellValue($columns['{{stby}}'] . $currentRow, $stdby / 24);
@@ -1032,6 +1094,7 @@ class ExportController extends Controller
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
+                        ->unique('request_id')
                         ->values();
 
                     $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
@@ -1290,6 +1353,7 @@ class ExportController extends Controller
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
+                        ->unique('request_id')
                         ->values();
 
                     $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
@@ -1598,6 +1662,7 @@ class ExportController extends Controller
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
+                        ->unique('request_id')
                         ->values();
 
                     $sheetName = substr($unitSn, 0, 31);
@@ -1987,6 +2052,7 @@ class ExportController extends Controller
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
+                        ->unique('request_id')
                         ->values();
 
                     $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);

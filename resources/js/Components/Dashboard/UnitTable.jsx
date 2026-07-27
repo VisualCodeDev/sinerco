@@ -18,7 +18,6 @@ import Modal from "../Modal";
 import InputValidationSetting from "@/Pages/Unit/InputValidationSetting";
 import { formItems } from "../utils/dashboard-util";
 import { getFields } from "../db";
-import { MdClose } from "react-icons/md";
 import axios from "axios";
 import { useToast } from "../Toast/ToastProvider";
 
@@ -34,6 +33,7 @@ const UnitTable = (props) => {
 
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const [visibilitySetting, setVisibilitySetting] = useState(null);
+    const [curvePercentage, setCurvePercentage] = useState(null);
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
     const [isExportModal, setExportModal] = useState(false);
@@ -43,10 +43,13 @@ const UnitTable = (props) => {
     useEffect(() => {
         const formattedUnitData = data.map((item) => ({
             ...item,
-            url: route("daily", item.unit_position_id),
+            // In edit mode rows must be selectable, not links — TableComponent
+            // renders an <a href> wrapper whenever `url` is set, which would
+            // navigate away on click regardless of the row's onClick handler.
+            url: edit ? undefined : route("daily", item.unit_position_id),
         }));
-        setFormData({ ...formData, data: formattedUnitData });
-    }, [unitData]);
+        setFormData((prev) => ({ ...prev, data: formattedUnitData }));
+    }, [unitData, edit]);
 
     useEffect(() => {
         setThresholdSetting(
@@ -64,6 +67,14 @@ const UnitTable = (props) => {
                         formData?.selectedRows.length - 1
                     ] === item?.unit_id,
             )?.visibilitySetting || null,
+        );
+        setCurvePercentage(
+            data.find(
+                (item) =>
+                    formData?.selectedRows[
+                        formData?.selectedRows.length - 1
+                    ] === item?.unit_id,
+            )?.curve_percentage ?? null,
         );
     }, [formData?.selectedRows]);
 
@@ -198,6 +209,7 @@ const UnitTable = (props) => {
                 unitName={formData?.selectedUnits}
                 thresholdSetting={thresholdSetting}
                 visibilitySetting={visibilitySetting}
+                curvePercentage={curvePercentage}
                 selectedUnits={formData?.selectedRows}
             />
             <ExportModal
@@ -319,6 +331,7 @@ const SettingModal = ({
     setIsModal,
     thresholdSetting,
     visibilitySetting,
+    curvePercentage,
     unitName,
     selectedUnits,
     addToast,
@@ -326,6 +339,7 @@ const SettingModal = ({
     const [formData, setFormData] = useState({
         thresholdSetting: {},
         visibilitySetting: {},
+        curve_percentage: 0,
     });
 
     const [fields, setFields] = useState([]);
@@ -363,8 +377,9 @@ const SettingModal = ({
             ...prev,
             thresholdSetting: thresholdSetting ?? defaultThresholdSetting,
             visibilitySetting: visibilitySetting ?? defaultVisibilitySetting,
+            curve_percentage: curvePercentage ?? 0,
         }));
-    }, [thresholdSetting]);
+    }, [thresholdSetting, curvePercentage]);
 
     const handleChange = (section, field, value) => {
         setFormData((prev) => ({
@@ -415,27 +430,40 @@ const SettingModal = ({
         }
     };
     return (
-        <div
-            className={`${
-                isModal ? "block" : "hidden"
-            } absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full bg-white rounded-xl z-10`}
+        <Modal
+            showModal={isModal}
+            handleCloseModal={() => setIsModal(false)}
+            title="Unit Setting"
+            size="xl"
         >
-            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
-                <span>Unit Setting</span>
-                <div
-                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
-                    onClick={() => setIsModal(false)}
-                >
-                    <MdClose />
-                </div>
-            </div>
-            <div className=" bg-white h-[70vh] scale-[.85] flex justify-center flex-col items-center gap-4 p-6">
-                <span className="font-bold text-2xl">
-                    {Array.isArray(unitName) && unitName?.length > 5
-                        ? unitName.slice(0, 5).join(", ") + ", ..."
-                        : unitName?.join(", ") || unitName}
-                </span>
-                <div className="overflow-y-auto overflow-x-auto w-full bg-white rounded-xl z-50">
+            <Modal.Body>
+                <div className="flex flex-col items-center gap-4">
+                    <span className="font-bold text-2xl text-center">
+                        {Array.isArray(unitName) && unitName?.length > 5
+                            ? unitName.slice(0, 5).join(", ") + ", ..."
+                            : unitName?.join(", ") || unitName}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        <label className="font-medium">Curve %</label>
+                        <input
+                            type="number"
+                            min="0"
+                            max="200"
+                            step="0.01"
+                            value={formData?.curve_percentage ?? 0}
+                            onChange={(e) =>
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    curve_percentage: e.target.value,
+                                }))
+                            }
+                            className="w-24 border border-gray-300 rounded px-2 py-1"
+                        />
+                        <span className="text-sm text-gray-500">
+                            (0% = no change, 200% = triple)
+                        </span>
+                    </div>
+                    <div className="overflow-y-auto overflow-x-auto w-full max-h-[50vh] rounded-lg border">
                     <table className="w-full h-full table-auto border-collapse">
                         <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
                             <tr className="sticky top-0">
@@ -633,8 +661,9 @@ const SettingModal = ({
                         Save
                     </button>
                 </div>
-            </div>
-        </div>
+                </div>
+            </Modal.Body>
+        </Modal>
     );
 };
 

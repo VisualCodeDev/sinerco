@@ -83,7 +83,9 @@ class DataUnit extends Model
         'unit',
         'status',
         'thresholdSetting',
-        'visibilitySetting'
+        'visibilitySetting',
+        'valve',
+        'curve_percentage'
     ];
 
     protected $casts = [

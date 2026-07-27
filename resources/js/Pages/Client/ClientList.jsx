@@ -28,18 +28,13 @@ const ClientList = () => {
     // const columns = tColumns();
     const { data: initData, loading, error } = fetch("client.get");
     const [data, setData] = useState(initData);
-    const [isPenalty, setIsPenalty] = useState(false);
-    const [tableData, setTableData] = useState(data);
     const [expanded, setExpanded] = useState(false);
     const [selectedClient, setSelectedClients] = useState(null);
     const [filteredArea, setArea] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState();
     const [isLoading, setLoading] = useState(false);
-    const [selectedRows, setSelectedRows] = useState([]);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
-    const [isMonthModal, setMonthModal] = useState(false);
-    const [toggleExport, setToggleExport] = useState(false);
     const { addToast } = useToast();
 
     // useEffect(() => {
@@ -104,22 +99,6 @@ const ClientList = () => {
     useEffect(() => {
         setData(initData);
     }, [initData]);
-    
-    useEffect(() => {
-        if (!data || toggleExport) return;
-        setTableData(data);
-    }, [data, toggleExport]);
-
-    useEffect(() => {
-        if (!data || !toggleExport) return;
-
-        const isInvoice = toggleExport;
-        const filteredData = data.filter(
-            (item) => Boolean(item?.is_invoice) === isInvoice,
-        );
-
-        setTableData(filteredData);
-    }, [toggleExport, data]);
 
     if (loading) {
         return <LoadingSpinner />;
@@ -167,93 +146,16 @@ const ClientList = () => {
         );
     };
 
-    const handleCheckItem = (item) => {
-        const id = item?.client_id;
-        setSelectedRows((prev) =>
-            prev.includes(id)
-                ? prev.filter((item) => item !== id)
-                : [...prev, id],
-        );
-    };
-
-    const handleSelectAll = (currData) => {
-        if (selectedRows.length === currData.length) {
-            // Unselect all
-            setSelectedRows([]);
-        } else {
-            // Select all
-            setSelectedRows(currData.map((item) => item.client_id));
-        }
-    };
-
-    const handleInvoice = (month = null) => {
-        if (!selectedRows.length > 0) alert("No client selected");
-        if (isPenalty)
-            window.open(
-                route("export_penalty", {
-                    start_date: month || null,
-                    clients: selectedRows,
-                    // ...data,
-                }),
-                "_blank",
-            );
-        window.open(
-            route("export_inv", {
-                start_date: month || null,
-                clients: selectedRows,
-                // ...data,
-            }),
-            "_blank",
-        );
-    };
-
     const handleOpenSetting = (value) => {
         setSelectedClients(value);
         setSettingModal(true);
     };
 
     const col = columns({
-        selectedRows,
-        handleSelectAll,
-        data,
-        setToggleExport,
-        toggleExport,
         handleOpenSetting,
         handleToggleInvoice,
     });
 
-    const Footer = Array.isArray(selectedRows) && selectedRows.length > 0 && (
-        <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
-            <tr>
-                <th>
-                    <div className="ps-8 pe-4 py-3 text-sm font-medium w-full flex gap-4">
-                        <button
-                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
-                            onClick={() => {
-                                setMonthModal(true);
-                                setIsPenalty(false);
-                            }}
-                        >
-                            Invoice
-                        </button>
-                    </div>
-                </th>
-                <th>
-                    <div className="py-3 text-sm font-medium w-full flex gap-4">
-                        <button
-                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
-                            onClick={() => {
-                                setMonthModal(true);
-                                setIsPenalty(true);
-                            }}
-                        >
-                            Penalty
-                        </button>
-                    </div>
-                </th>
-            </tr>
-        </div>
-    );
     return (
         <PageLayout>
             {/* {Array.isArray(selectedRows) && selectedRows.length > 0 && (
@@ -263,18 +165,7 @@ const ClientList = () => {
                     </div>
                 </div>
             )} */}
-            <TableComponent
-                toggleEdit={() => setToggleExport(!toggleExport)}
-                edit={toggleExport}
-                editPlaceHolder={"Document"}
-                title="Clients"
-                columns={col}
-                data={tableData}
-                Footer={Footer}
-                onRowClick={(value) => {
-                    if (toggleExport) handleCheckItem(value);
-                }}
-            />
+            <TableComponent title="Clients" columns={col} data={data} />
             {/* <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]"> */}
             {/* Client List Desktop*/}
             {/* <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
@@ -479,52 +370,7 @@ const ClientList = () => {
                     // handleConfirmSettings={handleConfirmSettings}
                 />
             )}
-            {isMonthModal && (
-                <InvoiceModal
-                    isPenalty={isPenalty}
-                    handleCloseModal={() => setMonthModal(false)}
-                    handleExport={handleInvoice}
-                />
-            )}
         </PageLayout>
-    );
-};
-
-const InvoiceModal = (props) => {
-    const { handleCloseModal, handleExport, isPenalty } = props;
-    const [selectedMonth, setSelectedMonth] = useState("");
-    const handleSubmit = () => {
-        const startDate = selectedMonth + "-01";
-
-        handleExport(startDate);
-    };
-    return (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg">
-            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
-                Export {isPenalty ? "Penalty" : "Invoice"}
-                <div
-                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
-                    onClick={handleCloseModal}
-                >
-                    <MdClose />
-                </div>
-            </div>
-            <div className="bg-white p-6 flex flex-col gap-4">
-                <label className="text-sm font-medium">Select Month</label>
-                <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="border rounded-lg px-3 py-2"
-                />
-                <button
-                    onClick={handleSubmit}
-                    className="bg-primary text-white rounded-lg py-2 mt-2"
-                >
-                    Export
-                </button>
-            </div>
-        </div>
     );
 };
 

@@ -45,7 +45,7 @@ const Heading = ({ children, alert, setAlert }) => {
     const menu = {
         ba: {
             icon: <FaFile />,
-            label: "Berita Acara",
+            label: "Documents",
             href: route("ba.page"),
         },
         home: {
@@ -207,6 +207,7 @@ const Heading = ({ children, alert, setAlert }) => {
     if (user?.role === "management") {
         menuItems = [
             menu.home,
+            menu.ba,
             menu.clientList,
             menu.unitList,
             menu.eventHistory,

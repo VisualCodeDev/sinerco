@@ -1,9 +1,6 @@
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useState } from "react";
 import InputValidationSetting from "./InputValidationSetting";
-import UnitInputIntervalSetting from "./UnitInputIntervalSetting";
-import { FaClipboardCheck, FaStopwatch } from "react-icons/fa";
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 
 import TableComponent from "@/Components/TableComponent";
 import tColumns from "@/Components/utils/UnitSetting/columns";
@@ -104,45 +101,36 @@ const UnitSetting = () => {
             addToast({ type: "error", text: e.response.data.message });
         }
     };
+    const selectedClientNames = (clienData || [])
+        .filter((item) =>
+            (formData?.selectedRows || []).includes(item.client_id.toString()),
+        )
+        .map((item) => item.name);
+
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}
-            {/* <TabGroup>
-                <TabList>
-                    <Tab className=" aria-selected:bg-primary py-4 px-6 aria-selected:text-white rounded-t-md text-gray-500 font-semibold ">
-                        <div className="flex justify-center items-center gap-2">
-                            <FaClipboardCheck />
-                            <p>Input Validation</p>
-                        </div>
-                    </Tab>
-                    <Tab className=" aria-selected:bg-primary py-4 px-6 aria-selected:text-white rounded-t-md text-gray-500 font-semibold ">
-                        <div className="flex justify-center items-center gap-2">
-                            <FaStopwatch />
-                            <p>Input Interval</p>
-                        </div>
-                    </Tab>
-                </TabList>
-                <TabPanels className={"p-6 bg-white border shadow-md"}>
-                    <TabPanel>
-                        <InputValidationSetting />
-                    </TabPanel>
-                    <TabPanel>
-                        <UnitInputIntervalSetting />
-                    </TabPanel>
-                </TabPanels>
-            </TabGroup> */}
+            <h1 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6">
+                Input Setting
+            </h1>
 
-            <TableComponent
-                title={"Unit Setting"}
-                subtitle={"Set interval and duration for each client"}
-                isForm
-                height="55vh"
-                submitPlaceholder="Apply Settings"
-                handleSubmit={handleClientSetting}
-                columns={columns}
-                data={clienData}
+            <div className="mb-6">
+                <TableComponent
+                    title={"Unit Setting"}
+                    subtitle={"Set interval and duration for each client"}
+                    isForm
+                    height="55vh"
+                    submitPlaceholder="Apply Settings"
+                    handleSubmit={handleClientSetting}
+                    columns={columns}
+                    data={clienData}
+                />
+            </div>
+
+            <InputValidationSetting
+                selectedClients={formData?.selectedRows}
+                selectedClientNames={selectedClientNames}
             />
-            <InputValidationSetting selectedClients={formData?.selectedRows} />
         </PageLayout>
     );
 };

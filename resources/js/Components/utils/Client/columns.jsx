@@ -1,15 +1,7 @@
 import { FaCog } from "react-icons/fa";
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const columns = ({
-    selectedRows,
-    handleToggleInvoice,
-    handleSelectAll,
-    handleCheckItem,
-    data,
-    toggleExport,
-    handleOpenSetting,
-}) => {
+const columns = ({ handleToggleInvoice, handleOpenSetting }) => {
     return [
         {
             name: "no",
@@ -83,9 +75,7 @@ const columns = ({
             sortable: false,
             Cell: ({ is_invoice, client_id }) => {
                 return (
-                    <div
-                        className={`flex flex-col items-center gap-2 ${toggleExport ? "hidden" : ""}`}
-                    >
+                    <div className="flex flex-col items-center gap-2">
                         <span className="text-muted" style={{ fontSize: 13 }}>
                             Invoice
                         </span>
@@ -183,52 +173,24 @@ const columns = ({
         //     },
         // },
         {
-            name: "checkbox",
+            name: "setting",
             width: "4%",
             sortable: false,
-            Header: (data) => {
-                if (toggleExport)
-                    return (
-                        <div
-                            className="text-center w-full"
-                            onClick={() => handleSelectAll(data)}
-                            checked={selectedRows?.length === data?.length}
-                        >
-                            Select All
-                            {/* {toggleExport ? "Select All" : ""} */}
-                        </div>
-                    );
-            },
             headerClassName: "bg-primary text-white text-center justify-center",
-            sortable: false,
             cellClassName: "text-center",
-            width: "10%",
             Cell: (props) => {
-                const { client_id } = props;
-                if (toggleExport) {
-                    return (
-                        <input
-                            type="checkbox"
-                            checked={selectedRows?.includes(String(client_id))}
-                            onChange={(e) => {
-                                e.stopPropagation();
-                            }}
-                        />
-                    );
-                } else {
-                    return (
-                        <button
-                            className="flex items-center justify-center bg-primary text-white p-2 rounded-md"
-                            style={{
-                                width: 40,
-                                height: 40,
-                            }}
-                            onClick={() => handleOpenSetting(props)}
-                        >
-                            <FaCog />
-                        </button>
-                    );
-                }
+                return (
+                    <button
+                        className="flex items-center justify-center bg-primary text-white p-2 rounded-md"
+                        style={{
+                            width: 40,
+                            height: 40,
+                        }}
+                        onClick={() => handleOpenSetting(props)}
+                    >
+                        <FaCog />
+                    </button>
+                );
             },
         },
     ];

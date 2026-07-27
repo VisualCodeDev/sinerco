@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             DataUnitFieldSeeder::class,
             DailyReportSettingSeeder::class,
             // SettingSeeder::class,
+            CurveSeeder::class,
         ]);
 
         // User::factory()->create([

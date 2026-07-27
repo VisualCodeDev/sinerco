@@ -1,14 +1,12 @@
 import { getFields } from "@/Components/db";
 import LoadingSpinner from "@/Components/Loading";
-import MultiSelectDropdown from "@/Components/MultiSelectDropdown";
 import { useToast } from "@/Components/Toast/ToastProvider";
 import { formItems } from "@/Components/utils/dashboard-util";
-import { fetch } from "@/Components/utils/database-util";
-import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+import { FaClipboardCheck } from "react-icons/fa";
 
 const InputValidationSetting = (props) => {
-    const { data, clientData, selectedClients } = props;
+    const { data, clientData, selectedClients, selectedClientNames } = props;
     const [formData, setFormData] = useState(null);
     const [saving, setSaving] = useState(false);
     const [fields, setFields] = useState([]);
@@ -148,23 +146,35 @@ const InputValidationSetting = (props) => {
         return <LoadingSpinner />;
     }
 
-    return (
-        <div className="flex flex-col gap-6">
-            {/* <h2 className="text-xl font-semibold text-gray-800">
-                Input Validation Settings
-            </h2>
-            <div className="flex flex-col gap-2">
-                <p className="text-base">Client: </p>
-                <MultiSelectDropdown
-                    options={clientOptions}
-                    selected={selectedClients}
-                    setSelected={setSelectedClients}
-                />
-            </div> */}
+    const hasSelection = (selectedClients?.length || 0) > 0;
 
-            <div className="overflow-y-auto w-screen overflow-x-auto">
+    return (
+        <div className="bg-white flex-col rounded-lg border shadow-lg">
+            <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b">
+                <div className="flex items-center">
+                    <div className="bg-[#e8edfc] text-primary p-1.5 md:p-2.5 rounded-md">
+                        <FaClipboardCheck className="text-2xl md:text-3xl" />
+                    </div>
+                    <div className="flex-row justify-center items-center ml-2 md:ml-4">
+                        <p className="font-semibold text-base md:text-2xl">
+                            Field Validation Settings
+                        </p>
+                        <p className="text-xs md:text-sm">
+                            {hasSelection
+                                ? `Applies to: ${
+                                      selectedClientNames?.length
+                                          ? selectedClientNames.join(", ")
+                                          : clientData?.name || "selected client"
+                                  }`
+                                : "Select client(s) in the Unit Setting table above to enable saving"}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="overflow-y-auto w-full overflow-x-auto p-6">
                 <table className="w-full">
-                    <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
+                    <thead className="bg-primary text-white z-10 shadow-sm w-full sticky top-0">
                         <tr className="sticky top-0">
                             <th className="font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">
                                 Item
@@ -376,13 +386,19 @@ const InputValidationSetting = (props) => {
                 </table>
             </div>
 
-            <div className="flex items-center justify-center mb-10">
+            <div className="flex flex-col items-center justify-center pb-6">
                 <button
                     onClick={handleSave}
-                    className="bg-primary text-white border-2 border-white px-10 py-2 rounded-lg mt-10 text-xl transition ease-in-out hover:bg-transparent hover:text-primary hover:border-primary hover:scale-90"
+                    disabled={!hasSelection || saving}
+                    className="bg-primary text-white border-2 border-white px-10 py-2 rounded-lg text-xl transition ease-in-out hover:bg-transparent hover:text-primary hover:border-primary hover:scale-90 disabled:opacity-40 disabled:pointer-events-none"
                 >
                     Save
                 </button>
+                {!hasSelection && (
+                    <p className="text-sm text-gray-500 mt-2">
+                        Select client(s) above before saving
+                    </p>
+                )}
             </div>
         </div>
     );
