@@ -31,8 +31,15 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule) {
-        // Ambil semua client
-        $clients = Client::all();
+        // Dibungkus try/catch supaya skema yang belum ter-migrate (mis. saat
+        // deploy, sebelum `php artisan migrate` sempat jalan) tidak membuat
+        // SELURUH proses artisan gagal boot -- withSchedule() dieksekusi di
+        // setiap perintah artisan, bukan cuma saat schedule:run.
+        try {
+            $clients = Client::all();
+        } catch (\Throwable $e) {
+            return;
+        }
 
         foreach ($clients as $client) {
             $interval = $client->auto_send_interval ?? '1h'; // default 1 jam
