@@ -1,7 +1,12 @@
-import { FaCog } from "react-icons/fa";
+import { FaCog, FaPencilAlt, FaTrash } from "react-icons/fa";
 import { DateInput, TimeInput } from "../dashboard-util";
 
-const columns = ({ handleToggleInvoice, handleOpenSetting }) => {
+const columns = ({
+    handleToggleInvoice,
+    handleOpenSetting,
+    handleOpenEdit,
+    handleOpenDelete,
+}) => {
     return [
         {
             name: "no",
@@ -190,6 +195,34 @@ const columns = ({ handleToggleInvoice, handleOpenSetting }) => {
                     >
                         <FaCog />
                     </button>
+                );
+            },
+        },
+        {
+            name: "actions",
+            header: "",
+            width: "8%",
+            sortable: false,
+            headerClassName: "bg-primary text-white text-center justify-center",
+            cellClassName: "text-center",
+            Cell: (props) => {
+                return (
+                    <div className="flex items-center justify-center gap-2">
+                        <button
+                            className="flex items-center justify-center bg-primary text-white p-2 rounded-md"
+                            style={{ width: 40, height: 40 }}
+                            onClick={() => handleOpenEdit(props)}
+                        >
+                            <FaPencilAlt />
+                        </button>
+                        <button
+                            className="flex items-center justify-center bg-danger text-white p-2 rounded-md"
+                            style={{ width: 40, height: 40 }}
+                            onClick={() => handleOpenDelete(props)}
+                        >
+                            <FaTrash />
+                        </button>
+                    </div>
                 );
             },
         },

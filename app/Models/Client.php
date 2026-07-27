@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
 {
+    use SoftDeletes;
+
     public $incrementing = false; // karena primary key string
     protected $keyType = 'string';
     protected $primaryKey = 'client_id';

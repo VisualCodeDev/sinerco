@@ -12,6 +12,20 @@ import {
 import { getAllUnits, getFields, getUnitReports } from "./db";
 import { splitCamelCase } from "./utils/dashboard-util";
 import LoadingSpinner from "./Loading";
+import MultiSelectDropdown from "./MultiSelectDropdown";
+
+const CURVE_FIELD = { name: "Curve", slug: "curve_24h" };
+
+const LINE_COLORS = [
+    "#8884d8",
+    "#82ca9d",
+    "#ff7300",
+    "#0088FE",
+    "#FF8042",
+    "#00C49F",
+    "#FFBB28",
+    "#a4de6c",
+];
 
 const DynamicLineChart = () => {
     const [fields, setFields] = useState([]);
@@ -19,7 +33,7 @@ const DynamicLineChart = () => {
     const [loading, setLoading] = useState(false);
     const [allUnits, setAllUnits] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState(1); // default
-    const [selectedField, setSelectedField] = useState("flowrate"); // default
+    const [selectedFields, setSelectedFields] = useState(["flowrate"]); // default
 
     const today = new Date();
     const formattedToday = today.toISOString().split("T")[0];
@@ -41,21 +55,23 @@ const DynamicLineChart = () => {
         return dates;
     };
 
-    const fillMissingDates = (aggregatedData, monthStr) => {
+    const fillMissingDates = (aggregatedData, monthStr, selectedFields) => {
         const fullDates = generateFullDatesInMonth(monthStr);
 
-        // buat map: date => value
+        // buat map: date => { field: value, ... }
         const dataMap = {};
         aggregatedData.forEach((item) => {
-            dataMap[item.date] = item.value;
+            dataMap[item.date] = item;
         });
 
         return fullDates.map((dateStr) => {
             const day = dateStr.split("-")[2];
-            return {
-                date: day,
-                value: dataMap[dateStr] ?? 0,
-            };
+            const item = dataMap[dateStr];
+            const values = selectedFields.reduce((acc, field) => {
+                acc[field] = item?.[field] ?? 0;
+                return acc;
+            }, {});
+            return { date: day, ...values };
         });
     };
 
@@ -80,37 +96,45 @@ const DynamicLineChart = () => {
         return hours;
     };
 
-    const aggregatePerDay = (data, selectedField) => {
+    const aggregatePerDay = (data, selectedFields) => {
         const map = {};
 
         data.forEach((item) => {
             if (!map[item.date]) map[item.date] = [];
-            map[item.date].push(Number(item[selectedField] || 0));
+            map[item.date].push(item);
         });
 
         return Object.keys(map)
             .map((date) => {
-                const values = map[date];
-                const avg = values.reduce((a, b) => a + b, 0) / values.length; // <--- pakai values.length
+                const items = map[date];
                 const day = date.split("-")[2];
-                return { date, day, value: avg };
+                const values = selectedFields.reduce((acc, field) => {
+                    const nums = items.map((item) => Number(item[field] || 0));
+                    acc[field] =
+                        nums.reduce((a, b) => a + b, 0) / (nums.length || 1);
+                    return acc;
+                }, {});
+                return { date, day, ...values };
             })
             .sort((a, b) => new Date(a.date) - new Date(b.date));
     };
 
-    const fillMissingHours = (reportData, selectedField) => {
+    const fillMissingHours = (reportData, selectedFields) => {
         const fullHours = generateFullHours();
 
         const dataMap = {};
         reportData.forEach((item) => {
-            const time = item.time;
-            dataMap[time] = Number(item[selectedField] || 0);
+            dataMap[item.time] = item;
         });
 
-        return fullHours.map((hour) => ({
-            time: hour,
-            value: dataMap[hour] ?? 0,
-        }));
+        return fullHours.map((hour) => {
+            const item = dataMap[hour];
+            const values = selectedFields.reduce((acc, field) => {
+                acc[field] = item ? Number(item[field] || 0) : 0;
+                return acc;
+            }, {});
+            return { time: hour, ...values };
+        });
     };
 
     const getAllUnitData = async () => {
@@ -148,7 +172,7 @@ const DynamicLineChart = () => {
                 };
             }
         });
-        setFields(formattedFields);
+        setFields([...formattedFields, CURVE_FIELD]);
         setLoading(false);
     };
 
@@ -163,10 +187,11 @@ const DynamicLineChart = () => {
 
     const chartData = selectedMonth
         ? fillMissingDates(
-              aggregatePerDay(filterByDateOrMonth(reportData), selectedField),
+              aggregatePerDay(filterByDateOrMonth(reportData), selectedFields),
               selectedMonth,
+              selectedFields,
           )
-        : fillMissingHours(filterByDateOrMonth(reportData), selectedField);
+        : fillMissingHours(filterByDateOrMonth(reportData), selectedFields);
 
     if (loading) {
         return <LoadingSpinner />;
@@ -225,18 +250,16 @@ const DynamicLineChart = () => {
                 </div>
 
                 {/* Choose Field */}
-                <div className="flex flex-col">
-                    <label className="mb-1 font-bold">Choose Field:</label>
-                    <select
-                        value={selectedField}
-                        onChange={(e) => setSelectedField(e.target.value)}
-                        className="p-2 border rounded border-gray-300"
-                    >
-                        {fields &&
-                            fields.map((item) => (
-                                <option value={item.slug}>{item?.name}</option>
-                            ))}
-                    </select>
+                <div className="flex flex-col min-w-[220px]">
+                    <label className="mb-1 font-bold">Choose Fields:</label>
+                    <MultiSelectDropdown
+                        options={fields.map((item) => ({
+                            value: item.slug,
+                            label: item.name,
+                        }))}
+                        selected={selectedFields}
+                        setSelected={setSelectedFields}
+                    />
                 </div>
             </div>
 
@@ -249,11 +272,20 @@ const DynamicLineChart = () => {
                         <YAxis />
                         <Tooltip />
                         <Legend />
-                        <Line
-                            type="monotone"
-                            dataKey="value"
-                            stroke="#8884d8"
-                        />
+                        {selectedFields.map((slug, index) => (
+                            <Line
+                                key={slug}
+                                type="monotone"
+                                dataKey={slug}
+                                name={
+                                    fields.find((f) => f.slug === slug)
+                                        ?.name || slug
+                                }
+                                stroke={
+                                    LINE_COLORS[index % LINE_COLORS.length]
+                                }
+                            />
+                        ))}
                     </LineChart>
                 </ResponsiveContainer>
             </div>

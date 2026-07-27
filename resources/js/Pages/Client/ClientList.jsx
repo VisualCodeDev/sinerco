@@ -1,4 +1,4 @@
-import { getFields, updateClientData } from "@/Components/db";
+import { deleteClient, getFields, updateClientData } from "@/Components/db";
 import LoadingSpinner from "@/Components/Loading";
 import Modal from "@/Components/Modal";
 import TableComponent from "@/Components/TableComponent";
@@ -21,7 +21,6 @@ import {
     FaUserFriends,
 } from "react-icons/fa";
 import InputValidationSetting from "../Unit/InputValidationSetting";
-import { MdClose } from "react-icons/md";
 import columns from "@/Components/utils/Client/columns";
 
 const ClientList = () => {
@@ -35,6 +34,9 @@ const ClientList = () => {
     const [isLoading, setLoading] = useState(false);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
+    const [isEditModal, setEditModal] = useState(false);
+    const [isDeleteModal, setDeleteModal] = useState(false);
+    const [actionClient, setActionClient] = useState(null);
     const { addToast } = useToast();
 
     // useEffect(() => {
@@ -151,9 +153,33 @@ const ClientList = () => {
         setSettingModal(true);
     };
 
+    const handleOpenEdit = (value) => {
+        setActionClient(value);
+        setEditModal(true);
+    };
+
+    const handleOpenDelete = (value) => {
+        setActionClient(value);
+        setDeleteModal(true);
+    };
+
+    const handleClientRenamed = (client_id, name) => {
+        setData((prev) =>
+            prev.map((item) =>
+                item.client_id === client_id ? { ...item, name } : item,
+            ),
+        );
+    };
+
+    const handleClientDeleted = (client_id) => {
+        setData((prev) => prev.filter((item) => item.client_id !== client_id));
+    };
+
     const col = columns({
         handleOpenSetting,
         handleToggleInvoice,
+        handleOpenEdit,
+        handleOpenDelete,
     });
 
     return (
@@ -370,7 +396,165 @@ const ClientList = () => {
                     // handleConfirmSettings={handleConfirmSettings}
                 />
             )}
+            <EditClientModal
+                isModal={isEditModal}
+                handleCloseModal={() => setEditModal(false)}
+                client={actionClient}
+                addToast={addToast}
+                onRenamed={handleClientRenamed}
+            />
+            <DeleteClientModal
+                isModal={isDeleteModal}
+                handleCloseModal={() => setDeleteModal(false)}
+                client={actionClient}
+                addToast={addToast}
+                onDeleted={handleClientDeleted}
+            />
         </PageLayout>
+    );
+};
+
+const EditClientModal = ({
+    isModal,
+    handleCloseModal,
+    client,
+    addToast,
+    onRenamed,
+}) => {
+    const [name, setName] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        setName(client?.name || "");
+    }, [client]);
+
+    const handleSave = async () => {
+        if (!name.trim()) {
+            return addToast({ type: "error", text: "Name cannot be empty" });
+        }
+        setSaving(true);
+        try {
+            const resp = await updateClientData(client?.client_id, [
+                { name: name.trim() },
+            ]);
+            if (resp?.response === "success") {
+                onRenamed(client?.client_id, name.trim());
+                addToast({ type: "success", text: "Client updated" });
+                handleCloseModal();
+            } else {
+                addToast({ type: "error", text: "Failed to update client" });
+            }
+        } catch (err) {
+            console.error(err);
+            addToast({ type: "error", text: "Failed to update client" });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <Modal
+            showModal={isModal}
+            handleCloseModal={handleCloseModal}
+            title="Edit Client"
+            size="sm"
+        >
+            <Modal.Body>
+                <label className="form-label">Client Name</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input-base"
+                />
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex justify-end">
+                    <button
+                        className="button-submit"
+                        disabled={saving}
+                        onClick={handleSave}
+                    >
+                        Save
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
+    );
+};
+
+const DeleteClientModal = ({
+    isModal,
+    handleCloseModal,
+    client,
+    addToast,
+    onDeleted,
+}) => {
+    const [confirmText, setConfirmText] = useState("");
+    const [deleting, setDeleting] = useState(false);
+
+    useEffect(() => {
+        setConfirmText("");
+    }, [client, isModal]);
+
+    const isConfirmed = confirmText === client?.name;
+
+    const handleDelete = async () => {
+        if (!isConfirmed) return;
+        setDeleting(true);
+        try {
+            const resp = await deleteClient(client?.client_id);
+            if (resp?.type === "success") {
+                onDeleted(client?.client_id);
+                addToast(resp);
+                handleCloseModal();
+            } else {
+                addToast({
+                    type: "error",
+                    text: resp?.text || "Failed to delete client",
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            addToast({ type: "error", text: "Failed to delete client" });
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    return (
+        <Modal
+            showModal={isModal}
+            handleCloseModal={handleCloseModal}
+            title="Delete Client"
+            size="sm"
+        >
+            <Modal.Body>
+                <p className="mb-3">
+                    This will remove{" "}
+                    <span className="font-semibold">{client?.name}</span> from
+                    every list. Type the client name below to confirm.
+                </p>
+                <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setConfirmText(e.target.value)}
+                    placeholder={client?.name}
+                    className="input-base"
+                />
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex justify-end">
+                    <button
+                        className="bg-danger text-white px-4 py-2 rounded-md disabled:opacity-40 disabled:pointer-events-none"
+                        disabled={!isConfirmed || deleting}
+                        onClick={handleDelete}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 
@@ -408,26 +592,21 @@ const SettingModal = (props) => {
     }, []);
 
     return (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full bg-white rounded-xl">
-            {loading && <LoadingSpinner />}
-            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
-                {clientData?.name}
-                <div
-                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
-                    onClick={handleCloseModal}
-                >
-                    <MdClose />
-                </div>
-            </div>
-
-            <div className="bg-white h-[70vh] scale-[.85] flex justify-center">
+        <Modal
+            showModal
+            handleCloseModal={handleCloseModal}
+            title={clientData?.name}
+            size="xl"
+        >
+            <Modal.Body>
+                {loading && <LoadingSpinner />}
                 <InputValidationSetting
                     data={settingData}
                     clientData={clientData}
                     selectedClients={[clientData?.client_id]}
                 />
-            </div>
-        </div>
+            </Modal.Body>
+        </Modal>
     );
 };
 

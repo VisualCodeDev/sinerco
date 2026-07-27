@@ -140,6 +140,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/client/{client_id}', 'clientDetail')->name('client.detail');
 
     Route::post('/client/update', 'updateClient')->name('client.update');
+    Route::post('/client/delete', 'deleteClient')->name('client.delete');
     Route::post('/client/settings', 'setSettings')->name('client.settings');
     Route::post('/client/settings/duration', 'updateDurationDisable')->name('duration.update.disable');
 });

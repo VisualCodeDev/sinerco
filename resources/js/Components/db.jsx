@@ -110,6 +110,27 @@ export const updateClientData = async (client_id, dataArr) => {
     }
 };
 
+export const deleteClient = async (client_id) => {
+    try {
+        const resp = await fetch(route("client.delete"), {
+            method: "POST",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "X-CSRF-TOKEN": document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.getAttribute("content"),
+            },
+            body: JSON.stringify({ client_id }),
+        });
+
+        return await resp.json();
+    } catch (err) {
+        return err;
+    }
+};
+
 export const fetchWithAuth = async (url, options = {}) => {
     try {
         const response = await fetch(url, {

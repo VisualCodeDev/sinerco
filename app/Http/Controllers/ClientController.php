@@ -156,4 +156,16 @@ class ClientController extends Controller
             'data' => $client
         ]);
     }
+
+    public function deleteClient(Request $request)
+    {
+        $request->validate([
+            'client_id' => 'required|exists:clients,client_id',
+        ]);
+
+        $client = Client::where('client_id', $request->client_id)->first();
+        $client->delete();
+
+        return response()->json(['type' => 'success', 'text' => 'Client deleted successfully']);
+    }
 }

@@ -172,20 +172,20 @@ const InputValidationSetting = (props) => {
                 </div>
             </div>
 
-            <div className="overflow-y-auto w-full overflow-x-auto p-6">
+            <div className="overflow-y-auto w-full overflow-x-auto p-6 max-h-[50vh]">
                 <table className="w-full">
-                    <thead className="bg-primary text-white z-10 shadow-sm w-full sticky top-0">
-                        <tr className="sticky top-0">
-                            <th className="font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">
+                    <thead className="text-white">
+                        <tr>
+                            <th className="sticky top-0 z-10 bg-primary shadow-sm font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">
                                 Item
                             </th>
-                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
+                            <th className="sticky top-0 z-10 bg-primary shadow-sm font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
                                 Decimal Settings
                             </th>
-                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[25%]">
+                            <th className="sticky top-0 z-10 bg-primary shadow-sm font-semibold text-nowrap text-left px-6 py-4 w-[25%]">
                                 Min Max Settings
                             </th>
-                            <th className="font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
+                            <th className="sticky top-0 z-10 bg-primary shadow-sm font-semibold text-nowrap text-left px-6 py-4 w-[15%]">
                                 Unit Settings
                             </th>
                             {/* <th className="font-semibold text-nowrap text-left px-6 py-4 w-[20%] rounded-tr-lg">
