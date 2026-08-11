@@ -113,6 +113,12 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
+    Route::post('/unit/location/remove', 'removeUnitLocation')->name('unit.position.remove');
+
+    Route::get('/unit/area-location/setting', 'unitAreaLocationSetting')->name('unit.area_location.setting');
+    Route::post('/unit/area-location/add', 'addUnitAreaLocation')->name('unit.area_location.add');
+    Route::post('/unit/area-location/remove', 'removeUnitAreaLocation')->name('unit.area_location.remove');
+    Route::get('/unit/relocate', 'relocateUnitPage')->name('unit.relocate');
     Route::post('/api/set-unit-setting', 'setUnitSetting')->name('unit.setSettings');
     Route::post('/unit/update/info', 'updateUnitInfo')->name('unit.update.info');
 
@@ -177,6 +183,7 @@ Route::controller(ProfileController::class)->middleware(['auth'])->group(functio
 
 Route::controller(LocationController::class)->middleware('auth')->group(function () {
     Route::get('/area', 'index')->name('areas');
+    Route::get('/fetch/areas', 'getAreas')->name('areas.get');
 });
 
 Route::controller(LocationController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {

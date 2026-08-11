@@ -1,11 +1,11 @@
 import { useToast } from "@/Components/Toast/ToastProvider";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import tColumns from "../../Components/utils/UnitLocationSettings/columns";
 import TableComponent from "@/Components/TableComponent";
 import PageLayout from "@/Layouts/PageLayout";
 import LoadingSpinner from "@/Components/Loading";
 
-const UnitPositionSetting = ({ data }) => {
+const UnitAreaLocationSetting = ({ data }) => {
     const [unitData, setUnitData] = useState([]);
     const [selectedItem, setSelectedItem] = useState(data || {});
     const [selectedItemUnits, setSelectedItemUnits] = useState([]);
@@ -122,14 +122,13 @@ const UnitPositionSetting = ({ data }) => {
             formData?.add?.some((wUnit) => wUnit === unit?.unit_id)
         );
 
-        const finalWorkshopUnit = [...selectedItemUnits, ...finalFilteredUnit];
-        setSelectedItemUnits(finalWorkshopUnit);
+        const finalLocationUnit = [...selectedItemUnits, ...finalFilteredUnit];
+        setSelectedItemUnits(finalLocationUnit);
 
         try {
             const resp = await axios.post(
-                route("unit.position.add", {
-                    workshop_id: selectedItem?.workshop_id,
-                    client_id: selectedItem?.client_id,
+                route("unit.area_location.add", {
+                    location_id: selectedItem?.id,
                     unit_ids: [...formData?.add],
                 })
             );
@@ -155,7 +154,7 @@ const UnitPositionSetting = ({ data }) => {
 
         try {
             const resp = await axios.post(
-                route("unit.position.remove", {
+                route("unit.area_location.remove", {
                     unit_ids: [...formData?.remove],
                 })
             );
@@ -174,7 +173,7 @@ const UnitPositionSetting = ({ data }) => {
         handleSelectAll,
     });
 
-    const workshopColumns = tColumns({
+    const locationColumns = tColumns({
         type: "workshopUnit",
         formData,
         unitAreaData: selectedItemUnits,
@@ -188,9 +187,10 @@ const UnitPositionSetting = ({ data }) => {
                 <div className="w-1/2 relative">
                     <TableComponent
                         data={selectedItemUnits || []}
-                        columns={workshopColumns}
+                        columns={locationColumns}
                         height="55vh"
-                        title={selectedItem?.name}
+                        title={selectedItem?.location}
+                        subtitle={selectedItem?.area?.area}
                         onRowClick={handleCheckRemoveItem}
                         isForm
                         submitPlaceholder="Remove"
@@ -216,4 +216,4 @@ const UnitPositionSetting = ({ data }) => {
     );
 };
 
-export default UnitPositionSetting;
+export default UnitAreaLocationSetting;

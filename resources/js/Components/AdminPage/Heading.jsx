@@ -75,8 +75,13 @@ const Heading = ({ children, alert, setAlert }) => {
         },
         unitLocationSetting: {
             icon: <IoMap />,
-            label: "Unit Location Set.",
+            label: "Unit - Client Setting",
             href: route("unit.position"),
+        },
+        unitRelocate: {
+            icon: <FaMapPin />,
+            label: "Relocate Unit",
+            href: route("unit.relocate"),
         },
         inputField: {
             icon: <IoDocumentText />,
@@ -183,6 +188,7 @@ const Heading = ({ children, alert, setAlert }) => {
             menu.eventHistory,
             menu.unitList,
             menu.unitLocationSetting,
+            menu.unitRelocate,
             menu.area,
             menu.inputSetting,
             menu.inputField,

@@ -8,9 +8,11 @@ import {
     FaPencilAlt,
     FaCheck,
     FaTimes,
+    FaBoxes,
 } from "react-icons/fa";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
+import { router } from "@inertiajs/react";
 import { useToast } from "@/Components/Toast/ToastProvider";
 
 const Location = ({ areas: initialAreas }) => {
@@ -449,6 +451,20 @@ const Location = ({ areas: initialAreas }) => {
                                             <span className="flex-1 text-sm text-blue-800 font-medium">
                                                 {item.location}
                                             </span>
+                                            <button
+                                                onClick={() =>
+                                                    router.visit(
+                                                        route(
+                                                            "unit.area_location.setting",
+                                                            { location_id: item.id }
+                                                        )
+                                                    )
+                                                }
+                                                title="Manage Units"
+                                                className="text-blue-300 hover:text-primary flex-shrink-0"
+                                            >
+                                                <FaBoxes className="text-xs" />
+                                            </button>
                                             <button
                                                 onClick={() => { setEditingLocationId(item.id); setEditingLocationName(item.location); }}
                                                 className="text-blue-200 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"

@@ -78,11 +78,11 @@ class DataUnitController extends Controller
                     'thresholdSetting' => $unit->thresholdSetting,
                     'visibilitySetting' => $unit->visibilitySetting,
                     'status' => $unit->status,
-                    'client' => $unit->UnitPositions?->client->name ?? $unit->UnitPositions?->workshop->name,
+                    'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                     'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
                     'location_id' => $unit->location_id,
-                    'location' => $unit->UnitPositions?->location->location ?? null,
-                    'area' => $unit->UnitPositions?->location->area->area ?? null,
+                    'location' => $unit->UnitPositions?->location?->location ?? null,
+                    'area' => $unit->UnitPositions?->location?->area?->area ?? null,
                     'unit_position_id' => $unit->UnitPositions?->id ?? null,
                     'latest_report' => $unit->UnitPositions?->latestReport
                 ];
@@ -390,6 +390,85 @@ class DataUnitController extends Controller
             'text' => 'Units added successfully',
             // 'inserted' => count($newData),
             // 'skipped' => count($existing),
+        ]);
+    }
+
+    public function removeUnitLocation(Request $request)
+    {
+        $val = $request->validate([
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:data_units,unit_id',
+        ]);
+
+        UnitPosition::whereIn('unit_id', $val['unit_ids'])
+            ->update([
+                'workshop_id' => null,
+                'client_id' => null,
+                'position_type' => null,
+                'updated_at' => now(),
+            ]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Units removed successfully',
+        ]);
+    }
+
+    public function relocateUnitPage()
+    {
+        return Inertia::render('Unit/RelocateUnit');
+    }
+
+    public function unitAreaLocationSetting(Request $request)
+    {
+        $request->validate([
+            'location_id' => 'required|exists:locations,id',
+        ]);
+
+        $location = Location::with(['area', 'units'])
+            ->findOrFail($request->location_id);
+
+        return Inertia::render('Unit/UnitAreaLocationSetting', [
+            'data' => $location
+        ]);
+    }
+
+    public function addUnitAreaLocation(Request $request)
+    {
+        $val = $request->validate([
+            'location_id' => 'required|exists:locations,id',
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:data_units,unit_id',
+        ]);
+
+        UnitPosition::whereIn('unit_id', $val['unit_ids'])
+            ->update([
+                'location_id' => $val['location_id'],
+                'updated_at' => now(),
+            ]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Units assigned to location successfully',
+        ]);
+    }
+
+    public function removeUnitAreaLocation(Request $request)
+    {
+        $val = $request->validate([
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:data_units,unit_id',
+        ]);
+
+        UnitPosition::whereIn('unit_id', $val['unit_ids'])
+            ->update([
+                'location_id' => null,
+                'updated_at' => now(),
+            ]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Units removed from location successfully',
         ]);
     }
 

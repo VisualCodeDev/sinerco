@@ -44,11 +44,11 @@ class UserSettingController extends Controller
 
         $data = $permittedData->map(function ($item) {
             return [
-                'unit_id' => $item?->unitArea->unit_id,
-                'unit' => $item?->unitArea->unit?->unit,
-                'client' => $item?->unitArea->client?->name,
-                'location' => $item?->unitArea->location?->location,
-                'area' => $item?->unitArea->location?->area?->area,
+                'unit_id' => $item?->unitArea?->unit_id,
+                'unit' => $item?->unitArea?->unit?->unit,
+                'client' => $item?->unitArea?->client?->name,
+                'location' => $item?->unitArea?->location?->location,
+                'area' => $item?->unitArea?->location?->area?->area,
                 'unit_position_id' => $item->unit_position_id,
             ];
         });

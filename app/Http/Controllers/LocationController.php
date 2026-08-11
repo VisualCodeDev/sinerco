@@ -15,6 +15,11 @@ class LocationController extends Controller
         return Inertia::render('Location/Location', ['areas' => $areas]);
     }
 
+    public function getAreas()
+    {
+        return response()->json(Area::with(['locations'])->get());
+    }
+
     public function storeArea(Request $request)
     {
         $request->validate(['area' => 'required|string|max:255']);

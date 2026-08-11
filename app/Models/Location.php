@@ -21,4 +21,9 @@ class Location extends Model
     {
         return $this->hasMany(UnitPosition::class, 'location_id', 'id');
     }
+
+    public function units()
+    {
+        return $this->belongsToMany(DataUnit::class, 'unit_positions', 'location_id', 'unit_id');
+    }
 }

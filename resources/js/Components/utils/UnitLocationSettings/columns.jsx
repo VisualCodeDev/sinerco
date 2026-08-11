@@ -156,7 +156,9 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
                     <div
                         className="text-center w-full"
                         onClick={() => handleSelectAll(data)}
-                        checked={formData?.add?.length === unitAreaData?.length}
+                        checked={
+                            formData?.remove?.length === unitAreaData?.length
+                        }
                     >
                         Select All
                     </div>
@@ -170,7 +172,9 @@ const columns = ({ type, formData, unitAreaData, handleSelectAll }) => {
                 return (
                     <input
                         type="checkbox"
-                        checked={formData?.add?.includes(unit_id?.toString())}
+                        checked={formData?.remove?.includes(
+                            unit_id?.toString(),
+                        )}
                         onChange={(e) => {
                             e.stopPropagation();
                         }}
