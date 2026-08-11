@@ -12,6 +12,7 @@ use App\Models\UnitPosition;
 use App\Models\Workshop;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Log;
@@ -40,7 +41,7 @@ class DataUnitController extends Controller
                     $q->select(['workshop_id', 'name']);
                 },
                 'location.area',
-                'reports'
+                'latestReport'
             ])->get()->makeHidden(['created_at', 'updated_at']);
             $data = $temp->map(function ($pos) {
                 return [
@@ -55,7 +56,7 @@ class DataUnitController extends Controller
                     'location_id' => $pos->location_id ?? null,
                     'area' => $pos->location?->area?->area ?? null,
                     'unit_position_id' => $pos->id,
-                    'reports' => $pos->reports
+                    'latest_report' => $pos->latestReport
                 ];
             });
         } else {
@@ -64,7 +65,7 @@ class DataUnitController extends Controller
                     $q->select(['client_id', 'name', 'gmt_offset']);
                 },
                 'UnitPositions.location.area',
-                'UnitPositions.reports',
+                'UnitPositions.latestReport',
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
@@ -83,7 +84,7 @@ class DataUnitController extends Controller
                     'location' => $unit->UnitPositions?->location->location ?? null,
                     'area' => $unit->UnitPositions?->location->area->area ?? null,
                     'unit_position_id' => $unit->UnitPositions?->id ?? null,
-                    'reports' => $unit->UnitPositions?->reports
+                    'latest_report' => $unit->UnitPositions?->latestReport
                 ];
             });
         }
@@ -108,17 +109,31 @@ class DataUnitController extends Controller
     public function unitList(Request $request)
     {
         $status = $request->query('status');
+        $perPage = 10;
+        $page = max(1, (int) $request->query('page', 1));
 
         $units = self::getPermittedUnit();
 
         if ($status) {
             $units = $units->filter(function ($item) use ($status) {
-                return optional($item->unit)->status === $status;
+                return $item['status'] === $status;
             });
         }
 
+        $units = $units->values();
+
+        $paginated = (new LengthAwarePaginator(
+            $units->forPage($page, $perPage)->values(),
+            $units->count(),
+            $perPage,
+            $page,
+            [
+                'path' => $request->url(),
+            ]
+        ))->appends($request->except('page'));
+
         return Inertia::render('Daily/DailyList', [
-            'data' => $units->values(),
+            'data' => $paginated,
             'filters' => [
                 'status' => $status,
             ],
@@ -447,10 +462,17 @@ class DataUnitController extends Controller
         return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
     }
 
-    public function getUnitReports($unit_position_id)
+    public function getUnitReports(Request $request, $unit_position_id)
     {
-        $reports = DailyReport::where('unit_position_id', $unit_position_id)
-            ->pluck('data'); // kolom JSON
+        $query = DailyReport::where('unit_position_id', $unit_position_id);
+
+        if ($date = $request->query('date')) {
+            $query->where('date', $date);
+        } elseif ($month = $request->query('month')) {
+            $query->where('date', 'like', "$month%");
+        }
+
+        $reports = $query->pluck('data'); // kolom JSON
 
         return response()->json([
             'success' => true,

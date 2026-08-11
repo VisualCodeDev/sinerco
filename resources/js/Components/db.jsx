@@ -65,10 +65,10 @@ export const getAllUnits = async () => {
     return data;
 };
 
-export const getUnitReports = async (unit_position_id) => {
+export const getUnitReports = async (unit_position_id, params = {}) => {
     try {
         const response = await fetch(
-            route("unit.position.report.get", { unit_position_id }),
+            route("unit.position.report.get", { unit_position_id, ...params }),
         );
 
         if (!response.ok) {
@@ -169,11 +169,7 @@ export const getAllReports = async () => {
         let data = await response.json();
         data = data
             .map((unit) => {
-                const lastReport = [...(unit.reports || [])].sort(
-                    (a, b) =>
-                        new Date(`${b.date}T${b.time}`) -
-                        new Date(`${a.date}T${a.time}`),
-                )[0];
+                const lastReport = unit.latest_report;
 
                 let lastReportTime = "No report";
                 let color = "red";

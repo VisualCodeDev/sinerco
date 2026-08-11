@@ -22,14 +22,30 @@ import axios from "axios";
 import { useToast } from "../Toast/ToastProvider";
 
 const UnitTable = (props) => {
-    const { data: propsData } = props;
+    const { data: propsData, pagination } = props;
     const data = propsData;
+
+    const handlePageChange = (url) => {
+        if (!url) return;
+        router.visit(url, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
     const [unitData, setUnitData] = useState(data);
     const [formData, setFormData] = useState({
         selectedRows: [],
         data: unitData,
         selectedUnitPositions: [],
     });
+
+    // Resync local copy whenever the page's data changes (e.g. navigating
+    // between pagination pages), since `unitData` is otherwise only ever
+    // set once on mount and locally after settings edits.
+    useEffect(() => {
+        setUnitData(data);
+    }, [data]);
 
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const [visibilitySetting, setVisibilitySetting] = useState(null);
@@ -124,7 +140,17 @@ const UnitTable = (props) => {
         }
     };
 
-    const columns = tColumns("unitList", formData, null, handleSelectAll, edit);
+    const pageOffset = pagination
+        ? (pagination.current_page - 1) * pagination.per_page
+        : 0;
+    const columns = tColumns(
+        "unitList",
+        formData,
+        null,
+        handleSelectAll,
+        edit,
+        pageOffset
+    );
     const onSelect = (selected) => {
         const currSelected = formData?.selectedRows || [];
         const currSelectedUnits = formData?.selectedUnits || [];
@@ -182,6 +208,30 @@ const UnitTable = (props) => {
             />
         );
     }
+    const paginationFooter = pagination && pagination.last_page > 1 && (
+        <div className="sticky bottom-0 left-0 bg-white border-t flex items-center justify-between flex-wrap gap-2 px-6 py-4 rounded-b-lg">
+            <p className="text-sm text-gray-500">
+                Page {pagination.current_page} of {pagination.last_page} (
+                {pagination.total} units)
+            </p>
+            <div className="flex gap-1 flex-wrap">
+                {pagination.links.map((link, i) => (
+                    <button
+                        key={i}
+                        disabled={!link.url}
+                        onClick={() => handlePageChange(link.url)}
+                        dangerouslySetInnerHTML={{ __html: link.label }}
+                        className={`px-3 py-1.5 rounded-md border text-sm min-w-[36px] disabled:opacity-40 disabled:cursor-not-allowed ${
+                            link.active
+                                ? "bg-primary text-white border-primary"
+                                : "hover:bg-gray-50"
+                        }`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+
     return (
         <>
             <TableComponent
@@ -199,6 +249,7 @@ const UnitTable = (props) => {
                 toggleEdit={() => setEdit((prev) => !prev)}
                 edit={edit}
                 handleNew={route("unit.add")}
+                Footer={paginationFooter}
             />
             <SettingModal
                 data={unitData}

@@ -30,6 +30,12 @@ class UnitPosition extends Model
         return $this->hasMany(DailyReport::class, 'unit_position_id', 'id');
     }
 
+    public function latestReport()
+    {
+        return $this->hasOne(DailyReport::class, 'unit_position_id', 'id')
+            ->latestOfMany(['date', 'time']);
+    }
+
     public function unit()
     {
         return $this->belongsTo(DataUnit::class, 'unit_id', 'unit_id');

@@ -1,6 +1,13 @@
 import { getRequestTypeName, toCapitalizeFirstLetter } from "../dashboard-util";
 
-const columns = (type, formData, unitAreaData, handleSelectAll, isEdit) => {
+const columns = (
+    type,
+    formData,
+    unitAreaData,
+    handleSelectAll,
+    isEdit,
+    pageOffset = 0
+) => {
     const colItem = [
         {
             name: "id",
@@ -181,7 +188,7 @@ const columns = (type, formData, unitAreaData, handleSelectAll, isEdit) => {
             Cell: ({ index }) => {
                 return (
                     <>
-                        <div>{index + 1}</div>
+                        <div>{index + 1 + pageOffset}</div>
                     </>
                 );
             },

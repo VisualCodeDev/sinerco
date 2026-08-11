@@ -146,7 +146,12 @@ const DynamicLineChart = () => {
 
     const getSelectedUnitReports = async (unit_position_id) => {
         setLoading(true);
-        const dataUnit = await getUnitReports(unit_position_id);
+        const params = selectedMonth
+            ? { month: selectedMonth }
+            : selectedDate
+              ? { date: selectedDate }
+              : {};
+        const dataUnit = await getUnitReports(unit_position_id, params);
         const parsed = dataUnit.data.map((item) =>
             typeof item === "string" ? JSON.parse(item) : item,
         );
@@ -183,7 +188,7 @@ const DynamicLineChart = () => {
 
     useEffect(() => {
         getSelectedUnitReports(selectedUnit);
-    }, [selectedUnit]);
+    }, [selectedUnit, selectedDate, selectedMonth]);
 
     const chartData = selectedMonth
         ? fillMissingDates(

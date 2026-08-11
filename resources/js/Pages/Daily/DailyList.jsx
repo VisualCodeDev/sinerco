@@ -4,7 +4,7 @@ import OnGoingEvent from "@/Components/Events/OnGoingEvent";
 import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
 
-const DailyList = ({ data }) => {
+const DailyList = ({ data, filters }) => {
     const [requestData, setRequestData] = useState([]);
     const [loading, setLoading] = useState(false);
     const getRequestData = async () => {
@@ -26,7 +26,7 @@ const DailyList = ({ data }) => {
         <PageLayout>
             <div className="flex flex-col gap-4 pb-4">
             <OnGoingEvent data={requestData} />
-            <UnitTable data={data} />
+            <UnitTable data={data.data} pagination={data} filters={filters} />
             </div>
         </PageLayout>
     );
