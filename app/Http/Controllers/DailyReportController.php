@@ -157,6 +157,7 @@ class DailyReportController extends Controller
                 (float) $validated['discharge_press'],
                 $unit?->valve ?? '4/0'
             );
+            $validated['curve'] = $curveValue;
             $validated['curve_24h'] = $curveValue === null
                 ? null
                 : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
@@ -266,6 +267,7 @@ class DailyReportController extends Controller
                 (float) $val['discharge_press'],
                 $unit?->valve ?? '4/0'
             );
+            $val['curve'] = $curveValue;
             $val['curve_24h'] = $curveValue === null
                 ? null
                 : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
