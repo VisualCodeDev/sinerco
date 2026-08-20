@@ -6,8 +6,58 @@ const columns = (
     unitAreaData,
     handleSelectAll,
     isEdit,
-    pageOffset = 0
+    pageOffset = 0,
+    lookups = {},
+    onFieldChange = () => {},
+    onSaveRow = () => {},
+    isBulk = false
 ) => {
+    const editValue = (item, field) =>
+        formData?.edits?.[item.unit_id]?.[field] ?? item[field] ?? "";
+
+    const textInput = (item, field, placeholder) => (
+        <input
+            type="text"
+            className="w-full border border-gray-300 rounded-md px-2 py-1"
+            placeholder={placeholder}
+            value={editValue(item, field)}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => onFieldChange(item.unit_id, field, e.target.value)}
+        />
+    );
+
+    const selectInput = (item, field, options, valueKey, labelKey, disabled) => (
+        <select
+            className="w-full border border-gray-300 rounded-md px-2 py-1 bg-white"
+            value={editValue(item, field)}
+            disabled={disabled}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => onFieldChange(item.unit_id, field, e.target.value)}
+        >
+            <option value="">-- Select --</option>
+            {options?.map((opt) => (
+                <option key={opt[valueKey]} value={opt[valueKey]}>
+                    {opt[labelKey]}
+                </option>
+            ))}
+        </select>
+    );
+
+    const areasForRegion = (item) => {
+        const regionId = editValue(item, "region_id");
+        return (
+            lookups.regions?.find((r) => String(r.id) === String(regionId))
+                ?.areas || []
+        );
+    };
+
+    const locationsForArea = (item) => {
+        const areaId = editValue(item, "area_id");
+        return (
+            areasForRegion(item).find((a) => String(a.id) === String(areaId))
+                ?.locations || []
+        );
+    };
     const colItem = [
         {
             name: "id",
@@ -194,23 +244,110 @@ const columns = (
             },
         },
         {
+            name: "unit",
+            header: "Unit Name",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "14%",
+            Cell: (item) => {
+                if (isEdit) return textInput(item, "unit", "Unit Name");
+                return <div className="flex flex-col">{item.unit}</div>;
+            },
+        },
+        {
+            name: "unit_sn",
+            header: "Unit S/N",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "12%",
+            Cell: (item) => {
+                if (isEdit) return textInput(item, "unit_sn", "Unit S/N");
+                return <div className="flex flex-col">{item.unit_sn}</div>;
+            },
+        },
+        {
+            name: "old_sn",
+            header: "Old S/N",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "12%",
+            Cell: (item) => {
+                if (isEdit) return textInput(item, "old_sn", "Old S/N");
+                return <div className="flex flex-col">{item.old_sn}</div>;
+            },
+        },
+        {
+            name: "region",
+            header: "Region",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "10%",
+            Cell: (item) => {
+                if (isEdit)
+                    return selectInput(
+                        item,
+                        "region_id",
+                        lookups.regions,
+                        "id",
+                        "name"
+                    );
+                return <div className="flex flex-col">{item.region}</div>;
+            },
+        },
+        {
             name: "client",
             header: "Client",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "17%",
-            Cell: ({ client }) => {
-                return <div className="flex flex-col">{client}</div>;
+            width: "13%",
+            Cell: (item) => {
+                if (isEdit)
+                    return selectInput(
+                        item,
+                        "client_id",
+                        lookups.clients,
+                        "client_id",
+                        "name"
+                    );
+                return <div className="flex flex-col">{item.client}</div>;
             },
         },
         {
-            name: "unit",
-            header: "Unit",
+            name: "area",
+            header: "Area",
             headerClassName: "bg-primary text-white",
             sortable: true,
-            width: "20%",
-            Cell: ({ unit }) => {
-                return <div className="flex flex-col">{unit}</div>;
+            width: "10%",
+            Cell: (item) => {
+                if (isEdit)
+                    return selectInput(
+                        item,
+                        "area_id",
+                        areasForRegion(item),
+                        "id",
+                        "area",
+                        !editValue(item, "region_id")
+                    );
+                return <div className="flex flex-col">{item.area}</div>;
+            },
+        },
+        {
+            name: "location",
+            header: "Location",
+            headerClassName: "bg-primary text-white",
+            sortable: true,
+            width: "13%",
+            Cell: (item) => {
+                if (isEdit)
+                    return selectInput(
+                        item,
+                        "location_id",
+                        locationsForArea(item),
+                        "id",
+                        "location",
+                        !editValue(item, "area_id")
+                    );
+                return <div className="flex flex-col">{item.location}</div>;
             },
         },
         {
@@ -219,7 +356,7 @@ const columns = (
             headerClassName:
                 "bg-primary text-white text-center flex items-center justify-center",
             sortable: true,
-            width: "20%",
+            width: "8%",
             Cell: ({ status }) => {
                 return (
                     <div className="flex flex-col text-center">
@@ -241,13 +378,26 @@ const columns = (
             },
         },
         {
-            name: "location",
-            header: "Location",
-            headerClassName: "bg-primary text-white",
-            sortable: true,
-            width: "20%",
-            Cell: ({ location }) => {
-                return <div className="flex flex-col">{location}</div>;
+            name: "save",
+            header: "",
+            headerClassName: "bg-primary text-white text-center",
+            sortable: false,
+            cellClassName: "text-center",
+            width: "5%",
+            Cell: (item) => {
+                if (!isEdit) return null;
+                return (
+                    <button
+                        type="button"
+                        className="bg-white text-primary border border-primary px-3 py-1 rounded-md text-sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onSaveRow(item.unit_id);
+                        }}
+                    >
+                        Save
+                    </button>
+                );
             },
         },
         {
@@ -256,22 +406,22 @@ const columns = (
                 return (
                     <div
                         className="text-center w-full"
-                        onClick={() => isEdit && handleSelectAll(data)}
+                        onClick={() => isBulk && handleSelectAll(data)}
                         checked={
                             formData?.selectedRows?.length ===
                             formData?.data?.length
                         }
                     >
-                        {isEdit ? "Select All" : ""}
+                        {isBulk ? "Select All" : ""}
                     </div>
                 );
             },
             headerClassName: "bg-primary text-white text-center justify-center",
             sortable: false,
             cellClassName: "text-center",
-            width: "10%",
+            width: "8%",
             Cell: ({ unit_id }) => {
-                if (isEdit) {
+                if (isBulk) {
                     return (
                         <input
                             type="checkbox"

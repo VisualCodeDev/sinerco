@@ -7,11 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Area extends Model
 {
     protected $fillable = [
-        'area'
+        'area',
+        'region_id',
     ];
 
     public function locations()
     {
         return $this->hasMany(Location::class);
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 }

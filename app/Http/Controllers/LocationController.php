@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Area;
 use App\Models\Location;
+use App\Models\Region;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -11,26 +12,33 @@ class LocationController extends Controller
 {
     public function index()
     {
-        $areas = Area::with(['locations'])->get();
-        return Inertia::render('Location/Location', ['areas' => $areas]);
+        $areas = Area::with(['locations', 'region'])->get();
+        $regions = Region::orderBy('name')->get();
+        return Inertia::render('Location/Location', ['areas' => $areas, 'regions' => $regions]);
     }
 
     public function getAreas()
     {
-        return response()->json(Area::with(['locations'])->get());
+        return response()->json(Area::with(['locations', 'region'])->get());
     }
 
     public function storeArea(Request $request)
     {
-        $request->validate(['area' => 'required|string|max:255']);
-        $area = Area::create(['area' => $request->area]);
+        $request->validate([
+            'area' => 'required|string|max:255',
+            'region_id' => 'nullable|exists:regions,id',
+        ]);
+        $area = Area::create(['area' => $request->area, 'region_id' => $request->region_id]);
         return response()->json(['type' => 'success', 'text' => 'Area added.', 'area' => $area], 200);
     }
 
     public function updateArea(Request $request, Area $area)
     {
-        $request->validate(['area' => 'required|string|max:255']);
-        $area->update(['area' => $request->area]);
+        $request->validate([
+            'area' => 'required|string|max:255',
+            'region_id' => 'nullable|exists:regions,id',
+        ]);
+        $area->update($request->only(['area', 'region_id']));
         return response()->json(['type' => 'success', 'text' => 'Area updated.'], 200);
     }
 
@@ -62,8 +70,11 @@ class LocationController extends Controller
 
     public function updateLocation(Request $request, Location $location)
     {
-        $request->validate(['location' => 'required|string|max:255']);
-        $location->update(['location' => $request->location]);
+        $request->validate([
+            'location' => 'required|string|max:255',
+            'area_id' => 'nullable|exists:areas,id',
+        ]);
+        $location->update($request->only(['location', 'area_id']));
         return response()->json(['type' => 'success', 'text' => 'Location updated.'], 200);
     }
 
@@ -77,5 +88,36 @@ class LocationController extends Controller
         }
         $location->delete();
         return response()->json(['type' => 'success', 'text' => 'Location deleted.'], 200);
+    }
+
+    public function getRegions()
+    {
+        return response()->json(Region::with(['areas.locations'])->get());
+    }
+
+    public function storeRegion(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        $region = Region::create(['name' => $request->name]);
+        return response()->json(['type' => 'success', 'text' => 'Region added.', 'region' => $region], 200);
+    }
+
+    public function updateRegion(Request $request, Region $region)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        $region->update(['name' => $request->name]);
+        return response()->json(['type' => 'success', 'text' => 'Region updated.'], 200);
+    }
+
+    public function destroyRegion(Region $region)
+    {
+        if ($region->areas()->exists()) {
+            return response()->json([
+                'type' => 'error',
+                'text' => 'Cannot delete region with areas assigned to it.',
+            ], 422);
+        }
+        $region->delete();
+        return response()->json(['type' => 'success', 'text' => 'Region deleted.'], 200);
     }
 }

@@ -66,7 +66,7 @@ Route::controller(DailyReportController::class)->middleware('auth')->group(funct
     Route::post('/unit/fill/NaN', 'fillReport')->name('fill.report');
 
     // Route::get('/daily', 'index')->name('daily')->middleware('auth');
-    Route::get('/unit/daily/{unit_position_id}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
+    Route::get('/unit/daily/{unit_name}', 'index')->name('daily')->middleware(['auth', 'unit.access']);
 
     Route::get('/fetch/unit/daily', 'getDataReportBasedOnDate')->name('getDataReportBasedOnDate')->middleware('auth');
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
@@ -121,6 +121,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/unit/relocate', 'relocateUnitPage')->name('unit.relocate');
     Route::post('/api/set-unit-setting', 'setUnitSetting')->name('unit.setSettings');
     Route::post('/unit/update/info', 'updateUnitInfo')->name('unit.update.info');
+    Route::post('/unit/update/full', 'updateUnitFull')->name('unit.update.full');
 
     Route::get('/unit/list/add', 'create')->name('unit.add.page')->middleware('roles:super_admin');
     Route::post('/unit/list/add', 'addNewUnit')->name('unit.add')->middleware('roles:super_admin');
@@ -145,6 +146,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
     Route::get('/client/list', 'index')->name('client.list');
     Route::get('/client/{client_id}', 'clientDetail')->name('client.detail');
 
+    Route::post('/client/store', 'storeClient')->name('client.store');
     Route::post('/client/update', 'updateClient')->name('client.update');
     Route::post('/client/delete', 'deleteClient')->name('client.delete');
     Route::post('/client/settings', 'setSettings')->name('client.settings');
@@ -184,6 +186,7 @@ Route::controller(ProfileController::class)->middleware(['auth'])->group(functio
 Route::controller(LocationController::class)->middleware('auth')->group(function () {
     Route::get('/area', 'index')->name('areas');
     Route::get('/fetch/areas', 'getAreas')->name('areas.get');
+    Route::get('/fetch/regions', 'getRegions')->name('regions.get');
 });
 
 Route::controller(LocationController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
@@ -193,6 +196,9 @@ Route::controller(LocationController::class)->middleware(['auth', 'roles:super_a
     Route::post('/location', 'storeLocation')->name('location.store');
     Route::put('/location/{location}', 'updateLocation')->name('location.update');
     Route::delete('/location/{location}', 'destroyLocation')->name('location.destroy');
+    Route::post('/region', 'storeRegion')->name('region.store');
+    Route::put('/region/{region}', 'updateRegion')->name('region.update');
+    Route::delete('/region/{region}', 'destroyRegion')->name('region.destroy');
 });
 
 Route::controller(WorkshopController::class)->middleware('auth')->group(function () {

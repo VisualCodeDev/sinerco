@@ -81,6 +81,8 @@ class DataUnit extends Model
     protected $fillable = [
         'unit_id',
         'unit',
+        'unit_sn',
+        'old_sn',
         'status',
         'thresholdSetting',
         'visibilitySetting',

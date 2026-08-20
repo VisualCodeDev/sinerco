@@ -23,6 +23,7 @@ const TableComponent = (props) => {
         toggleEdit,
         edit = true,
         editPlaceHolder,
+        secondaryAction,
         isBA = false,
         isUserList = false,
         isUnitList = false,
@@ -48,6 +49,7 @@ const TableComponent = (props) => {
         handleMoveToHistory,
         handleNew,
         isResponsive = false,
+        onSearchChange,
     } = props;
     const [sortConfig, setSortConfig] = useState({
         key:
@@ -60,6 +62,16 @@ const TableComponent = (props) => {
     const [filterConfig, setFilterConfig] = useState();
     const [filteredData, setFilteredData] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Search only ever runs over the `data` this component was given. When a
+    // parent paginates server-side (e.g. the Unit List), that's just the
+    // current page — so a match on another page silently "doesn't show up".
+    // Parents that need whole-dataset search can pass `onSearchChange` and
+    // swap in the full, unpaginated data themselves while a query is active.
+    const handleSearchChange = (value) => {
+        setSearchQuery(value);
+        onSearchChange?.(value);
+    };
 
     // const sortedData = data?.sort((a, b) => {
     //     if (!sortConfig.key) return 0;
@@ -255,7 +267,7 @@ const TableComponent = (props) => {
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) =>
-                                        setSearchQuery(e.target.value)
+                                        handleSearchChange(e.target.value)
                                     }
                                 />
                             </div>
@@ -283,6 +295,18 @@ const TableComponent = (props) => {
                                             : editPlaceHolder
                                               ? editPlaceHolder
                                               : "Edit"}
+                                    </span>
+                                </div>
+                            )}
+                            {secondaryAction && (
+                                <div
+                                    className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                    onClick={secondaryAction.onClick}
+                                >
+                                    <span className="">
+                                        {secondaryAction.active
+                                            ? secondaryAction.activeLabel || "Done"
+                                            : secondaryAction.label}
                                     </span>
                                 </div>
                             )}
@@ -498,7 +522,7 @@ const TableComponent = (props) => {
                     </div>
                 )}
 
-                {isUnitList && edit && (
+                {isUnitList && secondaryAction?.active && (
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-start text-white rounded-b-2xl">
                         <tr>
                             <th className="flex gap-2">
@@ -667,7 +691,7 @@ const TableComponent = (props) => {
                                     placeholder="Search..."
                                     value={searchQuery}
                                     onChange={(e) =>
-                                        setSearchQuery(e.target.value)
+                                        handleSearchChange(e.target.value)
                                     }
                                 />
                             </div>

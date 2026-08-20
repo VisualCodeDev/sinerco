@@ -12,6 +12,7 @@ class UnitPosition extends Model
         'location_id',
         'position_type',
         'workshop_id',
+        'region_id',
     ];
 
     public function dailyReportSetting()
@@ -58,6 +59,11 @@ class UnitPosition extends Model
     public function client()
     {
         return $this->belongsTo(Client::class, 'client_id', 'client_id');
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
     }
 
     public function workers()

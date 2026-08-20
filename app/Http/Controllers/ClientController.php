@@ -131,6 +131,21 @@ class ClientController extends Controller
         return response()->json($data);
     }
 
+    public function storeClient(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $client = Client::create(['name' => $request->name]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Client added.',
+            'data' => $client,
+        ]);
+    }
+
     public function updateClient(Request $request)
     {
         $val = $request->validate([

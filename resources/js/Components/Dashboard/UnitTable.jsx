@@ -53,19 +53,137 @@ const UnitTable = (props) => {
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
     const [isExportModal, setExportModal] = useState(false);
+    // `edit` makes each row's cells inline-editable (Region/Client/Area/Location
+    // dropdowns, Name/S/N text inputs). `bulkEdit` is the separate checkbox
+    // multi-select mode for bulk Threshold/Visibility settings & Export BA.
     const [edit, setEdit] = useState(false);
+    const [bulkEdit, setBulkEdit] = useState(false);
+    const [lookups, setLookups] = useState({ regions: [], clients: [] });
     const { addToast } = useToast();
-    
-    useEffect(() => {
-        const formattedUnitData = data.map((item) => ({
+
+    const formatRows = (rows) =>
+        (rows || []).map((item) => ({
             ...item,
-            // In edit mode rows must be selectable, not links — TableComponent
+            // In edit/bulk mode rows must be selectable, not links — TableComponent
             // renders an <a href> wrapper whenever `url` is set, which would
             // navigate away on click regardless of the row's onClick handler.
-            url: edit ? undefined : route("daily", item.unit_position_id),
+            url: edit || bulkEdit ? undefined : route("daily", item.unit),
         }));
-        setFormData((prev) => ({ ...prev, data: formattedUnitData }));
-    }, [unitData, edit]);
+
+    useEffect(() => {
+        setFormData((prev) => ({ ...prev, data: formatRows(data) }));
+    }, [unitData, edit, bulkEdit]);
+
+    // The page prop is only the current server-paginated slice, so a plain
+    // client-side search over it would miss every unit on another page. Once
+    // the user actually searches, fetch the full permitted unit list once and
+    // search across that instead — see searchQuery usage below.
+    const [searchQuery, setSearchQuery] = useState("");
+    const [allUnitsData, setAllUnitsData] = useState(null);
+    const isSearching = searchQuery.trim().length > 0;
+
+    useEffect(() => {
+        if (!isSearching || allUnitsData !== null) return;
+        const fetchAll = async () => {
+            try {
+                const resp = await axios.get(route("unit.get"));
+                setAllUnitsData(resp.data || []);
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchAll();
+    }, [isSearching]);
+
+    useEffect(() => {
+        if (!edit || lookups.regions.length > 0) return;
+        const fetchLookups = async () => {
+            try {
+                const [regionsResp, clientsResp] = await Promise.all([
+                    axios.get(route("regions.get")),
+                    axios.get(route("client.get")),
+                ]);
+                setLookups({
+                    regions: regionsResp.data || [],
+                    clients: clientsResp.data || [],
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchLookups();
+    }, [edit]);
+
+    const handleFieldChange = (unit_id, field, value) => {
+        setFormData((prev) => {
+            const current = { ...(prev.edits?.[unit_id] || {}) };
+            current[field] = value;
+            if (field === "region_id") {
+                current.area_id = "";
+                current.location_id = "";
+            } else if (field === "area_id") {
+                current.location_id = "";
+            }
+            return { ...prev, edits: { ...prev.edits, [unit_id]: current } };
+        });
+    };
+
+    const handleSaveRow = async (unit_id) => {
+        const edits = formData?.edits?.[unit_id];
+        if (!edits) return;
+        try {
+            const resp = await axios.post(route("unit.update.full"), {
+                unit_id,
+                ...edits,
+            });
+            addToast(resp?.data);
+
+            setUnitData((prev) =>
+                prev.map((item) => {
+                    if (item.unit_id !== unit_id) return item;
+                    const merged = { ...item, ...edits };
+                    if (edits.region_id) {
+                        merged.region = lookups.regions.find(
+                            (r) => String(r.id) === String(edits.region_id)
+                        )?.name;
+                    }
+                    if (edits.client_id) {
+                        merged.client = lookups.clients.find(
+                            (c) => c.client_id === edits.client_id
+                        )?.name;
+                    }
+                    if (edits.location_id) {
+                        const region = lookups.regions.find(
+                            (r) => String(r.id) === String(merged.region_id)
+                        );
+                        const area = region?.areas?.find((a) =>
+                            (a.locations || []).some(
+                                (l) => String(l.id) === String(edits.location_id)
+                            )
+                        );
+                        merged.area = area?.area;
+                        merged.area_id = area?.id;
+                        merged.location = area?.locations?.find(
+                            (l) => String(l.id) === String(edits.location_id)
+                        )?.location;
+                    }
+                    return merged;
+                })
+            );
+
+            setFormData((prev) => {
+                const newEdits = { ...prev.edits };
+                delete newEdits[unit_id];
+                return { ...prev, edits: newEdits };
+            });
+        } catch (e) {
+            console.error(e);
+            addToast({
+                type: "error",
+                text: e?.response?.data?.message || "Failed to update unit.",
+            });
+        }
+    };
 
     useEffect(() => {
         setThresholdSetting(
@@ -96,7 +214,7 @@ const UnitTable = (props) => {
 
     const handleClick = (item) => {
         if (!item.unit_position_id || edit) return;
-        const url = route("daily", item.unit_position_id);
+        const url = route("daily", item.unit);
 
         // if (e && (e.button === 1 || e.ctrlKey || e.metaKey)) {
         //     window.open(url, "_blank");
@@ -140,7 +258,7 @@ const UnitTable = (props) => {
         }
     };
 
-    const pageOffset = pagination
+    const pageOffset = pagination && !isSearching
         ? (pagination.current_page - 1) * pagination.per_page
         : 0;
     const columns = tColumns(
@@ -149,7 +267,11 @@ const UnitTable = (props) => {
         null,
         handleSelectAll,
         edit,
-        pageOffset
+        pageOffset,
+        lookups,
+        handleFieldChange,
+        handleSaveRow,
+        bulkEdit
     );
     const onSelect = (selected) => {
         const currSelected = formData?.selectedRows || [];
@@ -201,14 +323,23 @@ const UnitTable = (props) => {
                 columns={columns}
                 title={"List of Unit"}
                 // onRowClick={handleClick}
-                onRowClick={edit ? onSelect : handleClick}
+                onRowClick={bulkEdit ? onSelect : edit ? undefined : handleClick}
                 addNewItem={true}
-                toggleEdit={() => setEdit(!edit)}
+                toggleEdit={
+                    user?.role === "super_admin" ? () => setEdit(!edit) : undefined
+                }
                 edit={edit}
+                secondaryAction={{
+                    label: "Bulk Settings",
+                    activeLabel: "Done",
+                    active: bulkEdit,
+                    onClick: () => setBulkEdit((prev) => !prev),
+                }}
             />
         );
     }
-    const paginationFooter = pagination && pagination.last_page > 1 && (
+    const searchData = isSearching ? formatRows(allUnitsData || []) : formData?.data;
+    const paginationFooter = !isSearching && pagination && pagination.last_page > 1 && (
         <div className="sticky bottom-0 left-0 bg-white border-t flex items-center justify-between flex-wrap gap-2 px-6 py-4 rounded-b-lg">
             <p className="text-sm text-gray-500">
                 Page {pagination.current_page} of {pagination.last_page} (
@@ -239,15 +370,26 @@ const UnitTable = (props) => {
                 height={"55vh"}
                 isUnitList={true}
                 filterStatus={true}
-                data={formData?.data}
+                data={searchData}
+                onSearchChange={setSearchQuery}
                 columns={columns}
                 title={"List of Unit"}
-                route={(item) => route("daily", item.unit_position_id)}
+                route={(item) => route("daily", item.unit)}
                 // onRowClick={handleClick}
-                onRowClick={edit ? onSelect : handleClick}
+                onRowClick={bulkEdit ? onSelect : edit ? undefined : handleClick}
                 addNewItem={user && user.role === "super_admin" ? true : false}
-                toggleEdit={() => setEdit((prev) => !prev)}
+                toggleEdit={
+                    user?.role === "super_admin"
+                        ? () => setEdit((prev) => !prev)
+                        : undefined
+                }
                 edit={edit}
+                secondaryAction={{
+                    label: "Bulk Settings",
+                    activeLabel: "Done",
+                    active: bulkEdit,
+                    onClick: () => setBulkEdit((prev) => !prev),
+                }}
                 handleNew={route("unit.add")}
                 Footer={paginationFooter}
             />

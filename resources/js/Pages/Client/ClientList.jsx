@@ -36,6 +36,7 @@ const ClientList = () => {
     const [isSettingModal, setSettingModal] = useState(false);
     const [isEditModal, setEditModal] = useState(false);
     const [isDeleteModal, setDeleteModal] = useState(false);
+    const [isAddModal, setAddModal] = useState(false);
     const [actionClient, setActionClient] = useState(null);
     const { addToast } = useToast();
 
@@ -175,6 +176,10 @@ const ClientList = () => {
         setData((prev) => prev.filter((item) => item.client_id !== client_id));
     };
 
+    const handleClientAdded = (client) => {
+        setData((prev) => [...(prev || []), client]);
+    };
+
     const col = columns({
         handleOpenSetting,
         handleToggleInvoice,
@@ -191,6 +196,14 @@ const ClientList = () => {
                     </div>
                 </div>
             )} */}
+            <div className="flex justify-end mb-4">
+                <button
+                    className="flex justify-center items-center gap-2 bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                    onClick={() => setAddModal(true)}
+                >
+                    + Add Client
+                </button>
+            </div>
             <TableComponent title="Clients" columns={col} data={data} />
             {/* <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]"> */}
             {/* Client List Desktop*/}
@@ -410,7 +423,79 @@ const ClientList = () => {
                 addToast={addToast}
                 onDeleted={handleClientDeleted}
             />
+            <AddClientModal
+                isModal={isAddModal}
+                handleCloseModal={() => setAddModal(false)}
+                addToast={addToast}
+                onAdded={handleClientAdded}
+            />
         </PageLayout>
+    );
+};
+
+const AddClientModal = ({ isModal, handleCloseModal, addToast, onAdded }) => {
+    const [name, setName] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (isModal) setName("");
+    }, [isModal]);
+
+    const handleSave = async () => {
+        if (!name.trim()) {
+            return addToast({ type: "error", text: "Name cannot be empty" });
+        }
+        setSaving(true);
+        try {
+            const resp = await axios.post(route("client.store"), {
+                name: name.trim(),
+            });
+            if (resp?.data?.type === "success") {
+                onAdded(resp.data.data);
+                addToast(resp.data);
+                handleCloseModal();
+            } else {
+                addToast({ type: "error", text: "Failed to add client" });
+            }
+        } catch (err) {
+            console.error(err);
+            addToast({
+                type: "error",
+                text: err?.response?.data?.message || "Failed to add client",
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <Modal
+            showModal={isModal}
+            handleCloseModal={handleCloseModal}
+            title="Add Client"
+            size="sm"
+        >
+            <Modal.Body>
+                <label className="form-label">Client Name</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input-base"
+                />
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex justify-end">
+                    <button
+                        className="button-submit"
+                        disabled={saving}
+                        onClick={handleSave}
+                    >
+                        Save
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 

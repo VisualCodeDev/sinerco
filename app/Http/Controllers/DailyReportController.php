@@ -298,8 +298,18 @@ class DailyReportController extends Controller
         ], 200);
     }
 
-    public function index($unit_position_id)
+    public function index($unit_name)
     {
+        $unitPosition = UnitPosition::whereHas('unit', function ($q) use ($unit_name) {
+            $q->where('unit', $unit_name);
+        })->first();
+
+        if (!$unitPosition) {
+            return redirect()->route('dashboard');
+        }
+
+        $unit_position_id = $unitPosition->id;
+
         DailyReport::with('request')->where('unit_position_id', $unit_position_id)->get()->map(function ($item) {
             return collect($item)->except([
                 "created_at",
@@ -309,13 +319,10 @@ class DailyReportController extends Controller
                 "unit_position_id"
             ]);
         });
-        if ($unit_position_id) {
-            $unitData = UnitPosition::find($unit_position_id)->with(['client', 'unit', 'dailyReportSetting'])->first();
-            return Inertia::render('Daily/Daily', [
-                'unit_position_id' => $unit_position_id
-            ]);
-        }
-        return redirect()->route('dashboard');
+
+        return Inertia::render('Daily/Daily', [
+            'unit_position_id' => $unit_position_id
+        ]);
     }
 
     public function getReport()

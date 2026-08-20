@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\UnitPosition;
 use App\Models\UserSetting;
 use Auth;
 use Closure;
@@ -19,7 +20,10 @@ class CheckUnitAccess
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
-        $unitPositionId = $request->route('unit_position_id'); // ambil parameter dari route
+        $unitName = $request->route('unit_name'); // ambil parameter dari route
+        $unitPositionId = UnitPosition::whereHas('unit', function ($q) use ($unitName) {
+            $q->where('unit', $unitName);
+        })->value('id');
         // Cek apakah user memiliki akses ke unit_position_id ini
         $hasAccess = UserSetting::where('user_id', $user->user_id)
             ->where('unit_position_id', $unitPositionId)

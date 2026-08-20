@@ -32,7 +32,7 @@ class DataUnitController extends Controller
         if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unit_id', 'unit', 'status', 'thresholdSetting', 'visibilitySetting']);
+                    $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting']);
                 },
                 'client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -40,21 +40,28 @@ class DataUnitController extends Controller
                 'workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-                'location.area',
+                'location.area.region',
+                'region',
                 'latestReport'
             ])->get()->makeHidden(['created_at', 'updated_at']);
             $data = $temp->map(function ($pos) {
                 return [
                     'unit_id' => $pos->unit->unit_id,
                     'unit' => $pos->unit->unit,
+                    'unit_sn' => $pos->unit->unit_sn,
+                    'old_sn' => $pos->unit->old_sn,
                     'thresholdSetting' => $pos->unit->thresholdSetting,
                     'visibilitySetting' => $pos->unit->visibilitySetting,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
+                    'client_id' => $pos->client_id,
                     'gmt_offset' => $pos->client?->gmt_offset ?? $pos->workshop?->gmt_offset ?? 7,
                     'location' => $pos->location?->location ?? null,
                     'location_id' => $pos->location_id ?? null,
                     'area' => $pos->location?->area?->area ?? null,
+                    'area_id' => $pos->location?->area_id ?? null,
+                    'region' => $pos->region?->name ?? $pos->location?->area?->region?->name ?? null,
+                    'region_id' => $pos->region_id ?? $pos->location?->area?->region_id ?? null,
                     'unit_position_id' => $pos->id,
                     'latest_report' => $pos->latestReport
                 ];
@@ -64,25 +71,32 @@ class DataUnitController extends Controller
                 'UnitPositions.client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
                 },
-                'UnitPositions.location.area',
+                'UnitPositions.location.area.region',
+                'UnitPositions.region',
                 'UnitPositions.latestReport',
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-            ])->select(['unit_id', 'unit', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
+            ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
 
             $data = $temp->map(function ($unit) {
                 return [
                     'unit_id' => $unit->unit_id,
                     'unit' => $unit->unit,
+                    'unit_sn' => $unit->unit_sn,
+                    'old_sn' => $unit->old_sn,
                     'thresholdSetting' => $unit->thresholdSetting,
                     'visibilitySetting' => $unit->visibilitySetting,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
+                    'client_id' => $unit->UnitPositions?->client_id,
                     'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
-                    'location_id' => $unit->location_id,
+                    'location_id' => $unit->UnitPositions?->location_id,
                     'location' => $unit->UnitPositions?->location?->location ?? null,
                     'area' => $unit->UnitPositions?->location?->area?->area ?? null,
+                    'area_id' => $unit->UnitPositions?->location?->area_id ?? null,
+                    'region' => $unit->UnitPositions?->region?->name ?? $unit->UnitPositions?->location?->area?->region?->name ?? null,
+                    'region_id' => $unit->UnitPositions?->region_id ?? $unit->UnitPositions?->location?->area?->region_id ?? null,
                     'unit_position_id' => $unit->UnitPositions?->id ?? null,
                     'latest_report' => $unit->UnitPositions?->latestReport
                 ];
@@ -491,6 +505,42 @@ class DataUnitController extends Controller
         return response()->json([
             "type" => "success",
             "text" => "Unit Updated"
+        ]);
+    }
+
+    public function updateUnitFull(Request $request)
+    {
+        $val = $request->validate([
+            'unit_id' => 'required|exists:data_units,unit_id',
+            'unit' => 'nullable|string|max:255',
+            'unit_sn' => 'nullable|string|max:255',
+            'old_sn' => 'nullable|string|max:255',
+            'client_id' => 'nullable|exists:clients,client_id',
+            'location_id' => 'nullable|exists:locations,id',
+            'region_id' => 'nullable|exists:regions,id',
+        ]);
+
+        DB::transaction(function () use ($val) {
+            $unitData = collect($val)->only(['unit', 'unit_sn', 'old_sn'])
+                ->filter(fn($value) => $value !== null)
+                ->toArray();
+
+            if (!empty($unitData)) {
+                DataUnit::where('unit_id', $val['unit_id'])->update($unitData);
+            }
+
+            $positionData = collect($val)->only(['client_id', 'location_id', 'region_id'])
+                ->filter(fn($value) => $value !== null)
+                ->toArray();
+
+            if (!empty($positionData)) {
+                UnitPosition::where('unit_id', $val['unit_id'])->update($positionData);
+            }
+        });
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Unit updated successfully',
         ]);
     }
 
