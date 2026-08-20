@@ -47,7 +47,7 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Home');
-})->name('dashboard')->middleware('auth', 'roles:super_admin,technician');
+})->name('dashboard')->middleware('auth', 'roles:super_admin,technician,client,workshop,guest');
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
