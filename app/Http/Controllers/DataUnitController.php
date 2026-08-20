@@ -29,7 +29,7 @@ class DataUnitController extends Controller
         if (!$user) {
             return collect();
         }
-        if ($user->roleData->name == 'technician' || $user->roleData->name == 'operator') {
+        if ($user->roleData->name !== 'super_admin') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
                     $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting']);
