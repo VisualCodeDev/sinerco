@@ -125,6 +125,11 @@ class DailyReportController extends Controller
 
     public function setReport(Request $request, $unit_position_id)
     {
+        $userRole = auth()->user()?->roleData?->name;
+        if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
+            return response()->json(['type' => 'error', 'text' => 'You are not authorized to fill this report.'], 403);
+        }
+
         if (!$unit_position_id) {
             return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
@@ -226,6 +231,11 @@ class DailyReportController extends Controller
 
     public function editReport(Request $request)
     {
+        $userRole = auth()->user()?->roleData?->name;
+        if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
+            return response()->json(['type' => 'error', 'text' => 'You are not authorized to edit this report.'], 403);
+        }
+
         $fieldsToNormalize = $request->fields ?? [];
         $data = $request->data ?? [];
 

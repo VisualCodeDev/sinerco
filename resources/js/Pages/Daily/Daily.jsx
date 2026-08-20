@@ -71,7 +71,10 @@ export default function Dashboard({ unit_position_id }) {
             key: "form",
             label: "Fill Report",
             icon: <FaRegFileAlt className="mr-2" />,
-            condition: true,
+            condition:
+                user?.role === "technician" ||
+                user?.role === "super_admin" ||
+                user?.role === "operator",
         },
         {
             key: "data_unit",

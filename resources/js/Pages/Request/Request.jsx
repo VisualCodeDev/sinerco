@@ -244,6 +244,7 @@ export const EditItem = ({
     const [type, setType] = useState("Edit");
     const accessEdit =
         user?.role === "super_admin" || user?.role === "technician";
+    const canAct = accessEdit || user?.role === "operator";
 
     const updateData = async (isEdit) => {
         if (selectedItem) {
@@ -506,6 +507,11 @@ export const EditItem = ({
                             </div>
                         );
                     })}
+                    {!canAct && (
+                        <p className="text-gray-400 italic">
+                            You don't have permission to edit this request.
+                        </p>
+                    )}
                 </div>
             </Modal.Body>
 
@@ -521,16 +527,18 @@ export const EditItem = ({
                             </button>
                         )}
 
-                        <button
-                            className="bg-secondary text-white hover:opacity-90 transition duration-200 px-5 py-2.5 rounded-xl shadow-sm"
-                            onClick={() => {
-                                // setModal(false);
+                        {canAct && (
+                            <button
+                                className="bg-secondary text-white hover:opacity-90 transition duration-200 px-5 py-2.5 rounded-xl shadow-sm"
+                                onClick={() => {
+                                    // setModal(false);
 
-                                handleSave();
-                            }}
-                        >
-                            {accessEdit ? "Save Changes" : type}
-                        </button>
+                                    handleSave();
+                                }}
+                            >
+                                {accessEdit ? "Save Changes" : type}
+                            </button>
+                        )}
                     </div>
                 </div>
             </Modal.Footer>

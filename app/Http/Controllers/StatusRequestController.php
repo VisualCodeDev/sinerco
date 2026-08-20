@@ -216,6 +216,11 @@ class StatusRequestController extends Controller
 
     public function updateRequest(Request $request)
     {
+        $userRole = auth()->user()?->roleData?->name;
+        if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
+            return response()->json(['type' => 'error', 'text' => 'You are not authorized to edit this request.'], 403);
+        }
+
         $val = $request->validate([
             // 'unit_position_id' => 'required|string',
             'start_date' => 'nullable|string',
