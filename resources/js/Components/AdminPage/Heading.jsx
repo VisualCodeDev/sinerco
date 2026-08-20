@@ -391,30 +391,34 @@ const Heading = ({ children, alert, setAlert }) => {
                             onClick={() => handleAlert()}
                         >
                             {/* {user?.role === "super_admin" && */}
-                            {(alert ? (
-                            <BsFillBellFill />
+                            {alert ? (
+                                <BsFillBellFill />
                             ) : (
-                            <BsFillBellSlashFill />
-                            ))}
+                                <BsFillBellSlashFill />
+                            )}
                             {/* } */}
                         </p>
                     </div>
                     {/* Desktop button */}
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
-                    >
-                        <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
-                            SD
-                        </span>
-                        <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
-                            STBY
-                        </span>
-                    </button>
-                    <RequestModal
-                        handleCloseModal={() => setShowModal(false)}
-                        showModal={showModal}
-                    />
+                    {(user?.role != "client" || user?.role != "guest") && (
+                        <>
+                            <button
+                                onClick={() => setShowModal(true)}
+                                className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
+                            >
+                                <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
+                                    SD
+                                </span>
+                                <span className="bg-yellow-500 px-4 py-2 rounded-r-full shadow ">
+                                    STBY
+                                </span>
+                            </button>
+                            <RequestModal
+                                handleCloseModal={() => setShowModal(false)}
+                                showModal={showModal}
+                            />
+                        </>
+                    )}
                 </div>
 
                 {/* Page Content */}

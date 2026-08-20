@@ -366,16 +366,17 @@ export const EditItem = ({
                                   item?.name === "Remarks" ||
                                   item?.name === "End Date Time",
                           )
-                        : (user?.role === "super_admin" ||
-                              user?.role === "technician") &&
-                          editRequestItems.filter(
-                              (item) =>
-                                  item?.name === "Start Date Time" ||
-                                  item?.name === "Request" ||
-                                  item?.name === "Remarks" ||
-                                  item?.name === "End Date Time",
-                          )
-                    )?.map((item, index) => {
+                        : user?.role === "super_admin" ||
+                              user?.role === "technician"
+                          ? editRequestItems.filter(
+                                (item) =>
+                                    item?.name === "Start Date Time" ||
+                                    item?.name === "Request" ||
+                                    item?.name === "Remarks" ||
+                                    item?.name === "End Date Time",
+                            )
+                          : []
+                    ).map((item, index) => {
                         const itemInputType = item?.isInput
                             ? item?.type
                             : false;
