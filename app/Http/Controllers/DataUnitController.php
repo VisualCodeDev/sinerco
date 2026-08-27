@@ -292,27 +292,27 @@ class DataUnitController extends Controller
             $locationId = null;
 
             // 1. Handle Area
-            // if ($val['position_type'] === 'client') {
-            if (!empty($val['area_id'])) {
-                $areaId = $val['area_id'];
-            } else {
-                $area = Area::create([
-                    'area' => $val['area_name'],
-                ]);
-                $areaId = $area->id;
-            }
+            if ($val['position_type'] === 'client') {
+                if (!empty($val['area_id'])) {
+                    $areaId = $val['area_id'];
+                } else {
+                    $area = Area::create([
+                        'area' => $val['area_name'],
+                    ]);
+                    $areaId = $area->id;
+                }
 
-            // 2. Handle Location
-            if (!empty($val['location_id'])) {
-                $locationId = $val['location_id'];
-            } else {
-                $location = Location::create([
-                    'area_id' => $areaId,
-                    'location' => $val['location_name'],
-                ]);
-                $locationId = $location->id;
+                // 2. Handle Location
+                if (!empty($val['location_id'])) {
+                    $locationId = $val['location_id'];
+                } else {
+                    $location = Location::create([
+                        'area_id' => $areaId,
+                        'location' => $val['location_name'],
+                    ]);
+                    $locationId = $location->id;
+                }
             }
-            // }
 
             // 3. Create Unit
             $unit = DataUnit::create([

@@ -3,7 +3,7 @@ import { useToast } from "@/Components/Toast/ToastProvider";
 import PageLayout from "@/Layouts/PageLayout";
 import CreatableSelect from "react-select/creatable";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const UnitAddNew = ({ clients, locations, areas, workshops }) => {
     const [loading, setLoading] = useState(false);
@@ -24,6 +24,10 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
     const { addToast } = useToast();
 
     const handleChange = (e) => {
+        if (e.target.name === "position_type") {
+            setForm({ unit: form.unit, status: form?.status, [e.target.name]: e.target.value });
+            return;
+        }
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
@@ -66,7 +70,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
     const filteredLocations = form.area_id
         ? locations.filter((l) => l.area_id === form.area_id)
         : [];
-
+    console.log(form)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -94,6 +98,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                 addToast(resp.data);
             }
         } catch (e) {
+            console.log(e)
             if (e.response?.status === 422) {
                 setErrors(e.response.data.errors);
             }
@@ -213,46 +218,48 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                         />
                     )}
 
-                    {/* {form.position_type === "client" && ( */}
-                    <>
-                        {/* Area */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Area
-                            </label>
-                            <CreatableSelect
-                                isClearable
-                                onChange={handleAreaChange}
-                                options={areas.map((a) => ({
-                                    value: a.id,
-                                    label: a.area,
-                                }))}
-                                placeholder="Select or add area..."
-                            />
-                        </div>
+                    {form.position_type === "client" && (
+                        <>
+                            {/* Area */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Area
+                                </label>
+                                <CreatableSelect
+                                    isClearable
+                                    onChange={handleAreaChange}
+                                    options={areas.map((a) => ({
+                                        value: a.id,
+                                        label: a.area,
+                                    }))}
+                                    placeholder="Select or add area..."
+                                />
+                            </div>
 
-                        {/* Location */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Location
-                            </label>
-                            <CreatableSelect
-                                isClearable
-                                onChange={handleLocationChange}
-                                options={filteredLocations.map((l) => ({
-                                    value: l.id,
-                                    label: l.location,
-                                }))}
-                                placeholder={
-                                    form.area_id || form.area_name
-                                        ? "Select or add location..."
-                                        : "Pick an area first"
-                                }
-                                isDisabled={!form.area_id && !form.area_name} // disable until area selected
-                            />
-                        </div>
-                    </>
-                    {/* )} */}
+                            {/* Location */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Location
+                                </label>
+                                <CreatableSelect
+                                    isClearable
+                                    onChange={handleLocationChange}
+                                    options={filteredLocations.map((l) => ({
+                                        value: l.id,
+                                        label: l.location,
+                                    }))}
+                                    placeholder={
+                                        form.area_id || form.area_name
+                                            ? "Select or add location..."
+                                            : "Pick an area first"
+                                    }
+                                    isDisabled={
+                                        !form.area_id && !form.area_name
+                                    } // disable until area selected
+                                />
+                            </div>
+                        </>
+                    )}
 
                     {/* Submit */}
                     <button

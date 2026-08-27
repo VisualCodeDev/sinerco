@@ -31,10 +31,20 @@ const WorkshopList = () => {
     const [isLoading, setLoading] = useState(false);
     // const dailyReportSettingData = unitData?.daily_report_setting || {};
     const [isSettingModal, setSettingModal] = useState(false);
+    const [isAddModal, setAddModal] = useState(false);
+    const { addToast } = useToast();
+
+    useEffect(() => {
+        setWorkshops(data || []);
+    }, [data]);
 
     if (loading) {
         return <LoadingSpinner />;
     }
+
+    const handleWorkshopAdded = (workshop) => {
+        setWorkshops((prev) => [...(prev || []), workshop]);
+    };
 
     const handleClick = (item) => {
         if (!item.unitAreaLocationId) return;
@@ -56,16 +66,24 @@ const WorkshopList = () => {
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
                 {/* Workhops List Desktop*/}
                 <div className="md:w-1/2 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
-                    <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
-                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                            <FaUserFriends className="text-2xl md:text-3xl" />
+                    <div className="flex flex-row items-center justify-between gap-3 mb-6 text-lg md:text-xl font-semibold">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                <FaUserFriends className="text-2xl md:text-3xl" />
+                            </div>
+                            <h2 className="font-bold text-base md:text-2xl text-gray-700">
+                                Workhops
+                            </h2>
                         </div>
-                        <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                            Workhops
-                        </h2>
+                        <button
+                            onClick={() => setAddModal(true)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
+                        >
+                            + Add Workshop
+                        </button>
                     </div>
                     <div className="space-y-2 max-h-[70vh] overflow-y-auto">
-                        {data?.map((item) => (
+                        {workshops?.map((item) => (
                             <button
                                 key={item?.id}
                                 onClick={() => setSelectedWorkshop(item)}
@@ -83,13 +101,21 @@ const WorkshopList = () => {
 
                 {/* Workhops List Mobile*/}
                 <div className="w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
-                    <div className="flex flex-row items-center gap-2 mb-6 text-lg md:text-xl font-semibold">
-                        <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
-                            <FaUserFriends className="" />
+                    <div className="flex flex-row items-center justify-between gap-2 mb-6 text-lg md:text-xl font-semibold">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
+                                <FaUserFriends className="" />
+                            </div>
+                            <h2 className="text-lg font-semibold text-gray-700">
+                                Workhops
+                            </h2>
                         </div>
-                        <h2 className="text-lg font-semibold text-gray-700">
-                            Workhops
-                        </h2>
+                        <button
+                            onClick={() => setAddModal(true)}
+                            className="flex items-center gap-1 px-2 py-1 bg-primary text-white text-xs rounded-md hover:bg-blue-800"
+                        >
+                            + Add
+                        </button>
                     </div>
                     <div className="space-y-2 max-h-[10vh] relative px-2">
                         <div
@@ -106,7 +132,7 @@ const WorkshopList = () => {
                                 expanded ? "block" : "hidden"
                             }`}
                         >
-                            {data?.map((item) => (
+                            {workshops?.map((item) => (
                                 <button
                                     key={item?.id}
                                     onClick={() => {
@@ -171,7 +197,79 @@ const WorkshopList = () => {
                 handleCloseModal={() => setSettingModal(false)}
                 // handleConfirmSettings={handleConfirmSettings}
             />
+            <AddWorkshopModal
+                isModal={isAddModal}
+                handleCloseModal={() => setAddModal(false)}
+                addToast={addToast}
+                onAdded={handleWorkshopAdded}
+            />
         </PageLayout>
+    );
+};
+
+const AddWorkshopModal = ({ isModal, handleCloseModal, addToast, onAdded }) => {
+    const [name, setName] = useState("");
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        if (isModal) setName("");
+    }, [isModal]);
+
+    const handleSave = async () => {
+        if (!name.trim()) {
+            return addToast({ type: "error", text: "Name cannot be empty" });
+        }
+        setSaving(true);
+        try {
+            const resp = await axios.post(route("workshop.store"), {
+                name: name.trim(),
+            });
+            if (resp?.data?.type === "success") {
+                onAdded(resp.data.data);
+                addToast(resp.data);
+                handleCloseModal();
+            } else {
+                addToast({ type: "error", text: "Failed to add workshop" });
+            }
+        } catch (err) {
+            console.error(err);
+            addToast({
+                type: "error",
+                text: err?.response?.data?.message || "Failed to add workshop",
+            });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <Modal
+            showModal={isModal}
+            handleCloseModal={handleCloseModal}
+            title="Add Workshop"
+            size="sm"
+        >
+            <Modal.Body>
+                <label className="form-label">Workshop Name</label>
+                <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="input-base"
+                />
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex justify-end">
+                    <button
+                        className="button-submit"
+                        disabled={saving}
+                        onClick={handleSave}
+                    >
+                        Save
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 

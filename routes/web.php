@@ -206,6 +206,10 @@ Route::controller(WorkshopController::class)->middleware('auth')->group(function
     Route::get('/fetch/workshop', 'getAllWorkshops')->name('workshop.get');
 });
 
+Route::controller(WorkshopController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
+    Route::post('/workshop', 'storeWorkshop')->name('workshop.store');
+});
+
 Route::controller(BeritaAcaraController::class)->middleware('auth')->group(function () {
     Route::post('/berita-acara/set/field-setting', 'SetFieldBA')->name('ba.set.setting');
     Route::get('/berita-acara', 'index')->name('ba.page');

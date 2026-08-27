@@ -26,6 +26,21 @@ class WorkshopController extends Controller
         return response()->json($allData);
     }
 
+    public function storeWorkshop(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $workshop = Workshop::create(['name' => $request->name]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Workshop added.',
+            'data' => $workshop,
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
