@@ -20,9 +20,13 @@ class Client extends Model
 
         static::creating(function ($model) {
             if (empty($model->client_id)) {
-                // Ambil last client_id
-                $lastId = Client::orderBy('client_id', 'desc')->first()?->client_id;
-                $number = $lastId ? (int) substr($lastId, 3) + 1 : 1;
+                // withTrashed() is required here: client_id is soft-deleted,
+                // not actually freed, so a plain query would happily hand out
+                // an id that's still occupying a (trashed) row and collide.
+                $lastNumber = Client::withTrashed()
+                    ->selectRaw("MAX(CAST(SUBSTRING(client_id, 4) AS UNSIGNED)) as max_num")
+                    ->value('max_num');
+                $number = $lastNumber ? $lastNumber + 1 : 1;
                 $model->client_id = 'CLI' . str_pad($number, 3, '0', STR_PAD_LEFT);
             }
         });
