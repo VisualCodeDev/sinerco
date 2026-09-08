@@ -12,6 +12,7 @@ class WorkshopController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Menampilkan halaman daftar workshop
     public function index()
     {
         return Inertia::render('Workshop/WorkshopList');
@@ -20,12 +21,14 @@ class WorkshopController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    // Mengambil semua data workshop beserta unit-unitnya
     public function getAllWorkshops()
     {
         $allData = Workshop::with('units')->get();
         return response()->json($allData);
     }
 
+    // Menyimpan workshop baru
     public function storeWorkshop(Request $request)
     {
         $request->validate([
@@ -44,6 +47,7 @@ class WorkshopController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Mengambil data workshop berdasarkan id
     public function getSelectedWorkshops(Request $request)
     {
         $data = Workshop::find($request);

@@ -15,11 +15,13 @@ class PasswordController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        // Validasi password lama harus cocok, dan password baru harus sesuai aturan serta terkonfirmasi
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 
+        // Simpan password baru (di-hash) ke user yang sedang login
         $request->user()->update([
             'password' => Hash::make($validated['password']),
         ]);

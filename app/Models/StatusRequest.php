@@ -16,10 +16,12 @@ class StatusRequest extends Model
     protected static function boot()
     {
         parent::boot();
+        // generate request_id awal (bisa ditimpa di creating berikutnya)
         static::creating(function ($model) {
             $model->request_id = (string) Str::uuid();
         });
 
+        // saat membuat request baru, cek bentrok jadwal & buletkan jam ke HH:00
         static::creating(function ($status) {
             if (!$status->start_date || !$status->start_time) {
                 return;
@@ -50,6 +52,7 @@ class StatusRequest extends Model
         });
 
 
+        // setelah request dibuat, kirim notifikasi ke admin
         static::created(function ($statusRequest) {
             AdminNotification::create([
                 'request_id' => $statusRequest->request_id,
@@ -60,6 +63,7 @@ class StatusRequest extends Model
             ]);
         });
 
+        // saat menyimpan (create/update), sinkronkan slot waktu di DailyReport terkait
         static::saving(function ($status) {
             if (!$status->start_date || !$status->start_time)
                 return;
@@ -116,6 +120,7 @@ class StatusRequest extends Model
             );
         });
 
+        // setelah request tersimpan, pastikan DailyReport untuk slot waktu ini ada
         static::saved(function ($status) {
             if (!$status->start_date || !$status->start_time)
                 return;
@@ -143,12 +148,14 @@ class StatusRequest extends Model
         });
     }
 
+    // relasi ke UnitPosition terkait request ini
     public function unitPosition()
     {
         return $this->belongsTo(UnitPosition::class, 'unit_position_id', 'id')
             ->with('unit', 'location');
     }
 
+    // relasi ke User yang membuat request
     public function user()
     {
         return $this->belongsTo(User::class, 'requested_by', 'user_id')
@@ -156,17 +163,20 @@ class StatusRequest extends Model
 
     }
 
+    // relasi ke User (PIC) yang melihat/menangani request
     public function pic()
     {
         return $this->belongsTo(User::class, 'seen_by', 'user_id')
             ->select('user_id', 'name');
     }
 
+    // relasi ke Location terkait request
     public function location()
     {
         return $this->belongsTo(Location::class, 'location_id', 'id');
     }
 
+    // kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'date',
         'request_type',

@@ -12,6 +12,7 @@ export default function InputLabel({
                 className
             }
         >
+            {/* pakai prop value jika ada, kalau tidak pakai children sebagai isi label */}
             {value ? value : children}
         </label>
     );

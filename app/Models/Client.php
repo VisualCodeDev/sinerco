@@ -18,6 +18,7 @@ class Client extends Model
 
         parent::boot();
 
+        // saat membuat client baru, generate client_id otomatis jika kosong
         static::creating(function ($model) {
             if (empty($model->client_id)) {
                 // withTrashed() is required here: client_id is soft-deleted,
@@ -32,32 +33,38 @@ class Client extends Model
         });
     }
 
+    // relasi many-to-many ke Location lewat tabel unit_positions
     public function locations()
     {
         return $this->belongsToMany(Location::class, 'unit_positions', 'client_id', 'location_id');
     }
 
+    // relasi ke semua UnitPosition milik client ini
     public function unitPositions()
     {
         return $this->hasMany(UnitPosition::class, 'client_id');
     }
 
+    // relasi many-to-many ke DataUnit lewat tabel unit_positions
     public function units()
     {
         return $this->belongsToMany(DataUnit::class, 'unit_positions', 'client_id', 'unit_id');
     }
     protected static function booted()
     {
+        // jika is_invoice mati, paksa is_clu ikut mati
         static::saving(function ($model) {
             if (!$model->is_invoice) {
                 $model->is_clu = false;
             }
         });
     }
+    // cast kolom boolean
     protected $casts = [
         'is_invoice' => 'boolean',
         'is_clu' => 'boolean',
     ];
+    // kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'client_id',
         'name',

@@ -13,6 +13,7 @@ class DailyFieldController extends Controller
      */
     public function index()
     {
+        // Render halaman pengaturan input field unit
         return Inertia::render('Unit/InputFieldSetting');
     }
 
@@ -22,9 +23,11 @@ class DailyFieldController extends Controller
     public function getFields()
     {
         try {
+            // Ambil semua data DailyField beserta relasi subfields-nya
             $data = DailyField::with('subfields')->get();
             return response()->json($data);
         } catch (\Exception $e) {
+            // Catat error ke log jika gagal ambil data
             \Log::error('Error ambil field: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }

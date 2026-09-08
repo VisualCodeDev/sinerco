@@ -24,6 +24,7 @@ class StatusRequestController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+    // Membuat request status baru untuk sebuah unit (misal: shutdown, running, dll)
     public function setRequest(Request $request)
     {
         $val = $request->validate([
@@ -35,6 +36,7 @@ class StatusRequestController extends Controller
             'unit_position_id' => 'required',
         ]);
 
+        // Bulatkan waktu mulai ke jam penuh terdekat
         $start = Carbon::parse($val['start_time']);
         if ($start->minute > 0) {
             $start->addHour()->minute(0)->second(0);
@@ -48,6 +50,7 @@ class StatusRequestController extends Controller
         //     ->where('time', $formatted)
         //     ->first();
 
+        // Ambil data posisi unit beserta relasi unit-nya
         $unitPosition = UnitPosition::with('unit')->find($val['unit_position_id']);
 
         // if (!$unit) {
@@ -55,6 +58,7 @@ class StatusRequestController extends Controller
         // }
 
         $user = auth()->user();
+        // Simpan record request status baru
         $status = new StatusRequest();
         $status->unit_position_id = $val['unit_position_id'];
         $status->start_date = $val['start_date'];
@@ -65,6 +69,7 @@ class StatusRequestController extends Controller
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
         $status->save();
+        // Update status unit sesuai tipe request yang diajukan
         $unitPosition->unit->update(['status' => $val['request_type']]);
         // if ($unit) {
         //     Log::debug($status);
@@ -80,6 +85,7 @@ class StatusRequestController extends Controller
         // }
 
         try {
+            // Cari teknisi yang ditugaskan pada unit ini untuk dikirim notifikasi WhatsApp
             $technicians = UserSetting::with(['user', 'unitArea'])
                 ->whereHas('unitArea', function ($query) use ($val) {
                     $query->where('unit_id', $val['unit_id']);
@@ -87,6 +93,7 @@ class StatusRequestController extends Controller
                 ->get();
 
             $unitData = $unitPosition->unit;
+            // Ambil nomor WhatsApp teknisi yang valid
             $numbers = $technicians
                 ->filter(fn($tech) => !empty($tech->user->whatsAppNum))
                 ->map(fn($tech) => $tech->user->whatsAppNum)
@@ -96,6 +103,7 @@ class StatusRequestController extends Controller
                 $link = "/request/seen/" . $status->request_id;
                 // $full = 'https://vncdev-sinerco.my.id/unit-setting';
                 $full = url($link);
+                // Kirim notifikasi WhatsApp ke teknisi terkait
                 WhatsAppService::sendMessage($numbers, "A new request has been created for unit: {$unitData->unit}.\nStart Date: {$val['start_date']}\nStart Time: {$val['start_time']}\nRequest Type: {$val['request_type']}\nRemarks: {$val['remarks']}\n\nConfirm here:\n{$full}");
             }
             // $link = 'https://vncdev-sinerco.my.id/unit-setting';
@@ -107,11 +115,13 @@ class StatusRequestController extends Controller
         }
     }
 
+    // Menampilkan halaman utama fitur Request
     public function getRequest()
     {
         return Inertia::render('Request/Request');
     }
 
+    // Mengambil seluruh riwayat request untuk unit yang diizinkan bagi user
     public function getRequestHistory()
     {
         $permissionData = DataUnitController::getPermittedUnit();
@@ -123,6 +133,7 @@ class StatusRequestController extends Controller
             ->values();
         // ->toArray();
 
+        // Format data request menjadi struktur yang siap dikirim ke frontend
         $data = $requestList->map(function ($req) {
             return [
                 'request_id' => $req->request_id,
@@ -146,6 +157,7 @@ class StatusRequestController extends Controller
         return response()->json($data);
     }
 
+    // Mengambil daftar unit yang masih memiliki request aktif (status belum 'End')
     public function getRequestedUnit()
     {
         $permissionData = DataUnitController::getPermittedUnit();
@@ -179,6 +191,7 @@ class StatusRequestController extends Controller
         return response()->json($data);
     }
 
+    // Mengambil 5 request terbaru (untuk widget/dashboard)
     public function getFiveRequestedUnit()
     {
         $permissionData = DataUnitController::getPermittedUnit();
@@ -214,8 +227,10 @@ class StatusRequestController extends Controller
         return response()->json($data);
     }
 
+    // Mengupdate data request (misal: mengisi waktu selesai / mengubah status)
     public function updateRequest(Request $request)
     {
+        // Hanya role tertentu yang boleh mengedit request
         $userRole = auth()->user()?->roleData?->name;
         if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
             return response()->json(['type' => 'error', 'text' => 'You are not authorized to edit this request.'], 403);
@@ -272,10 +287,12 @@ class StatusRequestController extends Controller
 
         $currStatus = $status->status;
         // Update status and end time
+        // Jika belum ada tanggal/waktu selesai, status tetap "Ongoing"
         if (!$val['end_date'] || !$val['end_time']) {
             $status->status = "Ongoing";
         }
         ;
+        // Jika sebelumnya Ongoing dan sekarang end_date & end_time diisi, ubah status jadi "End"
         if ($currStatus === "Ongoing" && ($val['end_time'] && $val['end_date'])) {
             $status->status = "End";
         }
@@ -289,6 +306,7 @@ class StatusRequestController extends Controller
         // Handle unit status updates if the relationship is loaded
         $unitData = $status->unitPosition->unit;
         if ($unitData) {
+            // Tentukan status unit baru berdasarkan status request saat ini
             $newUnitStatus = match ($status->status) {
                 'Ongoing' => $status->request_type,
                 'End' => 'running',
@@ -301,6 +319,7 @@ class StatusRequestController extends Controller
         }
 
         // Handle notification
+        // Buat atau perbarui notifikasi admin terkait request ini
         $notification = AdminNotification::firstOrNew(['request_id' => $status->request_id]);
         $notification->date = $status->start_date;
         $notification->time = $status->start_time;
@@ -318,6 +337,7 @@ class StatusRequestController extends Controller
 
     }
 
+    // Menandai request sebagai sudah/belum dilihat oleh teknisi (via link WhatsApp)
     public function seenRequest(Request $request, $id)
     {
         if (!$id) {
@@ -334,6 +354,7 @@ class StatusRequestController extends Controller
                 'text' => 'User Not Found',
             ], 400);
         }
+        // Hanya role technician yang boleh menandai request sebagai "seen"
         if ($user->roleData?->name != 'technician') {
             return response()->json([
                 'type' => 'error',
@@ -348,6 +369,7 @@ class StatusRequestController extends Controller
                 'text' => "Request with ID {$id} not found.",
             ], 404);
         }
+        // Toggle status seen: jika sudah dilihat, reset; jika belum, tandai dilihat sekarang
         if ($selectedReq->seen_status) {
             $selectedReq->update(['seen_status' => !$selectedReq->seen_status, 'seen_time' => null, 'seen_by' => null]);
         } else {
@@ -362,6 +384,7 @@ class StatusRequestController extends Controller
 
     // MOVE TO HISTORY
 
+    // Memindahkan request terpilih ke tabel history (arsip) lalu menghapus dari tabel utama
     public function moveToHistory(Request $request)
     {
         $ids = $request->ids; // array of selected request IDs
@@ -374,11 +397,13 @@ class StatusRequestController extends Controller
 
         foreach ($requests as $req) {
             // Ensure requested_by exists in users table
+            // Pastikan user pengaju masih ada, jika tidak set null
             $requestedBy = \DB::table('users')->where('user_id', $req->requested_by)->exists()
                 ? $req->requested_by
                 : null; // or some default user ID
 
             // Insert into history table
+            // Simpan data ke tabel arsip/history
             DB::table('history_status_requests')->insert([
                 'request_id' => $req->request_id,
                 'action' => $req->action,
@@ -396,6 +421,7 @@ class StatusRequestController extends Controller
             ]);
 
             // Delete from original table
+            // Hapus data asli setelah dipindahkan ke history
             $req->delete();
         }
 

@@ -22,6 +22,7 @@ use Inertia\Response;
 
 class ProfileController extends Controller
 {
+    // Ambil daftar user dengan role technician dan operator untuk halaman UserList
     public function userList()
     {
         $technicianData = User::where('role', 'technician')->get();
@@ -29,21 +30,27 @@ class ProfileController extends Controller
         return Inertia::render('User/UserList', ['technicianData' => $technicianData, 'operatorData' => $operatorData]);
     }
 
+    // Ambil semua data role, dikembalikan sebagai JSON
     public function getAllRoles()
     {
         $data = Role::all();
         return response()->json($data);
     }
+    // Tampilkan halaman profil user beserta permission dan daftar request yang masih aktif
     public function index($user_id)
     {
         $userData = User::where('user_id', $user_id)->first();
+        // Ambil unit yang diizinkan untuk user saat ini
         $permissionData = DataUnitController::getPermittedUnit();
 
+        // Ambil id unit dari data permission, hilangkan duplikat dan nilai kosong
         $unitIds = collect($permissionData)->pluck('unit_id')->unique()->filter();
 
+        // Ambil status request yang unit-nya termasuk dalam unit yang diizinkan
         $requestList = StatusRequest::whereHas('unitPosition', function ($query) use ($unitIds) {
             $query->whereIn('unit_id', $unitIds);
         })->with('unitPosition.unit')->get();
+        // Hanya tampilkan request yang statusnya belum 'End'
         $requestList = collect($requestList)
             ->filter(fn($item) => $item->status !== 'End')
             ->values()
@@ -68,6 +75,7 @@ class ProfileController extends Controller
     }
 
 
+    // Update nomor WhatsApp user setelah validasi format nomor
     public function updatePhone(Request $request)
     {
         $val = $request->validate(
@@ -86,6 +94,7 @@ class ProfileController extends Controller
         return response()->json(['type' => 'error', 'text' => 'User not found']);
     }
 
+    // Update password user, wajib memasukkan password lama yang benar
     public function updatePassword(Request $request)
     {
         $val = $request->validate([
@@ -96,6 +105,7 @@ class ProfileController extends Controller
 
         $user = User::find($val['user_id']);
         if ($user) {
+            // Hash password baru sebelum disimpan
             $user->update(['password' => Hash::make($val['password'])]);
             return response()->json(['type' => 'success', 'text' => 'Password updated']);
         }
@@ -110,6 +120,7 @@ class ProfileController extends Controller
     {
         $request->user()->fill($request->validated());
 
+        // Jika email diubah, reset status verifikasi email
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
@@ -130,10 +141,12 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Logout dulu sebelum menghapus akun user
         Auth::logout();
 
         $user->delete();
 
+        // Bersihkan session agar tidak bisa dipakai lagi
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

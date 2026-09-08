@@ -1,5 +1,6 @@
 export default function ApplicationLogo(props) {
     return (
+        // svg logo aplikasi, props diteruskan agar bisa diatur ukuran/class dari luar
         <svg
             {...props}
             viewBox="0 0 316 316"

@@ -17,6 +17,7 @@ use Log;
 
 class DailyReportController extends Controller
 {
+    // Mengambil data laporan harian sebuah unit beserta field yang perlu ditampilkan
     public function getDailyReport(Request $request)
     {
         $start = $request->query('start');
@@ -44,11 +45,13 @@ class DailyReportController extends Controller
             ], 404);
         }
 
+        // Ambil daftar field laporan unit ini, filter hanya yang visible sesuai pengaturan unit
         $fields = UnitField::with('fields.subfields')
             ->where('unit_id', $unit_id)
             ->get()
             ->map(function ($item) use ($unitData) {
                 $field = $item->fields;
+                // Ambil subfield yang visibilitas-nya aktif
                 $visibleSubfields = collect($field->subfields ?? [])
                     ->filter(function ($sub) use ($unitData) {
                         return $unitData->visibilitySetting[$sub->slug] ?? false;
@@ -63,11 +66,13 @@ class DailyReportController extends Controller
                     'subfields' => $visibleSubfields,
                 ];
             })
+            // Hanya sertakan field yang visible atau punya subfield yang visible
             ->filter(function ($field) {
                 return $field['visible'] || $field['subfields']->isNotEmpty();
             })
             ->values();
 
+        // Ambil data laporan harian dalam rentang tanggal yang diminta
         $reports = DailyReport::where('unit_position_id', $unit_position_id)
             ->whereBetween('date', [$start, $end])
             ->with('request')
@@ -75,6 +80,7 @@ class DailyReportController extends Controller
             ->map(function ($item) {
                 $data = $item->data;
 
+                // Decode data JSON jika masih berupa string
                 if (is_string($data)) {
                     $data = json_decode($data, true) ?? [];
                 }
@@ -123,8 +129,10 @@ class DailyReportController extends Controller
     //     return Inertia::render('Daily/DailyList', ['data' => $data]);
     // }
 
+    // Menyimpan laporan harian baru untuk sebuah unit
     public function setReport(Request $request, $unit_position_id)
     {
+        // Hanya role tertentu yang boleh mengisi laporan
         $userRole = auth()->user()?->roleData?->name;
         if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
             return response()->json(['type' => 'error', 'text' => 'You are not authorized to fill this report.'], 403);
@@ -137,6 +145,7 @@ class DailyReportController extends Controller
         $fieldsToNormalize = $request->fields ?? [];
         $data = $request->data ?? [];
 
+        // Normalisasi angka: ubah koma jadi titik agar valid sebagai numeric
         foreach ($fieldsToNormalize as $field) {
             if (isset($data[$field])) {
                 $data[$field] = str_replace(',', '.', $data[$field]);
@@ -145,6 +154,7 @@ class DailyReportController extends Controller
 
         $request->merge(['data' => $data]);
 
+        // Bangun rule validasi secara dinamis berdasarkan field yang dikirim
         $rules = [];
         foreach ($fieldsToNormalize as $field) {
             $rules["data.$field"] = in_array($field, ['date', 'time'])
@@ -155,6 +165,7 @@ class DailyReportController extends Controller
         $validatedData = $request->validate($rules);
         $validated = $validatedData['data'];
 
+        // Hitung nilai curve berdasarkan tekanan suction & discharge jika ada
         if (isset($validated['suction_press'], $validated['discharge_press'])) {
             $unit = UnitPosition::find($unit_position_id)?->unit;
             $curveValue = Curve::interpolate(
@@ -163,6 +174,7 @@ class DailyReportController extends Controller
                 $unit?->valve ?? '4/0'
             );
             $validated['curve'] = $curveValue;
+            // curve_24h = curve + persentase tambahan dari setting unit
             $validated['curve_24h'] = $curveValue === null
                 ? null
                 : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
@@ -181,6 +193,7 @@ class DailyReportController extends Controller
         //     ->first();
 
         // Cek warning dari input
+        // Jika ada warning dari input, kirim notifikasi WhatsApp ke pekerja terkait unit
         $warnings = collect($request->input('warn', []))->filter();
         if ($warnings->isNotEmpty()) {
             $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
@@ -206,6 +219,7 @@ class DailyReportController extends Controller
             // WhatsAppService::sendMessage('081281995158', $warningMessage);
         }
         try {
+            // Simpan laporan harian baru, data field disimpan sebagai JSON
             $report = new DailyReport();
             $report->unit_position_id = $unit_position_id;
             $report->date = $validated['date'];
@@ -229,6 +243,7 @@ class DailyReportController extends Controller
         }
     }
 
+    // Mengedit laporan harian yang sudah ada, atau membuat baru jika belum ada id
     public function editReport(Request $request)
     {
         $userRole = auth()->user()?->roleData?->name;
@@ -269,6 +284,7 @@ class DailyReportController extends Controller
         $report = !empty($val['id']) ? DailyReport::find($val['id']) : null;
         Log::debug($request->unit_position_id);
 
+        // Hitung ulang curve jika data tekanan suction/discharge diubah
         if (isset($val['suction_press'], $val['discharge_press'])) {
             $unitPositionId = $report->unit_position_id ?? $request->unit_position_id;
             $unit = UnitPosition::find($unitPositionId)?->unit;
@@ -308,6 +324,7 @@ class DailyReportController extends Controller
         ], 200);
     }
 
+    // Menampilkan halaman detail laporan harian untuk sebuah unit berdasarkan nama
     public function index($unit_name)
     {
         $unitPosition = UnitPosition::whereHas('unit', function ($q) use ($unit_name) {
@@ -320,6 +337,7 @@ class DailyReportController extends Controller
 
         $unit_position_id = $unitPosition->id;
 
+        // Catatan: hasil map di bawah tidak digunakan/disimpan (tidak berdampak pada response)
         DailyReport::with('request')->where('unit_position_id', $unit_position_id)->get()->map(function ($item) {
             return collect($item)->except([
                 "created_at",
@@ -335,6 +353,7 @@ class DailyReportController extends Controller
         ]);
     }
 
+    // Mengambil semua laporan harian (dengan beberapa kolom disembunyikan)
     public function getReport()
     {
         $data = DailyReport::all()
@@ -352,6 +371,7 @@ class DailyReportController extends Controller
     }
 
 
+    // Mengambil laporan harian sebuah unit berdasarkan tanggal tertentu, terurut per jam
     public function getDataReportBasedOnDate(Request $request)
     {
         $data = DailyReport::with('request')
@@ -383,6 +403,7 @@ class DailyReportController extends Controller
         return response()->json($data);
     }
 
+    // Mengisi jam-jam laporan yang kosong (missing) dengan nilai 0 secara massal
     public function fillReport(Request $request)
     {
         Log::debug($request->all());
@@ -396,6 +417,7 @@ class DailyReportController extends Controller
 
         $rows = [];
 
+        // Bangun baris data default (nilai 0) untuk setiap jam yang hilang
         foreach ($val['missingHours'] as $time) {
             $rows[] = [
                 'unit_position_id' => $val['unit_position_id'],
@@ -421,10 +443,10 @@ class DailyReportController extends Controller
             ];
         }
 
+        // Insert semua baris sekaligus (bulk insert)
         DailyReport::insert($rows);
 
         return response()->json($rows);
     }
 
 }
-

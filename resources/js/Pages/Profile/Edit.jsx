@@ -4,6 +4,7 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
+// mustVerifyEmail: apakah user perlu verifikasi email, status: pesan status dari server
 export default function Edit({ mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout

@@ -29,6 +29,7 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validasi email wajib diisi dan formatnya benar
         $request->validate([
             'email' => 'required|email',
         ]);
@@ -41,9 +42,11 @@ class PasswordResetLinkController extends Controller
         );
 
         if ($status == Password::RESET_LINK_SENT) {
+            // Link reset berhasil dikirim
             return back()->with('status', __($status));
         }
 
+        // Gagal mengirim link, lempar pesan error
         throw ValidationException::withMessages([
             'email' => [trans($status)],
         ]);

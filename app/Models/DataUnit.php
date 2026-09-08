@@ -15,6 +15,7 @@ class DataUnit extends Model
     {
         parent::boot();
 
+        // saat membuat unit baru, isi default unit_id, threshold, dan visibility jika kosong
         static::creating(function ($model) {
             if (empty($model->unit_id)) {
                 // Ambil last unit_id
@@ -64,6 +65,7 @@ class DataUnit extends Model
             }
         });
 
+        // setelah unit dibuat, buat entri unit_fields untuk semua DailyField
         static::created(function ($model) {
             $fields = DailyField::all();
 
@@ -78,6 +80,7 @@ class DataUnit extends Model
         });
     }
 
+    // kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'unit_id',
         'unit',
@@ -90,25 +93,31 @@ class DataUnit extends Model
         'curve_percentage'
     ];
 
+    // cast kolom setting menjadi array
     protected $casts = [
         'thresholdSetting' => 'array',
         'visibilitySetting' => 'array'
     ];
+    // tambahkan accessor client & location ke hasil serialisasi model
     protected $appends = ['client', 'location'];
 
+    // relasi ke UnitPosition tempat unit ini terpasang
     public function unitPositions()
     {
         return $this->hasOne(UnitPosition::class, 'unit_id', 'unit_id');
     }
+    // accessor client, diambil dari relasi unitPositions
     public function getClientAttribute()
     {
         return $this->unitPositions?->client;
     }
+    // accessor location, diambil dari relasi unitPositions
     public function getLocationAttribute()
     {
         return $this->unitPositions?->location;
     }
 
+    // relasi many-to-many ke Workshop lewat tabel workshop_units
     public function workshopUnits()
     {
         return $this->belongsToMany(Workshop::class, 'workshop_units', 'unit_id', 'workshop_id')

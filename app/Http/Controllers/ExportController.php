@@ -65,11 +65,13 @@ class ExportController extends Controller
         return $base;
     }
 
+    // Jumlahkan total durasi (detik) dari kumpulan interval
     private function intervalsDurationSeconds(array $intervals): int
     {
         return array_sum(array_map(fn($i) => $i[1] - $i[0], $intervals));
     }
 
+    // Hitung status running/standby/down (jam) untuk satu tanggal berdasarkan daftar request
     private function calculateDailyStatus($requests, string $date)
     {
         $dayStart = Carbon::parse($date)->startOfDay();
@@ -125,9 +127,12 @@ class ExportController extends Controller
             'remarks' => implode("\n", $remarksArr) // semua request hari ini
         ];
     }
+
+    // Hitung rata-rata availability harian untuk rentang tanggal (default: bulan berjalan)
     private function calculateAvailabilityByRange($requests, array $rangeDate = null)
     {
         if (empty($rangeDate)) {
+            // default range = bulan ini jika tidak ada rangeDate diberikan
             $year = now()->year;
             $month = now()->month;
 
@@ -146,6 +151,7 @@ class ExportController extends Controller
         $availabilitySum = 0;
         $daysCount = 0;
 
+        // loop tiap hari dalam rentang, hitung availability per hari
         foreach ($period as $date) {
             $dateStr = $date->format('Y-m-d');
             $status = $this->calculateDailyStatus($requests, $dateStr);
@@ -170,6 +176,8 @@ class ExportController extends Controller
                 : 0,
         ];
     }
+
+    // Hitung rata-rata nilai $field per jam dalam rentang waktu tertentu
     private function getAvgByHourRange($reports, string $field, array $range = null)
     {
         $reports = collect($reports);
@@ -209,10 +217,12 @@ class ExportController extends Controller
 
         return $hours > 0 ? $total / $hours : 0;
     }
+
+    // Generate dokumen BAP (Berita Acara Pekerjaan) dari template docx sesuai jenis template
     public function exportBap($client_name, $client_department, $client, $area, $pic_name, $pic_department, $listData, $spv_name, $spv_department, $rangeDate, $templateType)
     {
         // dd($area);
-        // 1. Ambil template
+        // 1. Ambil template sesuai templateType
         switch ($templateType) {
             case 1:
                 $templatePath = storage_path('templates/Template_JAS_BAP.docx');
@@ -296,6 +306,8 @@ class ExportController extends Controller
 
         return $path;
     }
+
+    // Generate dokumen BAPM (Berita Acara Pemeriksaan Mesin) per unit dari template docx
     public function exportBapm($unit, $location, $area, $events, $client, $name, $department, $client_name, $client_department)
     {
         // 1. Ambil template
@@ -353,6 +365,7 @@ class ExportController extends Controller
         return $path;
     }
 
+    // Generate dokumen BA untuk request standby/shutdown (SD) per unit dari template docx
     public function exportBa_stdby_sd($request_type, $unit, $location, $events, $client, $name, $department, $client_name, $client_department)
     {
         // 1. Ambil template
@@ -410,6 +423,7 @@ class ExportController extends Controller
 
         return $path;
     }
+    // Endpoint utama: generate BA/BAPM/BAP untuk unit-unit terpilih lalu bungkus jadi satu file ZIP
     public function exportDoc(Request $request)
     {
         $validated = $request->validate([
@@ -422,13 +436,15 @@ class ExportController extends Controller
         // dd($validated['bapm']);
         $unitPosIds = $validated['unit_pos_id'];
 
+        // ambil unit beserta relasi yang dibutuhkan untuk generate dokumen
         $units = UnitPosition::whereIn('id', $unitPosIds)->with(['requests', 'unit', 'location.area', 'client', 'baSettings', 'reports'])->get();
 
         $zipFileName = 'Laporan_' . date('Ymd_His') . '.zip';
         $zipPath = storage_path("app/public/$zipFileName");
-        $allFiles = [];
+        $allFiles = []; // kumpulan path file docx yang sudah dibuat, akan dizip
 
         if ($validated['bapm'] || $validated['ba_req']) {
+            // generate BA (shutdown/standby) dan BAPM (PM) per unit
             foreach ($units as $unit) {
                 $name = $unit->baSettings->pic_name ?? 'name';
                 $area = $unit->location->area->area ?? '';
@@ -439,6 +455,7 @@ class ExportController extends Controller
                 $location = $unit->location->location;
                 $requests = $unit->requests;
                 $client = $unit->client->name;
+                // transform tiap request jadi format tampilan (tanggal, durasi, dll)
                 $transformed = $requests->map(function ($req) {
                     // Convert start & end date + time
                     $start = Carbon::parse($req->start_date . ' ' . $req->start_time);
@@ -474,7 +491,7 @@ class ExportController extends Controller
                     ];
                 });
 
-                // Filter
+                // Filter berdasarkan tipe request
                 $shutdown = $transformed->filter(function ($req) {
                     return $req['request_type'] === 'sd';
                 });
@@ -483,6 +500,7 @@ class ExportController extends Controller
                     return $req['request_type'] === 'stdby';
                 });
 
+                // request dengan remarks diawali "PM" dianggap preventive maintenance
                 $pm = $transformed->filter(function ($req) {
                     return isset($req['remarks'])
                         && Str::startsWith(strtoupper(trim($req['remarks'])), 'PM');
@@ -508,6 +526,7 @@ class ExportController extends Controller
         }
 
         if ($validated['bap']) {
+            // BAP dikelompokkan per klien (bukan per unit)
             $clients = $units
                 ->groupBy('client_id')
                 ->map(function ($units) {
@@ -543,6 +562,7 @@ class ExportController extends Controller
 
                 $month = (int) $validated['month'];
                 $year = $validated['year'] ?? now()->year;
+                // rentang tanggal = satu bulan penuh sesuai input
                 $start = Carbon::create($year, $month, 1)->startOfMonth();
                 $end = Carbon::create($year, $month, 1)->endOfMonth();
                 $rangeDate = [
@@ -554,6 +574,7 @@ class ExportController extends Controller
                         $end->translatedFormat('j F Y'),
                 ];
 
+                // hitung availability & rata-rata flowrate tiap unit untuk isi tabel BAP
                 $transformedUnits = $units->map(function ($item) use ($rangeDate) {
                     $reports = $item->reports
                         ->map(function ($report) {
@@ -609,6 +630,7 @@ class ExportController extends Controller
                 'message' => 'Tidak ada file yang dapat diekspor'
             ], 422);
         }
+        // bungkus semua file docx yang dihasilkan ke dalam satu ZIP
         $zip = new ZipArchive;
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
@@ -638,6 +660,8 @@ class ExportController extends Controller
             }
         }
     }
+    // Konversi jam desimal (misal 1.5) menjadi format jam:menit (01:30)
+    // Format jumlah jam (desimal) menjadi string "HH:MM"
     private function hoursToHMS($hours)
     {
         $h = floor($hours);
@@ -646,6 +670,7 @@ class ExportController extends Controller
 
         return sprintf('%02d:%02d', $h, $m);
     }
+    // Generate invoice (xlsx) per klien untuk bulan tertentu, isi tabel unit + rekap harga dari template excel
     public function exportInvoice(Request $request)
     {
         $validated = $request->validate([
@@ -680,12 +705,14 @@ class ExportController extends Controller
             ->get();
         $groupedByClient = $unitPositions->groupBy('client_id');
 
+        // klien dengan template_inv '3' dipakai untuk data CLU (diproses terpisah di bawah)
         $cluData = $groupedByClient->map(function ($clientUnits) {
             return $clientUnits
                 ->filter(fn($item) => $item->client->is_invoice && $item->client->template_inv === '3')
                 ->values();
         })->filter(fn($items) => $items->isNotEmpty());
 
+        // klien non-CLU: filter report hanya untuk bulan/tahun yang diminta
         $groupedByClient = $groupedByClient->map(function ($clientUnits) use ($month, $year) {
             return $clientUnits
                 ->filter(fn($item) => $item->client->is_invoice && $item->client->template_inv !== '3')
@@ -718,13 +745,14 @@ class ExportController extends Controller
             if ($clientUnits->count() === 0) {
                 continue;
             }
+            // pilih template excel sesuai tipe invoice klien
             $templateInv = $clientUnits->first()->client->template_inv;
             $templatePath = $templateInv === '2'
                 ? storage_path('templates/Template_inv_2.xlsx')
                 : storage_path('templates/Template_inv.xlsx');
             $spreadsheet = IOFactory::load($templatePath);
 
-            $baseSheet = $spreadsheet->getSheet(1);
+            $baseSheet = $spreadsheet->getSheet(1); // sheet template per-unit, akan diduplikasi
             $templateSheet = clone $baseSheet;
             $sheet = null;
             $sheetIndex = 0;
@@ -732,8 +760,9 @@ class ExportController extends Controller
             $lastPriceRow = 0;
             $lastTotalPriceRow = 0;
             if (!empty($clientUnits)) {
-                $rekapInvSheet = $spreadsheet->getSheet(0);
+                $rekapInvSheet = $spreadsheet->getSheet(0); // sheet rekap/ringkasan (sheet pertama)
                 // dd($rekapInvSheet->getCell('A5'));
+                // cari posisi cell placeholder ({{unit_sn}}, {{price_unit_sn}}, dst) di sheet rekap
                 $placeholderRow = null;
                 $placeholderCol = null;
                 $pricePlaceholderRow = null;
@@ -784,10 +813,11 @@ class ExportController extends Controller
                 if (!$placeholderRow) {
                     abort(300, 'Placeholder {{unit_sn}} not found!');
                 }
+                // loop tiap unit klien: tambah baris rekap + buat sheet detail sendiri per unit
                 foreach ($clientUnits as $unitPos) {
                     $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
 
-                    // insert row
+                    // insert row baru di sheet rekap untuk unit ini
                     $rekapInvSheet->insertNewRowBefore($lastRow + 1, 1);
 
                     $newRow = $lastRow + 1;
@@ -818,6 +848,7 @@ class ExportController extends Controller
                     // geser lastRow supaya next insert di bawahnya
                     $lastRow++;
 
+                    // unit pertama pakai sheet template asli, unit berikutnya duplikat sheet baru
                     if ($sheetIndex == 0) {
                         $sheet = $baseSheet;
                     } else {
@@ -861,6 +892,7 @@ class ExportController extends Controller
                         ->unique('request_id')
                         ->values();
 
+                    // hitung running/standby/down harian untuk unit ini selama sebulan
                     $availability = $this->calculateAvailabilityByRange($formattedRequests, ['start' => $startDate, 'end' => $endDate]);
                     $placeholders = [
                         '{{date}}',
@@ -874,6 +906,7 @@ class ExportController extends Controller
                         '{{remarks}}'
                     ];
 
+                    // cari kolom & baris awal tiap placeholder di sheet (letak tabel data harian)
                     $columns = [];
                     $startRow = 0;
                     $index = 0;
@@ -893,6 +926,7 @@ class ExportController extends Controller
                             }
                         }
                     }
+                    // isi tabel baris per tanggal dalam periode
                     $currentRow = $startRow;
                     foreach ($period as $date) {
                         // dd($availability["daily"]);
@@ -903,6 +937,7 @@ class ExportController extends Controller
                         $sd = $availability["daily"][$dateString]['down'] ?? 0;
                         $remarks = $availability["daily"][$dateString]['remarks'] ?? '';
 
+                        // jika ada laporan di tanggal ini, hitung rata-rata dari laporan tsb; jika tidak, nilai 0
                         if (isset($reportsGrouped[$dateString])) {
 
                             $dayReports = $reportsGrouped[$dateString];
@@ -987,6 +1022,7 @@ class ExportController extends Controller
                     }
                     $sheetIndex++;
                 }
+                // total harga = SUM formula dari semua baris harga unit yang ditambahkan
                 $startRow = $pricePlaceholderRow + 1;
                 $endRow = $lastRow;
                 $rekapInvSheet->setCellValue(
@@ -994,7 +1030,7 @@ class ExportController extends Controller
                     "=SUM({$pricePlaceholderCol}{$startRow}:{$pricePlaceholderCol}{$endRow})"
                 );
 
-                $rekapInvSheet->removeRow($placeholderRow);
+                $rekapInvSheet->removeRow($placeholderRow); // hapus baris placeholder asli
             }
             // ======================
             // SAVE FILE PER CLIENT
@@ -1010,6 +1046,7 @@ class ExportController extends Controller
             $generatedFiles[] = $filePath;
         }
 
+        // proses klien tipe CLU: laporan tahunan (bukan bulanan) pakai template terpisah
         foreach ($cluData as $clientId => $clientUnits) {
             // CLU YEARLY
             if ($clientUnits->count() === 0) {
@@ -1051,6 +1088,7 @@ class ExportController extends Controller
                     });
 
 
+                    // rentang 1 tahun penuh untuk laporan CLU
                     $start = Carbon::create($year, 1, 1);
                     $end = $start->copy()->endOfYear();
                     foreach ($sheet->getRowIterator() as $row) {
@@ -1063,6 +1101,7 @@ class ExportController extends Controller
                             }
                         }
                     }
+                    // isi tiap tanggal dalam setahun dengan report yg ada, atau data kosong jika tidak ada
                     $finalReports = collect();
 
                     while ($start <= $end) {
@@ -1111,6 +1150,7 @@ class ExportController extends Controller
                         '{{remarks}}',
                         '{{availability}}'
                     ];
+                    // cari kolom & baris awal tiap placeholder di sheet (letak tabel data harian)
                     $columns = [];
                     $startRow = 0;
                     $index = 0;
@@ -1136,13 +1176,14 @@ class ExportController extends Controller
 
                         $currentMonth = $date->month;
 
+                        // sisipkan baris kosong tiap pergantian bulan (template CLU punya pemisah antar bulan)
                         if ($prevMonth !== null && $prevMonth !== $currentMonth) {
 
                             // default: skip 1 row
                             $currentRow++;
 
                             if ($prevMonth == 2 && $currentMonth == 3) {
-                                $currentRow++; // extra skip
+                                $currentRow++; // extra skip (Februari punya baris tambahan di template)
                             }
                         }
 
@@ -1155,6 +1196,7 @@ class ExportController extends Controller
                         $availabilityDay = $availability["daily"][$dateString]['availability'] ?? 0;
                         $remarks = $availability["daily"][$dateString]['remarks'] ?? '';
 
+                        // jika ada laporan di tanggal ini, hitung rata-rata dari laporan tsb; jika tidak, nilai 0
                         if (isset($reportsGrouped[$dateString])) {
 
                             $dayReports = $reportsGrouped[$dateString];
@@ -1230,7 +1272,7 @@ class ExportController extends Controller
                 }
             }
 
-            // CLU INV PER UNIT
+            // CLU INV PER UNIT - buat file invoice terpisah khusus klien CLU (bulanan, beda dari laporan tahunan di atas)
             $baseSheetCLUInv = $spreadsheetCLUInv->getSheet(1);
             $templateSheetCLUInv = clone $baseSheetCLUInv;
             $sheetCLUInv = null;
@@ -1273,6 +1315,7 @@ class ExportController extends Controller
                     }
                 }
 
+                // loop tiap unit: tambah baris rekap invoice + buat sheet detail perhitungan per unit
                 foreach ($clientUnits as $unitPos) {
                     $templateRow = $coordinates['{{unit_sn}}']['row'] + $sheetIndexCLUInv;
 
@@ -1322,6 +1365,7 @@ class ExportController extends Controller
                     $start = Carbon::create($year, $month, 1)->startOfMonth();
                     $endCLU = Carbon::create($year, $month, 1)->endOfMonth();
 
+                    // isi tiap tanggal dalam setahun dengan report yg ada, atau data kosong jika tidak ada
                     $finalReports = collect();
 
                     while ($start <= $end) {
@@ -1404,13 +1448,14 @@ class ExportController extends Controller
 
                         $currentMonth = $date->month;
 
+                        // sisipkan baris kosong tiap pergantian bulan (template CLU punya pemisah antar bulan)
                         if ($prevMonth !== null && $prevMonth !== $currentMonth) {
 
                             // default: skip 1 row
                             $currentRow++;
 
                             if ($prevMonth == 2 && $currentMonth == 3) {
-                                $currentRow++; // extra skip
+                                $currentRow++; // extra skip (Februari punya baris tambahan di template)
                             }
                         }
 
@@ -1422,6 +1467,7 @@ class ExportController extends Controller
                         $sd = $availability["daily"][$dateString]['down'] ?? 0;
                         $remarks = $availability["daily"][$dateString]['remarks'] ?? '';
 
+                        // jika ada laporan di tanggal ini, hitung rata-rata dari laporan tsb; jika tidak, nilai 0
                         if (isset($reportsGrouped[$dateString])) {
 
                             $dayReports = $reportsGrouped[$dateString];
@@ -1587,6 +1633,7 @@ class ExportController extends Controller
         )->deleteFileAfterSend(true);
     }
 
+    // Generate laporan denda/penalty (xlsx) per klien berdasarkan data suction/flowrate bulanan
     public function exportPenalty(Request $request)
     {
         $validated = $request->validate([

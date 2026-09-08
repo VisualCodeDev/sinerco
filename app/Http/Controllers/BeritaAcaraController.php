@@ -16,6 +16,7 @@ class BeritaAcaraController extends Controller
      */
     public function index()
     {
+        // Render halaman Berita Acara
         return Inertia::render('BA/BaPage');
     }
 
@@ -24,8 +25,10 @@ class BeritaAcaraController extends Controller
      */
     public function getBaUnits()
     {
+        // Ambil semua unit beserta pengaturan BA, data unit, dan lokasi/area-nya
         $data = UnitPosition::with('baSettings', 'unit', 'location.area')
             ->get()
+            // Bentuk ulang data menjadi format yang dibutuhkan frontend
             ->map(function ($item) {
                 return [
                     'unit_position_id' => $item->id,
@@ -49,6 +52,7 @@ class BeritaAcaraController extends Controller
      */
     public function SetFieldBA(Request $request)
     {
+        // Validasi input daftar unit terpilih dan data pihak-pihak terkait BA
         $validated = $request->validate([
             'selectedUnits' => 'required|array',
             'spv_name' => 'nullable|string',
@@ -59,9 +63,10 @@ class BeritaAcaraController extends Controller
             'client_department' => 'nullable|string',
         ]);
 
+        // Simpan/update data BA untuk setiap unit yang dipilih
         foreach ($validated['selectedUnits'] as $unitPosId) {
             if (!$unitPosId)
-                continue;
+                continue; // lewati jika id unit kosong
 
             BeritaAcara::updateOrCreate(
                 [

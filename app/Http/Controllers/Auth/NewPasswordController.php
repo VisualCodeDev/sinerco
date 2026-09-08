@@ -34,6 +34,7 @@ class NewPasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validasi token reset, email, dan password baru
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
@@ -46,11 +47,13 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
+                // Update password user dengan yang baru (di-hash) dan buat remember token baru
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
 
+                // Trigger event bahwa password sudah direset
                 event(new PasswordReset($user));
             }
         );
@@ -59,9 +62,11 @@ class NewPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         if ($status == Password::PASSWORD_RESET) {
+            // Reset berhasil, arahkan ke halaman login
             return redirect()->route('login')->with('status', __($status));
         }
 
+        // Reset gagal, lempar pesan error dari status
         throw ValidationException::withMessages([
             'email' => [trans($status)],
         ]);

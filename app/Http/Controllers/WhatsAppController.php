@@ -11,10 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppController extends Controller
 {
+    // Kirim pesan WhatsApp otomatis berisi laporan unit harian untuk sebuah client
     public function sendAutoMessage($clientId)
     {
+        // Tanggal hari ini, dipakai untuk filter report & request
         $currentDate = Carbon::today();
 
+        // Ambil semua unit posisi milik client beserta relasi terkait
         $unitReports = UnitPosition::select('id', 'location_id', 'unit_id', 'client_id')
             ->where('client_id', $clientId)
             ->with([
@@ -32,11 +35,14 @@ class WhatsAppController extends Controller
             ->get();
 
 
+        // Loop tiap unit untuk membuat pesan report masing-masing
         foreach ($unitReports as $unitReport) {
             $client = $unitReport->client ?? null;
+            // Interval jam pengisian report (default tiap 1 jam)
             $input_interval = $client->input_interval ?? 1;
 
             $reports = $unitReport->reports ?? collect();
+            // Petakan report berdasarkan jam (time) agar mudah dicari
             $reportMap = $reports->mapWithKeys(function ($r) {
                 return [$r->time => $r->data];
             });
@@ -50,6 +56,7 @@ class WhatsAppController extends Controller
                 $fields = collect();
             }
 
+            // Header pesan berisi daftar nama field report
             $header = 'TIME : ' . (
                 $fields->isNotEmpty()
                 ? $fields->map(fn($f) => ucwords(str_replace('_', ' ', $f)))->implode(' | ')
@@ -73,6 +80,7 @@ class WhatsAppController extends Controller
 
             // isi request
             $requests = $unitReport->requests ?? collect();
+            // Gabungkan semua remarks dari request menjadi bullet list
             $remarksList = $requests
                 ->pluck('remarks')
                 ->filter() // buang null / kosong
@@ -91,6 +99,7 @@ class WhatsAppController extends Controller
 
             // NOMOR TELEPON
             $workers = $unitReport->workers ?? collect();
+            // Ambil daftar nomor WhatsApp pekerja untuk tujuan kirim pesan
             $phoneNumberList = $workers->pluck('user.whatsAppNum')
                 ->filter()
                 ->values()
@@ -109,6 +118,7 @@ class WhatsAppController extends Controller
             TEXT;
 
             // Log::debug($unitReport);
+            // Kirim pesan hanya jika ada nomor tujuan
             if (count($phoneNumberList) > 0) {
                 Log::debug($message);
                 WhatsAppService::sendMessage(implode(', ', $phoneNumberList), $message);

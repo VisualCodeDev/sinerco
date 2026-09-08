@@ -17,10 +17,11 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    public $incrementing = false;
-    protected $keyType = 'string';
+    public $incrementing = false; // primary key bukan angka auto increment
+    protected $keyType = 'string'; // tipe primary key berupa string
     protected $primaryKey = 'user_id';
 
+    // Auto generate user_id saat user baru dibuat
     protected static function boot()
     {
         parent::boot();
@@ -29,10 +30,12 @@ class User extends Authenticatable
             if (empty($model->user_id)) {
                 $lastId = User::orderBy('user_id', 'desc')->first()?->user_id;
                 $number = $lastId ? (int) substr($lastId, 3) + 1 : 1;
+                // Format id jadi USR001, USR002, dst
                 $model->user_id = 'USR' . str_pad($number, 3, '0', STR_PAD_LEFT);
             }
         });
     }
+    // Kolom yang boleh diisi mass assignment
     protected $fillable = [
         'name',
         'email',
@@ -46,6 +49,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    // Kolom yang disembunyikan saat serialisasi (data sensitif)
     protected $hidden = [
         'password',
         'remember_token',
@@ -60,14 +64,16 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password' => 'hashed', // password otomatis di-hash
         ];
     }
+    // Relasi ke Role/jabatan user ini
     public function roleData()
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
+    // Relasi many-to-many ke UnitPosition lewat tabel pivot user_settings
     public function UnitPositions()
     {
         return $this->belongsToMany(

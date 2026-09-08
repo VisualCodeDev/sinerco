@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Curve extends Model
 {
+    // kolom yang boleh diisi mass-assignment
     protected $fillable = [
         'suction_pressure',
         'discharge_pressure',
@@ -13,6 +14,7 @@ class Curve extends Model
         'flowrate',
     ];
 
+    // cast flowrate menjadi decimal 2 digit
     protected $casts = [
         'flowrate' => 'decimal:2',
     ];
@@ -28,9 +30,11 @@ class Curve extends Model
             return null;
         }
 
+        // kelompokkan baris berdasarkan discharge_pressure
         $dischargeGroups = $rows->groupBy('discharge_pressure');
         $dischargePressures = $dischargeGroups->keys()->map(fn($v) => (float) $v)->sort()->values();
 
+        // cari batas bawah & atas discharge_pressure yang mengapit nilai target
         [$dpLow, $dpHigh] = self::bracket($dischargePressures, $dischargePressure);
 
         $flowAtDpLow = self::interpolateBySuction($dischargeGroups->get((int) $dpLow), $suctionPressure);
@@ -42,6 +46,7 @@ class Curve extends Model
             return null;
         }
 
+        // interpolasi linear antar dua titik discharge_pressure
         return $dpHigh === $dpLow
             ? $flowAtDpLow
             : self::lerp($dischargePressure, $dpLow, $flowAtDpLow, $dpHigh, $flowAtDpHigh);

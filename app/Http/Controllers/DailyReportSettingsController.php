@@ -14,11 +14,13 @@ class DailyReportSettingsController extends Controller
      */
     public function index()
     {
+        // Render halaman pengaturan validasi input
         return Inertia::render('Unit/InputValidationSetting');
     }
 
     public function setSetting(Request $request)
     {
+        // Aturan validasi dasar untuk request
         $rules = [
             'client_id' => 'required|array',
             'decimalSetting' => 'required|array',
@@ -27,10 +29,12 @@ class DailyReportSettingsController extends Controller
             // 'thresholdSetting' => 'required|array'
         ];
 
+        // Tambah aturan validasi dinamis untuk tiap key decimalSetting
         foreach ($request->input('decimalSetting', []) as $key => $value) {
             $rules["decimalSetting.$key"] = 'required|numeric';
         }
 
+        // Tambah aturan validasi dinamis untuk tiap key minMaxSetting (min wajib, max opsional)
         foreach ($request->input('minMaxSetting', []) as $key => $value) {
             $rules["minMaxSetting.$key.min"] = 'required|numeric';
             $rules["minMaxSetting.$key.max"] = 'nullable|numeric';
@@ -41,13 +45,16 @@ class DailyReportSettingsController extends Controller
         //     $rules["thresholdSetting.$key.type"] = 'required|string';
         // }
 
+        // Tambah aturan validasi dinamis untuk tiap key unitSetting
         foreach ($request->input('unitSetting', []) as $key => $value) {
             $rules["unitSetting.$key"] = 'required|string';
         }
+        // Jalankan validasi sesuai aturan yang sudah disusun
         $validated = $request->validate($rules);
 
         $client_ids = $validated['client_id'];
 
+        // Simpan atau update pengaturan untuk setiap client_id yang dipilih
         foreach ((array) $client_ids as $client_id) {
             DailyReportSettings::updateOrCreate(
                 ['client_id' => $client_id],
@@ -69,6 +76,7 @@ class DailyReportSettingsController extends Controller
      */
     public function getUnitSetting($client_id)
     {
+        // Ambil pengaturan report berdasarkan client_id
         $data = DailyReportSettings::where('client_id', $client_id)->first();
         return response()->json($data);
     }

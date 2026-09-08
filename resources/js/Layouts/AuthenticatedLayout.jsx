@@ -6,8 +6,10 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function AuthenticatedLayout({ header, children }) {
+    // ambil data user yang sedang login dari shared props Inertia
     const user = usePage().props.auth.user;
 
+    // state untuk toggle menu navigasi versi mobile
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
@@ -79,6 +81,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="-me-2 flex items-center sm:hidden">
+                            {/* tombol hamburger untuk buka/tutup menu mobile */}
                             <button
                                 onClick={() =>
                                     setShowingNavigationDropdown(
@@ -162,6 +165,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
             </nav>
 
+            {/* tampilkan header hanya jika prop header diberikan */}
             {header && (
                 <header className="bg-white shadow">
                     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">

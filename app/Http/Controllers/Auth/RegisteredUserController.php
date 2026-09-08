@@ -30,20 +30,24 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Validasi data registrasi, email harus unik di tabel users
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Buat user baru dengan password yang di-hash
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        // Trigger event registrasi (misal untuk kirim email verifikasi)
         event(new Registered($user));
 
+        // Langsung login-kan user setelah berhasil daftar
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: false));

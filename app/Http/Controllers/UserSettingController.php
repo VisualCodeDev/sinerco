@@ -17,6 +17,7 @@ class UserSettingController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Ambil semua user beserta role dan posisi unitnya untuk ditampilkan di list
     public function getAllUsers()
     {
         $users = User::with('roleData', 'UnitPositions')->get();
@@ -28,6 +29,7 @@ class UserSettingController extends Controller
                 'email' => $user->email,
                 'role' => $user->roleData?->name,
                 'role_id' => $user->roleData?->id,
+                // Gabungkan semua area unik yang dimiliki user jadi satu string
                 'areas' => $user->unitPositions
                     ->pluck('location.area.area')
                     ->unique()
@@ -36,6 +38,7 @@ class UserSettingController extends Controller
         );
     }
 
+    // Ambil data unit yang boleh diakses oleh user tertentu
     public function getPermittedUnitData($user_id)
     {
         $permittedData = UserSetting::where('user_id', $user_id)
@@ -57,12 +60,14 @@ class UserSettingController extends Controller
     }
 
 
+    // Tampilkan halaman form tambah user baru
     public function newUserIndex()
     {
         $roles = Role::all();
         return Inertia::render('User/AddUser', ['roles' => $roles]);
     }
 
+    // Simpan user baru ke database
     public function addNewUser(Request $request)
     {
         $validated = $request->validate([
@@ -72,6 +77,7 @@ class UserSettingController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
+        // Hash password sebelum disimpan
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -79,6 +85,7 @@ class UserSettingController extends Controller
         return response()->json(['text' => 'User Added', 'type' => 'success'], 200);
     }
 
+    // Tampilkan halaman daftar user
     public function index()
     {
         $roles = Role::all();
@@ -86,6 +93,7 @@ class UserSettingController extends Controller
         // $operatorData = User::where('role', 'operator')->get();
         return Inertia::render('User/UserList', ['roles' => $roles]);
     }
+    // Tampilkan halaman pengaturan alokasi unit untuk satu user
     public function allocationSettings($user_id)
     {
         $userData = User::select(['user_id', 'name', 'email', 'role_id'])
@@ -93,6 +101,7 @@ class UserSettingController extends Controller
             ->first();
         $roleData = Role::all();
         $unitAreaData = [];
+        // Ambil semua data unit posisi beserta relasi unit, client, lokasi, dan area
         $unitAreaData = UnitPosition::with(['unit', 'client', 'location.area'])->get();
 
         $data = $unitAreaData->map(function ($item) {
@@ -110,6 +119,7 @@ class UserSettingController extends Controller
         return Inertia::render('User/UserAllocationSetting', ['data' => $userData, 'unitAreaData' => $data, 'roleData' => $roleData]);
     }
 
+    // Tambahkan alokasi unit baru untuk user, lewati yang sudah ada
     public function allocationSettingsAdd(Request $request)
     {
         $validate = $request->validate([
@@ -128,6 +138,7 @@ class UserSettingController extends Controller
         $skipped = [];
 
         foreach ($unit_position_ids as $unitId) {
+            // Cek apakah alokasi ini sudah ada sebelumnya
             $exists = UserSetting::where('user_id', $user_id)
                 ->where('unit_position_id', $unitId)
                 ->exists();
@@ -150,6 +161,7 @@ class UserSettingController extends Controller
         ], 201);
     }
 
+    // Hapus alokasi unit tertentu dari user
     public function allocationSettingsRemove(Request $request)
     {
         $validate = $request->validate([
@@ -196,12 +208,14 @@ class UserSettingController extends Controller
             'password' => 'nullable|string|min:8'
         ]);
         $user = User::find($user_id);
+        // Hanya update password jika diisi, kalau kosong pakai password lama
         $user->update(['name' => $request->name, 'role_id' => $request->role, 'password' => $request->password != '' ? Hash::make($request->password) : $user->password]);
         return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
     /**
      * Store a newly created resource in storage.
      */
+    // Ambil detail satu user berdasarkan id
     public function getSelectedUser($user_id)
     {
         $user = User::where('id', $user_id)->firstOrFail();
@@ -211,6 +225,7 @@ class UserSettingController extends Controller
     /**
      * Display the specified resource.
      */
+    // Hapus beberapa user sekaligus (bulk delete)
     public function delete(Request $request)
     {
         $request->validate([
@@ -235,6 +250,7 @@ class UserSettingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    // Set ulang alokasi unit untuk banyak user sekaligus (hapus lama, insert baru)
     public function bulkAllocation(Request $request)
     {
         $request->validate([
@@ -271,6 +287,7 @@ class UserSettingController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // Hapus semua alokasi unit milik user-user yang dipilih
     public function reset(Request $request)
     {
         $request->validate([

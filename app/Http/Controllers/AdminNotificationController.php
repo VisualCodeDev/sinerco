@@ -12,22 +12,27 @@ class AdminNotificationController extends Controller
      */
     public function getNotifications()
     {
+        // Ambil daftar unit yang diizinkan untuk user saat ini
         $permissionData = DataUnitController::getPermittedUnit();
 
+        // Ambil id unit unik dari data izin, buang yang kosong
         $unitIds = collect($permissionData)
             ->pluck('unit_position_id')
             ->unique()
             ->filter();
 
+        // Ambil notifikasi yang statusnya belum 'End' dan unit-nya termasuk yang diizinkan
         $requestList = AdminNotification::where('status', '!=', 'End')
             ->whereHas('request', function ($query) use ($unitIds) {
                 $query->whereIn('unit_position_id', $unitIds);
             })
             ->with('request')
             ->get()
+            // Kelompokkan berdasarkan tipe request
             ->groupBy(function ($item) {
                 return $item->request_type ?? null;
             })
+            // Ambil satu data pertama tiap kelompok
             ->map->first()
             ->values();
 

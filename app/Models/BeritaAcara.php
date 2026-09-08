@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class BeritaAcara extends Model
 {
+     // kolom yang boleh diisi mass-assignment
      protected $fillable = [
         'unit_position_id',
         'spv_name',

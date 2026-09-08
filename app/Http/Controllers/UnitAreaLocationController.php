@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class UnitAreaLocationController extends Controller
 {
+    // Menampilkan daftar lokasi area unit (belum diimplementasikan)
     /**
      * Display a listing of the resource.
      */

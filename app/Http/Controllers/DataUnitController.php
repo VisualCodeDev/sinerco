@@ -22,6 +22,7 @@ class DataUnitController extends Controller
     /**
      * Display a listing of the resource.
      */
+    // Mengambil daftar unit yang boleh diakses oleh user yang login (berdasarkan role)
     public static function getPermittedUnit()
     {
         $user = Auth::user()?->load('roleData');
@@ -29,6 +30,7 @@ class DataUnitController extends Controller
         if (!$user) {
             return collect();
         }
+        // Jika bukan super_admin, hanya ambil unit yang ditugaskan ke user tersebut
         if ($user->roleData->name !== 'super_admin') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
@@ -44,6 +46,7 @@ class DataUnitController extends Controller
                 'region',
                 'latestReport'
             ])->get()->makeHidden(['created_at', 'updated_at']);
+            // Format ulang data unit non-admin ke struktur flat
             $data = $temp->map(function ($pos) {
                 return [
                     'unit_id' => $pos->unit->unit_id,
@@ -67,6 +70,7 @@ class DataUnitController extends Controller
                 ];
             });
         } else {
+            // Super admin bisa melihat semua unit
             $temp = DataUnit::with([
                 'UnitPositions.client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -79,6 +83,7 @@ class DataUnitController extends Controller
                 },
             ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
 
+            // Format ulang data unit untuk super_admin ke struktur flat
             $data = $temp->map(function ($unit) {
                 return [
                     'unit_id' => $unit->unit_id,
@@ -105,6 +110,7 @@ class DataUnitController extends Controller
         return $data;
     }
 
+    // Mengambil semua unit yang diizinkan, dengan opsi filter berdasarkan status
     public function getAllUnit(Request $request)
     {
         $filterStatus = $request->query('status');
@@ -120,6 +126,7 @@ class DataUnitController extends Controller
         return response()->json($units->values(), 200);
     }
 
+    // Menampilkan halaman daftar unit dengan pagination dan filter status
     public function unitList(Request $request)
     {
         $status = $request->query('status');
@@ -136,6 +143,7 @@ class DataUnitController extends Controller
 
         $units = $units->values();
 
+        // Buat pagination manual dari collection
         $paginated = (new LengthAwarePaginator(
             $units->forPage($page, $perPage)->values(),
             $units->count(),
@@ -154,6 +162,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Mengambil daftar unit yang diizinkan dalam format JSON
     public function getUnit()
     {
         $data = $this->getPermittedUnit();
@@ -161,6 +170,7 @@ class DataUnitController extends Controller
         return response()->json($data);
     }
 
+    // Mengambil status seluruh unit yang diizinkan
     public function getUnitStatus()
     {
         $data = $this->getPermittedUnit()->map(function ($item) {
@@ -172,6 +182,7 @@ class DataUnitController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    // Menampilkan halaman pengaturan unit
     public function unitSetting(Request $request)
     {
         return Inertia::render('Unit/UnitSetting');
@@ -180,6 +191,7 @@ class DataUnitController extends Controller
     /**
      * Display the specified resource.
      */
+    // Mengatur interval input data untuk unit-unit yang dipilih
     public function setInterval(Request $request)
     {
         $val = $request->validate([
@@ -197,11 +209,13 @@ class DataUnitController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
+    // Mengambil detail data satu unit berdasarkan unit_position_id, untuk halaman edit
     public function getSelectedUnit(Request $request)
     {
         $unit = UnitPosition::with(['client', 'unit', 'dailyReportSetting', 'location.area', 'workshop'])
             ->where('id', $request->unit_position_id)->first();
 
+        // Susun data unit lengkap dengan info tambahan untuk ditampilkan di form
         $data = [
             'unit_id' => $unit->unit_id ?? null,
             'visibilitySetting' => $unit->unit->visibilitySetting ?? null,
@@ -237,6 +251,7 @@ class DataUnitController extends Controller
 
     // ADD NEW UNIT
 
+    // Menampilkan halaman form tambah unit baru, beserta data referensi (client, workshop, dll)
     public function create()
     {
         $clients = Client::all();
@@ -252,6 +267,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Menyimpan unit baru beserta posisi (client atau workshop) dan area/lokasi terkait
     public function addNewUnit(Request $request)
     {
         $rules = [
@@ -264,6 +280,7 @@ class DataUnitController extends Controller
             'location_name' => 'nullable|string',
         ];
 
+        // Rule tambahan tergantung posisi unit (client / workshop)
         if ($request->position_type === 'client') {
             $rules['client_id'] = 'nullable|exists:clients,client_id';
             $rules['client_name'] = 'nullable|string';
@@ -274,24 +291,28 @@ class DataUnitController extends Controller
 
         $val = $request->validate($rules);
 
+        // Validasi manual: minimal salah satu dari id/name client harus ada
         if ($request->position_type === 'client' && !$request->client_id && !$request->client_name) {
             return response()->json([
                 'errors' => ['client' => ['Either client_id or client_name is required.']]
             ], 422);
         }
 
+        // Validasi manual: minimal salah satu dari id/name workshop harus ada
         if ($request->position_type === 'workshop' && !$request->workshop_id && !$request->workshop_name) {
             return response()->json([
                 'errors' => ['workshop' => ['Either workshop_id or workshop_name is required.']]
             ], 422);
         }
 
+        // Gunakan transaksi DB agar semua insert konsisten (unit, area, lokasi, client/workshop, position)
         DB::transaction(function () use ($val) {
 
             $areaId = null;
             $locationId = null;
 
             // 1. Handle Area
+            // Buat area baru bila belum dipilih dari yang sudah ada (hanya untuk posisi client)
             if ($val['position_type'] === 'client') {
                 if (!empty($val['area_id'])) {
                     $areaId = $val['area_id'];
@@ -303,6 +324,7 @@ class DataUnitController extends Controller
                 }
 
                 // 2. Handle Location
+                // Buat lokasi baru bila belum dipilih dari yang sudah ada
                 if (!empty($val['location_id'])) {
                     $locationId = $val['location_id'];
                 } else {
@@ -315,6 +337,7 @@ class DataUnitController extends Controller
             }
 
             // 3. Create Unit
+            // Buat data unit baru
             $unit = DataUnit::create([
                 'unit' => $val['unit'],
                 'status' => $val['status'],
@@ -323,6 +346,7 @@ class DataUnitController extends Controller
             $clientId = null;
             $workshopId = null;
 
+            // Buat/gunakan client atau workshop sesuai position_type
             if ($val['position_type'] === 'client') {
                 $clientId = !empty($val['client_id'])
                     ? $val['client_id']
@@ -337,6 +361,7 @@ class DataUnitController extends Controller
                     ])->workshop_id;
             }
 
+            // Simpan posisi unit (relasi unit ke client/workshop/lokasi)
             $unit->UnitPositions()->create([
                 'client_id' => $clientId,
                 'location_id' => $locationId,
@@ -353,11 +378,13 @@ class DataUnitController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    // Menampilkan halaman posisi unit
     public function unitLocation()
     {
         return Inertia::render('Unit/Positions');
     }
 
+    // Menampilkan halaman pengaturan posisi unit untuk workshop/client tertentu
     public function unitLocationSetting(Request $request)
     {
         $request->validate([
@@ -380,6 +407,7 @@ class DataUnitController extends Controller
     /**
      * Remove the specified resource from storage.
      */
+    // Menetapkan unit-unit terpilih ke sebuah workshop atau client
     public function addUnitLocation(Request $request)
     {
         $val = $request->validate([
@@ -407,6 +435,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Melepas unit-unit terpilih dari workshop/client (client_id & workshop_id di-null-kan)
     public function removeUnitLocation(Request $request)
     {
         $val = $request->validate([
@@ -428,11 +457,13 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Menampilkan halaman relokasi unit
     public function relocateUnitPage()
     {
         return Inertia::render('Unit/RelocateUnit');
     }
 
+    // Menampilkan halaman pengaturan area/lokasi untuk unit-unit pada sebuah lokasi
     public function unitAreaLocationSetting(Request $request)
     {
         $request->validate([
@@ -447,6 +478,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Menetapkan unit-unit terpilih ke sebuah lokasi
     public function addUnitAreaLocation(Request $request)
     {
         $val = $request->validate([
@@ -467,6 +499,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Melepas unit-unit terpilih dari lokasi (location_id di-null-kan)
     public function removeUnitAreaLocation(Request $request)
     {
         $val = $request->validate([
@@ -486,6 +519,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Mengupdate sebagian info unit (hanya field yang tidak null/kosong yang diupdate)
     public function updateUnitInfo(Request $request)
     {
         $val = $request->validate([
@@ -493,6 +527,7 @@ class DataUnitController extends Controller
             "data" => "required|array"
         ]);
 
+        // Buang field yang null atau string kosong sebelum update
         $data = collect($val['data'])
             ->filter(function ($value) {
                 return $value !== null && $value !== '';
@@ -508,6 +543,7 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Mengupdate data unit dan posisi unit sekaligus (data unit dan data posisi terpisah)
     public function updateUnitFull(Request $request)
     {
         $val = $request->validate([
@@ -521,6 +557,7 @@ class DataUnitController extends Controller
         ]);
 
         DB::transaction(function () use ($val) {
+            // Ambil field yang termasuk data unit
             $unitData = collect($val)->only(['unit', 'unit_sn', 'old_sn'])
                 ->filter(fn($value) => $value !== null)
                 ->toArray();
@@ -529,6 +566,7 @@ class DataUnitController extends Controller
                 DataUnit::where('unit_id', $val['unit_id'])->update($unitData);
             }
 
+            // Ambil field yang termasuk data posisi unit
             $positionData = collect($val)->only(['client_id', 'location_id', 'region_id'])
                 ->filter(fn($value) => $value !== null)
                 ->toArray();
@@ -545,6 +583,7 @@ class DataUnitController extends Controller
     }
 
 
+    // Mengambil daftar field laporan yang terdaftar untuk sebuah unit
     public function getUnitFields(Request $request)
     {
         $fields = UnitField::where("unit_id", $request->unit_id)
@@ -554,6 +593,7 @@ class DataUnitController extends Controller
 
         return response()->json($fields);
     }
+    // Mengatur threshold, visibility, dan curve_percentage untuk unit-unit terpilih
     public function setUnitSetting(Request $request)
     {
         $rules = [
@@ -563,11 +603,13 @@ class DataUnitController extends Controller
             'curve_percentage' => 'nullable|numeric|min:0|max:200'
         ];
 
+        // Bangun rule validasi dinamis untuk tiap key threshold
         foreach ($request->input('thresholdSetting', []) as $key => $value) {
             $rules["thresholdSetting.$key.value"] = 'required|numeric';
             $rules["thresholdSetting.$key.type"] = 'required|string';
         }
 
+        // Bangun rule validasi dinamis untuk tiap key visibility
         foreach ($request->input('visibilitySetting', []) as $key => $value) {
             $rules["visibilitySetting.$key"] = 'required|boolean';
         }
@@ -576,6 +618,7 @@ class DataUnitController extends Controller
 
         $unit_ids = $validated['unit_id'];
 
+        // Terapkan pengaturan yang sama ke semua unit terpilih
         foreach ((array) $unit_ids as $unit_id) {
             $unit = DataUnit::where('unit_id', $unit_id)->first();
             if (!$unit) {
@@ -591,6 +634,7 @@ class DataUnitController extends Controller
         return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);
     }
 
+    // Mengambil laporan harian sebuah unit, bisa difilter berdasarkan tanggal atau bulan
     public function getUnitReports(Request $request, $unit_position_id)
     {
         $query = DailyReport::where('unit_position_id', $unit_position_id);
