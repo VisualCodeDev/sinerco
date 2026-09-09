@@ -104,12 +104,14 @@ const AddUser = ({ roles }) => {
                                 className="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring focus:ring-indigo-200"
                                 required
                             />
-                            <div
-                                className="absolute right-0 top-1/2 -translate-y-1/2 pe-3 cursor-pointer"
+                            <button
+                                type="button"
+                                aria-label="Show or hide password"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 pe-3 p-2 cursor-pointer border border-gray-300 bg-white rounded"
                                 onClick={() => setReveal(!reveal)}
                             >
                                 {!reveal ? <FaRegEyeSlash /> : <FaRegEye />}
-                            </div>
+                            </button>
                         </div>
                         {errors.password && (
                             <p className="text-red-600 text-sm mt-1">
@@ -146,7 +148,7 @@ const AddUser = ({ roles }) => {
 
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
+                        className="w-full border border-transparent bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
                     >
                         Submit
                     </button>

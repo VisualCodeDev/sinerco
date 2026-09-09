@@ -29,7 +29,6 @@ const TableComponent = (props) => {
         isUnitList = false,
         newItemPlaceholder = "Add Unit",
         isModal = false,
-        maxItemPerPage,
         roles = [],
         submitPlaceholder,
         height,
@@ -40,7 +39,6 @@ const TableComponent = (props) => {
         data,
         handleClose,
         handleSubmit,
-        sortableData,
         onRowClick = null,
         title,
         subtitle,
@@ -194,14 +192,14 @@ const TableComponent = (props) => {
                     isResponsive && "md:block hidden"
                 } bg-white flex-col rounded-none md:rounded-lg border shadow-none md:shadow-lg max-h-[80vh] overflow-y-auto`}
             >
-                <div className="flex flex-col md:flex-row justify-between px-6 py-6 border-b sticky top-0 left-0 bg-white z-10">
+                <div className="flex flex-col md:flex-row justify-between px-4 py-2 border-b sticky top-0 left-0 bg-white z-10">
                     {title && (
                         <div className="flex md:justify-center items-center">
                             <div className="bg-[#e8edfc] text-primary p-1.5 md:p-2.5 rounded-md">
                                 <FaRegBuilding className="text-2xl md:text-3xl" />
                             </div>
                             <div className="flex-row justify-center items-center ml-2 md:ml-4 ">
-                                <p className="font-semibold text-base md:text-2xl">
+                                <p className="font-semibold text-base md:text-2xl uppercase">
                                     {title}
                                 </p>
                                 {subtitle && (
@@ -273,17 +271,29 @@ const TableComponent = (props) => {
                             </div>
                         </div>
                         <div className="flex md:flex-row flex-col gap-4">
-                            {addNewItem && (
-                                <a
-                                    href={handleNew}
-                                    className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
-                                >
-                                    <FaPlus />
-                                    <span className="">
-                                        {newItemPlaceholder || "Add"}
-                                    </span>
-                                </a>
-                            )}
+                            {addNewItem &&
+                                (typeof handleNew === "function" ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleNew}
+                                        className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                    >
+                                        <FaPlus />
+                                        <span className="">
+                                            {newItemPlaceholder || "Add"}
+                                        </span>
+                                    </button>
+                                ) : (
+                                    <a
+                                        href={handleNew}
+                                        className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                    >
+                                        <FaPlus />
+                                        <span className="">
+                                            {newItemPlaceholder || "Add"}
+                                        </span>
+                                    </a>
+                                ))}
                             {toggleEdit && (
                                 <div
                                     className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-white px-5 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
@@ -305,7 +315,8 @@ const TableComponent = (props) => {
                                 >
                                     <span className="">
                                         {secondaryAction.active
-                                            ? secondaryAction.activeLabel || "Done"
+                                            ? secondaryAction.activeLabel ||
+                                              "Done"
                                             : secondaryAction.label}
                                     </span>
                                 </div>
@@ -317,14 +328,14 @@ const TableComponent = (props) => {
                     className="flex-col"
                     style={{ maxHeight: height || "auto", overflow: "auto" }}
                 >
-                    <table className="table-auto w-full relative rounded-3xl overflow-x-scroll">
+                    <table className="table-auto w-full relative rounded-3xl overflow-x-scroll border-collapse border border-[#EAECF0]">
                         <thead className="bg-[#f5f7f9] sticky top-0 left-0">
-                            <tr className="text-[#0F111C] font-semibold bg-primary">
+                            <tr className="text-[#0F111C] font-bold text-sm bg-primary">
                                 {columns.map((col, index) => (
                                     <th
                                         key={index}
                                         className={
-                                            `px-6 py-3 md:px-8 text-sm font-medium text-left cursor-pointer uppercase` +
+                                            `px-3 py-3 text-left cursor-pointer uppercase border border-[#EAECF0] h-full` +
                                             (col.headerClassName || "")
                                         }
                                         onClick={() =>
@@ -333,11 +344,14 @@ const TableComponent = (props) => {
                                         }
                                     >
                                         <div
-                                            className={`flex items-center ${col.headerClassName}`}
+                                            className={`flex items-center h-full ${col.headerClassName}`}
                                         >
-                                            {typeof col?.Header === "function"
-                                                ? col?.Header(filteredData)
-                                                : col?.header}
+                                            <span>
+                                                {typeof col?.Header ===
+                                                "function"
+                                                    ? col?.Header(filteredData)
+                                                    : col?.header}
+                                            </span>
                                             {col.sortable &&
                                                 (sortConfig.key === col.name ? (
                                                     <span className="ml-1 text-xs">
@@ -377,6 +391,7 @@ const TableComponent = (props) => {
                                             {columns.map((col, colIndex) => (
                                                 <td
                                                     key={colIndex}
+                                                    className="border border-[#EAECF0]"
                                                     style={{
                                                         width:
                                                             col?.width ||
@@ -385,7 +400,7 @@ const TableComponent = (props) => {
                                                 >
                                                     <a
                                                         href={item?.url}
-                                                        className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
+                                                        className={`text-[#0F111C] px-2 py-2 text-sm font-medium block ${
                                                             col.cellClassName ||
                                                             ""
                                                         }`}
@@ -417,7 +432,7 @@ const TableComponent = (props) => {
                                             {columns.map((col, colIndex) => (
                                                 <td
                                                     key={colIndex}
-                                                    className={`text-[#0F111C] px-4 py-2 md:px-8 md:py-6 text-md font-medium border-b border-[#EAECF0] ${
+                                                    className={`text-[#0F111C] px-2 py-2 text-sm font-medium border border-[#EAECF0] ${
                                                         col.cellClassName || ""
                                                     }`}
                                                     style={{
@@ -459,7 +474,7 @@ const TableComponent = (props) => {
                                 <div className="px-8 py-3 text-sm font-medium w-full flex gap-4">
                                     {isModal && (
                                         <button
-                                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                            className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                             onClick={handleClose}
                                         >
                                             Close
@@ -467,7 +482,7 @@ const TableComponent = (props) => {
                                     )}
 
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={handleSubmit}
                                     >
                                         {submitPlaceholder
@@ -486,7 +501,7 @@ const TableComponent = (props) => {
                             <th className="flex gap-4">
                                 <div className="ml-5 py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "edit" })
                                         }
@@ -497,7 +512,7 @@ const TableComponent = (props) => {
 
                                 <div className="py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className={`${edit ? "" : "hidden"} flex gap-1 items-center bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all`}
+                                        className={`${edit ? "" : "hidden"} flex gap-1 items-center border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all`}
                                         onClick={() =>
                                             handleSubmit({ type: "delete" })
                                         }
@@ -509,7 +524,7 @@ const TableComponent = (props) => {
 
                                 <div className="pe-8 py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "reset" })
                                         }
@@ -528,20 +543,12 @@ const TableComponent = (props) => {
                             <th className="flex gap-2">
                                 <div className="ml-5 py-3 text-sm font-medium w-full relative flex gap-5">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "edit" })
                                         }
                                     >
                                         Edit
-                                    </button>
-                                    <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
-                                        onClick={() =>
-                                            handleSubmit({ type: "export" })
-                                        }
-                                    >
-                                        Export BA
                                     </button>
                                 </div>
                             </th>
@@ -550,9 +557,11 @@ const TableComponent = (props) => {
                 )}
 
                 {isRequestList && (
-                    <div className={`${edit ? "" : "hidden"} sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl p-4`}>
+                    <div
+                        className={`${edit ? "" : "hidden"} sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl p-4`}
+                    >
                         <button
-                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                            className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                             onClick={handleMoveToHistory}
                         >
                             Delete
@@ -566,7 +575,7 @@ const TableComponent = (props) => {
                             <th className="flex gap-4">
                                 <div className="ml-5 py-3 text-sm font-medium w-full relative flex gap-5">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "export" })
                                         }
@@ -574,7 +583,7 @@ const TableComponent = (props) => {
                                         Export BA
                                     </button>
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "edit" })
                                         }
@@ -641,17 +650,29 @@ const TableComponent = (props) => {
                                     </div>
                                 )}
 
-                                {addNewItem && (
-                                    <a
-                                        href={handleNew}
-                                        className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-sm text-white px-2 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
-                                    >
-                                        <FaPlus />
-                                        <span className="">
-                                            {newItemPlaceholder || "Add"}
-                                        </span>
-                                    </a>
-                                )}
+                                {addNewItem &&
+                                    (typeof handleNew === "function" ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleNew}
+                                            className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-sm text-white px-2 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                        >
+                                            <FaPlus />
+                                            <span className="">
+                                                {newItemPlaceholder || "Add"}
+                                            </span>
+                                        </button>
+                                    ) : (
+                                        <a
+                                            href={handleNew}
+                                            className="flex justify-center items-center gap-2 cursor-pointer bg-primary text-sm text-white px-2 py-2 rounded-md hover:bg-white hover:border-primary hover:border-2 hover:text-primary transition-all"
+                                        >
+                                            <FaPlus />
+                                            <span className="">
+                                                {newItemPlaceholder || "Add"}
+                                            </span>
+                                        </a>
+                                    ))}
                             </div>
 
                             <div className="flex">
@@ -826,7 +847,7 @@ const TableComponent = (props) => {
                             <th>
                                 <div className="px-8 py-3 text-sm font-medium w-full">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={handleSubmit}
                                     >
                                         {submitPlaceholder
@@ -845,7 +866,7 @@ const TableComponent = (props) => {
                             <th className="flex gap-4">
                                 <div className="ml-5 py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "edit" })
                                         }
@@ -858,7 +879,7 @@ const TableComponent = (props) => {
                                     <div className="bg-white flex justify-center items-center gap-2 text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all">
                                         <FaTrashAlt />
                                         <button
-                                            className=""
+                                            className="border border-transparent bg-white text-primary"
                                             onClick={() =>
                                                 handleSubmit({ type: "delete" })
                                             }
@@ -870,7 +891,7 @@ const TableComponent = (props) => {
 
                                 <div className="pe-8 py-3 text-sm font-medium w-full relative">
                                     <button
-                                        className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                                        className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                                         onClick={() =>
                                             handleSubmit({ type: "reset" })
                                         }
@@ -886,7 +907,7 @@ const TableComponent = (props) => {
                 {isRequestList && (
                     <div className="sticky bottom-0 left-0 bg-primary w-full flex justify-end text-white rounded-b-2xl p-4">
                         <button
-                            className="bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
+                            className="border border-gray-300 bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-all"
                             onClick={handleMoveToHistory}
                         >
                             Delete

@@ -50,7 +50,7 @@ class WorkshopController extends Controller
     // Mengambil data workshop berdasarkan id
     public function getSelectedWorkshops(Request $request)
     {
-        $data = Workshop::find($request);
+        $data = Workshop::where('workshop_id', $request->workshop_id)->first();
         return response()->json($data);
     }
 

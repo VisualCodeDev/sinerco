@@ -93,12 +93,14 @@ export default function Login({ status, canResetPassword }) {
                                     setData("password", e.target.value)
                                 }
                             />
-                            <div
-                                className="absolute right-0 top-1/2 -translate-y-1/2 pe-3 cursor-pointer"
+                            <button
+                                type="button"
+                                aria-label="Show or hide password"
+                                className="absolute right-0 top-1/2 -translate-y-1/2 pe-3 p-2 cursor-pointer border border-gray-300 bg-white rounded"
                                 onClick={() => setReveal(!reveal)}
                             >
                                 {!reveal ? <FaRegEyeSlash /> : <FaRegEye />}
-                            </div>
+                            </button>
                         </div>
                         <InputError
                             message={errors.password}
@@ -125,7 +127,7 @@ export default function Login({ status, canResetPassword }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="mt-4 p-2 w-full text-white font-semibold bg-gradient-to-r from-primary to-secondary shadow-md hover:from-primary/85 hover:to-secondary/85 hover:inset-shadow-sm"
+                            className="mt-4 p-2 w-full text-white font-semibold border border-transparent bg-gradient-to-r from-primary to-secondary shadow-md hover:from-primary/85 hover:to-secondary/85 hover:inset-shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
                         >
                             LOGIN
                         </button>

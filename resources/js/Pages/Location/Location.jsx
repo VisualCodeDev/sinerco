@@ -290,7 +290,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-8 min-h-[90vh]">
                 {/* Region panel — desktop */}
-                <div className="md:w-1/4 w-full bg-white shadow-md rounded-lg p-6 md:p-8 lg:block hidden">
+                <div className="md:w-1/4 w-full bg-white shadow-md rounded-lg p-6 md:p-8 md:block hidden">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
@@ -302,7 +302,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                         </div>
                         <button
                             onClick={() => { setAddingRegion(true); setNewRegionName(""); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 border border-transparent bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
                         >
                             <FaPlus className="text-xs" /> Add
                         </button>
@@ -322,10 +322,10 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                 placeholder="New region name"
                                 className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             />
-                            <button onClick={handleAddRegion} className="text-green-600 hover:text-green-800">
+                            <button onClick={handleAddRegion} className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800">
                                 <FaCheck />
                             </button>
-                            <button onClick={() => setAddingRegion(false)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => setAddingRegion(false)} className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -334,8 +334,8 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                     <div className="space-y-2 max-h-[65vh] overflow-y-auto pr-1">
                         <button
                             onClick={() => setSelectedRegion(null)}
-                            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-all duration-150 ${
-                                !selectedRegion ? "bg-blue-100 text-gray-800" : "bg-gray-100 hover:bg-blue-50 text-gray-600"
+                            className={`w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-all duration-150 border ${
+                                !selectedRegion ? "bg-blue-100 text-gray-800 border-blue-300" : "bg-gray-100 hover:bg-blue-50 text-gray-600 border-gray-200"
                             }`}
                         >
                             All Regions
@@ -364,13 +364,13 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                         />
                                         <button
                                             onClick={() => handleUpdateRegion(item.id)}
-                                            className="text-green-600 hover:text-green-800 flex-shrink-0"
+                                            className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800 flex-shrink-0"
                                         >
                                             <FaCheck className="text-xs" />
                                         </button>
                                         <button
                                             onClick={() => setEditingRegionId(null)}
-                                            className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                            className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700 flex-shrink-0"
                                         >
                                             <FaTimes className="text-xs" />
                                         </button>
@@ -379,19 +379,19 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                     <>
                                         <button
                                             onClick={() => setSelectedRegion(item)}
-                                            className="flex-1 text-left text-gray-800 font-medium text-sm truncate"
+                                            className="flex-1 text-left text-gray-800 font-medium text-sm truncate border border-transparent bg-transparent"
                                         >
                                             {item.name}
                                         </button>
                                         <button
                                             onClick={() => { setEditingRegionId(item.id); setEditingRegionName(item.name); }}
-                                            className="text-gray-300 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="border border-gray-200 bg-white rounded text-gray-300 hover:text-primary flex-shrink-0 transition-opacity"
                                         >
                                             <FaPencilAlt className="text-xs" />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteRegion(item.id)}
-                                            className="text-gray-300 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="border border-gray-200 bg-white rounded text-gray-300 hover:text-red-500 flex-shrink-0 transition-opacity"
                                         >
                                             <FaTrash className="text-xs" />
                                         </button>
@@ -406,7 +406,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                 </div>
 
                 {/* Region panel — mobile */}
-                <div className="w-full bg-white shadow-md rounded-lg p-4 lg:hidden block">
+                <div className="w-full bg-white shadow-md rounded-lg p-4 md:hidden block">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
@@ -416,7 +416,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                         </div>
                         <button
                             onClick={() => { setAddingRegion(true); setNewRegionName(""); setMobileRegionExpanded(false); }}
-                            className="flex items-center gap-1 px-2 py-1 bg-primary text-white text-xs rounded-md hover:bg-blue-800"
+                            className="flex items-center gap-1 px-2 py-1 border border-transparent bg-primary text-white text-xs rounded-md hover:bg-blue-800"
                         >
                             <FaPlus className="text-xs" /> Add
                         </button>
@@ -436,10 +436,10 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                 placeholder="New region name"
                                 className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                             />
-                            <button onClick={handleAddRegion} className="text-green-600 hover:text-green-800">
+                            <button onClick={handleAddRegion} className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800">
                                 <FaCheck />
                             </button>
-                            <button onClick={() => setAddingRegion(false)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => setAddingRegion(false)} className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -459,7 +459,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                             <div className="absolute top-8 left-0 right-0 z-10 bg-white border border-gray-200 rounded-md shadow-lg max-h-[30vh] overflow-y-auto">
                                 <button
                                     onClick={() => { setSelectedRegion(null); setMobileRegionExpanded(false); }}
-                                    className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm font-medium text-gray-800"
+                                    className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm font-medium text-gray-800 border border-transparent bg-white"
                                 >
                                     All Regions
                                 </button>
@@ -470,19 +470,19 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                     >
                                         <button
                                             onClick={() => { setSelectedRegion(item); setMobileRegionExpanded(false); }}
-                                            className="flex-1 text-left text-sm font-medium text-gray-800"
+                                            className="flex-1 text-left text-sm font-medium text-gray-800 border border-transparent bg-transparent"
                                         >
                                             {item.name}
                                         </button>
                                         <button
                                             onClick={() => { setEditingRegionId(item.id); setEditingRegionName(item.name); setMobileRegionExpanded(false); }}
-                                            className="text-gray-400 hover:text-primary"
+                                            className="border border-gray-200 bg-white rounded text-gray-400 hover:text-primary"
                                         >
                                             <FaPencilAlt className="text-xs" />
                                         </button>
                                         <button
                                             onClick={() => { handleDeleteRegion(item.id); setMobileRegionExpanded(false); }}
-                                            className="text-gray-400 hover:text-red-500"
+                                            className="border border-gray-200 bg-white rounded text-gray-400 hover:text-red-500"
                                         >
                                             <FaTrash className="text-xs" />
                                         </button>
@@ -494,7 +494,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                 </div>
 
                 {/* Area panel — desktop */}
-                <div className="md:w-1/4 w-full bg-white shadow-md rounded-lg p-6 md:p-8 lg:block hidden">
+                <div className="md:w-1/4 w-full bg-white shadow-md rounded-lg p-6 md:p-8 md:block hidden">
                     <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                             <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
@@ -506,7 +506,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                         </div>
                         <button
                             onClick={() => { setAddingArea(true); setNewAreaName(""); }}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 border border-transparent bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
                         >
                             <FaPlus className="text-xs" /> Add
                         </button>
@@ -526,10 +526,10 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                 placeholder="New area name"
                                 className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             />
-                            <button onClick={handleAddArea} className="text-green-600 hover:text-green-800">
+                            <button onClick={handleAddArea} className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800">
                                 <FaCheck />
                             </button>
-                            <button onClick={() => setAddingArea(false)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => setAddingArea(false)} className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -561,13 +561,13 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                             />
                                             <button
                                                 onClick={() => handleUpdateArea(item.id)}
-                                                className="text-green-600 hover:text-green-800 flex-shrink-0"
+                                                className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800 flex-shrink-0"
                                             >
                                                 <FaCheck className="text-xs" />
                                             </button>
                                             <button
                                                 onClick={() => setEditingAreaId(null)}
-                                                className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                                className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700 flex-shrink-0"
                                             >
                                                 <FaTimes className="text-xs" />
                                             </button>
@@ -576,19 +576,19 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                         <>
                                             <button
                                                 onClick={() => setSelectedArea(item)}
-                                                className="flex-1 text-left text-gray-800 font-medium text-sm truncate"
+                                                className="flex-1 text-left text-gray-800 font-medium text-sm truncate border border-transparent bg-transparent"
                                             >
                                                 {item.area}
                                             </button>
                                             <button
                                                 onClick={() => { setEditingAreaId(item.id); setEditingAreaName(item.area); }}
-                                                className="text-gray-300 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="border border-gray-200 bg-white rounded text-gray-300 hover:text-primary flex-shrink-0 transition-opacity"
                                             >
                                                 <FaPencilAlt className="text-xs" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteArea(item.id)}
-                                                className="text-gray-300 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="border border-gray-200 bg-white rounded text-gray-300 hover:text-red-500 flex-shrink-0 transition-opacity"
                                             >
                                                 <FaTrash className="text-xs" />
                                             </button>
@@ -618,7 +618,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                 </div>
 
                 {/* Area panel — mobile */}
-                <div className="w-full bg-white shadow-md rounded-lg p-4 lg:hidden block">
+                <div className="w-full bg-white shadow-md rounded-lg p-4 md:hidden block">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <div className="bg-[#e8edfc] text-primary p-1.5 rounded-md">
@@ -628,7 +628,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                         </div>
                         <button
                             onClick={() => { setAddingArea(true); setNewAreaName(""); setMobileExpanded(false); }}
-                            className="flex items-center gap-1 px-2 py-1 bg-primary text-white text-xs rounded-md hover:bg-blue-800"
+                            className="flex items-center gap-1 px-2 py-1 border border-transparent bg-primary text-white text-xs rounded-md hover:bg-blue-800"
                         >
                             <FaPlus className="text-xs" /> Add
                         </button>
@@ -648,10 +648,10 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                 placeholder="New area name"
                                 className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                             />
-                            <button onClick={handleAddArea} className="text-green-600 hover:text-green-800">
+                            <button onClick={handleAddArea} className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800">
                                 <FaCheck />
                             </button>
-                            <button onClick={() => setAddingArea(false)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => setAddingArea(false)} className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -676,19 +676,19 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                     >
                                         <button
                                             onClick={() => { setSelectedArea(item); setMobileExpanded(false); }}
-                                            className="flex-1 text-left text-sm font-medium text-gray-800"
+                                            className="flex-1 text-left text-sm font-medium text-gray-800 border border-transparent bg-transparent"
                                         >
                                             {item.area}
                                         </button>
                                         <button
                                             onClick={() => { setEditingAreaId(item.id); setEditingAreaName(item.area); setMobileExpanded(false); }}
-                                            className="text-gray-400 hover:text-primary"
+                                            className="border border-gray-200 bg-white rounded text-gray-400 hover:text-primary"
                                         >
                                             <FaPencilAlt className="text-xs" />
                                         </button>
                                         <button
                                             onClick={() => { handleDeleteArea(item.id); setMobileExpanded(false); }}
-                                            className="text-gray-400 hover:text-red-500"
+                                            className="border border-gray-200 bg-white rounded text-gray-400 hover:text-red-500"
                                         >
                                             <FaTrash className="text-xs" />
                                         </button>
@@ -720,7 +720,7 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                         {selectedArea && (
                             <button
                                 onClick={() => { setAddingLocation(true); setNewLocationName(""); }}
-                                className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-white text-sm rounded-md hover:bg-green-700 transition-colors"
+                                className="flex items-center gap-1.5 px-3 py-1.5 border border-transparent bg-secondary text-white text-sm rounded-md hover:bg-green-700 transition-colors"
                             >
                                 <FaPlus className="text-xs" /> Add
                             </button>
@@ -741,10 +741,10 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                 placeholder="New location name"
                                 className="flex-1 px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
                             />
-                            <button onClick={handleAddLocation} className="text-green-600 hover:text-green-800">
+                            <button onClick={handleAddLocation} className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800">
                                 <FaCheck />
                             </button>
-                            <button onClick={() => setAddingLocation(false)} className="text-red-500 hover:text-red-700">
+                            <button onClick={() => setAddingLocation(false)} className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700">
                                 <FaTimes />
                             </button>
                         </div>
@@ -772,13 +772,13 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                             />
                                             <button
                                                 onClick={() => handleUpdateLocation(item.id)}
-                                                className="text-green-600 hover:text-green-800 flex-shrink-0"
+                                                className="border border-gray-300 bg-white rounded text-green-600 hover:text-green-800 flex-shrink-0"
                                             >
                                                 <FaCheck className="text-xs" />
                                             </button>
                                             <button
                                                 onClick={() => setEditingLocationId(null)}
-                                                className="text-red-500 hover:text-red-700 flex-shrink-0"
+                                                className="border border-gray-300 bg-white rounded text-red-500 hover:text-red-700 flex-shrink-0"
                                             >
                                                 <FaTimes className="text-xs" />
                                             </button>
@@ -810,19 +810,19 @@ const Location = ({ areas: initialAreas, regions: initialRegions }) => {
                                                     )
                                                 }
                                                 title="Manage Units"
-                                                className="text-blue-300 hover:text-primary flex-shrink-0"
+                                                className="border border-blue-200 bg-white rounded text-blue-300 hover:text-primary flex-shrink-0"
                                             >
                                                 <FaBoxes className="text-xs" />
                                             </button>
                                             <button
                                                 onClick={() => { setEditingLocationId(item.id); setEditingLocationName(item.location); }}
-                                                className="text-blue-200 hover:text-primary flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="border border-blue-200 bg-white rounded text-blue-200 hover:text-primary flex-shrink-0 transition-opacity"
                                             >
                                                 <FaPencilAlt className="text-xs" />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteLocation(item.id)}
-                                                className="text-blue-200 hover:text-red-500 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="border border-blue-200 bg-white rounded text-blue-200 hover:text-red-500 flex-shrink-0 transition-opacity"
                                             >
                                                 <FaTrash className="text-xs" />
                                             </button>

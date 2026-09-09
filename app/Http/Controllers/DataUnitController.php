@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\DailyReport;
+use App\Models\DailyReportSettings;
 use App\Models\DataUnit;
 use App\Models\Location;
 use App\Models\Area;
@@ -14,6 +15,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Log;
 
@@ -31,7 +33,7 @@ class DataUnitController extends Controller
             return collect();
         }
         // Jika bukan super_admin, hanya ambil unit yang ditugaskan ke user tersebut
-        if ($user->roleData->name !== 'super_admin') {
+        if ($user->roleData?->name !== 'super_admin') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
                     $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting']);
@@ -171,10 +173,29 @@ class DataUnitController extends Controller
     }
 
     // Mengambil status seluruh unit yang diizinkan
+    // Endpoint ini di-polling tiap 10 detik oleh dashboard Home.jsx, dan query-nya
+    // berat (join unit+client+workshop+location+area+region+latestReport). Di-cache
+    // singkat (5 detik) SUPAYA tidak semua polling dari banyak user memicu query
+    // database yang sama berulang-ulang dalam rentang waktu yang sangat dekat.
+    //
+    // Cache di-key per user_id (BUKAN per role) karena getPermittedUnit() hasilnya
+    // beda per user (non-admin cuma lihat unit yang di-assign ke dia, bukan semua
+    // unit dengan role yang sama) -- kalau key-nya cuma role, user lain bisa
+    // "kebagian" cache milik user lain dan lihat unit yang bukan miliknya.
+    //
+    // TTL 5 detik sengaja dibuat pendek: cukup untuk meredam lonjakan request
+    // yang datang hampir bersamaan (banyak tab/banyak user), tapi tidak sampai
+    // bikin status unit terasa basi di dashboard. Tidak ada invalidasi manual
+    // di sini (tidak di-clear saat ada report/request baru) -- data cukup
+    // "menunggu" sampai cache-nya kadaluarsa sendiri, jadi tidak perlu diingat-ingat
+    // untuk clear cache di setiap endpoint lain yang mengubah status unit.
     public function getUnitStatus()
     {
-        $data = $this->getPermittedUnit()->map(function ($item) {
-            return $item;
+        $userId = Auth::id();
+        $data = Cache::remember("unit-status:{$userId}", 5, function () {
+            return $this->getPermittedUnit()->map(function ($item) {
+                return $item;
+            });
         });
         return response()->json($data);
     }
@@ -635,23 +656,91 @@ class DataUnitController extends Controller
     }
 
     // Mengambil laporan harian sebuah unit, bisa difilter berdasarkan tanggal atau bulan
+    // Mengambil laporan harian sebuah unit, bisa difilter berdasarkan tanggal tunggal, rentang tanggal, atau bulan
     public function getUnitReports(Request $request, $unit_position_id)
     {
         $query = DailyReport::where('unit_position_id', $unit_position_id);
 
         if ($date = $request->query('date')) {
             $query->where('date', $date);
+        } elseif ($start = $request->query('start')) {
+            // Rentang tanggal; kalau 'end' tidak dikirim, anggap sama dengan start (1 hari)
+            $end = $request->query('end') ?: $start;
+            $query->whereBetween('date', [$start, $end]);
         } elseif ($month = $request->query('month')) {
-            $query->where('date', 'like', "$month%");
+            // Validasi format YYYY-MM agar tidak jadi LIKE wildcard yang tidak disengaja
+            if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+                return response()->json(['success' => false, 'message' => 'Invalid month format, expected YYYY-MM'], 422);
+            }
+            $query->where('date', 'like', $month . '%');
         }
 
-        $reports = $query->pluck('data'); // kolom JSON
+        $reports = $query->pluck('data');
+
+        // Ambil satuan (unit pengukuran per field) dari client pemilik unit ini -- bisa beda tiap client
+        $unitPosition = UnitPosition::find($unit_position_id);
+        $satuan = [];
+        if ($unitPosition?->client_id) {
+            $settings = DailyReportSettings::where('client_id', $unitPosition->client_id)->first();
+            $satuan = $settings?->unitSetting ?? [];
+        }
 
         return response()->json([
             'success' => true,
-            'data' => $reports
+            'data' => $reports,
+            'satuan' => $satuan,
         ]);
     }
 
+    // Mengambil laporan harian SEMUA unit dalam satu area sekaligus (1 request, bukan N request per unit)
+    public function getAreaReports(Request $request, $area_id)
+    {
+        $unitPositionIds = UnitPosition::whereHas('location', function ($q) use ($area_id) {
+            $q->where('area_id', $area_id);
+        })->pluck('id', 'id');
+
+        if ($unitPositionIds->isEmpty()) {
+            return response()->json(['success' => true, 'units' => []]);
+        }
+
+        $query = DailyReport::whereIn('unit_position_id', $unitPositionIds);
+
+        if ($date = $request->query('date')) {
+            $query->where('date', $date);
+        } elseif ($start = $request->query('start')) {
+            $end = $request->query('end') ?: $start;
+            $query->whereBetween('date', [$start, $end]);
+        } elseif ($month = $request->query('month')) {
+            if (!preg_match('/^\d{4}-\d{2}$/', $month)) {
+                return response()->json(['success' => false, 'message' => 'Invalid month format, expected YYYY-MM'], 422);
+            }
+            $query->where('date', 'like', $month . '%');
+        }
+
+        // Kelompokkan report per unit_position_id dalam 1 query, bukan query terpisah per unit
+        $reportsByUnit = $query->get(['unit_position_id', 'data'])
+            ->groupBy('unit_position_id');
+
+        // Ambil nama unit + client_id sekaligus (1 query), bukan N query
+        $unitPositions = UnitPosition::whereIn('id', $unitPositionIds)
+            ->with(['unit:unit_id,unit', 'client:client_id'])
+            ->get(['id', 'unit_id', 'client_id']);
+
+        // Ambil semua unitSetting (satuan) yang relevan sekaligus (1 query), bukan N query
+        $clientIds = $unitPositions->pluck('client_id')->filter()->unique();
+        $satuanByClient = DailyReportSettings::whereIn('client_id', $clientIds)
+            ->pluck('unitSetting', 'client_id');
+
+        $units = $unitPositions->map(function ($pos) use ($reportsByUnit, $satuanByClient) {
+            return [
+                'unit_position_id' => $pos->id,
+                'unit' => $pos->unit?->unit,
+                'data' => ($reportsByUnit->get($pos->id) ?? collect())->pluck('data')->values(),
+                'satuan' => $satuanByClient->get($pos->client_id) ?? [],
+            ];
+        })->values();
+
+        return response()->json(['success' => true, 'units' => $units]);
+    }
 
 }

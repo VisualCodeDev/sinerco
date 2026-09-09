@@ -21,6 +21,8 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     const [loading, setLoading] = useState(false);
     const [errors, setErrors] = useState({});
     const [unitData, setUnitData] = useState([]);
+    const [remarkList, setRemarkList] = useState([]);
+    const [showRemarkSuggestions, setShowRemarkSuggestions] = useState(false);
     const { addToast } = useToast();
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,6 +78,11 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         setUnitData(response.data);
     };
 
+    const fetchRemarkList = async () => {
+        const response = await axios.get(route("remark.list.get"));
+        setRemarkList(response.data || []);
+    };
+
     const fetchTime = async () => {
         setLoading(true);
         const dataDateTime = await getCurrDateTime(
@@ -93,8 +100,16 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         if (showModal && unitData) {
             fetchTime();
             fetchDataUnit();
+            fetchRemarkList();
         }
     }, [showModal]);
+
+    // Saring daftar remark berdasarkan teks yang sedang diketik (case-insensitive)
+    const filteredRemarkList = (data.remarks || "").trim() === ""
+        ? remarkList
+        : remarkList.filter((item) =>
+              item.toLowerCase().includes(data.remarks.trim().toLowerCase()),
+          );
 
     useEffect(() => {
         const areaLocation = unitData.find(
@@ -245,20 +260,66 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     Remarks
                                 </label>
 
-                                <textarea
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[120px]"
-                                    required
-                                    id="remarks"
-                                    name="remarks"
-                                    placeholder="Write remarks here..."
-                                    value={data.remarks || ""}
-                                    onChange={(e) =>
-                                        handleChange(
-                                            [e.target.name],
-                                            e.target.value,
-                                        )
-                                    }
-                                />
+                                <div className="relative">
+                                    <textarea
+                                        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[120px]"
+                                        required
+                                        id="remarks"
+                                        name="remarks"
+                                        placeholder="Write remarks here..."
+                                        autoComplete="off"
+                                        value={data.remarks || ""}
+                                        onFocus={() =>
+                                            setShowRemarkSuggestions(true)
+                                        }
+                                        onBlur={() =>
+                                            // delay supaya klik item suggestion sempat kedaftar sebelum ditutup
+                                            setTimeout(
+                                                () =>
+                                                    setShowRemarkSuggestions(
+                                                        false,
+                                                    ),
+                                                150,
+                                            )
+                                        }
+                                        onChange={(e) => {
+                                            handleChange(
+                                                [e.target.name],
+                                                e.target.value,
+                                            );
+                                            setShowRemarkSuggestions(true);
+                                        }}
+                                    />
+
+                                    {showRemarkSuggestions &&
+                                        filteredRemarkList.length > 0 && (
+                                            <ul className="absolute z-10 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-300 bg-white shadow-lg">
+                                                {filteredRemarkList
+                                                    .slice(0, 8)
+                                                    .map((item, index) => (
+                                                        <li key={index}>
+                                                            <button
+                                                                type="button"
+                                                                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                                                onClick={() => {
+                                                                    handleChange(
+                                                                        [
+                                                                            "remarks",
+                                                                        ],
+                                                                        item,
+                                                                    );
+                                                                    setShowRemarkSuggestions(
+                                                                        false,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                {item}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                        )}
+                                </div>
 
                                 {errors.remarks && (
                                     <p className="text-red-500 text-sm mt-2">
@@ -275,7 +336,7 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                 <button
                                     type="button"
                                     onClick={handleCloseModal}
-                                    className="px-5 py-2.5 rounded-xl bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                                    className="px-5 py-2.5 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-all duration-200"
                                 >
                                     Cancel
                                 </button>

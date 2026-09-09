@@ -65,10 +65,45 @@ export const getAllUnits = async () => {
     return data;
 };
 
+export const getAreas = async () => {
+    let data;
+    try {
+        const response = await fetch(route("areas.get"));
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        data = await response.json();
+    } catch (error) {
+        console.error("Gagal ambil data:", error);
+    }
+
+    return data;
+};
+
 export const getUnitReports = async (unit_position_id, params = {}) => {
     try {
         const response = await fetch(
             route("unit.position.report.get", { unit_position_id, ...params }),
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Gagal ambil data:", error);
+        return null;
+    }
+};
+
+// Ambil laporan semua unit dalam 1 area sekaligus (1 request), dipakai untuk chart mode Area
+export const getAreaReports = async (area_id, params = {}) => {
+    try {
+        const response = await fetch(
+            route("area.position.report.get", { area_id, ...params }),
         );
 
         if (!response.ok) {

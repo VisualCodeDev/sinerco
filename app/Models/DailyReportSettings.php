@@ -14,7 +14,8 @@ class DailyReportSettings extends Model
         'decimalSetting',
         'minMaxSetting',
         'unitSetting',
-        'thresholdSetting'
+        'thresholdSetting',
+        'performanceFixedValue'
     ];
 
     // Kolom JSON di-cast otomatis jadi array

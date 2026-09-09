@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Curve;
 use App\Models\DailyReport;
+use App\Models\DailyReportSettings;
 use App\Models\DataUnit;
 use App\Models\StatusRequest;
 use App\Models\UnitField;
@@ -17,6 +18,34 @@ use Log;
 
 class DailyReportController extends Controller
 {
+    // Cek apakah user yang login boleh mengakses unit_position_id ini (super_admin selalu boleh)
+    private function userCanAccessUnitPosition($user, $unitPositionId): bool
+    {
+        if (($user?->roleData?->name ?? null) === 'super_admin') {
+            return true;
+        }
+        return UserSetting::where('user_id', $user->user_id)
+            ->where('unit_position_id', $unitPositionId)
+            ->exists();
+    }
+
+    // Hitung performance & performance_24h.
+    // performance_24h dibagi curve_24h seperti biasa, KECUALI client punya performanceFixedValue
+    // di setting-nya -- kalau diisi, itu yang dipakai sebagai pembagi, bukan curve_24h.
+    private function calculatePerformance($unitPosition, ?float $curveValue, ?float $curve24h, float $flowrate): array
+    {
+        $performance = $curveValue ? $flowrate / $curveValue * 100 : null;
+
+        $performanceFixedValue = $unitPosition?->client_id
+            ? DailyReportSettings::where('client_id', $unitPosition->client_id)->value('performanceFixedValue')
+            : null;
+        // 0/null/kosong dianggap "belum di-set" -> tetap pakai curve_24h, bukan dibagi 0
+        $performanceDivisor = $performanceFixedValue > 0 ? (float) $performanceFixedValue : $curve24h;
+        $performance24h = $performanceDivisor ? $flowrate / $performanceDivisor * 100 : null;
+
+        return [$performance, $performance24h];
+    }
+
     // Mengambil data laporan harian sebuah unit beserta field yang perlu ditampilkan
     public function getDailyReport(Request $request)
     {
@@ -138,6 +167,11 @@ class DailyReportController extends Controller
             return response()->json(['type' => 'error', 'text' => 'You are not authorized to fill this report.'], 403);
         }
 
+        // Pastikan user memang ditugaskan ke unit ini, bukan sekadar punya role yang tepat
+        if (!$this->userCanAccessUnitPosition(auth()->user(), $unit_position_id)) {
+            return response()->json(['type' => 'error', 'text' => 'You are not assigned to this unit.'], 403);
+        }
+
         if (!$unit_position_id) {
             return response()->json(['type' => 'error', 'text' => 'Unit position ID tidak ditemukan.']);
         }
@@ -167,7 +201,8 @@ class DailyReportController extends Controller
 
         // Hitung nilai curve berdasarkan tekanan suction & discharge jika ada
         if (isset($validated['suction_press'], $validated['discharge_press'])) {
-            $unit = UnitPosition::find($unit_position_id)?->unit;
+            $unitPosition = UnitPosition::find($unit_position_id);
+            $unit = $unitPosition?->unit;
             $curveValue = Curve::interpolate(
                 (float) $validated['suction_press'],
                 (float) $validated['discharge_press'],
@@ -178,6 +213,12 @@ class DailyReportController extends Controller
             $validated['curve_24h'] = $curveValue === null
                 ? null
                 : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+            [$validated['performance'], $validated['performance_24h']] = $this->calculatePerformance(
+                $unitPosition,
+                $curveValue,
+                $validated['curve_24h'],
+                (float) ($validated['flowrate'] ?? 0)
+            );
         }
 
         // Hitung jam sebelumnya
@@ -194,7 +235,8 @@ class DailyReportController extends Controller
 
         // Cek warning dari input
         // Jika ada warning dari input, kirim notifikasi WhatsApp ke pekerja terkait unit
-        $warnings = collect($request->input('warn', []))->filter();
+        // Frontend mengirim warning di dalam data.warn, bukan warn di level atas
+        $warnings = collect($request->input('data.warn', []))->filter();
         if ($warnings->isNotEmpty()) {
             $unit = UnitPosition::with('unit')->findOrFail($unit_position_id);
             $warningMessage = "{$validated['date']},\n📍Unit: {$unit->unit->unit}:\n";
@@ -216,7 +258,6 @@ class DailyReportController extends Controller
             if (!empty($numbers)) {
                 WhatsAppService::sendMessage($numbers, $warningMessage);
             }
-            // WhatsAppService::sendMessage('081281995158', $warningMessage);
         }
         try {
             // Simpan laporan harian baru, data field disimpan sebagai JSON
@@ -224,7 +265,8 @@ class DailyReportController extends Controller
             $report->unit_position_id = $unit_position_id;
             $report->date = $validated['date'];
             $report->time = $validated['time'];
-            $report->data = json_encode($validated);
+            // Model sudah cast 'data' ke array, jangan json_encode manual (double-encode)
+            $report->data = $validated;
             // if ($statusRequest) {
             //     $report->request_id = $statusRequest->request_id;
             // }
@@ -284,10 +326,17 @@ class DailyReportController extends Controller
         $report = !empty($val['id']) ? DailyReport::find($val['id']) : null;
         Log::debug($request->unit_position_id);
 
+        // Pastikan user memang ditugaskan ke unit yang mau diedit/dibuat
+        $targetUnitPositionId = $report->unit_position_id ?? $request->unit_position_id;
+        if (!$this->userCanAccessUnitPosition(auth()->user(), $targetUnitPositionId)) {
+            return response()->json(['type' => 'error', 'text' => 'You are not assigned to this unit.'], 403);
+        }
+
         // Hitung ulang curve jika data tekanan suction/discharge diubah
         if (isset($val['suction_press'], $val['discharge_press'])) {
             $unitPositionId = $report->unit_position_id ?? $request->unit_position_id;
-            $unit = UnitPosition::find($unitPositionId)?->unit;
+            $unitPosition = UnitPosition::find($unitPositionId);
+            $unit = $unitPosition?->unit;
             $curveValue = Curve::interpolate(
                 (float) $val['suction_press'],
                 (float) $val['discharge_press'],
@@ -297,11 +346,17 @@ class DailyReportController extends Controller
             $val['curve_24h'] = $curveValue === null
                 ? null
                 : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+            [$val['performance'], $val['performance_24h']] = $this->calculatePerformance(
+                $unitPosition,
+                $curveValue,
+                $val['curve_24h'],
+                (float) ($val['flowrate'] ?? 0)
+            );
         }
         if ($report) {
             // 📝 Update data lama
             $report->update([
-                'data' => json_encode($val),
+                'data' => $val,
                 'time' => $val['time'],
                 'date' => $val['date'],
             ]);
@@ -312,7 +367,7 @@ class DailyReportController extends Controller
                 'unit_position_id' => $request->unit_position_id,
                 'date' => $val['date'],
                 'time' => $val['time'],
-                'data' => json_encode($val),
+                'data' => $val,
             ]);
             $message = 'Report created successfully';
         }
@@ -417,27 +472,38 @@ class DailyReportController extends Controller
 
         $rows = [];
 
+        // Field default (nilai 0) yang disimpan di dalam kolom JSON 'data'
+        $defaultFields = [
+            'sourcePress' => 0,
+            'suctionPress' => 0,
+            'dischargePress' => 0,
+            'speed' => 0,
+            'manifoldPress' => 0,
+            'oilPress' => 0,
+            'oilDiff' => 0,
+            'runningHours' => 0,
+            'voltage' => 0,
+            'waterTemp' => 0,
+            'befCooler' => 0,
+            'aftCooler' => 0,
+            'staticPress' => 0,
+            'diffPress' => 0,
+            'mscfd' => 0,
+        ];
+
         // Bangun baris data default (nilai 0) untuk setiap jam yang hilang
+        // Tabel daily_reports cuma punya kolom 'data' (JSON), bukan kolom per-field,
+        // dan insert() ini raw query builder (bukan lewat Eloquent) sehingga cast
+        // 'array' di model tidak berlaku otomatis -- harus json_encode manual di sini.
         foreach ($val['missingHours'] as $time) {
             $rows[] = [
                 'unit_position_id' => $val['unit_position_id'],
                 'date' => $val['date'],
                 'time' => $time,
-                'sourcePress' => 0,
-                'suctionPress' => 0,
-                'dischargePress' => 0,
-                'speed' => 0,
-                'manifoldPress' => 0,
-                'oilPress' => 0,
-                'oilDiff' => 0,
-                'runningHours' => 0,
-                'voltage' => 0,
-                'waterTemp' => 0,
-                'befCooler' => 0,
-                'aftCooler' => 0,
-                'staticPress' => 0,
-                'diffPress' => 0,
-                'mscfd' => 0,
+                'data' => json_encode(array_merge($defaultFields, [
+                    'date' => $val['date'],
+                    'time' => $time,
+                ])),
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

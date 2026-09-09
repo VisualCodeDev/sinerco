@@ -16,7 +16,7 @@ export default function UserInfo({ data, onSave, roleData }) {
     const labelStyle = "text-sm font-medium text-zinc-700";
     const inputBaseStyle =
         "w-full px-3 py-2 rounded-md border text-sm transition";
-    const inputReadOnly = "bg-zinc-100 border-primary text-zinc-500";
+    const inputReadOnly = "bg-zinc-100 border-primary text-zinc-700";
     const inputEditable =
         "border-primary focus:border-black focus:ring-1 focus:ring-blue-500 bg-white";
 
@@ -58,7 +58,7 @@ export default function UserInfo({ data, onSave, roleData }) {
                     disabled={!isEditing}
                 >
                     {roleData?.map((item, index) => (
-                        <option value={item?.id}>
+                        <option key={item?.id} value={item?.id}>
                             {splitCamelCase(item?.name)}
                         </option>
                     ))}
@@ -83,13 +83,13 @@ export default function UserInfo({ data, onSave, roleData }) {
                     <>
                         <button
                             onClick={() => setIsEditing(false)}
-                            className="px-4 py-1.5 text-sm rounded border border-primary text-zinc-700 hover:bg-zinc-100 transition"
+                            className="px-4 py-1.5 text-sm rounded border border-primary bg-white text-zinc-700 hover:bg-zinc-100 transition"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleSave}
-                            className="px-4 py-1.5 text-sm rounded bg-primary text-white hover:bg-blue-900 transition"
+                            className="px-4 py-1.5 text-sm rounded border border-transparent bg-primary text-white hover:bg-blue-900 transition"
                         >
                             Save
                         </button>
@@ -97,7 +97,7 @@ export default function UserInfo({ data, onSave, roleData }) {
                 ) : (
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="px-4 py-1.5 text-sm rounded bg-primary text-white hover:bg-blue-900 transition"
+                        className="px-4 py-1.5 text-sm rounded border border-transparent bg-primary text-white hover:bg-blue-900 transition"
                     >
                         Edit
                     </button>

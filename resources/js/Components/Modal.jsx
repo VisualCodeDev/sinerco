@@ -38,12 +38,14 @@ const Modal = (props) => {
                                 </h2>
                             </div>
                             <div className="text-xl font-bold w-fit text-end">
-                                <span
+                                <button
+                                    type="button"
                                     onClick={handleCloseModal}
-                                    className="cursor-pointer"
+                                    aria-label="Close modal"
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/20 transition"
                                 >
                                     🞩
-                                </span>
+                                </button>
                             </div>
                         </div>
                         <div className="overflow-auto">{props.children}</div>

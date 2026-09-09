@@ -197,7 +197,7 @@ const DailyReportForm = (props) => {
                         ))}
                     </div>
                     <div className="mb-32 md:mb-0 flex place-self-center w-fit mt-10 items-center justify-center gap-2 bg-secondary/90 hover:bg-secondary text-white py-2 px-8 rounded-full transition ease-in-out delay-75 hover:scale-95">
-                        <button className="font-semibold w-full h-full">
+                        <button className="font-semibold w-full h-full border border-transparent bg-secondary rounded-full">
                             Simpan
                         </button>
                     </div>
@@ -292,7 +292,12 @@ const ConfirmationModal = (props) => {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <button onClick={handleSubmit}>Submit</button>
+                <button
+                    onClick={handleSubmit}
+                    className="px-4 py-1.5 rounded border border-transparent bg-primary text-white hover:opacity-90"
+                >
+                    Submit
+                </button>
             </Modal.Footer>
         </Modal>
     );

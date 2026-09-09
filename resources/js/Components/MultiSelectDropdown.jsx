@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 
 export default function MultiSelectDropdown({
+    name,
     options,
     selected,
     setSelected,
@@ -36,13 +37,13 @@ export default function MultiSelectDropdown({
         <div className="relative w-full" ref={dropdownRef}>
             <div
                 className="border rounded w-full min-h-[48px] flex items-center flex-wrap gap-1 cursor-text bg-white px-3 py-2"
-                onClick={() => setIsOpen(!isOpen)}
+                onBlur={() => setIsOpen(false)}
             >
                 {selected.length === 0 && (
                     <input
                         onClick={() => setIsOpen(true)}
                         className="text-gray-700 outline-none border-none ring-0 focus:outline-none focus:ring-0 flex-1"
-                        placeholder="Select clients..."
+                        placeholder={`Select ${name ? name : 'clients'}...`}
                         type="text"
                         value={searchTerm}
                         onChange={(e) => {
@@ -59,7 +60,10 @@ export default function MultiSelectDropdown({
                             <span
                                 key={value}
                                 className="bg-primary text-white text-sm px-3 py-1.5 rounded-full cursor-pointer"
-                                onClick={(e) => {
+                                onMouseDown={(e) => {
+                                    // mousedown lebih dulu daripada blur, supaya klik tidak "hilang"
+                                    // saat input kehilangan fokus dan dropdown ke-unmount duluan
+                                    e.preventDefault();
                                     e.stopPropagation();
                                     toggleOption(value);
                                 }}
@@ -99,7 +103,10 @@ export default function MultiSelectDropdown({
                                         ? "bg-blue-50"
                                         : ""
                                 }`}
-                                onClick={() => {
+                                onMouseDown={(e) => {
+                                    // mousedown lebih dulu daripada blur, supaya klik tidak "hilang"
+                                    // saat input kehilangan fokus dan dropdown ke-unmount duluan
+                                    e.preventDefault();
                                     toggleOption(opt.value);
                                     setSearchTerm("");
                                 }}

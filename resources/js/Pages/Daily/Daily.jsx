@@ -59,7 +59,9 @@ export default function Dashboard({ unit_position_id }) {
             key: "unit_information",
             label: "Unit Information",
             icon: <BsGear className="mr-2" />,
-            condition: user?.role === "super_admin",
+            condition: user?.role === "technician" ||
+                user?.role === "super_admin" ||
+                user?.role === "operator",
         },
         {
             key: "report",
@@ -76,12 +78,7 @@ export default function Dashboard({ unit_position_id }) {
                 user?.role === "super_admin" ||
                 user?.role === "operator",
         },
-        {
-            key: "data_unit",
-            label: "Data Unit",
-            icon: <FaRegCalendarAlt className="mr-2" />,
-            condition: true,
-        },
+      
         {
             key: "gasComposition",
             label: "Gas Composition",
@@ -307,7 +304,7 @@ export default function Dashboard({ unit_position_id }) {
                                     >
                                         {icon}
                                         <button
-                                            className={`py-2 font-semibold ${
+                                            className={`py-2 font-semibold border border-transparent bg-transparent ${
                                                 activeTab === key
                                                     ? ""
                                                     : "text-gray-500"
@@ -325,8 +322,8 @@ export default function Dashboard({ unit_position_id }) {
                     <div className="flex flex-col border-t-2 border-t-primary shadow-xl">
                         {unitData && (
                             <>
-                                <div className="text-center w-full flex flex-col items-center lg:md:gap-1 gap-1 lg:md:py-8 py-6 bg-primary text-white">
-                                    <div className="text-xl lg:md:text-2xl font-bold bg-primary flex justify-center items-center">
+                                <div className="text-center w-full flex flex-col items-center md:gap-1 gap-1 md:py-8 py-6 bg-primary text-white">
+                                    <div className="text-xl md:text-2xl font-bold bg-primary flex justify-center items-center">
                                         <div
                                             className="cursor-pointer flex items-center gap-2  relative"
                                             onClick={() =>
@@ -347,7 +344,7 @@ export default function Dashboard({ unit_position_id }) {
                                                 <FaAngleDown />
                                             )}
                                             <div
-                                                className={`absolute z-[100] bg-white text-gray-400 font-semibold text-start text-base w-full top-10 left-0 max-h-[20vh] overflow-y-auto ${
+                                                className={`absolute z-[100] bg-white text-gray-400 font-semibold text-start text-base w-full min-w-[250px] top-10 left-0 max-h-[20vh] overflow-y-auto ${
                                                     expanded
                                                         ? "block"
                                                         : "hidden"
@@ -357,7 +354,9 @@ export default function Dashboard({ unit_position_id }) {
                                                     allUnits?.length > 0 &&
                                                     allUnits?.map((item) => (
                                                         <div
-                                                            className="py-1 px-2 flex items-center justify-between text-xs"
+                                                            className="py-2 px-2 flex items-center justify-between text-xs cursor-pointer"
+                                                            role="button"
+                                                            tabIndex={0}
                                                             onClick={() =>
                                                                 router.visit(
                                                                     route(
@@ -382,10 +381,10 @@ export default function Dashboard({ unit_position_id }) {
                                     </div>
 
                                     <div className="">
-                                        <p className="lg:md:text-base text-xs font-semibold">
+                                        <p className="md:text-base text-xs font-semibold">
                                             {unitData?.area}
                                         </p>
-                                        <p className="lg:md:text-sm text-xs m-0 p-0">
+                                        <p className="md:text-sm text-xs m-0 p-0">
                                             {unitData.location}
                                         </p>
                                     </div>
@@ -432,10 +431,6 @@ export default function Dashboard({ unit_position_id }) {
                                 unitData={unitData}
                                 user={user}
                             />
-                        )}
-
-                        {activeTab === "data_unit" && (
-                            <UnitTable data={allUnits} />
                         )}
                     </div>
                 </div>

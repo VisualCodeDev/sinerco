@@ -25,13 +25,13 @@ const Carousel = (props) => {
 
             <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black"
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black border border-gray-300 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm"
             >
                 ◀
             </button>
             <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-black border border-gray-300 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-sm"
             >
                 ▶
             </button>

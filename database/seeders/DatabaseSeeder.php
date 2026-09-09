@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             DailyReportSettingSeeder::class,
             // SettingSeeder::class,
             CurveSeeder::class,
+            RemarkListSeeder::class,
         ]);
 
         // User::factory()->create([

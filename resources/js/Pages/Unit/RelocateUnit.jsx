@@ -156,7 +156,7 @@ const RelocateUnit = () => {
                     <button
                         onClick={handleSubmit}
                         disabled={!unitId || !locationId || saving}
-                        className="mt-2 bg-primary text-white py-2 rounded-md hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="mt-2 border border-transparent bg-primary text-white py-2 rounded-md hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {saving ? "Relocating..." : "Relocate"}
                     </button>

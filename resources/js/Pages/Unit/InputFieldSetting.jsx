@@ -36,7 +36,7 @@ const InputFieldSetting = () => {
             {loading && <LoadingSpinner />}
             <div className="flex gap-5">
                 {/* Left side */}
-                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
+                <div className="md:w-1/3 w-full bg-white shadow-md rounded-lg p-10 space-y-2 hidden md:block">
                     <div className="flex flex-row items-center gap-3 mb-6 text-lg md:text-xl font-semibold">
                         <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                             <IoDocumentText className="text-2xl md:text-3xl" />
@@ -50,7 +50,7 @@ const InputFieldSetting = () => {
                             <button
                                 key={item?.id}
                                 onClick={() => setSelectedField(item)}
-                                className={`w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                className={`w-full text-left px-4 py-2 rounded-md border border-gray-300 hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
                                     selectedField?.id === item?.id
                                         ? "bg-blue-100"
                                         : "bg-gray-100"
@@ -63,7 +63,7 @@ const InputFieldSetting = () => {
                 </div>
 
                 {/* Right side */}
-                <div className="md:w-2/3 w-full bg-white shadow-lg rounded-2xl p-8 space-y-4 hidden lg:block transition-all duration-300">
+                <div className="md:w-2/3 w-full bg-white shadow-lg rounded-2xl p-8 space-y-4 hidden md:block transition-all duration-300">
                     <div className="flex items-center gap-3 mb-6">
                         <div className="bg-blue-50 text-primary p-2 rounded-xl shadow-sm">
                             <IoDocumentText className="text-3xl" />

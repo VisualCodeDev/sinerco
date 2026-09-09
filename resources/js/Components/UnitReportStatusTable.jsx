@@ -27,20 +27,17 @@ const UnitReportStatusTable = () => {
     return (
         <div className="bg-white border border-[#dadee3] rounded-2xl shadow-sm overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-[#eceff3]">
+            <div className="flex items-center justify-between px-6 py-2 border-b border-[#eceff3] bg-primary text-white">
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        Unit Report Status
+                    <h2 className="text-sm font-semibold">
+                        REPORT STATUS
                     </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Monitor latest submitted reports from all units
-                    </p>
                 </div>
 
                 <button
                     onClick={fetchReports}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:opacity-90 transition-all disabled:opacity-60"
+                    className="flex items-center gap-2 px-4 py-2 border border-transparent bg-white text-black rounded-xl hover:opacity-90 transition-all disabled:opacity-60"
                 >
                     <BiRefresh/>
                     {loading ? "Refreshing..." : "Refresh"}
@@ -49,7 +46,7 @@ const UnitReportStatusTable = () => {
 
             {/* Table */}
             <div className="overflow-auto max-h-[450px]">
-                <table className="w-full text-sm text-left">
+                <table className="w-full min-w-[600px] text-sm text-left border-collapse [&_th]:border [&_th]:border-[#eceff3] [&_td]:border [&_td]:border-[#eceff3]">
                     <thead className="sticky top-0 bg-[#f8fafc] border-b border-[#eceff3] z-1">
                         <tr className="text-gray-500 uppercase text-xs tracking-wider">
                             <th className="px-6 py-4 font-semibold">Unit</th>

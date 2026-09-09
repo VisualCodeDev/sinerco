@@ -12,7 +12,6 @@ import { Button } from "@headlessui/react";
 import TableComponent from "../TableComponent";
 import { router } from "@inertiajs/react";
 import LoadingSpinner from "../Loading";
-import { fetch } from "../utils/database-util";
 import { useAuth } from "../Auth/auth";
 import Modal from "../Modal";
 import InputValidationSetting from "@/Pages/Unit/InputValidationSetting";
@@ -47,6 +46,33 @@ const UnitTable = (props) => {
         setUnitData(data);
     }, [data]);
 
+    // Standalone mode (no `data` prop, e.g. used as a tab with no Inertia page
+    // props): fetch the permitted unit list ourselves and feed it into the
+    // same `unitData` state the props-driven path uses, so every other effect
+    // and the actual table render (which reads `formData.data`, built from
+    // `unitData`) picks it up the same way.
+    const [selfFetchLoading, setSelfFetchLoading] = useState(!propsData);
+    const [selfFetchError, setSelfFetchError] = useState(null);
+    useEffect(() => {
+        if (propsData) return;
+        let ignore = false;
+        (async () => {
+            try {
+                const resp = await axios.get(route("unit.get"));
+                if (!ignore) setUnitData(resp.data || []);
+            } catch (err) {
+                if (!ignore) setSelfFetchError(err);
+            } finally {
+                if (!ignore) setSelfFetchLoading(false);
+            }
+        })();
+        return () => {
+            ignore = true;
+        };
+        // Only ever run once on mount for the standalone path.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const [visibilitySetting, setVisibilitySetting] = useState(null);
     const [curvePercentage, setCurvePercentage] = useState(null);
@@ -71,7 +97,10 @@ const UnitTable = (props) => {
         }));
 
     useEffect(() => {
-        setFormData((prev) => ({ ...prev, data: formatRows(data) }));
+        // Build from `unitData` (not `data`/`propsData`), since `unitData` is what
+        // actually gets updated -- by our self-fetch below in standalone mode, and
+        // by handleSaveRow's local merge after an inline edit is saved.
+        setFormData((prev) => ({ ...prev, data: formatRows(unitData) }));
     }, [unitData, edit, bulkEdit]);
 
     // The page prop is only the current server-paginated slice, so a plain
@@ -114,6 +143,53 @@ const UnitTable = (props) => {
         fetchLookups();
     }, [edit]);
 
+    // Sentinel id for a not-yet-saved draft row inserted by "Add Unit" (see
+    // handleAddRow below) -- lets the same inline-edit cells/Save button used
+    // for existing rows double as the "create new unit" form, instead of
+    // navigating to a separate page.
+    const NEW_UNIT_ID = "__new_unit__";
+
+    const handleAddRow = () => {
+        if ((unitData || []).some((u) => u.unit_id === NEW_UNIT_ID)) return;
+        setEdit(true);
+        setUnitData((prev) => [
+            {
+                unit_id: NEW_UNIT_ID,
+                unit: "",
+                unit_sn: "",
+                old_sn: "",
+                region_id: "",
+                region: "",
+                client_id: "",
+                client: "",
+                area_id: "",
+                area: "",
+                location_id: "",
+                location: "",
+                status: "running",
+            },
+            ...(prev || []),
+        ]);
+    };
+
+    // Wraps setEdit so turning edit mode OFF also discards any unsaved draft
+    // row from "Add Unit" -- otherwise it'd linger in the list unsaved.
+    const handleToggleEdit = () => {
+        setEdit((prev) => {
+            if (prev) handleCancelNewRow();
+            return !prev;
+        });
+    };
+
+    const handleCancelNewRow = () => {
+        setUnitData((prev) => (prev || []).filter((u) => u.unit_id !== NEW_UNIT_ID));
+        setFormData((prev) => {
+            const newEdits = { ...prev.edits };
+            delete newEdits[NEW_UNIT_ID];
+            return { ...prev, edits: newEdits };
+        });
+    };
+
     const handleFieldChange = (unit_id, field, value) => {
         setFormData((prev) => {
             const current = { ...(prev.edits?.[unit_id] || {}) };
@@ -128,7 +204,44 @@ const UnitTable = (props) => {
         });
     };
 
+    const handleCreateRow = async () => {
+        const edits = formData?.edits?.[NEW_UNIT_ID] || {};
+        if (!edits.unit || !edits.client_id || !edits.area_id || !edits.location_id) {
+            addToast({
+                type: "error",
+                text: "Unit name, Client, Area, and Location are required.",
+            });
+            return;
+        }
+        try {
+            const resp = await axios.post(route("unit.add"), {
+                unit: edits.unit,
+                status: edits.status || "running",
+                position_type: "client",
+                client_id: edits.client_id,
+                area_id: edits.area_id,
+                location_id: edits.location_id,
+            });
+            addToast(resp?.data);
+            handleCancelNewRow();
+            // The create endpoint doesn't return the new row's flat shape
+            // (client/area/location names etc.), so just refetch the list.
+            const fresh = await axios.get(route("unit.get"));
+            setUnitData(fresh.data || []);
+        } catch (e) {
+            console.error(e);
+            const firstError = Object.values(e?.response?.data?.errors || {})[0]?.[0];
+            addToast({
+                type: "error",
+                text: firstError || e?.response?.data?.message || "Failed to add unit.",
+            });
+        }
+    };
+
     const handleSaveRow = async (unit_id) => {
+        if (unit_id === NEW_UNIT_ID) {
+            return handleCreateRow();
+        }
         const edits = formData?.edits?.[unit_id];
         if (!edits) return;
         try {
@@ -186,8 +299,12 @@ const UnitTable = (props) => {
     };
 
     useEffect(() => {
+        // `data` is only guaranteed when this component is given props (e.g. from
+        // DailyList.jsx's server-paginated page) -- when it self-fetches (no props,
+        // see the `!propsData` branch below) `data` is undefined until then.
+        const safeData = unitData || [];
         setThresholdSetting(
-            data.find(
+            safeData.find(
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
@@ -195,7 +312,7 @@ const UnitTable = (props) => {
             )?.thresholdSetting || null,
         );
         setVisibilitySetting(
-            data.find(
+            safeData.find(
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
@@ -203,7 +320,7 @@ const UnitTable = (props) => {
             )?.visibilitySetting || null,
         );
         setCurvePercentage(
-            data.find(
+            safeData.find(
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
@@ -226,7 +343,8 @@ const UnitTable = (props) => {
     };
 
     const handleSelectAll = () => {
-        if (formData.selectedRows.length === data.length) {
+        const safeData = unitData || [];
+        if (formData.selectedRows.length === safeData.length) {
             // Unselect all
             setFormData((prev) => ({
                 ...prev,
@@ -238,9 +356,9 @@ const UnitTable = (props) => {
             // Select all
             setFormData((prev) => ({
                 ...prev,
-                selectedRows: data.map((item) => item.unit_id),
-                selectedUnits: data.map((item) => item.unit),
-                selectedUnitPositions: data.map(
+                selectedRows: safeData.map((item) => item.unit_id),
+                selectedUnits: safeData.map((item) => item.unit),
+                selectedUnitPositions: safeData.map(
                     (item) => item.unit_position_id,
                 ),
             }));
@@ -309,33 +427,54 @@ const UnitTable = (props) => {
     };
 
     if (!propsData) {
-        const { data, loading, error } = fetch("unit.get");
-        if (loading) {
+        if (selfFetchLoading) {
             return <LoadingSpinner />;
         }
-        if (error) return <div>Error: {error.message}</div>;
+        if (selfFetchError) {
+            return <div>Error: {selfFetchError.message}</div>;
+        }
         return (
-            <TableComponent
-                handleSubmit={handleSubmit}
-                isUnitList={true}
-                filterStatus={true}
-                data={formData?.data}
-                columns={columns}
-                title={"List of Unit"}
-                // onRowClick={handleClick}
-                onRowClick={bulkEdit ? onSelect : edit ? undefined : handleClick}
-                addNewItem={true}
-                toggleEdit={
-                    user?.role === "super_admin" ? () => setEdit(!edit) : undefined
-                }
-                edit={edit}
-                secondaryAction={{
-                    label: "Bulk Settings",
-                    activeLabel: "Done",
-                    active: bulkEdit,
-                    onClick: () => setBulkEdit((prev) => !prev),
-                }}
-            />
+            <>
+                <TableComponent
+                    handleSubmit={handleSubmit}
+                    isUnitList={true}
+                    filterStatus={true}
+                    data={formData?.data}
+                    columns={columns}
+                    title={"List of Unit"}
+                    // onRowClick={handleClick}
+                    onRowClick={bulkEdit ? onSelect : edit ? undefined : handleClick}
+                    addNewItem={true}
+                    handleNew={handleAddRow}
+                    toggleEdit={
+                        user?.role === "super_admin" ? handleToggleEdit : undefined
+                    }
+                    edit={edit}
+                    secondaryAction={{
+                        label: "Bulk Settings",
+                        activeLabel: "Done",
+                        active: bulkEdit,
+                        onClick: () => setBulkEdit((prev) => !prev),
+                    }}
+                />
+                <SettingModal
+                    data={unitData}
+                    setData={setUnitData}
+                    addToast={addToast}
+                    isModal={isSettingModal}
+                    setIsModal={setIsSettingModal}
+                    unitName={formData?.selectedUnits}
+                    thresholdSetting={thresholdSetting}
+                    visibilitySetting={visibilitySetting}
+                    curvePercentage={curvePercentage}
+                    selectedUnits={formData?.selectedRows}
+                />
+                <ExportModal
+                    isModal={isExportModal}
+                    setIsModal={setExportModal}
+                    selectedUnitPositions={formData?.selectedUnitPositions}
+                />
+            </>
         );
     }
     const searchData = isSearching ? formatRows(allUnitsData || []) : formData?.data;
@@ -379,9 +518,7 @@ const UnitTable = (props) => {
                 onRowClick={bulkEdit ? onSelect : edit ? undefined : handleClick}
                 addNewItem={user && user.role === "super_admin" ? true : false}
                 toggleEdit={
-                    user?.role === "super_admin"
-                        ? () => setEdit((prev) => !prev)
-                        : undefined
+                    user?.role === "super_admin" ? handleToggleEdit : undefined
                 }
                 edit={edit}
                 secondaryAction={{
@@ -390,7 +527,7 @@ const UnitTable = (props) => {
                     active: bulkEdit,
                     onClick: () => setBulkEdit((prev) => !prev),
                 }}
-                handleNew={route("unit.add")}
+                handleNew={handleAddRow}
                 Footer={paginationFooter}
             />
             <SettingModal
@@ -657,7 +794,7 @@ const SettingModal = ({
                         </span>
                     </div>
                     <div className="overflow-y-auto overflow-x-auto w-full max-h-[50vh] rounded-lg border">
-                    <table className="w-full h-full table-auto border-collapse">
+                    <table className="w-full h-full table-auto border-collapse [&_th]:border [&_th]:border-[#3a56b0] [&_td]:border [&_td]:border-gray-200">
                         <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
                             <tr className="sticky top-0">
                                 <th className="font-semibold text-nowrap text-left px-6 py-4 w-[45%]">
@@ -815,7 +952,7 @@ const SettingModal = ({
                                                                         ],
                                                                     )
                                                                 }
-                                                                className="text-red-50 bg-success font-bold px-2 py-1 rounded-lg"
+                                                                className="text-red-50 border border-transparent bg-success font-bold px-2 py-1 rounded-lg"
                                                             >
                                                                 Active
                                                             </button>
@@ -832,7 +969,7 @@ const SettingModal = ({
                                                                         ],
                                                                     )
                                                                 }
-                                                                className="text-red-50 bg-danger font-bold px-2 py-1 rounded-lg"
+                                                                className="text-red-50 border border-transparent bg-danger font-bold px-2 py-1 rounded-lg"
                                                             >
                                                                 Hidden
                                                             </button>
@@ -848,7 +985,7 @@ const SettingModal = ({
                 </div>
                 <div>
                     <button
-                        className="bg-primary text-white px-6 py-3 rounded-lg mt-4 hover:bg-blue-700 transition"
+                        className="border border-transparent bg-primary text-white px-6 py-3 rounded-lg mt-4 hover:bg-blue-700 transition"
                         onClick={() => handleSave()}
                     >
                         Save

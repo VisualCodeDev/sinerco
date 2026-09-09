@@ -67,7 +67,7 @@ const PageLayout = ({ children }) => {
                             {/* Mobile button */}
                             <button
                                 onClick={handleClick}
-                                className={`flex items-center bg-secondary text-white text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out 
+                                className={`flex items-center border border-transparent bg-secondary text-white text-lg rounded-full shadow hover:scale-105 transition delay-75 duration-300 ease-in-out
                                 ${
                                     expanded
                                         ? "w-auto"

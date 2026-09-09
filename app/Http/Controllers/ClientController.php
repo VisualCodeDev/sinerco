@@ -169,17 +169,15 @@ class ClientController extends Controller
             'client_id' => 'required|exists:clients,client_id',
             'updateData' => 'required|array'
         ]);
-        if(!$val) {
-            return response()->json([
-
-            ]);
-        }
 
         // Gabungkan array updateData jadi satu array key-value untuk update
         $updateData = collect($request->updateData)
             ->reduce(function ($carry, $item) {
                 return array_merge($carry, $item);
             }, []);
+
+        // Jangan izinkan mengubah primary key client_id lewat updateData
+        unset($updateData['client_id']);
 
         $client = Client::where('client_id', $request->client_id)->first();
 

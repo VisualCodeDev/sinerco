@@ -8,6 +8,7 @@ import {
     getFormattedDate,
     DateInput,
     TimeInput,
+    DateParser,
 } from "../utils/dashboard-util";
 import Card from "../Card";
 import { useAuth } from "../Auth/auth";
@@ -19,6 +20,8 @@ import axios from "axios";
 import LoadingSpinner from "../Loading";
 import { useToast } from "../Toast/ToastProvider";
 import ExportXlsm from "../utils/DailyReport/exportExcel";
+import { BiLeftArrow, BiRightArrow } from "react-icons/bi";
+import dayjs from "dayjs";
 
 const DailyReport = (props) => {
     const { formData, unitData, user, setSelectedDate, selectedDate, fields } =
@@ -31,10 +34,10 @@ const DailyReport = (props) => {
     const [currData, setCurrData] = useState(null);
     const averages = useMemo(
         () => getAvg(currData, fields),
-        [currData, fields]
+        [currData, fields],
     );
     const prevDateList = getDateLists(currDate);
-    
+
     const sortedObjectByTime = (obj) => {
         const sortedItemByTime = Object.entries(dataAll)
             .map(([, value]) => value)
@@ -61,39 +64,53 @@ const DailyReport = (props) => {
         setSelectedData({ ...data, key: id });
     };
 
+    const handleDateChange = (op) => {
+        let newDate = selectedDate;
+        if (op == "+") {
+            newDate = dayjs(selectedDate).add(1, "day");
+        } else {
+            newDate = dayjs(selectedDate).subtract(1, "day");
+        }
+        setSelectedDate(newDate);
+    };
+
     useEffect(() => {
         setData(formData);
         setCurrData(formData);
     }, [formData]);
     return (
         <div className="bg-white flex flex-col py-10 px-6 md:p-10 overflow-scroll h-full w-full">
-            <div className="flex gap-4 md:gap-6 sticky top-0 left-0 pb-2 w-full z-10 mb-4">
-                <div className="flex gap-2 items-center">
+            <div className="flex items-end gap-4 md:gap-6 mb-4">
+                <div className="flex flex-col gap-2">
                     <p className="font-semibold text-lg">Date:</p>
-                    <input
+                    <div className="flex items-center gap-2">
+                        <div
+                            onClick={() => handleDateChange("-")}
+                            className="text-sm flex justify-center items-center bg-primary rounded-full p-2 text-center text-white cursor-pointer hover:bg-primary/90 duration-75"
+                        >
+                            <BiLeftArrow />
+                        </div>
+                        <span>{DateParser(selectedDate)}</span>
+                        <div
+                            onClick={() => handleDateChange("+")}
+                            className="text-sm flex justify-center items-center bg-primary rounded-full p-2 text-center text-white cursor-pointer hover:bg-primary/90 duration-75"
+                        >
+                            <BiRightArrow />
+                        </div>
+                    </div>
+                    {/* <input
                         className="rounded-full py-1 px-3"
                         type="date"
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                    />
-                    {/* <select
-                        onChange={(e) => handleSelectDate(e)}
-                        value={selectedDate}
-                    >
-                        {prevDateList.map((items, index) => (
-                            <option key={index} value={items}>
-                                {items}
-                            </option>
-                        ))}
-                    </select> */}
+                    /> */}
                 </div>
-                <div className="flex items-center justify-center md:gap-2 bg-secondary/90 hover:bg-secondary text-white px-4 rounded-full transition ease-in-out delay-75 hover:scale-95">
-                    <FaFileExport />
-                    <button onClick={() => setClick(true)}>
-                        {" "}
-                        <p className="md:block hidden">Export</p>
-                    </button>
-                </div>
+                <button
+                    onClick={() => setClick(true)}
+                    className="flex items-center justify-center md:gap-2 bg-secondary/90 hover:bg-secondary text-white px-4 py-2 rounded-full transition ease-in-out delay-75 hover:scale-95"
+                >
+                    <FaFileExport /> <p className="md:block hidden">Export</p>
+                </button>
             </div>
             <div className="overflow-x-auto w-full">
                 <table className="min-w-[900px] w-full table-auto border-collapse">
@@ -143,7 +160,7 @@ const DailyReport = (props) => {
                                     >
                                         {sub.name}
                                     </th>
-                                ))
+                                )),
                             )}
                         </tr>
                     </thead>
@@ -160,7 +177,7 @@ const DailyReport = (props) => {
                                     </td>
                                     {fields
                                         ?.filter(
-                                            (item) => item?.name != "remarks"
+                                            (item) => item?.name != "remarks",
                                         )
                                         .map((item) =>
                                             item?.subfields?.length > 0 ? (
@@ -174,7 +191,7 @@ const DailyReport = (props) => {
                                                 <td className="px-4 py-2 border text-center">
                                                     {value?.[item?.slug] || 0}
                                                 </td>
-                                            )
+                                            ),
                                         )}
                                     <td className="px-4 py-2 border text-center">
                                         {value?.request &&
@@ -213,7 +230,7 @@ const DailyReport = (props) => {
                                         >
                                             {averages[field] || ""}
                                         </th>
-                                    )
+                                    ),
                                 )}
                                 <th className="px-4 py-2 text-sm font-semibold border text-left"></th>
                                 {user?.role === "super_admin" && (
@@ -302,12 +319,12 @@ const ExportModal = (props) => {
 
         return dateArray;
     };
-    
+
     const handleGenerate = async () => {
         try {
             const { start, end } = selectedDate;
             const res = await fetch(
-                `/api/daily-report?id=${unitData.unit_position_id}&start=${start}&end=${end}&unit_id=${unitData.unit_id}`
+                `/api/daily-report?id=${unitData.unit_position_id}&start=${start}&end=${end}&unit_id=${unitData.unit_id}`,
             );
             const data = await res.json();
             const range = getDateRange(start, end);
@@ -319,7 +336,17 @@ const ExportModal = (props) => {
     return (
         <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
             <Card>
-                <Card.Header>Export to Excel</Card.Header>
+                <Card.Header>
+                    <div className="flex items-center justify-between">
+                        Export to Excel
+                        <button
+                            onClick={() => setClick(false)}
+                            className="font-semibold text-danger border border-white/30 bg-white/10 p-2"
+                        >
+                            x
+                        </button>
+                    </div>
+                </Card.Header>
                 <Card.Body>
                     <div className="font-semibold mb-4 text-center">
                         <p>Select Date to Export:</p>
@@ -343,25 +370,19 @@ const ExportModal = (props) => {
                             }
                         />
                     </div>
-                    <div className="flex items-center place-self-center w-fit gap-2 bg-secondary text-white px-4 py-1 rounded-full transition ease-in-out delay-75 hover:scale-95">
-                        <FaFileExport />
+                </Card.Body>
+                <Card.Footer>
+                    <div className="flex gap-2 items-center justify-end">
                         <button
                             onClick={
                                 () => handleGenerate()
                                 // exportToExcel("Report.xlsx", data, checkedItems)
                             }
+                            className="text-white border border-white/30 bg-white/10 rounded px-2 py-1"
                         >
                             Export to Excel
                         </button>
                     </div>
-                </Card.Body>
-                <Card.Footer>
-                    <button
-                        onClick={() => setClick(false)}
-                        className="font-semibold w-full h-full text-white"
-                    >
-                        Close
-                    </button>
                 </Card.Footer>
             </Card>
         </div>
@@ -405,7 +426,7 @@ const EditModal = (props) => {
                     ...fields.flatMap((item) =>
                         item.subfields.length > 0
                             ? item?.subfields.map((sub) => sub.slug)
-                            : item?.slug
+                            : item?.slug,
                     ),
                 ];
                 const resp = await axios.post(
@@ -413,7 +434,7 @@ const EditModal = (props) => {
                         data: formDataState,
                         fields: normalizedField,
                         unit_position_id: Number(unitData?.unit_position_id),
-                    })
+                    }),
                 );
                 if (resp.status === 200) {
                     addToast(resp.data);
@@ -498,7 +519,7 @@ const EditModal = (props) => {
                             .filter(
                                 (item) =>
                                     item?.name !== "time" &&
-                                    item?.name !== "date"
+                                    item?.name !== "date",
                             )
                             .map((item) => (
                                 <div
@@ -515,7 +536,7 @@ const EditModal = (props) => {
                                                   name: item.name,
                                                   subfields:
                                                       item?.subfields || [],
-                                              } || ""
+                                              } || "",
                                           )
                                         : item.Cell}
                                 </div>
@@ -525,7 +546,7 @@ const EditModal = (props) => {
             </Modal.Body>
             <Modal.Footer>
                 <button
-                    className="bg-primary text-white font-semibold w-full h-full"
+                    className="border border-transparent bg-primary text-white font-semibold w-full h-full"
                     onClick={handleSubmit}
                 >
                     Simpan

@@ -14,6 +14,7 @@ import {
     FaCog,
     FaWarehouse,
     FaFile,
+    FaDatabase,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -22,7 +23,7 @@ import { FaTextSlash } from "react-icons/fa6";
 import { BsFillBellFill, BsFillBellSlashFill } from "react-icons/bs";
 import { getSetting } from "../db";
 import { RequestModal } from "../RequestComponents/RequestModal";
-
+import HorseImg from "../../../../public/img/horse.png";
 const Heading = ({ children, alert, setAlert }) => {
     const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -78,18 +79,18 @@ const Heading = ({ children, alert, setAlert }) => {
             label: "Unit - Client Setting",
             href: route("unit.position"),
         },
-        unitRelocate: {
-            icon: <FaMapPin />,
-            label: "Relocate Unit",
-            href: route("unit.relocate"),
-        },
         inputField: {
             icon: <IoDocumentText />,
             label: "Input Fields",
             href: route("input.field.setting"),
         },
+        database: {
+            icon: <FaDatabase />,
+            label: "Database",
+            href: route("database"),
+        },
         unitList: {
-            icon: <FaList />,
+            icon: <img src={HorseImg} alt="Unit List" width="20" height="20" />,
             label: "Unit List",
             href: route("daily.list"),
             submenu: [
@@ -123,7 +124,7 @@ const Heading = ({ children, alert, setAlert }) => {
             href: route("unit.interval.setting"),
         },
         eventHistory: {
-            icon: <FaCalendarAlt />,
+            icon: <FaHistory />,
             label: "SD / STBY Event",
             href: route("request"),
         },
@@ -160,11 +161,6 @@ const Heading = ({ children, alert, setAlert }) => {
                 window.location.href = "/login";
             },
         },
-        logHistory: {
-            icon: <FaHistory />,
-            label: "Log History",
-            // href: route("profile", { id: user.id }),
-        },
         logout: {
             icon: <FaSignOutAlt />,
             label: "Logout",
@@ -182,18 +178,17 @@ const Heading = ({ children, alert, setAlert }) => {
     if (user?.role === "super_admin") {
         menuItems = [
             menu.home,
+            menu.database,
             menu.ba,
             menu.workshopList,
             menu.clientList,
             menu.eventHistory,
             menu.unitList,
             menu.unitLocationSetting,
-            menu.unitRelocate,
             menu.area,
-            menu.inputSetting,
-            menu.inputField,
+            // menu.inputSetting,
+            // menu.inputField,
             menu.accountList,
-            menu.logHistory,
             // menu.editUnit,
             menu.profile,
         ];
@@ -400,11 +395,11 @@ const Heading = ({ children, alert, setAlert }) => {
                         </p>
                     </div>
                     {/* Desktop button */}
-                    {(user?.role != "client" || user?.role != "guest") && (
+                    {(user?.role != "client" && user?.role != "guest") && (
                         <>
                             <button
                                 onClick={() => setShowModal(true)}
-                                className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
+                                className="hidden md:flex items-center text-white text-lg rounded-md border border-gray-200 bg-gray-50 hover:scale-105 transition ease-in-out delay-75"
                             >
                                 <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
                                     SD
@@ -422,7 +417,7 @@ const Heading = ({ children, alert, setAlert }) => {
                 </div>
 
                 {/* Page Content */}
-                <main className="p-0 md:py-10 md:px-10 overflow-y-auto bg-[#e8edfc]/50 h-[90%]">
+                <main className="p-0 md:py-4 md:px-7 overflow-y-auto bg-[#e8edfc]/50 h-[90%]">
                     {children}
                 </main>
             </div>

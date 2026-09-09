@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DailyFieldController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
+use App\Http\Controllers\DatabaseController;
 use App\Http\Controllers\DataUnitController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\LocationController;
@@ -84,6 +85,7 @@ Route::controller(DailyReportSettingsController::class)->middleware(['auth', 'ro
 });
 
 Route::controller(StatusRequestController::class)->middleware('auth')->group(function () {
+    Route::get('/api/get-remark-list', 'getRemarkList')->name('remark.list.get')->middleware('auth');
     Route::get('/api/get-all-request', 'getRequestHistory')->name('request.history')->middleware('auth');
     Route::get('/get-last-request', 'getFiveRequestedUnit')->name('getLastRequestUnitStatus')->middleware('auth');
     Route::get('/get-request', 'getRequestedUnit')->name('getRequestUnitStatus')->middleware('auth');
@@ -110,6 +112,7 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
     Route::get('/get/fields', 'getUnitFields')->name('unit.fields.get');
     Route::get('/get/reports/{unit_position_id}', 'getUnitReports')->name('unit.position.report.get');
+    Route::get('/get/area-reports/{area_id}', 'getAreaReports')->name('area.position.report.get');
 
     Route::post('/unit/setting/set', 'setInterval')->name('unit.interval.set');
     Route::post('/unit/location/add', 'addUnitLocation')->name('unit.position.add');
@@ -130,6 +133,14 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
 Route::controller(DailyFieldController::class)->middleware(['auth'])->group(function () {
     Route::get('/unit/input-field', 'index')->middleware('roles:super_admin')->name('input.field.setting');
     Route::get('/get/field', 'getFields')->name('input.field.get');
+
+    Route::post('/field/add', 'store')->middleware('roles:super_admin')->name('field.add');
+    Route::post('/field/{dailyField}/update', 'update')->middleware('roles:super_admin')->name('field.update');
+    Route::post('/field/{dailyField}/delete', 'destroy')->middleware('roles:super_admin')->name('field.delete');
+
+    Route::post('/field/{dailyField}/subfield/add', 'storeSubfield')->middleware('roles:super_admin')->name('subfield.add');
+    Route::post('/subfield/{subfield}/update', 'updateSubfield')->middleware('roles:super_admin')->name('subfield.update');
+    Route::post('/subfield/{subfield}/delete', 'destroySubfield')->middleware('roles:super_admin')->name('subfield.delete');
 });
 
 Route::get('/get/server-time', function () {
@@ -209,6 +220,10 @@ Route::controller(WorkshopController::class)->middleware('auth')->group(function
 Route::controller(WorkshopController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::post('/workshop', 'storeWorkshop')->name('workshop.store');
 });
+
+Route::get('/database', [DatabaseController::class, 'index'])
+    ->name('database')
+    ->middleware(['auth', 'roles:super_admin']);
 
 Route::controller(BeritaAcaraController::class)->middleware('auth')->group(function () {
     Route::post('/berita-acara/set/field-setting', 'SetFieldBA')->name('ba.set.setting');

@@ -37,8 +37,14 @@ class ProfileController extends Controller
         return response()->json($data);
     }
     // Tampilkan halaman profil user beserta permission dan daftar request yang masih aktif
-    public function index($user_id)
+    public function index(Request $request, $user_id)
     {
+        // Hanya boleh lihat profil sendiri, kecuali super_admin
+        $authUser = $request->user();
+        if ($authUser->user_id !== $user_id && ($authUser->roleData?->name ?? null) !== 'super_admin') {
+            abort(403);
+        }
+
         $userData = User::where('user_id', $user_id)->first();
         // Ambil unit yang diizinkan untuk user saat ini
         $permissionData = DataUnitController::getPermittedUnit();
@@ -76,41 +82,33 @@ class ProfileController extends Controller
 
 
     // Update nomor WhatsApp user setelah validasi format nomor
+    // Selalu update user yang sedang login, abaikan user_id dari request agar tidak bisa mengubah data user lain (IDOR)
     public function updatePhone(Request $request)
     {
         $val = $request->validate(
             [
-                'user_id' => 'required|string',
                 'whatsAppNum' => 'required|regex:/^08[0-9]+$/|min:10|max:13'
             ]
         );
 
-        $user = User::find($val['user_id']);
-        if ($user) {
-            $user->update(['whatsAppNum' => $val['whatsAppNum']]);
-            return response()->json(['type' => 'success', 'text' => 'Phone number updated']);
-        }
-        ;
-        return response()->json(['type' => 'error', 'text' => 'User not found']);
+        $user = $request->user();
+        $user->update(['whatsAppNum' => $val['whatsAppNum']]);
+        return response()->json(['type' => 'success', 'text' => 'Phone number updated']);
     }
 
     // Update password user, wajib memasukkan password lama yang benar
+    // Selalu update user yang sedang login, abaikan user_id dari request agar tidak bisa mengubah password user lain (IDOR)
     public function updatePassword(Request $request)
     {
         $val = $request->validate([
-            'user_id' => 'required|string',
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user = User::find($val['user_id']);
-        if ($user) {
-            // Hash password baru sebelum disimpan
-            $user->update(['password' => Hash::make($val['password'])]);
-            return response()->json(['type' => 'success', 'text' => 'Password updated']);
-        }
-
-        return response()->json(['type' => 'error', 'text' => 'User not found']);
+        $user = $request->user();
+        // Hash password baru sebelum disimpan
+        $user->update(['password' => Hash::make($val['password'])]);
+        return response()->json(['type' => 'success', 'text' => 'Password updated']);
     }
 
     /**

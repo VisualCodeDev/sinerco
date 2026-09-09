@@ -22,5 +22,5 @@
 }
 
 .button-submit {
-    @apply bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition duration-200
+    @apply border border-transparent bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition duration-200
 }

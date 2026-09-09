@@ -70,6 +70,10 @@ class WhatsAppController extends Controller
                 $data = $reportMap[$time] ?? null;
 
                 if ($data) {
+                    // Jaga-jaga kalau ada data lama yang ke-double-encode (masih string JSON)
+                    if (is_string($data)) {
+                        $data = json_decode($data, true) ?? [];
+                    }
                     unset($data['date'], $data['time']);
                     $values = array_values($data);
                     $lines[] = $time . '/' . implode('/', $values);

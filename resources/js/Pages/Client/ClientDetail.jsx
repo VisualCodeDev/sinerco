@@ -18,7 +18,7 @@ const ClientDetail = ({ data, unitData }) => {
             <div className="flex md:justify-start justify-center">
                 <div className="my-4">
                     <button
-                        className="bg-primary text-white px-6 py-2 rounded-md"
+                        className="border border-transparent bg-primary text-white px-6 py-2 rounded-md"
                         onClick={() => setSettingModal(true)}
                     >
                         Setting
@@ -283,7 +283,12 @@ const SettingModal = (props) => {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <button onClick={handleSave}>Simpan</button>
+                <button
+                    onClick={handleSave}
+                    className="border border-transparent bg-primary text-white px-4 py-2 rounded-md hover:opacity-90"
+                >
+                    Simpan
+                </button>
             </Modal.Footer>
         </Modal>
     );

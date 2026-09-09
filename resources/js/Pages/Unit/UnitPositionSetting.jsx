@@ -184,8 +184,8 @@ const UnitPositionSetting = ({ data }) => {
     return (
         <PageLayout>
             {loading && <LoadingSpinner />}
-            <div className="flex gap-4 relative w-full">
-                <div className="w-1/2 relative">
+            <div className="flex flex-col lg:flex-row gap-4 relative w-full">
+                <div className="w-full lg:w-1/2 relative">
                     <TableComponent
                         data={selectedItemUnits || []}
                         columns={workshopColumns}

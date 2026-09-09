@@ -83,6 +83,7 @@ const InputValidationSetting = (props) => {
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
             unitSetting: data?.unitSetting ?? defaultUnitSetting,
             thresholdSetting: data?.thresholdSetting ?? defaultThresholdSetting,
+            performanceFixedValue: data?.performanceFixedValue ?? "",
         }));
     }, [data]);
 
@@ -118,6 +119,11 @@ const InputValidationSetting = (props) => {
             const resp = await axios.post(route("daily.setting"), {
                 client_id: selectedClients,
                 ...formData,
+                // String kosong bukan angka valid buat rule 'numeric', kirim null biar dianggap "tidak diisi"
+                performanceFixedValue:
+                    formData?.performanceFixedValue === ""
+                        ? null
+                        : formData?.performanceFixedValue,
             });
             if (resp.status === 200 || resp.status === 302) {
                 addToast(resp.data);
@@ -172,8 +178,27 @@ const InputValidationSetting = (props) => {
                 </div>
             </div>
 
+            <div className="px-6 pt-6 flex flex-col max-w-md">
+                <label className="font-semibold text-[#101828] mb-1">
+                    Performance Fixed Value
+                </label>
+                <input
+                    type="number"
+                    step="any"
+                    placeholder="Leave empty to calculate from curve"
+                    className="h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
+                    value={formData?.performanceFixedValue ?? ""}
+                    onChange={(e) =>
+                        setFormData((prev) => ({
+                            ...prev,
+                            performanceFixedValue: e.target.value,
+                        }))
+                    }
+                />
+            </div>
+
             <div className="overflow-y-auto w-full overflow-x-auto p-6 max-h-[50vh]">
-                <table className="w-full">
+                <table className="w-full border-collapse [&_th]:border [&_th]:border-[#3a56b0] [&_td]:border [&_td]:border-gray-200">
                     <thead className="text-white">
                         <tr>
                             <th className="sticky top-0 z-10 bg-primary shadow-sm font-semibold text-nowrap text-left px-6 py-4 rounded-tl-lg w-[25%]">

@@ -64,20 +64,20 @@ const WorkshopList = () => {
     return (
         <PageLayout>
             <div className="flex flex-col md:flex-row w-full h-full p-4 gap-6 md:gap-12 min-h-[90vh]">
-                {/* Workhops List Desktop*/}
-                <div className="md:w-1/2 w-full bg-white shadow-md rounded-lg p-10 space-y-2 lg:md:block hidden">
+                {/* Workshops List Desktop*/}
+                <div className="md:w-1/2 w-full bg-white shadow-md rounded-lg p-10 space-y-2 hidden lg:block">
                     <div className="flex flex-row items-center justify-between gap-3 mb-6 text-lg md:text-xl font-semibold">
                         <div className="flex items-center gap-3">
                             <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                                 <FaUserFriends className="text-2xl md:text-3xl" />
                             </div>
                             <h2 className="font-bold text-base md:text-2xl text-gray-700">
-                                Workhops
+                                Workshops
                             </h2>
                         </div>
                         <button
                             onClick={() => setAddModal(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 border border-transparent bg-primary text-white text-sm rounded-md hover:bg-blue-800 transition-colors"
                         >
                             + Add Workshop
                         </button>
@@ -87,10 +87,10 @@ const WorkshopList = () => {
                             <button
                                 key={item?.id}
                                 onClick={() => setSelectedWorkshop(item)}
-                                className={`w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                className={`w-full text-left px-4 py-2 rounded-md hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 border ${
                                     selectedWorkshop?.id === item?.id
-                                        ? "bg-blue-100"
-                                        : "bg-gray-100"
+                                        ? "bg-blue-100 border-blue-300"
+                                        : "bg-gray-100 border-gray-200"
                                 }`}
                             >
                                 {item?.name}
@@ -99,20 +99,20 @@ const WorkshopList = () => {
                     </div>
                 </div>
 
-                {/* Workhops List Mobile*/}
-                <div className="w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:md:hidden block">
+                {/* Workshops List Mobile*/}
+                <div className="w-full bg-white shadow-md rounded-lg p-4 space-y-2 lg:hidden block">
                     <div className="flex flex-row items-center justify-between gap-2 mb-6 text-lg md:text-xl font-semibold">
                         <div className="flex items-center gap-2">
                             <div className="bg-[#e8edfc] text-primary p-1.5 md:p-1.5 rounded-md">
                                 <FaUserFriends className="" />
                             </div>
                             <h2 className="text-lg font-semibold text-gray-700">
-                                Workhops
+                                Workshops
                             </h2>
                         </div>
                         <button
                             onClick={() => setAddModal(true)}
-                            className="flex items-center gap-1 px-2 py-1 bg-primary text-white text-xs rounded-md hover:bg-blue-800"
+                            className="flex items-center gap-1 px-2 py-1 border border-transparent bg-primary text-white text-xs rounded-md hover:bg-blue-800"
                         >
                             + Add
                         </button>
@@ -123,7 +123,7 @@ const WorkshopList = () => {
                             onClick={() => setExpanded(!expanded)}
                         >
                             <div>
-                                {selectedWorkshop?.name || workshops[0]?.name}
+                                {selectedWorkshop?.name || workshops[0]?.name || "Select workshop"}
                             </div>
                             <FaAngleDown />
                         </div>
@@ -139,10 +139,10 @@ const WorkshopList = () => {
                                         setSelectedWorkshop(item);
                                         setExpanded(false);
                                     }}
-                                    className={`w-full text-left px-4 py-2 hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 ${
+                                    className={`w-full text-left px-4 py-2 hover:bg-blue-100 text-gray-800 font-medium transition-all duration-150 border ${
                                         selectedWorkshop?.id === item?.id
-                                            ? "bg-blue-100"
-                                            : "bg-gray-100"
+                                            ? "bg-blue-100 border-blue-300"
+                                            : "bg-gray-100 border-gray-200"
                                     }`}
                                 >
                                     {item?.name}
@@ -534,7 +534,12 @@ const SettingModal = (props) => {
                 </div>
             </Modal.Body>
             <Modal.Footer>
-                <button onClick={handleSave}>Simpan</button>
+                <button
+                    onClick={handleSave}
+                    className="border border-transparent bg-primary text-white px-4 py-2 rounded-md hover:opacity-90"
+                >
+                    Simpan
+                </button>
             </Modal.Footer>
         </Modal>
     );

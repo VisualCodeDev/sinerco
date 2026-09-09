@@ -19,6 +19,7 @@ import PageLayout from "@/Layouts/PageLayout";
 import React, { useEffect, useState } from "react";
 import { FaPencil } from "react-icons/fa6";
 import { useToast } from "@/Components/Toast/ToastProvider";
+import { router } from "@inertiajs/react";
 
 const Profile = ({ data, permissionData, requestList }) => {
     const [formData, setFormData] = useState({
@@ -37,12 +38,12 @@ const Profile = ({ data, permissionData, requestList }) => {
         e.preventDefault();
 
         if (passwordForm.password !== passwordForm.password_confirmation) {
-            alert("New password and confirmation do not match");
+            addToast({ type: "error", text: "New password and confirmation do not match" });
             return;
         }
 
         if (passwordForm.password.length < 8) {
-            alert("New password must be at least 8 characters");
+            addToast({ type: "error", text: "New password must be at least 8 characters" });
             return;
         }
 
@@ -77,12 +78,12 @@ const Profile = ({ data, permissionData, requestList }) => {
         e.preventDefault();
 
         if (!/^08\d+$/.test(phoneNum)) {
-            alert("Phone number must start with 08 and contain only digits");
+            addToast({ type: "error", text: "Phone number must start with 08 and contain only digits" });
             return;
         }
 
         if (phoneNum.length < 10 || phoneNum.length > 13) {
-            alert("Phone number must be between 10 and 13 digits");
+            addToast({ type: "error", text: "Phone number must be between 10 and 13 digits" });
             return;
         }
 
@@ -158,7 +159,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                         </span>
                                         <button
                                             type="submit"
-                                            className="bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                            className="border border-transparent bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
                                         >
                                             Submit
                                         </button>
@@ -166,12 +167,14 @@ const Profile = ({ data, permissionData, requestList }) => {
                                 ) : (
                                     <p className="">{phoneNum}</p>
                                 )}
-                                <div
-                                    className="ms-3 text-sm cursor-pointer"
+                                <button
+                                    type="button"
+                                    aria-label="Edit"
+                                    className="ms-3 p-2 text-sm cursor-pointer border border-white/30 bg-white/10 rounded"
                                     onClick={() => setEdit(!edit)}
                                 >
                                     {!edit && <FaPencil />}
-                                </div>
+                                </button>
                             </div>
                             <div className="flex flex-row justify-center items-center">
                                 <FaEnvelope className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
@@ -237,13 +240,13 @@ const Profile = ({ data, permissionData, requestList }) => {
                                         <div className="flex gap-2">
                                             <button
                                                 type="submit"
-                                                className="bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                                className="border border-transparent bg-success px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
                                             >
                                                 Submit
                                             </button>
                                             <button
                                                 type="button"
-                                                className="bg-white/20 px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                                className="border border-white/30 bg-white/20 px-2 py-1 rounded-md font-semibold text-center flex items-center text-sm"
                                                 onClick={() => {
                                                     setPasswordEdit(false);
                                                     setPasswordForm({
@@ -261,14 +264,16 @@ const Profile = ({ data, permissionData, requestList }) => {
                                 ) : (
                                     <p className="">Reset Password</p>
                                 )}
-                                <div
-                                    className="ms-3 text-sm cursor-pointer"
+                                <button
+                                    type="button"
+                                    aria-label="Edit"
+                                    className="ms-3 p-2 text-sm cursor-pointer border border-white/30 bg-white/10 rounded"
                                     onClick={() =>
                                         setPasswordEdit(!passwordEdit)
                                     }
                                 >
                                     {!passwordEdit && <FaPencil />}
-                                </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -296,13 +301,17 @@ const Profile = ({ data, permissionData, requestList }) => {
                         {permissionData && permissionData.length > 0 ? (
                             <div className="flex flex-col max-h-[35vh] overflow-y-auto bg-white">
                                 {permissionData.map((permission, index) => (
-                                    <a
+                                    <div
                                         key={index}
-                                        href={route(
-                                            "daily",
-                                            permission?.unit_position_id
-                                        )}
-                                        className="flex justify-between items-center border-b border-gray-200 p-4 hover:bg-gray-100 transition-all"
+                                        onClick={() =>
+                                            router.visit(
+                                                route(
+                                                    "daily",
+                                                    permission?.unit_position_id
+                                                )
+                                            )
+                                        }
+                                        className="flex justify-between items-center border-b border-gray-200 p-4 hover:bg-gray-100 transition-all cursor-pointer"
                                     >
                                         <p className="text-md md:text-lg font-medium">
                                             {permission?.unit}
@@ -316,7 +325,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                                         >
                                             Daily Form
                                         </a>
-                                    </a>
+                                    </div>
                                 ))}
                             </div>
                         ) : (

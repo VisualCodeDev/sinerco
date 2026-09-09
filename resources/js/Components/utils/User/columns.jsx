@@ -94,7 +94,7 @@ const columns = ({
                 return (
                     <>
                         <button
-                            className="bg-primary text-white rounded-lg px-3 py-2 text-sm"
+                            className="border border-transparent bg-primary text-white rounded-lg px-3 py-2 text-sm"
                             onClick={() => onRowClick(items)}
                         >
                             Detail

@@ -70,7 +70,6 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
     const filteredLocations = form.area_id
         ? locations.filter((l) => l.area_id === form.area_id)
         : [];
-    console.log(form)
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -175,6 +174,10 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                     </div>
 
                     {form.position_type === "client" && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Client
+                            </label>
                         <CreatableSelect
                             isClearable
                             onChange={(val) =>
@@ -194,9 +197,14 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                             }))}
                             placeholder="Select or add client..."
                         />
+                        </div>
                     )}
 
                     {form.position_type === "workshop" && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Workshop
+                            </label>
                         <CreatableSelect
                             isClearable
                             onChange={(val) =>
@@ -216,6 +224,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                             }))}
                             placeholder="Select or add workshop..."
                         />
+                        </div>
                     )}
 
                     {form.position_type === "client" && (
@@ -264,7 +273,7 @@ const UnitAddNew = ({ clients, locations, areas, workshops }) => {
                     {/* Submit */}
                     <button
                         type="submit"
-                        className="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
+                        className="w-full border border-transparent bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-200"
                     >
                         Submit
                     </button>

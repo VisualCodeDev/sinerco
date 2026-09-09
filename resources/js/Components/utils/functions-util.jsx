@@ -265,7 +265,10 @@ export const TimeInput = ({
 export const generatePrevHour = async (gmt_offset, interval = 1) => {
     const hours = [];
     const { hour } = await getCurrDateTime(gmt_offset);
-    for (let i = 1 + (interval - 1); i < hour; i += Number(interval)) {
+    // Kalau interval 0/negatif/bukan angka, step-nya jadi 0 dan loop tidak pernah berhenti
+    // (bisa sampai RangeError: Invalid array length) — fallback ke 1
+    const step = Number(interval) > 0 ? Number(interval) : 1;
+    for (let i = 1 + (step - 1); i < hour; i += step) {
         hours.push(`${String(i).padStart(2, "0")}:00`);
     }
     return hours;
@@ -530,7 +533,7 @@ export const generateTableHTML = (date, formItems, currData, averages) => {
                     ?.map(
                         (value, index) => `
             <tr>
-                <td class="table-content">${value.time || (index + 1) + ':00'}</td>
+                <td class="table-content">${value.time || index + 1 + ":00"}</td>
                 <td class="table-content">${value.sourcePress || 0.0}</td>
                 <td class="table-content">${value.suctionPress || 0.0}</td>
                 <td class="table-content">${value.dischargePress || 0.0}</td>
@@ -598,6 +601,12 @@ export const getDDMMYYDate = (date, format = null) => {
     }
     return formattedDate;
 };
+
+export function DateParser(dateString) {
+    const date = dayjs(dateString).format("DD MMM YYYY");
+
+    return date;
+}
 
 export const getDateLists = (currDate) => {
     const dateList = [];

@@ -314,12 +314,6 @@ export const EditItem = ({
     };
 
     const handleSave = async () => {
-        // if (
-        //     formData?.status != "End" &&
-        //     (!formData?.end_date || !formData?.end_time)
-        // ) {
-        //     return alert("Please fill all the fields");
-        // }
         try {
             setSaving(true);
 
@@ -455,7 +449,7 @@ export const EditItem = ({
                                                         formData?.status !==
                                                         "End"
                                                     }
-                                                    className="rounded-lg border border-gray-300 px-3 py-2"
+                                                    className="w-full rounded-lg border border-gray-300 px-3 py-2"
                                                 />
 
                                                 <TimePicker24
@@ -508,7 +502,7 @@ export const EditItem = ({
                         );
                     })}
                     {!canAct && (
-                        <p className="text-gray-400 italic">
+                        <p className="text-gray-500 italic">
                             You don't have permission to edit this request.
                         </p>
                     )}
@@ -517,10 +511,10 @@ export const EditItem = ({
 
             <Modal.Footer>
                 <div className="w-full flex justify-end">
-                    <div className=" rounded-2xl p-2 flex items-center gap-2">
+                    <div className=" rounded-2xl p-2 flex items-center gap-2 flex-wrap">
                         {selectedItem?.status != "End" && accessEdit && (
                             <button
-                                className="bg-white hover:bg-white/90 transition duration-200 text-primary px-4 py-2.5 rounded-xl shadow-sm"
+                                className="border border-gray-300 bg-white hover:bg-white/90 transition duration-200 text-primary px-4 py-2.5 rounded-xl shadow-sm"
                                 onClick={() => updateData(true)}
                             >
                                 Set Current Date
@@ -529,7 +523,7 @@ export const EditItem = ({
 
                         {canAct && (
                             <button
-                                className="bg-secondary text-white hover:opacity-90 transition duration-200 px-5 py-2.5 rounded-xl shadow-sm"
+                                className="border border-transparent bg-secondary text-white hover:opacity-90 transition duration-200 px-5 py-2.5 rounded-xl shadow-sm"
                                 onClick={() => {
                                     // setModal(false);
 

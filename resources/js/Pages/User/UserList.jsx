@@ -199,13 +199,13 @@ const UserList = () => {
                     <Modal.Footer>
                         <div className="flex justify-end gap-4">
                             <button
-                                className="bg-green-500 rounded px-3 py-2"
+                                className="border border-transparent bg-green-500 rounded px-3 py-2"
                                 onClick={handleDelete}
                             >
                                 Yes
                             </button>
                             <button
-                                className="bg-red-500 rounded px-3 py-2"
+                                className="border border-transparent bg-red-500 rounded px-3 py-2"
                                 onClick={() =>
                                     setDeleteConfirmationModal(false)
                                 }
@@ -323,7 +323,7 @@ const EditUserLocationModal = ({
         return <LoadingSpinner />;
     }
     return (
-        <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <TableComponent
                 title={"Allocation"}
                 subtitle={selectedUsers.map((u) => u.name).join(", ")}

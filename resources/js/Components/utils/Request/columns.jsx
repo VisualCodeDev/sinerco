@@ -87,7 +87,7 @@ const columns = ({
                         {user?.role === "technician" ? (
                             !seen_status ? (
                                 <button
-                                    className="bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
+                                    className="border border-transparent bg-primary hover:bg-[#1f1882] px-3 py-2 rounded-lg text-white transition duration-100"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         handleSeen(request_id);
@@ -98,7 +98,7 @@ const columns = ({
                             ) : (
                                 seen_status && (
                                     <button
-                                        className="bg-green-500 px-3 py-2 rounded-lg text-white transition duration-100"
+                                        className="border border-transparent bg-green-500 px-3 py-2 rounded-lg text-white transition duration-100"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                         }}

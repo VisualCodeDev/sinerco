@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AdminNotification;
 use App\Models\DailyReport;
 use App\Models\DataUnit;
+use App\Models\RemarkList;
 use App\Models\StatusRequest;
 use App\Models\UnitPosition;
 use App\Models\UserSetting;
@@ -27,6 +28,12 @@ class StatusRequestController extends Controller
     // Membuat request status baru untuk sebuah unit (misal: shutdown, running, dll)
     public function setRequest(Request $request)
     {
+        // Hanya role tertentu yang boleh membuat request (samakan dengan updateRequest)
+        $userRole = auth()->user()?->roleData?->name;
+        if (!in_array($userRole, ['operator', 'super_admin', 'technician'])) {
+            return response()->json(['type' => 'error', 'text' => 'You are not authorized to create this request.'], 403);
+        }
+
         $val = $request->validate([
             'unit_id' => 'required|string',
             'start_date' => 'required|string',
@@ -53,9 +60,17 @@ class StatusRequestController extends Controller
         // Ambil data posisi unit beserta relasi unit-nya
         $unitPosition = UnitPosition::with('unit')->find($val['unit_position_id']);
 
-        // if (!$unit) {
-        //     return response()->json(['type' => 'error', 'text' => 'Daily Report Unit Time not Found'], 500);
-        // }
+        if (!$unitPosition || !$unitPosition->unit) {
+            return response()->json(['type' => 'error', 'text' => 'Unit not found'], 404);
+        }
+
+        // Cegah membuat request baru kalau unit ini masih punya request yang statusnya Ongoing
+        $hasOngoingRequest = StatusRequest::where('unit_position_id', $val['unit_position_id'])
+            ->where('status', 'Ongoing')
+            ->exists();
+        if ($hasOngoingRequest) {
+            return response()->json(['type' => 'error', 'text' => 'This unit already has an ongoing request.'], 422);
+        }
 
         $user = auth()->user();
         // Simpan record request status baru
@@ -71,6 +86,12 @@ class StatusRequestController extends Controller
         $status->save();
         // Update status unit sesuai tipe request yang diajukan
         $unitPosition->unit->update(['status' => $val['request_type']]);
+
+        // Simpan remark baru ke daftar suggestion kalau belum ada (auto-learn)
+        $trimmedRemark = trim($val['remarks']);
+        if ($trimmedRemark !== '') {
+            RemarkList::firstOrCreate(['remark' => $trimmedRemark]);
+        }
         // if ($unit) {
         //     Log::debug($status);
         //     $unit->update(['request_id' => $status->request_id]);
@@ -426,6 +447,13 @@ class StatusRequestController extends Controller
         }
 
         return response()->json(['type' => 'success', 'text' => 'Request trashed!']);
+    }
+
+    // Ambil daftar remark untuk suggestion di form SD/STBY
+    public function getRemarkList()
+    {
+        $remarks = RemarkList::orderBy('remark')->pluck('remark');
+        return response()->json($remarks);
     }
 
 }

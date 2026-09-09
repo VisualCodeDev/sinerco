@@ -143,7 +143,7 @@ const columns = (
                                 !disable_duration
                                     ? "bg-red-500"
                                     : "bg-green-500"
-                            } text-white rounded-md px-2 py-1`}
+                            } border border-transparent text-white rounded-md px-2 py-1`}
                             onClick={() => handleUpdateDisable(client_id)}
                         >
                             {disable_duration ? "Enable" : "Disable"}

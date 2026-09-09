@@ -60,8 +60,8 @@ const UnitLocationSetting = () => {
                             </div>
                         </div>
                     ))} */}
-                <div className="flex w-full gap-4">
-                    <div className="w-1/2">
+                <div className="flex flex-col md:flex-row w-full gap-4">
+                    <div className="w-full md:w-1/2">
                         <TableComponent
                             data={clientData || []}
                             height="55vh"
@@ -70,7 +70,7 @@ const UnitLocationSetting = () => {
                             title={"Clients"}
                         />
                     </div>
-                    <div className="w-1/2">
+                    <div className="w-full md:w-1/2">
                         <TableComponent
                             data={workshopData || []}
                             height="55vh"

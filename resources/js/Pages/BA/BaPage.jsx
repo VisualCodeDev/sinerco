@@ -47,7 +47,7 @@ const BaPage = () => {
                     <button
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`px-4 py-2 text-sm font-semibold border-b-2 transition-all ${
+                        className={`px-4 py-2 text-sm font-semibold border-b-2 bg-white transition-all ${
                             activeTab === tab.key
                                 ? "border-primary text-primary"
                                 : "border-transparent text-gray-500 hover:text-primary"
@@ -129,7 +129,7 @@ const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) =
         {
             name: "no",
             header: "No",
-            headerClassName: "text-center bg-primary text-white",
+            headerClassName: "text-center bg-primary text-white justify-center",
             cellClassName: "text-center",
             width: "5%",
             Cell: ({ index }) => <div>{index + 1}</div>,
@@ -146,9 +146,8 @@ const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) =
                   {
                       name: "template_inv",
                       header: "Template",
-                      headerClassName: "text-center bg-primary text-white",
+                      headerClassName: "text-center justify-center bg-primary text-white",
                       cellClassName: "text-center",
-                      width: "20%",
                       Cell: ({ template_inv }) => {
                           const option = INVOICE_TEMPLATE_OPTIONS.find(
                               (opt) => opt.value === String(template_inv ?? "1"),
@@ -163,11 +162,11 @@ const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) =
         {
             name: "checkbox",
             Header: (data) => (
-                <div className="text-center w-full" onClick={() => handleSelectAll(data)}>
+                <div className="text-center" onClick={() => handleSelectAll(data)}>
                     Select All
                 </div>
             ),
-            headerClassName: "bg-primary text-white text-center",
+            headerClassName: "bg-primary text-white text-center justify-center",
             cellClassName: "text-center",
             width: "10%",
             Cell: ({ client_id }) => (
@@ -185,7 +184,7 @@ const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) =
     }
 
     return (
-        <>
+        <div className="">
             <TableComponent
                 title={label}
                 subtitle="Select clients to export"
@@ -205,7 +204,7 @@ const ClientExportTab = ({ addToast, exportRoute, label, showTemplateColumn }) =
                     handleExport={handleExport}
                 />
             )}
-        </>
+        </div>
     );
 };
 
@@ -215,32 +214,38 @@ const MonthExportModal = ({ title, handleCloseModal, handleExport }) => {
         handleExport(selectedMonth ? `${selectedMonth}-01` : null);
     };
     return (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg z-[110]">
-            <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
-                {title}
-                <div
-                    className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
-                    onClick={handleCloseModal}
-                >
-                    <MdClose />
+        <>
+            <div
+                className="fixed inset-0 bg-black bg-opacity-50 z-[999]"
+                onClick={handleCloseModal}
+            />
+            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-lg z-[1000] max-h-[85vh] overflow-y-auto">
+                <div className="bg-primary text-white sticky top-0 left-0 text-center py-4 w-full z-[100] font-bold rounded-t-xl">
+                    {title}
+                    <div
+                        className="font-light absolute right-5 top-1/2 -translate-y-1/2 cursor-pointer"
+                        onClick={handleCloseModal}
+                    >
+                        <MdClose />
+                    </div>
+                </div>
+                <div className="bg-white p-6 flex flex-col gap-4">
+                    <label className="text-sm font-medium">Select Month</label>
+                    <input
+                        type="month"
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="border rounded-lg px-3 py-2"
+                    />
+                    <button
+                        onClick={handleSubmit}
+                        className="border border-transparent bg-primary text-white rounded-lg py-2 mt-2"
+                    >
+                        Export
+                    </button>
                 </div>
             </div>
-            <div className="bg-white p-6 flex flex-col gap-4">
-                <label className="text-sm font-medium">Select Month</label>
-                <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="border rounded-lg px-3 py-2"
-                />
-                <button
-                    onClick={handleSubmit}
-                    className="bg-primary text-white rounded-lg py-2 mt-2"
-                >
-                    Export
-                </button>
-            </div>
-        </div>
+        </>
     );
 };
 
@@ -683,12 +688,12 @@ const BaExportModal = (props) => {
             <Modal.Body>
                 <div className="flex flex-col gap-3">
                     <div className="mb-5 flex gap-2">
-                        <div class="w-full max-w-xs ">
-                            <label class="block mb-1 text-sm font-medium text-gray-700">
+                        <div className="w-full max-w-xs ">
+                            <label className="block mb-1 text-sm font-medium text-gray-700">
                                 Choose Month
                             </label>
                             <select
-                                class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm
+                                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm
                             focus:border-blue-500 focus:ring-2 focus:ring-blue-200
                             transition duration-150 ease-in-out"
                                 onChange={(e) =>
@@ -699,7 +704,7 @@ const BaExportModal = (props) => {
                                 }
                                 value={data?.month}
                             >
-                                <option value="" disabled selected>
+                                <option value="" disabled>
                                     Choose Month
                                 </option>
                                 <option value="1">January</option>

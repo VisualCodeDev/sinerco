@@ -11,7 +11,8 @@ const columns = ({
         {
             name: "no",
             header: "No",
-            headerClassName: "text-center bg-primary text-white",
+            headerClassName: "text-center justify-center bg-primary text-white",
+            cellClassName: "text-center",
             Cell: ({ index }) => {
                 return (
                     <label
@@ -186,7 +187,7 @@ const columns = ({
             Cell: (props) => {
                 return (
                     <button
-                        className="flex items-center justify-center bg-primary text-white p-2 rounded-md"
+                        className="flex items-center justify-center border border-transparent bg-primary text-white p-2 rounded-md"
                         style={{
                             width: 40,
                             height: 40,
@@ -209,14 +210,14 @@ const columns = ({
                 return (
                     <div className="flex items-center justify-center gap-2">
                         <button
-                            className="flex items-center justify-center bg-primary text-white p-2 rounded-md"
+                            className="flex items-center justify-center border border-transparent bg-primary text-white p-2 rounded-md"
                             style={{ width: 40, height: 40 }}
                             onClick={() => handleOpenEdit(props)}
                         >
                             <FaPencilAlt />
                         </button>
                         <button
-                            className="flex items-center justify-center bg-danger text-white p-2 rounded-md"
+                            className="flex items-center justify-center border border-transparent bg-danger text-white p-2 rounded-md"
                             style={{ width: 40, height: 40 }}
                             onClick={() => handleOpenDelete(props)}
                         >

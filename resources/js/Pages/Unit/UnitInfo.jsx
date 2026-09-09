@@ -107,13 +107,13 @@ const UnitInfo = (props) => {
                         <>
                             <button
                                 onClick={() => setIsEditing(false)}
-                                className="px-4 py-1.5 text-sm rounded-md border border-primary text-zinc-700 hover:bg-zinc-100 transition"
+                                className="px-4 py-1.5 text-sm rounded-md border border-primary bg-white text-zinc-700 hover:bg-zinc-100 transition"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-4 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-blue-900 transition"
+                                className="px-4 py-1.5 text-sm rounded-md border border-transparent bg-primary text-white hover:bg-blue-900 transition"
                             >
                                 Save
                             </button>
@@ -121,7 +121,7 @@ const UnitInfo = (props) => {
                     ) : (
                         <button
                             onClick={() => setIsEditing(true)}
-                            className="px-4 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-blue-900 transition"
+                            className="px-4 py-1.5 text-sm rounded-md border border-transparent bg-primary text-white hover:bg-blue-900 transition"
                         >
                             Edit
                         </button>
