@@ -7,6 +7,11 @@ import {
     FaPlus,
     FaSearch,
     FaRegBuilding,
+    FaEye,
+    FaEyeSlash,
+    FaAsterisk,
+    FaCube,
+    FaPercent,
 } from "react-icons/fa";
 import { Button } from "@headlessui/react";
 import TableComponent from "../TableComponent";
@@ -85,6 +90,7 @@ const UnitTable = (props) => {
     const [edit, setEdit] = useState(false);
     const [bulkEdit, setBulkEdit] = useState(false);
     const [lookups, setLookups] = useState({ regions: [], clients: [] });
+    const [historyUnit, setHistoryUnit] = useState(null);
     const { addToast } = useToast();
 
     const formatRows = (rows) =>
@@ -389,7 +395,8 @@ const UnitTable = (props) => {
         lookups,
         handleFieldChange,
         handleSaveRow,
-        bulkEdit
+        bulkEdit,
+        (item) => setHistoryUnit(item)
     );
     const onSelect = (selected) => {
         const currSelected = formData?.selectedRows || [];
@@ -474,6 +481,10 @@ const UnitTable = (props) => {
                     setIsModal={setExportModal}
                     selectedUnitPositions={formData?.selectedUnitPositions}
                 />
+                <UnitHistoryModal
+                    unit={historyUnit}
+                    onClose={() => setHistoryUnit(null)}
+                />
             </>
         );
     }
@@ -546,6 +557,10 @@ const UnitTable = (props) => {
                 isModal={isExportModal}
                 setIsModal={setExportModal}
                 selectedUnitPositions={formData?.selectedUnitPositions}
+            />
+            <UnitHistoryModal
+                unit={historyUnit}
+                onClose={() => setHistoryUnit(null)}
             />
         </>
         // <></>
@@ -654,6 +669,94 @@ const ExportModal = ({ isModal, setIsModal, selectedUnitPositions }) => {
     );
 };
 
+// Label ramah baca buat tiap jenis perubahan -- lihat action yang dikirim
+// UnitMovementLogger di backend (assign_client, remove_client, relocate, dsb).
+const MOVEMENT_ACTION_LABEL = {
+    created: "Unit created",
+    assign_client: "Assigned to client",
+    assign_workshop: "Assigned to workshop",
+    remove_client: "Unassigned from client/workshop",
+    assign_location: "Assigned to location",
+    remove_location: "Unassigned from location",
+    relocate: "Relocated",
+    client_bulk_move: "Moved with client (bulk)",
+};
+
+const UnitHistoryModal = ({ unit, onClose }) => {
+    const [loading, setLoading] = useState(false);
+    const [logs, setLogs] = useState([]);
+
+    useEffect(() => {
+        if (!unit) return;
+        setLoading(true);
+        axios
+            .get(route("unit.movement.log", { unit_id: unit.unit_id }))
+            .then((resp) => setLogs(resp.data || []))
+            .catch((e) => console.error(e))
+            .finally(() => setLoading(false));
+    }, [unit]);
+
+    const describe = (log, prefix) => {
+        const client = log[`${prefix}Client`]?.name;
+        const region = log[`${prefix}Region`]?.name;
+        const location = log[`${prefix}Location`]?.location;
+        const area = log[`${prefix}Location`]?.area?.area;
+        const parts = [
+            client && `Client: ${client}`,
+            region && `Region: ${region}`,
+            area && `Area: ${area}`,
+            location && `Location: ${location}`,
+        ].filter(Boolean);
+        return parts.length > 0 ? parts.join(" · ") : "—";
+    };
+
+    return (
+        <Modal showModal={!!unit} handleCloseModal={onClose} title="Movement History" size="md">
+            <Modal.Body>
+                <p className="text-sm text-gray-500 mb-4">
+                    Unit: <span className="font-medium">{unit?.unit}</span>
+                </p>
+                {loading ? (
+                    <LoadingSpinner />
+                ) : logs.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">
+                        No movement recorded yet.
+                    </p>
+                ) : (
+                    <div className="flex flex-col gap-3 max-h-[50vh] overflow-y-auto">
+                        {logs.map((log) => (
+                            <div
+                                key={log.id}
+                                className="border border-gray-200 rounded-md p-3"
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="font-semibold text-sm text-primary">
+                                        {MOVEMENT_ACTION_LABEL[log.action] || log.action}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {new Date(log.created_at).toLocaleString()}
+                                    </span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    From: {describe(log, "from")}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    To: {describe(log, "to")}
+                                </p>
+                                {log.changedByUser && (
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        By {log.changedByUser.name}
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </Modal.Body>
+        </Modal>
+    );
+};
+
 const SettingModal = ({
     setData,
     data,
@@ -669,6 +772,7 @@ const SettingModal = ({
     const [formData, setFormData] = useState({
         thresholdSetting: {},
         visibilitySetting: {},
+        requiredSetting: {},
         curve_percentage: 0,
     });
 
@@ -680,6 +784,33 @@ const SettingModal = ({
             setFields(data);
         };
         fetchFields();
+
+        // 'Required' disimpan per unit di tabel unit_fields (bukan JSON di data_units
+        // seperti threshold/visibility), jadi harus di-fetch terpisah per unit. Kalau
+        // pilih banyak unit sekaligus, pakai unit yang terakhir dipilih sebagai acuan
+        // nilai awal -- sama seperti threshold/visibility yang juga cuma ambil dari
+        // unit terakhir yang dipilih (lihat useEffect [formData?.selectedRows] di UnitTable).
+        const lastUnitId = selectedUnits?.[selectedUnits.length - 1];
+        if (lastUnitId) {
+            const fetchRequired = async () => {
+                try {
+                    const resp = await axios.get(
+                        route("unit.fields.get", { unit_id: lastUnitId }),
+                    );
+                    const requiredMap = {};
+                    (resp.data || []).forEach((field) => {
+                        requiredMap[field.id] = field.required;
+                    });
+                    setFormData((prev) => ({
+                        ...prev,
+                        requiredSetting: requiredMap,
+                    }));
+                } catch (e) {
+                    console.error(e);
+                }
+            };
+            fetchRequired();
+        }
 
         let defaultThresholdSetting = {};
         let defaultVisibilitySetting = {};
@@ -709,7 +840,7 @@ const SettingModal = ({
             visibilitySetting: visibilitySetting ?? defaultVisibilitySetting,
             curve_percentage: curvePercentage ?? 0,
         }));
-    }, [thresholdSetting, curvePercentage]);
+    }, [thresholdSetting, curvePercentage, selectedUnits]);
 
     const handleChange = (section, field, value) => {
         setFormData((prev) => ({
@@ -730,6 +861,20 @@ const SettingModal = ({
             [section]: {
                 ...prev[section],
                 [field]: value,
+            },
+        }));
+    };
+
+    // Toggle wajib-isi per field_id. Field dengan subfields cuma punya 1 field_id
+    // (punya induknya), jadi menoggle satu subfield ikut menoggle semua saudaranya
+    // -- sesuai unit_fields.required yang memang disimpan per field induk, bukan
+    // per subfield.
+    const handleClickRequired = (fieldId, value) => {
+        setFormData((prev) => ({
+            ...prev,
+            requiredSetting: {
+                ...prev.requiredSetting,
+                [fieldId]: value,
             },
         }));
     };
@@ -759,6 +904,8 @@ const SettingModal = ({
             // setSaving(false);
         }
     };
+    const unitList = Array.isArray(unitName) ? unitName : [unitName].filter(Boolean);
+
     return (
         <Modal
             showModal={isModal}
@@ -767,232 +914,293 @@ const SettingModal = ({
             size="xl"
         >
             <Modal.Body>
-                <div className="flex flex-col items-center gap-4">
-                    <span className="font-bold text-2xl text-center">
-                        {Array.isArray(unitName) && unitName?.length > 5
-                            ? unitName.slice(0, 5).join(", ") + ", ..."
-                            : unitName?.join(", ") || unitName}
-                    </span>
-                    <div className="flex items-center gap-2">
-                        <label className="font-medium">Curve %</label>
-                        <input
-                            type="number"
-                            min="0"
-                            max="200"
-                            step="0.01"
-                            value={formData?.curve_percentage ?? 0}
-                            onChange={(e) =>
-                                setFormData((prev) => ({
-                                    ...prev,
-                                    curve_percentage: e.target.value,
-                                }))
-                            }
-                            className="w-24 border border-gray-300 rounded px-2 py-1"
-                        />
-                        <span className="text-sm text-gray-500">
-                            (0% = no change, 200% = triple)
-                        </span>
+                <div className="flex flex-col gap-5">
+                    {/* Ringkasan: unit yang lagi diedit + kartu Curve % */}
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1 bg-[#F4F6FB] rounded-xl p-4">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                Editing {unitList.length || 1} unit
+                                {unitList.length !== 1 && "s"}
+                            </p>
+                            <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                                {unitList.slice(0, 12).map((name, i) => (
+                                    <span
+                                        key={i}
+                                        className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700 shadow-sm"
+                                    >
+                                        <FaCube className="text-primary text-[10px]" />
+                                        {name}
+                                    </span>
+                                ))}
+                                {unitList.length > 12 && (
+                                    <span className="text-sm text-gray-500 px-2 py-1">
+                                        +{unitList.length - 12} more
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="md:w-64 bg-primary rounded-xl p-4 text-white flex flex-col justify-between">
+                            <div className="flex items-center gap-2 mb-2">
+                                <FaPercent className="text-sm" />
+                                <p className="text-xs font-semibold uppercase tracking-wide">
+                                    Curve Adjustment
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="200"
+                                    step="0.01"
+                                    value={formData?.curve_percentage ?? 0}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            curve_percentage: e.target.value,
+                                        }))
+                                    }
+                                    className="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-white/50"
+                                />
+                                <span className="text-lg font-bold">%</span>
+                            </div>
+                            <p className="text-xs text-white/70 mt-2">
+                                0% = no change &middot; 200% = triple
+                            </p>
+                        </div>
                     </div>
-                    <div className="overflow-y-auto overflow-x-auto w-full max-h-[50vh] rounded-lg border">
-                    <table className="w-full h-full table-auto border-collapse [&_th]:border [&_th]:border-[#3a56b0] [&_td]:border [&_td]:border-gray-200">
-                        <thead className="bg-[#243F96] text-white z-10 shadow-sm w-full sticky top-0">
-                            <tr className="sticky top-0">
-                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[45%]">
-                                    Item
-                                </th>
-                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[45%]">
-                                    Input Threshold
-                                </th>
-                                <th className="font-semibold text-nowrap text-left px-6 py-4 w-[10%]">
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {fields
-                                .filter(
-                                    (item) =>
-                                        item.name !== "time" &&
-                                        item.name !== "remarks",
-                                )
-                                .flatMap((item) => {
-                                    const fields =
-                                        item.subfields.length > 0
-                                            ? item?.subfields
-                                            : [item];
-                                    return fields.map((field, idx) => {
-                                        return (
-                                            <tr
-                                                key={field.name + idx}
-                                                className={`${
-                                                    !formData.visibilitySetting[
-                                                        field.slug
-                                                    ]
-                                                        ? "bg-[#cecece]"
-                                                        : "bg-[#F9FAFB] hover:bg-[#F3F4F6]"
-                                                } border-b border-[#E4E7EC] transition-colors`}
-                                            >
-                                                {/* ITEM NAME */}
-                                                <td
-                                                    className={`py-6 px-6 font-medium text-[#101828] whitespace-nowrap ${
-                                                        !formData
-                                                            .visibilitySetting[
-                                                            field.slug
-                                                        ] && "text-gray-400"
+
+                    {/* Field settings */}
+                    <div className="overflow-y-auto overflow-x-auto max-h-[45vh] rounded-xl border border-gray-200">
+                        <table className="w-full border-collapse">
+                            <thead className="bg-gray-50 sticky top-0 z-10 border-b border-gray-200">
+                                <tr>
+                                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">
+                                        Field
+                                    </th>
+                                    <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">
+                                        Threshold
+                                    </th>
+                                    <th className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">
+                                        Visible
+                                    </th>
+                                    <th className="text-center text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">
+                                        Required
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {fields
+                                    .filter(
+                                        (item) =>
+                                            item.name !== "time" &&
+                                            item.name !== "remarks",
+                                    )
+                                    .flatMap((item) => {
+                                        const fields =
+                                            item.subfields.length > 0
+                                                ? item?.subfields
+                                                : [item];
+                                        // Semua subfield ikut field_id induknya -- required
+                                        // disimpan per DailyField, bukan per subfield.
+                                        const parentFieldId = item.id;
+                                        return fields.map((field, idx) => {
+                                            const isVisible =
+                                                formData.visibilitySetting[
+                                                    field.slug
+                                                ] ?? true;
+                                            const isRequired =
+                                                formData?.requiredSetting?.[
+                                                    parentFieldId
+                                                ] ?? true;
+
+                                            return (
+                                                <tr
+                                                    key={field.name + idx}
+                                                    className={`transition-colors ${
+                                                        isVisible
+                                                            ? "bg-white hover:bg-[#F9FAFC]"
+                                                            : "bg-gray-50/70"
                                                     }`}
                                                 >
-                                                    {field.name}
-                                                </td>
-
-                                                {/* INPUT THRESHOLD */}
-                                                <td className="px-6 py-4">
-                                                    <div className="flex gap-3">
-                                                        <input
-                                                            type="text"
-                                                            inputMode="decimal"
-                                                            placeholder="Threshold"
-                                                            disabled={
-                                                                !formData
-                                                                    .visibilitySetting[
-                                                                    field.slug
-                                                                ]
-                                                            }
-                                                            className={`w-[120px] h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition ${
-                                                                !formData
-                                                                    .visibilitySetting[
-                                                                    field.slug
-                                                                ] &&
-                                                                "text-gray-400"
+                                                    {/* FIELD NAME */}
+                                                    <td className="px-5 py-3.5">
+                                                        <span
+                                                            className={`font-medium text-sm ${
+                                                                isVisible
+                                                                    ? "text-gray-800"
+                                                                    : "text-gray-400"
                                                             }`}
-                                                            onChange={(e) =>
-                                                                handleChange(
-                                                                    "thresholdSetting",
-                                                                    field.slug,
-                                                                    {
-                                                                        value: e
-                                                                            .target
-                                                                            .value,
-                                                                    },
-                                                                )
-                                                            }
-                                                            value={
-                                                                formData
-                                                                    ?.thresholdSetting?.[
-                                                                    field.slug
-                                                                ]?.value || ""
-                                                            }
-                                                        />
-                                                        <select
-                                                            disabled={
-                                                                !formData
-                                                                    .visibilitySetting[
-                                                                    field.slug
-                                                                ]
-                                                            }
-                                                            className="w-[80px] h-[40px] border border-[#D0D5DD] rounded-lg px-2 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
-                                                            value={
-                                                                formData
-                                                                    ?.thresholdSetting?.[
-                                                                    field.slug
-                                                                ]?.type || ""
-                                                            }
-                                                            onChange={(e) =>
-                                                                handleChange(
-                                                                    "thresholdSetting",
-                                                                    field.slug,
-                                                                    {
-                                                                        type: e
-                                                                            .target
-                                                                            .value,
-                                                                    },
-                                                                )
-                                                            }
                                                         >
-                                                            {[
-                                                                {
-                                                                    label: "%",
-                                                                    value: "percentage",
-                                                                },
-                                                                {
-                                                                    label: "Number",
-                                                                    value: "number",
-                                                                },
-                                                            ].map((item) => (
-                                                                <option
-                                                                    key={
-                                                                        item.value
-                                                                    }
-                                                                    value={
-                                                                        item.value
-                                                                    }
-                                                                >
-                                                                    {item.label}
-                                                                </option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                </td>
+                                                            {field.name}
+                                                        </span>
+                                                    </td>
 
-                                                {/* Hide */}
-                                                <td className="px-6 py-4">
-                                                    <div className="">
-                                                        {formData
-                                                            ?.visibilitySetting?.[
-                                                            field.slug
-                                                        ] ? (
-                                                            <button
-                                                                onClick={(e) =>
-                                                                    handleClickVisibility(
-                                                                        "visibilitySetting",
+                                                    {/* THRESHOLD */}
+                                                    <td className="px-5 py-3.5">
+                                                        <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden w-fit focus-within:ring-2 focus-within:ring-primary/30">
+                                                            <input
+                                                                type="text"
+                                                                inputMode="decimal"
+                                                                placeholder="0"
+                                                                disabled={
+                                                                    !isVisible
+                                                                }
+                                                                className="w-20 px-3 py-2 text-sm text-[#344054] outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                                                                onChange={(e) =>
+                                                                    handleChange(
+                                                                        "thresholdSetting",
                                                                         field.slug,
-                                                                        !formData
-                                                                            ?.visibilitySetting?.[
-                                                                            field
-                                                                                .slug
-                                                                        ],
+                                                                        {
+                                                                            value: e
+                                                                                .target
+                                                                                .value,
+                                                                        },
                                                                     )
                                                                 }
-                                                                className="text-red-50 border border-transparent bg-success font-bold px-2 py-1 rounded-lg"
-                                                            >
-                                                                Active
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                onClick={(e) =>
-                                                                    handleClickVisibility(
-                                                                        "visibilitySetting",
+                                                                value={
+                                                                    formData
+                                                                        ?.thresholdSetting?.[
+                                                                        field
+                                                                            .slug
+                                                                    ]
+                                                                        ?.value ||
+                                                                    ""
+                                                                }
+                                                            />
+                                                            <select
+                                                                disabled={
+                                                                    !isVisible
+                                                                }
+                                                                className="border-l border-gray-200 bg-gray-50 text-sm px-2 py-2 text-[#344054] outline-none disabled:text-gray-400"
+                                                                value={
+                                                                    formData
+                                                                        ?.thresholdSetting?.[
+                                                                        field
+                                                                            .slug
+                                                                    ]?.type ||
+                                                                    ""
+                                                                }
+                                                                onChange={(e) =>
+                                                                    handleChange(
+                                                                        "thresholdSetting",
                                                                         field.slug,
-                                                                        !formData
-                                                                            ?.visibilitySetting?.[
-                                                                            field
-                                                                                .slug
-                                                                        ],
+                                                                        {
+                                                                            type: e
+                                                                                .target
+                                                                                .value,
+                                                                        },
                                                                     )
                                                                 }
-                                                                className="text-red-50 border border-transparent bg-danger font-bold px-2 py-1 rounded-lg"
                                                             >
-                                                                Hidden
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    });
-                                })}
-                        </tbody>
-                    </table>
-                </div>
-                <div>
-                    <button
-                        className="border border-transparent bg-primary text-white px-6 py-3 rounded-lg mt-4 hover:bg-blue-700 transition"
-                        onClick={() => handleSave()}
-                    >
-                        Save
-                    </button>
-                </div>
+                                                                {[
+                                                                    {
+                                                                        label: "%",
+                                                                        value: "percentage",
+                                                                    },
+                                                                    {
+                                                                        label: "Num",
+                                                                        value: "number",
+                                                                    },
+                                                                ].map((opt) => (
+                                                                    <option
+                                                                        key={
+                                                                            opt.value
+                                                                        }
+                                                                        value={
+                                                                            opt.value
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            opt.label
+                                                                        }
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* VISIBLE */}
+                                                    <td className="px-5 py-3.5 text-center">
+                                                        <button
+                                                            type="button"
+                                                            title={
+                                                                isVisible
+                                                                    ? "Visible -- click to hide"
+                                                                    : "Hidden -- click to show"
+                                                            }
+                                                            onClick={() =>
+                                                                handleClickVisibility(
+                                                                    "visibilitySetting",
+                                                                    field.slug,
+                                                                    !isVisible,
+                                                                )
+                                                            }
+                                                            className={`inline-flex items-center justify-center w-9 h-9 rounded-full border transition ${
+                                                                isVisible
+                                                                    ? "bg-success/10 border-success text-success"
+                                                                    : "bg-gray-100 border-gray-300 text-gray-400"
+                                                            }`}
+                                                        >
+                                                            {isVisible ? (
+                                                                <FaEye />
+                                                            ) : (
+                                                                <FaEyeSlash />
+                                                            )}
+                                                        </button>
+                                                    </td>
+
+                                                    {/* REQUIRED */}
+                                                    <td className="px-5 py-3.5 text-center">
+                                                        <button
+                                                            type="button"
+                                                            title={
+                                                                isRequired
+                                                                    ? "Required -- click to make optional"
+                                                                    : "Optional -- click to make required"
+                                                            }
+                                                            onClick={() =>
+                                                                handleClickRequired(
+                                                                    parentFieldId,
+                                                                    !isRequired,
+                                                                )
+                                                            }
+                                                            className={`inline-flex items-center justify-center w-9 h-9 rounded-full border transition ${
+                                                                isRequired
+                                                                    ? "bg-primary/10 border-primary text-primary"
+                                                                    : "bg-gray-100 border-gray-300 text-gray-400"
+                                                            }`}
+                                                        >
+                                                            <FaAsterisk className="text-[10px]" />
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        });
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </Modal.Body>
+            <Modal.Footer>
+                <div className="flex justify-end gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsModal(false)}
+                        className="border border-white/30 bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleSave()}
+                        className="border border-transparent bg-white text-primary font-semibold px-5 py-2 rounded-lg hover:bg-gray-100 transition"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            </Modal.Footer>
         </Modal>
     );
 };

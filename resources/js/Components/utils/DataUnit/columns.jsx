@@ -10,7 +10,8 @@ const columns = (
     lookups = {},
     onFieldChange = () => {},
     onSaveRow = () => {},
-    isBulk = false
+    isBulk = false,
+    onOpenHistory = null
 ) => {
     const editValue = (item, field) =>
         formData?.edits?.[item.unit_id]?.[field] ?? item[field] ?? "";
@@ -152,8 +153,8 @@ const columns = (
             },
         },
         {
-            name: "user",
-            header: "User",
+            name: "client",
+            header: "Client",
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "17%",
@@ -245,35 +246,13 @@ const columns = (
         },
         {
             name: "unit",
-            header: "Unit Name",
+            header: "Unit",
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "14%",
             Cell: (item) => {
                 if (isEdit) return textInput(item, "unit", "Unit Name");
                 return <div className="flex flex-col">{item.unit}</div>;
-            },
-        },
-        {
-            name: "unit_sn",
-            header: "Unit S/N",
-            headerClassName: "bg-primary text-white",
-            sortable: true,
-            width: "12%",
-            Cell: (item) => {
-                if (isEdit) return textInput(item, "unit_sn", "Unit S/N");
-                return <div className="flex flex-col">{item.unit_sn}</div>;
-            },
-        },
-        {
-            name: "old_sn",
-            header: "Old S/N",
-            headerClassName: "bg-primary text-white",
-            sortable: true,
-            width: "12%",
-            Cell: (item) => {
-                if (isEdit) return textInput(item, "old_sn", "Old S/N");
-                return <div className="flex flex-col">{item.old_sn}</div>;
             },
         },
         {
@@ -400,6 +379,31 @@ const columns = (
                 );
             },
         },
+        ...(onOpenHistory
+            ? [
+                  {
+                      name: "history",
+                      header: "",
+                      headerClassName: "bg-primary text-white text-center",
+                      sortable: false,
+                      cellClassName: "text-center",
+                      width: "5%",
+                      Cell: (item) => (
+                          <button
+                              type="button"
+                              title="Movement history"
+                              className="border border-gray-300 bg-white text-gray-600 px-2 py-1 rounded-md text-sm"
+                              onClick={(e) => {
+                                  e.stopPropagation();
+                                  onOpenHistory(item);
+                              }}
+                          >
+                              History
+                          </button>
+                      ),
+                  },
+              ]
+            : []),
         {
             name: "checkbox",
             Header: (data) => {
@@ -442,7 +446,13 @@ const columns = (
         case "checkbox":
             return dataListCheckbox;
         case "unitList":
-            return dataUnitItem;
+            // Kolom "save" cuma ada isinya pas mode edit aktif -- di luar itu dia
+            // selalu kosong tapi tetap makan tempat & border-nya kelihatan aneh
+            // (bordered tapi tanpa isi/header). Cukup jangan render kolomnya sama
+            // sekali kalau lagi tidak edit.
+            return isEdit
+                ? dataUnitItem
+                : dataUnitItem.filter((col) => col.name !== "save");
         default:
             return colItem;
     }

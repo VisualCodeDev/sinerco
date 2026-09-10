@@ -88,4 +88,10 @@ class UnitPosition extends Model
         return $this->belongsTo(Workshop::class, 'workshop_id', 'workshop_id');
     }
 
+    // relasi ke kontrak untuk posisi unit ini (1 unit_position = 1 kontrak)
+    public function contract()
+    {
+        return $this->hasOne(Contract::class, 'unit_position_id', 'id');
+    }
+
 }

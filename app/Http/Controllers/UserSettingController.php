@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\UserSetting;
 use Hash;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Log;
 
@@ -82,7 +83,20 @@ class UserSettingController extends Controller
 
         $user = User::create($validated);
 
-        return response()->json(['text' => 'User Added', 'type' => 'success'], 200);
+        return response()->json([
+            'text' => 'User Added',
+            'type' => 'success',
+            // Dipakai frontend buat ganti sentinel id baris draft dengan
+            // user_id sungguhan setelah tersimpan (lihat handleSaveRow di
+            // UserList.jsx) -- tanpa ini baris draft tetap "nyangkut" pakai id
+            // palsu, jadi tombol Detail/Delete baris itu tidak akan berfungsi.
+            'data' => [
+                'id' => $user->user_id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role_id' => $user->role_id,
+            ],
+        ], 200);
     }
 
     // Tampilkan halaman daftar user
@@ -204,12 +218,24 @@ class UserSettingController extends Controller
     {
         $request->validate([
             'name' => 'sometimes|string',
+            'email' => [
+                'sometimes',
+                'email',
+                Rule::unique('users', 'email')->ignore($user_id, 'user_id'),
+            ],
             'role' => 'sometimes|numeric',
             'password' => 'nullable|string|min:8'
         ]);
         $user = User::find($user_id);
-        // Hanya update password jika diisi, kalau kosong pakai password lama
-        $user->update(['name' => $request->name, 'role_id' => $request->role, 'password' => $request->password != '' ? Hash::make($request->password) : $user->password]);
+        // Hanya update password jika diisi, kalau kosong pakai password lama.
+        // email/name/role dibolehkan sebagian (super_admin bisa update email user lain
+        // dari sini, bukan cuma email sendiri lewat halaman Profile).
+        $user->update([
+            'name' => $request->name ?? $user->name,
+            'email' => $request->email ?? $user->email,
+            'role_id' => $request->role ?? $user->role_id,
+            'password' => $request->password != '' ? Hash::make($request->password) : $user->password,
+        ]);
         return response()->json(['text' => 'User Edit Succesfully', 'type' => 'success'], 200);
     }
     /**

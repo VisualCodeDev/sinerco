@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -94,6 +95,31 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->update(['whatsAppNum' => $val['whatsAppNum']]);
         return response()->json(['type' => 'success', 'text' => 'Phone number updated']);
+    }
+
+    // Update nama & email user sendiri. Selalu update user yang sedang login
+    // (bukan user_id dari request) supaya tidak bisa mengubah data user lain (IDOR).
+    public function updateInfo(Request $request)
+    {
+        $user = $request->user();
+
+        $val = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique(User::class, 'email')->ignore($user->user_id, 'user_id'),
+            ],
+        ]);
+
+        $user->update([
+            'name' => $val['name'],
+            'email' => $val['email'],
+        ]);
+
+        return response()->json(['type' => 'success', 'text' => 'Profile updated', 'data' => $user->fresh()]);
     }
 
     // Update password user, wajib memasukkan password lama yang benar

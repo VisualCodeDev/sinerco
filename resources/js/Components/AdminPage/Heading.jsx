@@ -14,7 +14,7 @@ import {
     FaCog,
     FaWarehouse,
     FaFile,
-    FaDatabase,
+    FaTruckMoving,
 } from "react-icons/fa";
 import { useAuth } from "../Auth/auth";
 import LoadingSpinner from "../Loading";
@@ -24,6 +24,7 @@ import { BsFillBellFill, BsFillBellSlashFill } from "react-icons/bs";
 import { getSetting } from "../db";
 import { RequestModal } from "../RequestComponents/RequestModal";
 import HorseImg from "../../../../public/img/horse.png";
+import DatabaseImg from "../../../../public/img/database.svg";
 const Heading = ({ children, alert, setAlert }) => {
     const [isLoading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -85,9 +86,14 @@ const Heading = ({ children, alert, setAlert }) => {
             href: route("input.field.setting"),
         },
         database: {
-            icon: <FaDatabase />,
+            icon: <img src={DatabaseImg} alt="Database" width="20" height="20" />,
             label: "Database",
             href: route("database"),
+        },
+        movementLog: {
+            icon: <FaTruckMoving />,
+            label: "Unit Movement Log",
+            href: route("unit.movement.log.page"),
         },
         unitList: {
             icon: <img src={HorseImg} alt="Unit List" width="20" height="20" />,
@@ -128,19 +134,9 @@ const Heading = ({ children, alert, setAlert }) => {
             label: "SD / STBY Event",
             href: route("request"),
         },
-        // classifiedContract: {
-        //     icon: <FaNewspaper />,
-        //     label: "Classified Contract",
-        //     href: route("daily.list"),
-        // },
-        // contract: {
-        //     icon: <FaSignature />,
-        //     label: "Contract",
-        //     href: route("daily.list"),
-        // },
         accountList: {
             icon: <FaUserFriends />,
-            label: "Account list",
+            label: "Account Data",
             href: route("allocation.setting"),
             // submenu: [
             //     {
@@ -185,11 +181,8 @@ const Heading = ({ children, alert, setAlert }) => {
             menu.eventHistory,
             menu.unitList,
             menu.unitLocationSetting,
-            menu.area,
-            // menu.inputSetting,
-            // menu.inputField,
+            menu.movementLog,
             menu.accountList,
-            // menu.editUnit,
             menu.profile,
         ];
     }

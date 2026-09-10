@@ -11,6 +11,11 @@ import { router } from "@inertiajs/react";
 import React, { use, useEffect, useState } from "react";
 import { FaAngleDown, FaNewspaper, FaPlus, FaUser } from "react-icons/fa";
 
+// Sentinel id buat baris draft "Add User" -- sama pola dengan NEW_UNIT_ID di
+// UnitTable/List of Unit: baris kosong disisipkan langsung di tabel, diisi
+// user, lalu di-Save -- bukan navigasi ke halaman terpisah.
+const NEW_USER_ID = "__new_user__";
+
 const UserList = () => {
     const [formData, setFormData] = useState({
         selectedRows: [],
@@ -24,6 +29,15 @@ const UserList = () => {
         useState(false);
     const [filteredUser, setFilteredUser] = useState();
     const { addToast } = useToast();
+
+    // Inline row-edit mode (Name/Email/Role jadi input/select langsung di
+    // tabel + tombol Save per baris) -- pola yang sama dengan UnitTable/List
+    // of Unit, terpisah dari mode bulk-select (checkbox) yang sudah ada.
+    const [edit, setEdit] = useState(false);
+    const [edits, setEdits] = useState({});
+    const [newUserId, setNewUserId] = useState(null);
+    const [deleteTarget, setDeleteTarget] = useState(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         const fetch = async () => {
@@ -88,6 +102,163 @@ const UserList = () => {
         });
     };
 
+    const handleFieldChange = (id, field, value) => {
+        setEdits((prev) => ({
+            ...prev,
+            [id]: { ...(prev[id] || {}), [field]: value },
+        }));
+    };
+
+    const handleAddRow = () => {
+        if (users.some((u) => u.id === NEW_USER_ID)) return;
+        setEdit(true);
+        setNewUserId(NEW_USER_ID);
+        setUsers((prev) => [
+            {
+                id: NEW_USER_ID,
+                name: "",
+                email: "",
+                role: "",
+                role_id: "",
+                areas: "",
+            },
+            ...(prev || []),
+        ]);
+    };
+
+    const handleCancelNewRow = () => {
+        setUsers((prev) => prev.filter((u) => u.id !== NEW_USER_ID));
+        setEdits((prev) => {
+            const next = { ...prev };
+            delete next[NEW_USER_ID];
+            return next;
+        });
+        setNewUserId(null);
+    };
+
+    const handleToggleEdit = () => {
+        setEdit((prev) => {
+            if (prev) handleCancelNewRow();
+            return !prev;
+        });
+        setEdits({});
+    };
+
+    const handleSaveRow = async (id) => {
+        const rowEdits = edits[id];
+        if (!rowEdits) return;
+
+        if (id === NEW_USER_ID) {
+            if (!rowEdits.name?.trim() || !rowEdits.email?.trim() || !rowEdits.role_id || !rowEdits.password) {
+                return addToast({
+                    type: "error",
+                    text: "Name, email, role, and password are required.",
+                });
+            }
+            try {
+                const resp = await axios.post(route("user.add"), {
+                    name: rowEdits.name.trim(),
+                    email: rowEdits.email.trim(),
+                    password: rowEdits.password,
+                    role_id: rowEdits.role_id,
+                });
+                addToast(resp?.data);
+                const roleName = roles.find(
+                    (r) => String(r.id) === String(rowEdits.role_id),
+                )?.name;
+                const createdId = resp?.data?.data?.id;
+                setUsers((prev) =>
+                    prev.map((u) =>
+                        u.id === NEW_USER_ID
+                            ? {
+                                  ...u,
+                                  id: createdId ?? u.id,
+                                  name: rowEdits.name.trim(),
+                                  email: rowEdits.email.trim(),
+                                  role: roleName,
+                                  role_id: rowEdits.role_id,
+                              }
+                            : u,
+                    ),
+                );
+                setNewUserId(null);
+                setEdits((prev) => {
+                    const next = { ...prev };
+                    delete next[NEW_USER_ID];
+                    return next;
+                });
+            } catch (err) {
+                console.error(err);
+                addToast({
+                    type: "error",
+                    text:
+                        err?.response?.data?.errors?.email?.[0] ||
+                        err?.response?.data?.message ||
+                        "Failed to add user.",
+                });
+            }
+            return;
+        }
+
+        try {
+            const resp = await axios.post(route("user.edit", id), {
+                name: rowEdits.name,
+                email: rowEdits.email,
+                role: rowEdits.role_id,
+            });
+            addToast(resp?.data);
+            const roleName = roles.find(
+                (r) => String(r.id) === String(rowEdits.role_id ?? users.find((u) => u.id === id)?.role_id),
+            )?.name;
+            setUsers((prev) =>
+                prev.map((u) =>
+                    u.id === id
+                        ? {
+                              ...u,
+                              ...rowEdits,
+                              role: roleName ?? u.role,
+                          }
+                        : u,
+                ),
+            );
+            setEdits((prev) => {
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+        } catch (err) {
+            console.error(err);
+            addToast({
+                type: "error",
+                text:
+                    err?.response?.data?.errors?.email?.[0] ||
+                    err?.response?.data?.message ||
+                    "Failed to update user.",
+            });
+        }
+    };
+
+    const handleDeleteUser = async () => {
+        if (!deleteTarget) return;
+        setDeleting(true);
+        try {
+            const resp = await axios.post(route("user.bulkDelete"), {
+                users: [deleteTarget.id],
+            });
+            addToast(resp?.data);
+            setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
+            setDeleteTarget(null);
+        } catch (err) {
+            console.error(err);
+            addToast({
+                type: "error",
+                text: err?.response?.data?.message || "Failed to delete user.",
+            });
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     if (loading) {
         return <LoadingSpinner />;
     }
@@ -97,6 +268,14 @@ const UserList = () => {
         handleSelectAll,
         handleCheckItem,
         onRowClick,
+        isEdit: edit,
+        edits,
+        roles,
+        newRowId: newUserId,
+        handleFieldChange,
+        handleSaveRow,
+        onDeleteUser: (item) => setDeleteTarget(item),
+        handleCancelNewRow,
     });
 
     const handleSubmit = async ({ type }) => {
@@ -161,7 +340,7 @@ const UserList = () => {
     return (
         <PageLayout>
             <TableComponent
-                handleNew={route("user.new")}
+                handleNew={handleAddRow}
                 addNewItem={true}
                 newItemPlaceholder={"Add User"}
                 height={"55vh"}
@@ -172,7 +351,20 @@ const UserList = () => {
                 columns={columns}
                 data={users}
                 filterUserRole={true}
-                onRowClick={handleCheckItem}
+                onRowClick={edit ? undefined : handleCheckItem}
+                // NOTE: TableComponent's `edit` prop is a DIFFERENT, older toggle --
+                // for isUserList it gates the bulk-select footer (Edit
+                // Location/Delete/Reset), unrelated to our new per-row inline edit
+                // (`edit` state above). Invert it so that footer (which needs the
+                // checkbox column, hidden below) hides while inline edit is on,
+                // and keeps behaving exactly as before otherwise.
+                edit={!edit}
+                secondaryAction={{
+                    label: "Edit Users",
+                    activeLabel: "Done",
+                    active: edit,
+                    onClick: handleToggleEdit,
+                }}
             />
             {editUserLocationModal && (
                 <EditUserLocationModal
@@ -216,6 +408,41 @@ const UserList = () => {
                     </Modal.Footer>
                 </Modal>
             )}
+
+            {/* Delete confirmation for a single row's Delete button (inline edit mode) */}
+            <Modal
+                showModal={!!deleteTarget}
+                handleCloseModal={() => setDeleteTarget(null)}
+                title="Delete User"
+                size="sm"
+            >
+                <Modal.Body>
+                    <p>
+                        Are you sure you want to delete{" "}
+                        <span className="font-semibold">{deleteTarget?.name}</span>?
+                        This action cannot be undone.
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            type="button"
+                            className="border border-gray-300 bg-white text-gray-700 px-4 py-2 rounded-md"
+                            onClick={() => setDeleteTarget(null)}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            className="border border-transparent bg-danger text-white px-4 py-2 rounded-md disabled:opacity-40"
+                            disabled={deleting}
+                            onClick={handleDeleteUser}
+                        >
+                            Delete
+                        </button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
         </PageLayout>
     );
 };
@@ -323,20 +550,22 @@ const EditUserLocationModal = ({
         return <LoadingSpinner />;
     }
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <TableComponent
-                title={"Allocation"}
-                subtitle={selectedUsers.map((u) => u.name).join(", ")}
-                height={"55vh"}
-                isModal={true}
-                handleClose={() => setModal(false)}
-                columns={columns}
-                data={units}
-                isForm={true}
-                handleSubmit={handleSubmit}
-                submitPlaceholder={"Submit"}
-                onRowClick={handleCheckItem}
-            />
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+            <div className="w-full max-w-5xl">
+                <TableComponent
+                    title={"Allocation"}
+                    subtitle={selectedUsers.map((u) => u.name).join(", ")}
+                    height={"55vh"}
+                    isModal={true}
+                    handleClose={() => setModal(false)}
+                    columns={columns}
+                    data={units}
+                    isForm={true}
+                    handleSubmit={handleSubmit}
+                    submitPlaceholder={"Submit"}
+                    onRowClick={handleCheckItem}
+                />
+            </div>
         </div>
     );
 };

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UnitPosition;
 use App\Models\Workshop;
+use App\Services\UnitMovementLogger;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
@@ -75,7 +77,17 @@ class WorkshopController extends Controller
      */
     public function update(Request $request, Workshop $workshop)
     {
-        //
+        $val = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $workshop->update(['name' => $val['name']]);
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Workshop updated.',
+            'data' => $workshop->fresh(),
+        ]);
     }
 
     /**
@@ -83,6 +95,24 @@ class WorkshopController extends Controller
      */
     public function destroy(Workshop $workshop)
     {
-        //
+        // Unit yang masih ditempatkan di workshop ini jangan sampai jadi yatim
+        // (workshop_id nyantol ke workshop yang sudah tidak ada) -- lepas dulu
+        // posisinya sebelum workshop-nya dihapus. Kalau tidak dilepas dulu, FK
+        // cascade di unit_positions.workshop_id bakal ikut MENGHAPUS baris
+        // posisi unit itu sendiri, bukan cuma melepas workshop-nya.
+        $unitIds = UnitPosition::where('workshop_id', $workshop->workshop_id)->pluck('unit_id')->all();
+        $before = UnitMovementLogger::snapshot($unitIds);
+        UnitPosition::where('workshop_id', $workshop->workshop_id)->update([
+            'workshop_id' => null,
+            'position_type' => null,
+        ]);
+        UnitMovementLogger::commit($before, 'remove_client');
+
+        $workshop->delete();
+
+        return response()->json([
+            'type' => 'success',
+            'text' => 'Workshop deleted.',
+        ]);
     }
 }

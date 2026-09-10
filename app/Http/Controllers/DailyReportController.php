@@ -46,6 +46,30 @@ class DailyReportController extends Controller
         return [$performance, $performance24h];
     }
 
+    // Ambil map slug field -> wajib diisi atau tidak (dari unit_fields.required),
+    // dipakai buat bangun rule validasi dinamis di setReport/editReport. Subfield
+    // tidak punya kolom 'required' sendiri, jadi ikut nilai required field induknya.
+    // Kalau belum ada baris unit_fields untuk field itu, default-nya WAJIB (aman,
+    // sama seperti behavior lama sebelum fitur ini ada).
+    private function getRequiredFieldMap($unitId): array
+    {
+        $map = [];
+        UnitField::where('unit_id', $unitId)
+            ->with('fields.subfields')
+            ->get()
+            ->each(function ($uf) use (&$map) {
+                $isRequired = (bool) $uf->required;
+                $slug = $uf->fields?->slug;
+                if ($slug) {
+                    $map[$slug] = $isRequired;
+                }
+                foreach ($uf->fields?->subfields ?? [] as $sub) {
+                    $map[$sub->slug] = $isRequired;
+                }
+            });
+        return $map;
+    }
+
     // Mengambil data laporan harian sebuah unit beserta field yang perlu ditampilkan
     public function getDailyReport(Request $request)
     {
@@ -188,12 +212,19 @@ class DailyReportController extends Controller
 
         $request->merge(['data' => $data]);
 
-        // Bangun rule validasi secara dinamis berdasarkan field yang dikirim
+        // Bangun rule validasi secara dinamis berdasarkan field yang dikirim,
+        // dan wajib/tidaknya tiap field sesuai unit_fields.required unit ini.
+        $unitIdForRules = UnitPosition::find($unit_position_id)?->unit_id;
+        $requiredMap = $unitIdForRules ? $this->getRequiredFieldMap($unitIdForRules) : [];
+
         $rules = [];
         foreach ($fieldsToNormalize as $field) {
-            $rules["data.$field"] = in_array($field, ['date', 'time'])
-                ? 'required|string'
-                : 'required|numeric';
+            if (in_array($field, ['date', 'time'])) {
+                $rules["data.$field"] = 'required|string';
+                continue;
+            }
+            $isRequired = $requiredMap[$field] ?? true;
+            $rules["data.$field"] = ($isRequired ? 'required' : 'nullable') . '|numeric';
         }
 
         $validatedData = $request->validate($rules);
@@ -306,12 +337,18 @@ class DailyReportController extends Controller
         // Gabungkan hasil normalisasi ke request->data
         $request->merge(['data' => $data]);
 
-        // 🔍 Validasi dinamis
+        // 🔍 Validasi dinamis (wajib/tidaknya tiap field ikut unit_fields.required)
+        $unitIdForRules = UnitPosition::find($request->unit_position_id)?->unit_id;
+        $requiredMap = $unitIdForRules ? $this->getRequiredFieldMap($unitIdForRules) : [];
+
         $rules = [];
         foreach ($fieldsToNormalize as $field) {
-            $rules["data.$field"] = in_array($field, ['date', 'time'])
-                ? 'required|string'
-                : 'required|numeric';
+            if (in_array($field, ['date', 'time'])) {
+                $rules["data.$field"] = 'required|string';
+                continue;
+            }
+            $isRequired = $requiredMap[$field] ?? true;
+            $rules["data.$field"] = ($isRequired ? 'required' : 'nullable') . '|numeric';
         }
 
         // id boleh kosong, karena bisa record baru

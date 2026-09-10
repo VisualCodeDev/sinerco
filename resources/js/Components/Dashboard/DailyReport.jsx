@@ -10,7 +10,6 @@ import {
     TimeInput,
     DateParser,
 } from "../utils/dashboard-util";
-import Card from "../Card";
 import { useAuth } from "../Auth/auth";
 import { FaPen, FaFileExport } from "react-icons/fa";
 import Modal from "../Modal";
@@ -271,12 +270,17 @@ const DailyReport = (props) => {
 
 const ExportModal = (props) => {
     const { setClick, list, data, unitData } = props;
+    const { addToast } = useToast();
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [checkedItems, setCheckedItems] = useState([]);
+    // "range" = pilih tanggal awal/akhir bebas, "month" = pilih 1 bulan penuh
+    const [dateMode, setDateMode] = useState("range");
     const [selectedDate, setSelectedDate] = useState({
         start: "",
         end: "",
     });
+    const [selectedMonth, setSelectedMonth] = useState("");
+    const [generating, setGenerating] = useState(false);
 
     useEffect(() => {
         if (checkedItems.length === list.length) {
@@ -320,72 +324,137 @@ const ExportModal = (props) => {
         return dateArray;
     };
 
+    // Bulan dipilih -> hitung tanggal 1 s/d tanggal terakhir bulan itu, supaya
+    // logic fetch/export di bawah tetap sama-sama pakai start/end seperti mode range.
+    const monthToRange = (monthStr) => {
+        const [year, month] = monthStr.split("-").map(Number);
+        const lastDay = new Date(year, month, 0).getDate();
+        // Format manual dari komponen tanggal LOKAL, bukan lewat toISOString()
+        // (yang konversi ke UTC dan bisa geser tanggal mundur 1 hari untuk
+        // timezone UTC+ seperti WIB -- misal 1 Feb jadi kebaca 31 Jan).
+        const pad = (n) => String(n).padStart(2, "0");
+        return {
+            start: `${year}-${pad(month)}-01`,
+            end: `${year}-${pad(month)}-${pad(lastDay)}`,
+        };
+    };
+
     const handleGenerate = async () => {
+        const { start, end } =
+            dateMode === "month"
+                ? monthToRange(selectedMonth)
+                : selectedDate;
+
+        if (dateMode === "month" && !selectedMonth) {
+            addToast({ type: "error", text: "Please choose a month." });
+            return;
+        }
+        if (dateMode === "range" && (!start || !end)) {
+            addToast({ type: "error", text: "Please choose both dates." });
+            return;
+        }
+
+        setGenerating(true);
         try {
-            const { start, end } = selectedDate;
             const res = await fetch(
                 `/api/daily-report?id=${unitData.unit_position_id}&start=${start}&end=${end}&unit_id=${unitData.unit_id}`,
             );
             const data = await res.json();
             const range = getDateRange(start, end);
             await ExportXlsm("Report.xlsx", data, range, unitData);
+            setClick(false);
         } catch (err) {
             console.error("❌ Gagal ambil data:", err);
+            addToast({ type: "error", text: "Failed to generate export." });
+        } finally {
+            setGenerating(false);
         }
     };
+
     return (
-        <div className="bg-primary w-[80%] md:w-1/3 rounded-xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[100]  ">
-            <Card>
-                <Card.Header>
-                    <div className="flex items-center justify-between">
-                        Export to Excel
+        <Modal
+            showModal
+            handleCloseModal={() => setClick(false)}
+            title="Export to Excel"
+            size="sm"
+        >
+            <Modal.Body>
+                <div className="flex flex-col gap-4">
+                    {/* Toggle Range vs Month */}
+                    <div className="flex gap-2 justify-center">
                         <button
-                            onClick={() => setClick(false)}
-                            className="font-semibold text-danger border border-white/30 bg-white/10 p-2"
+                            type="button"
+                            onClick={() => setDateMode("range")}
+                            className={`px-4 py-1.5 rounded-full border text-sm font-medium ${
+                                dateMode === "range"
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-white text-gray-600 border-gray-300"
+                            }`}
                         >
-                            x
+                            Date Range
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDateMode("month")}
+                            className={`px-4 py-1.5 rounded-full border text-sm font-medium ${
+                                dateMode === "month"
+                                    ? "bg-primary text-white border-primary"
+                                    : "bg-white text-gray-600 border-gray-300"
+                            }`}
+                        >
+                            Month
                         </button>
                     </div>
-                </Card.Header>
-                <Card.Body>
-                    <div className="font-semibold mb-4 text-center">
-                        <p>Select Date to Export:</p>
-                    </div>
-                    <div className="flex gap-3 items-center justify-center mb-5">
-                        <input
-                            className="rounded-full py-1 px-3"
-                            type="date"
-                            value={selectedDate?.start}
-                            onChange={(e) =>
-                                handleSelectDate(["start"], e.target.value)
-                            }
-                        />
-                        -
-                        <input
-                            className="rounded-full py-1 px-3"
-                            type="date"
-                            value={selectedDate?.end}
-                            onChange={(e) =>
-                                handleSelectDate(["end"], e.target.value)
-                            }
-                        />
-                    </div>
-                </Card.Body>
-                <Card.Footer>
-                    <div className="flex gap-2 items-center justify-end">
-                        <button
-                            onClick={
-                                () => handleGenerate()
-                                // exportToExcel("Report.xlsx", data, checkedItems)
-                            }
-                            className="text-white border border-white/30 bg-white/10 rounded px-2 py-1"
-                        >
-                            Export to Excel
-                        </button>
-                    </div>
-                </Card.Footer>
-            </Card>
-        </div>
+
+                    {dateMode === "range" ? (
+                        <div className="flex gap-3 items-center justify-center">
+                            <input
+                                className="border border-gray-300 rounded-full py-1.5 px-3"
+                                type="date"
+                                value={selectedDate?.start}
+                                onChange={(e) =>
+                                    handleSelectDate(
+                                        ["start"],
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                            <span>-</span>
+                            <input
+                                className="border border-gray-300 rounded-full py-1.5 px-3"
+                                type="date"
+                                value={selectedDate?.end}
+                                onChange={(e) =>
+                                    handleSelectDate(["end"], e.target.value)
+                                }
+                            />
+                        </div>
+                    ) : (
+                        <div className="flex justify-center">
+                            <input
+                                className="border border-gray-300 rounded-full py-1.5 px-3"
+                                type="month"
+                                value={selectedMonth}
+                                onChange={(e) =>
+                                    setSelectedMonth(e.target.value)
+                                }
+                            />
+                        </div>
+                    )}
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <div className="flex gap-2 items-center justify-end">
+                    <button
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="text-white border border-white/30 bg-white/10 rounded px-4 py-1.5 disabled:opacity-40"
+                    >
+                        {generating ? "Generating..." : "Export to Excel"}
+                    </button>
+                </div>
+            </Modal.Footer>
+        </Modal>
     );
 };
 

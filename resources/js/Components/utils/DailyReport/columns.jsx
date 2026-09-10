@@ -778,6 +778,9 @@ const list = ({
                             className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {item?.name}
+                            {item?.required && (
+                                <span className="text-danger"> *</span>
+                            )}
                         </label>
 
                         <div className="flex gap-4 flex-wrap">
@@ -820,6 +823,9 @@ const list = ({
                                     >
                                         <label className="text-sm">
                                             {sub?.name}
+                                            {item?.required && (
+                                                <span className="text-danger"> *</span>
+                                            )}
                                         </label>
                                         <input
                                             required
@@ -876,6 +882,9 @@ const list = ({
                             className="font-medium lg:md:text-base text-sm lg:md:mb-1.5 mb-1"
                         >
                             {item?.name}{" "}
+                            {item?.required && (
+                                <span className="text-danger">*</span>
+                            )}
                         </label>
                         <input
                             required

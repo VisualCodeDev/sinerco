@@ -11,6 +11,7 @@ use App\Models\Area;
 use App\Models\UnitField;
 use App\Models\UnitPosition;
 use App\Models\Workshop;
+use App\Services\UnitMovementLogger;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -172,32 +173,90 @@ class DataUnitController extends Controller
         return response()->json($data);
     }
 
+    // Data unit itu sendiri (status, client, area, dst) SAMA untuk semua orang yang
+    // boleh lihat unit itu -- yang beda cuma UNIT MANA SAJA yang boleh dilihat tiap
+    // user (izin akses), bukan datanya. Jadi cache-nya dipisah jadi 2 lapis:
+    // 1. Cache SATU dataset besar berisi SEMUA unit (di bawah ini), dipakai bareng-
+    //    bareng oleh semua user -- bukan digandakan per user seperti sebelumnya.
+    // 2. Baru difilter di PHP (bukan cache lagi) sesuai unit mana yang diizinkan
+    //    untuk user yang sedang minta.
+    // Ini lebih hemat daripada cache per-user (yang isinya sering duplikat kalau
+    // banyak super_admin lihat data yang sama), dan juga lebih murah daripada cache
+    // per-unit satu-satu (karena CACHE_STORE di .env masih "file" -- baca N file
+    // kecil kemungkinan malah lebih lambat daripada 1 query sekalian).
+    private static function getAllUnitsFlat()
+    {
+        $temp = DataUnit::with([
+            'UnitPositions.client' => function ($q) {
+                $q->select(['client_id', 'name', 'gmt_offset']);
+            },
+            'UnitPositions.location.area.region',
+            'UnitPositions.region',
+            'UnitPositions.latestReport',
+            'UnitPositions.workshop' => function ($q) {
+                $q->select(['workshop_id', 'name']);
+            },
+        ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
+
+        return $temp->map(function ($unit) {
+            return [
+                'unit_id' => $unit->unit_id,
+                'unit' => $unit->unit,
+                'unit_sn' => $unit->unit_sn,
+                'old_sn' => $unit->old_sn,
+                'thresholdSetting' => $unit->thresholdSetting,
+                'visibilitySetting' => $unit->visibilitySetting,
+                'status' => $unit->status,
+                'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
+                'client_id' => $unit->UnitPositions?->client_id,
+                'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
+                'location_id' => $unit->UnitPositions?->location_id,
+                'location' => $unit->UnitPositions?->location?->location ?? null,
+                'area' => $unit->UnitPositions?->location?->area?->area ?? null,
+                'area_id' => $unit->UnitPositions?->location?->area_id ?? null,
+                'region' => $unit->UnitPositions?->region?->name ?? $unit->UnitPositions?->location?->area?->region?->name ?? null,
+                'region_id' => $unit->UnitPositions?->region_id ?? $unit->UnitPositions?->location?->area?->region_id ?? null,
+                'unit_position_id' => $unit->UnitPositions?->id ?? null,
+                'latest_report' => $unit->UnitPositions?->latestReport,
+            ];
+        });
+    }
+
     // Mengambil status seluruh unit yang diizinkan
-    // Endpoint ini di-polling tiap 10 detik oleh dashboard Home.jsx, dan query-nya
-    // berat (join unit+client+workshop+location+area+region+latestReport). Di-cache
-    // singkat (5 detik) SUPAYA tidak semua polling dari banyak user memicu query
-    // database yang sama berulang-ulang dalam rentang waktu yang sangat dekat.
-    //
-    // Cache di-key per user_id (BUKAN per role) karena getPermittedUnit() hasilnya
-    // beda per user (non-admin cuma lihat unit yang di-assign ke dia, bukan semua
-    // unit dengan role yang sama) -- kalau key-nya cuma role, user lain bisa
-    // "kebagian" cache milik user lain dan lihat unit yang bukan miliknya.
-    //
-    // TTL 5 detik sengaja dibuat pendek: cukup untuk meredam lonjakan request
-    // yang datang hampir bersamaan (banyak tab/banyak user), tapi tidak sampai
-    // bikin status unit terasa basi di dashboard. Tidak ada invalidasi manual
-    // di sini (tidak di-clear saat ada report/request baru) -- data cukup
-    // "menunggu" sampai cache-nya kadaluarsa sendiri, jadi tidak perlu diingat-ingat
-    // untuk clear cache di setiap endpoint lain yang mengubah status unit.
+    // Endpoint ini di-polling tiap 10 detik oleh dashboard Home.jsx. Query dasarnya
+    // (getAllUnitsFlat) di-cache 5 detik dan dipakai bareng oleh SEMUA user -- baru
+    // setelah itu difilter sesuai unit mana yang boleh dilihat user yang sedang login.
     public function getUnitStatus()
     {
-        $userId = Auth::id();
-        $data = Cache::remember("unit-status:{$userId}", 5, function () {
-            return $this->getPermittedUnit()->map(function ($item) {
-                return $item;
-            });
+        $user = Auth::user()?->load('roleData');
+        if (!$user) {
+            return response()->json([]);
+        }
+
+        $allUnits = Cache::remember('unit-status:all-units', 5, function () {
+            return self::getAllUnitsFlat();
         });
-        return response()->json($data);
+
+        // Super admin boleh lihat semua unit -- tidak perlu difilter lagi
+        if ($user->roleData?->name === 'super_admin') {
+            return response()->json($allUnits->values());
+        }
+
+        // Non-admin: cari unit_id mana saja yang di-assign ke user ini (query ringan,
+        // cuma ambil id, bukan join berat seperti getAllUnitsFlat), lalu filter dataset
+        // yang sudah di-cache di atas -- tidak query ulang ke database untuk datanya.
+        $permittedUnitIds = $user->UnitPositions()
+            ->with(['unit:unit_id'])
+            ->get()
+            ->pluck('unit.unit_id')
+            ->filter()
+            ->values();
+
+        $data = $allUnits->filter(function ($item) use ($permittedUnitIds) {
+            return $permittedUnitIds->contains($item['unit_id']);
+        });
+
+        return response()->json($data->values());
     }
 
     /**
@@ -383,12 +442,14 @@ class DataUnitController extends Controller
             }
 
             // Simpan posisi unit (relasi unit ke client/workshop/lokasi)
-            $unit->UnitPositions()->create([
+            $position = $unit->UnitPositions()->create([
                 'client_id' => $clientId,
                 'location_id' => $locationId,
                 'workshop_id' => $workshopId,
                 'position_type' => $val['position_type'],
             ]);
+
+            UnitMovementLogger::logCreated($position);
 
             return $unit;
         });
@@ -440,6 +501,7 @@ class DataUnitController extends Controller
 
         $workshopId = $val['workshop_id'] ?? null;
         $clientId = $val['client_id'] ?? null;
+        $before = UnitMovementLogger::snapshot($val['unit_ids']);
         UnitPosition::whereIn('unit_id', $val['unit_ids'])
             ->update([
                 'workshop_id' => $workshopId,
@@ -447,6 +509,7 @@ class DataUnitController extends Controller
                 'position_type' => $workshopId ? 'workshop' : 'client',
                 'updated_at' => now(),
             ]);
+        UnitMovementLogger::commit($before, $workshopId ? 'assign_workshop' : 'assign_client');
 
         return response()->json([
             'type' => 'success',
@@ -464,6 +527,7 @@ class DataUnitController extends Controller
             'unit_ids.*' => 'exists:data_units,unit_id',
         ]);
 
+        $before = UnitMovementLogger::snapshot($val['unit_ids']);
         UnitPosition::whereIn('unit_id', $val['unit_ids'])
             ->update([
                 'workshop_id' => null,
@@ -471,6 +535,7 @@ class DataUnitController extends Controller
                 'position_type' => null,
                 'updated_at' => now(),
             ]);
+        UnitMovementLogger::commit($before, 'remove_client');
 
         return response()->json([
             'type' => 'success',
@@ -508,11 +573,13 @@ class DataUnitController extends Controller
             'unit_ids.*' => 'exists:data_units,unit_id',
         ]);
 
+        $before = UnitMovementLogger::snapshot($val['unit_ids']);
         UnitPosition::whereIn('unit_id', $val['unit_ids'])
             ->update([
                 'location_id' => $val['location_id'],
                 'updated_at' => now(),
             ]);
+        UnitMovementLogger::commit($before, 'assign_location');
 
         return response()->json([
             'type' => 'success',
@@ -528,11 +595,13 @@ class DataUnitController extends Controller
             'unit_ids.*' => 'exists:data_units,unit_id',
         ]);
 
+        $before = UnitMovementLogger::snapshot($val['unit_ids']);
         UnitPosition::whereIn('unit_id', $val['unit_ids'])
             ->update([
                 'location_id' => null,
                 'updated_at' => now(),
             ]);
+        UnitMovementLogger::commit($before, 'remove_location');
 
         return response()->json([
             'type' => 'success',
@@ -593,7 +662,9 @@ class DataUnitController extends Controller
                 ->toArray();
 
             if (!empty($positionData)) {
+                $before = UnitMovementLogger::snapshot([$val['unit_id']]);
                 UnitPosition::where('unit_id', $val['unit_id'])->update($positionData);
+                UnitMovementLogger::commit($before, 'relocate');
             }
         });
 
@@ -603,24 +674,131 @@ class DataUnitController extends Controller
         ]);
     }
 
+    // Data buat tab "Unit Placement" di Database: unit dikelompokkan per client,
+    // per workshop, dan unit yang belum ditempatkan sama sekali (belum punya
+    // client_id maupun workshop_id).
+    public function getUnitPlacement()
+    {
+        $unitSelect = ['unit_id', 'unit', 'status'];
+        // 'units' di Workshop itu belongsToMany lewat unit_positions -- query-nya JOIN
+        // data_units dengan unit_positions, dan keduanya sama-sama punya kolom unit_id,
+        // jadi select-nya wajib di-qualify (data_units.unit_id) supaya tidak ambiguous.
+        $qualifiedUnitSelect = ['data_units.unit_id', 'data_units.unit', 'data_units.status'];
+
+        $clients = Client::with(['unitPositions.unit' => function ($q) use ($unitSelect) {
+            $q->select($unitSelect);
+        }])->get()->map(function ($client) {
+            return [
+                'client_id' => $client->client_id,
+                'name' => $client->name,
+                'units' => $client->unitPositions->pluck('unit')->filter()->values(),
+            ];
+        });
+
+        $workshops = Workshop::with(['units' => function ($q) use ($qualifiedUnitSelect) {
+            $q->select($qualifiedUnitSelect);
+        }])->get()->map(function ($workshop) {
+            return [
+                'workshop_id' => $workshop->workshop_id,
+                'name' => $workshop->name,
+                'units' => $workshop->units->values(),
+            ];
+        });
+
+        $unassigned = DataUnit::where(function ($q) {
+            $q->whereDoesntHave('unitPositions')
+                ->orWhereHas('unitPositions', function ($q2) {
+                    $q2->whereNull('client_id')->whereNull('workshop_id');
+                });
+        })->get($unitSelect);
+
+        return response()->json([
+            'clients' => $clients,
+            'workshops' => $workshops,
+            'unassigned' => $unassigned,
+        ]);
+    }
+
+    // Halaman "Unit Movement Log" -- daftar SEMUA riwayat pergerakan unit
+    // (super_admin only, lihat routes/web.php).
+    public function movementLogPage()
+    {
+        return Inertia::render('Unit/MovementLog');
+    }
+
+    // Riwayat pergerakan (perubahan client/region/location) unit, terbaru duluan.
+    // Tanpa `unit_id` -> semua unit, dipaginate (dipakai halaman Movement Log).
+    // Dengan `unit_id` -> cuma unit itu, tidak dipaginate (dipakai modal History
+    // di List of Unit).
+    public function getUnitMovementLog(Request $request)
+    {
+        $request->validate([
+            'unit_id' => 'nullable|exists:data_units,unit_id',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date',
+        ]);
+
+        $query = \App\Models\UnitMovementLog::with([
+            'unit:unit_id,unit',
+            'fromClient:client_id,name',
+            'toClient:client_id,name',
+            'fromRegion:id,name',
+            'toRegion:id,name',
+            'fromLocation:id,location,area_id',
+            'fromLocation.area:id,area',
+            'toLocation:id,location,area_id',
+            'toLocation.area:id,area',
+            'changedByUser:user_id,name',
+        ])
+            ->orderByDesc('created_at');
+
+        if ($request->date_from) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->date_to) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->unit_id) {
+            $query->where('unit_id', $request->unit_id);
+
+            return response()->json($query->get());
+        }
+
+        return response()->json($query->paginate(30)->withQueryString());
+    }
+
 
     // Mengambil daftar field laporan yang terdaftar untuk sebuah unit
     public function getUnitFields(Request $request)
     {
-        $fields = UnitField::where("unit_id", $request->unit_id)
+        $unitFields = UnitField::where("unit_id", $request->unit_id)
             ->with('fields.subfields')
-            ->get()
-            ->pluck('fields');
+            ->get();
+
+        // Sertakan 'required' dari pivot unit_fields (bukan cuma data field-nya
+        // sendiri) -- dipakai buat toggle Required di Unit Setting, dan buat
+        // validasi wajib/tidaknya field ini pas isi laporan (lihat setReport).
+        $fields = $unitFields->map(function ($uf) {
+            return [
+                ...$uf->fields->toArray(),
+                'field_id' => $uf->field_id,
+                'required' => (bool) $uf->required,
+            ];
+        });
 
         return response()->json($fields);
     }
-    // Mengatur threshold, visibility, dan curve_percentage untuk unit-unit terpilih
+    // Mengatur threshold, visibility, required, dan curve_percentage untuk unit-unit terpilih
     public function setUnitSetting(Request $request)
     {
         $rules = [
             'unit_id' => 'required|array',
             'thresholdSetting' => 'required|array',
             'visibilitySetting' => 'required|array',
+            // requiredSetting di-keyin per field_id (bukan slug), karena disimpan
+            // di tabel unit_fields yang PK-nya field_id, bukan di kolom JSON milik unit.
+            'requiredSetting' => 'nullable|array',
             'curve_percentage' => 'nullable|numeric|min:0|max:200'
         ];
 
@@ -633,6 +811,11 @@ class DataUnitController extends Controller
         // Bangun rule validasi dinamis untuk tiap key visibility
         foreach ($request->input('visibilitySetting', []) as $key => $value) {
             $rules["visibilitySetting.$key"] = 'required|boolean';
+        }
+
+        // Bangun rule validasi dinamis untuk tiap key required
+        foreach ($request->input('requiredSetting', []) as $key => $value) {
+            $rules["requiredSetting.$key"] = 'required|boolean';
         }
 
         $validated = $request->validate($rules);
@@ -650,6 +833,17 @@ class DataUnitController extends Controller
                 'visibilitySetting' => $validated['visibilitySetting'],
                 'curve_percentage' => $validated['curve_percentage'] ?? $unit->curve_percentage,
             ]);
+
+            // Required disimpan per-baris di unit_fields (bukan JSON di data_units),
+            // jadi update tiap field_id satu-satu. Hanya UPDATE baris yang sudah ada
+            // (bukan create) karena unit_fields.column itu NOT NULL & tidak kita tahu
+            // nilainya di sini -- baris unit_fields untuk field ini seharusnya sudah
+            // di-seed lebih dulu waktu field itu di-assign ke unit.
+            foreach ($validated['requiredSetting'] ?? [] as $field_id => $isRequired) {
+                UnitField::where('unit_id', $unit_id)
+                    ->where('field_id', $field_id)
+                    ->update(['required' => $isRequired]);
+            }
         }
 
         return response()->json(['text' => 'Settings updated successfully', 'type' => 'success'], 200);

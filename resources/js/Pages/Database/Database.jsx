@@ -1,6 +1,6 @@
-import { useState } from "react";
 import PageLayout from "@/Layouts/PageLayout";
 import { FaDatabase } from "react-icons/fa";
+import useUrlTab from "@/Components/utils/useUrlTab";
 
 import ClientsTab from "./ClientsTab";
 import AreasTab from "./AreasTab";
@@ -8,10 +8,15 @@ import InputSettingsTab from "./InputSettingsTab";
 import FieldsTab from "./FieldsTab";
 import RolesTab from "./RolesTab";
 import UnitTab from "./UnitTab";
+import WorkshopsTab from "./WorkshopsTab";
+import UnitPlacementTab from "./UnitPlacementTab";
 
 const TABS = [
-    { key: "clients", label: "Clients", Component: ClientsTab },
     { key: "areas", label: "Areas", Component: AreasTab },
+    { key: "unit", label: "Unit", Component: UnitTab },
+    { key: "clients", label: "Clients", Component: ClientsTab },
+    { key: "workshops", label: "Workshops", Component: WorkshopsTab },
+    { key: "placement", label: "Unit Placement", Component: UnitPlacementTab },
     {
         key: "inputSettings",
         label: "Input Settings",
@@ -19,11 +24,13 @@ const TABS = [
     },
     { key: "fields", label: "Fields", Component: FieldsTab },
     { key: "roles", label: "Roles", Component: RolesTab },
-    { key: "unit", label: "Unit", Component: UnitTab },
 ];
 
 const Database = () => {
-    const [activeTab, setActiveTab] = useState(TABS[0].key);
+    const [activeTab, setActiveTab] = useUrlTab(
+        TABS.map((t) => t.key),
+        TABS[0].key,
+    );
     const ActiveComponent = TABS.find(
         (tab) => tab.key === activeTab,
     )?.Component;

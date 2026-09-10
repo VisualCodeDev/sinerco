@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyReport;
+use App\Models\DailyReportSettings;
 use Carbon\CarbonPeriod;
 use Carbon\Carbon;
 use App\Models\UnitPosition;
@@ -866,6 +867,14 @@ class ExportController extends Controller
                     $sheet->setTitle($sheetName);
                     $reports = $unitPos->reports->sortBy('date')->values();
 
+                    // Sama seperti calculatePerformance() di DailyReportController: kalau
+                    // client punya performanceFixedValue, itu dipakai sebagai pengganti
+                    // curve_24h -- jadi kolom {{curve}} di invoice juga harus konsisten
+                    // pakai nilai itu, bukan curve_24h mentah dari laporan.
+                    $performanceFixedValue = $unitPos->client_id
+                        ? DailyReportSettings::where('client_id', $unitPos->client_id)->value('performanceFixedValue')
+                        : null;
+
                     // replace {{unit_sn}}
                     foreach ($sheet->getRowIterator() as $row) {
                         foreach ($row->getCellIterator() as $cell) {
@@ -962,7 +971,9 @@ class ExportController extends Controller
                                         'suction_press' => $data['suction_press'] ?? 0,
                                         'discharge_press' => $data['discharge_press'] ?? 0,
                                         'flowrate' => $data['flowrate'] ?? 0,
-                                        'curve' => $data['curve_24h'] ?? 0,
+                                        'curve' => $performanceFixedValue > 0
+                                            ? (float) $performanceFixedValue
+                                            : ($data['curve_24h'] ?? 0),
                                     ];
                                 })
                                 ->filter()

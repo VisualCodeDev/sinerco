@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\DailyField;
+use App\Models\DataUnit;
 use App\Models\Subfield;
 use App\Models\UnitField;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -56,23 +58,41 @@ class DailyFieldController extends Controller
         ]);
 
         try {
-            $field = DailyField::create([
-                'name' => $validated['name'],
-                'slug' => $validated['slug'] ?: Str::slug($validated['name'], '_'),
-                'active' => $validated['active'] ?? true,
-            ]);
-
-            foreach ($validated['subfields'] ?? [] as $sub) {
-                Subfield::create([
-                    'field_id' => $field->id,
-                    'name' => $sub['name'],
-                    'slug' => $sub['slug'] ?: Str::slug($sub['name'], '_'),
+            DB::transaction(function () use ($validated, &$field) {
+                $field = DailyField::create([
+                    'name' => $validated['name'],
+                    'slug' => $validated['slug'] ?: Str::slug($validated['name'], '_'),
+                    'active' => $validated['active'] ?? true,
                 ]);
-            }
+
+                foreach ($validated['subfields'] ?? [] as $sub) {
+                    Subfield::create([
+                        'field_id' => $field->id,
+                        'name' => $sub['name'],
+                        'slug' => $sub['slug'] ?: Str::slug($sub['name'], '_'),
+                    ]);
+                }
+
+                // Field baru langsung ke-assign ke SEMUA unit (required=true default)
+                // supaya langsung muncul di form laporan tiap unit -- kalau ada unit
+                // yang tidak butuh field ini, tinggal di-hide/set optional lewat
+                // toggle Visible/Required di Unit Setting (bukan berarti tidak bisa
+                // disesuaikan, cuma default-nya "kelihatan semua").
+                $unitIds = DataUnit::pluck('unit_id');
+                foreach ($unitIds as $unitId) {
+                    $nextColumn = (UnitField::where('unit_id', $unitId)->max('column') ?? 0) + 1;
+                    UnitField::create([
+                        'unit_id' => $unitId,
+                        'field_id' => $field->id,
+                        'column' => $nextColumn,
+                        'required' => true,
+                    ]);
+                }
+            });
 
             return response()->json([
                 'type' => 'success',
-                'text' => 'Field created successfully.',
+                'text' => 'Field created and assigned to all units.',
                 'data' => $field->load('subfields'),
             ]);
         } catch (\Exception $e) {

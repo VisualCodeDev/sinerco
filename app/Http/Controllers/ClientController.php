@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\UnitPosition;
+use App\Services\UnitMovementLogger;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
@@ -20,8 +21,10 @@ class ClientController extends Controller
     public function getAllClient()
     {
         $allData = Client::with([
-            'locations.area',
-            'unitPositions.baSettings'
+            'locations.area.region',
+            'unitPositions.baSettings',
+            'unitPositions.region',
+            'unitPositions.location.area.region',
         ])
             ->get()
             ->map(function ($client) {
@@ -35,9 +38,22 @@ class ClientController extends Controller
                     ->filter()
                     ->values();
 
+                // Region per unit_position bisa di-set langsung (lihat
+                // updateClientLocation di bawah) ATAU ikut dari location->area->region
+                // kalau tidak di-set -- sama seperti pola di DataUnitController.
+                $regions = $client->unitPositions
+                    ->map(function ($pos) {
+                        return $pos->region?->name ?? $pos->location?->area?->region?->name;
+                    })
+                    ->filter()
+                    ->unique();
+
                 return [
                     ...$client->toArray(),
                     'is_invoice' => (bool) $client->is_invoice,
+                    // Gabungkan nama region jadi satu string dipisah koma
+                    'regions' => $regions->implode(', '),
+
                     // Gabungkan nama lokasi jadi satu string dipisah koma
                     'locations' => $locations
                         ->pluck('location')
@@ -53,7 +69,11 @@ class ClientController extends Controller
 
                     'disable_duration' => (bool) $client->disable_duration,
 
-                    'berita_acaras' => $beritaAcaras
+                    'berita_acaras' => $beritaAcaras,
+
+                    // Dipakai buat pesan konfirmasi di frontend ("ini akan mindahin
+                    // N unit ke area/lokasi baru") sebelum bulk-update lokasi client
+                    'unit_count' => $client->unitPositions->count(),
                 ];
             });
 
@@ -199,5 +219,37 @@ class ClientController extends Controller
         $client->delete();
 
         return response()->json(['type' => 'success', 'text' => 'Client deleted successfully']);
+    }
+
+    // Memindahkan SEMUA unit milik client ini ke region/area/location baru sekaligus.
+    // Client sendiri tidak punya 1 area/location tetap (client bisa punya banyak unit
+    // yang tersebar di banyak lokasi) -- "area/location milik client" itu cuma hasil
+    // agregat dari lokasi unit-unitnya (lihat getAllClient di atas). Jadi meng-edit
+    // "lokasi client" di sini artinya benar-benar MEMINDAHKAN semua unit client ini
+    // ke lokasi baru, bukan cuma ubah 1 kolom di tabel clients. Makanya di frontend
+    // wajib ada konfirmasi dulu sebelum manggil endpoint ini (aksi ini bulk & langsung
+    // berefek ke banyak unit_position sekaligus).
+    public function updateClientLocation(Request $request)
+    {
+        $val = $request->validate([
+            'client_id' => 'required|exists:clients,client_id',
+            'region_id' => 'nullable|exists:regions,id',
+            'location_id' => 'nullable|exists:locations,id',
+        ]);
+
+        $unitIds = UnitPosition::where('client_id', $val['client_id'])->pluck('unit_id')->all();
+        $before = UnitMovementLogger::snapshot($unitIds);
+
+        $affected = UnitPosition::where('client_id', $val['client_id'])->update([
+            'region_id' => $val['region_id'] ?? null,
+            'location_id' => $val['location_id'] ?? null,
+        ]);
+
+        UnitMovementLogger::commit($before, 'client_bulk_move');
+
+        return response()->json([
+            'type' => 'success',
+            'text' => "Moved {$affected} unit(s) to the new area/location.",
+        ]);
     }
 }

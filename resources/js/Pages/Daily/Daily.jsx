@@ -24,6 +24,7 @@ import {
     FaLock,
 } from "react-icons/fa";
 import UnitInfo from "../Unit/UnitInfo";
+import ContractTab from "@/Components/Dashboard/ContractTab";
 import { getUnitField } from "@/Components/db";
 
 export default function Dashboard({ unit_position_id }) {
@@ -251,7 +252,8 @@ export default function Dashboard({ unit_position_id }) {
                             field.subfields.length > 0
                         ) {
                             const visibleSubfields = field.subfields.filter(
-                                (sub) => unitData.visibilitySetting[sub.slug],
+                                (sub) =>
+                                    unitData.visibilitySetting[sub.slug] ?? true,
                             );
                             if (visibleSubfields.length === 0) return null;
                             return {
@@ -259,7 +261,7 @@ export default function Dashboard({ unit_position_id }) {
                                 subfields: visibleSubfields,
                             };
                         }
-                        return unitData.visibilitySetting[field.slug]
+                        return (unitData.visibilitySetting[field.slug] ?? true)
                             ? field
                             : null;
                     })
@@ -431,6 +433,10 @@ export default function Dashboard({ unit_position_id }) {
                                 unitData={unitData}
                                 user={user}
                             />
+                        )}
+
+                        {activeTab === "contract" && (
+                            <ContractTab unitPositionId={unit_position_id} />
                         )}
                     </div>
                 </div>

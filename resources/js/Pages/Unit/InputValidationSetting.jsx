@@ -180,12 +180,12 @@ const InputValidationSetting = (props) => {
 
             <div className="px-6 pt-6 flex flex-col max-w-md">
                 <label className="font-semibold text-[#101828] mb-1">
-                    Performance Fixed Value
+                    Fixed Curve Value
                 </label>
                 <input
                     type="number"
                     step="any"
-                    placeholder="Leave empty to calculate from curve"
+                    placeholder="Leave empty to use the calculated curve (curve_24h)"
                     className="h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
                     value={formData?.performanceFixedValue ?? ""}
                     onChange={(e) =>

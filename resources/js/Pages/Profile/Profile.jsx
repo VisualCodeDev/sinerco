@@ -27,13 +27,46 @@ const Profile = ({ data, permissionData, requestList }) => {
     });
     const [edit, setEdit] = useState(false);
     const [phoneNum, setPhoneNum] = useState(data?.whatsAppNum || "");
+    const [infoEdit, setInfoEdit] = useState(false);
+    const [infoForm, setInfoForm] = useState({
+        name: data?.name || "",
+        email: data?.email || "",
+    });
     const [passwordEdit, setPasswordEdit] = useState(false);
     const [passwordForm, setPasswordForm] = useState({
         current_password: "",
         password: "",
         password_confirmation: "",
     });
+    const [userInfo, setUserInfo] = useState({
+        name: data?.name || "",
+        email: data?.email || "",
+    });
     const { addToast } = useToast();
+    const handleInfoSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            const resp = await axios.post(route("user.info.update"), {
+                name: infoForm.name,
+                email: infoForm.email,
+            });
+
+            if (resp?.data?.type === "success") {
+                setUserInfo({ name: infoForm.name, email: infoForm.email });
+                setInfoEdit(false);
+            }
+
+            addToast(resp.data);
+        } catch (err) {
+            console.error(err);
+            const message =
+                err?.response?.data?.errors?.email?.[0] ||
+                err?.response?.data?.errors?.name?.[0] ||
+                "Failed to update profile";
+            addToast({ type: "error", text: message });
+        }
+    };
     const handlePasswordSubmit = async (e) => {
         e.preventDefault();
 
@@ -116,10 +149,75 @@ const Profile = ({ data, permissionData, requestList }) => {
                     </div>
                     <div className="flex flex-col w-full gap-4 md:gap-6">
                         <div className="">
-                            <div className="flex flex-col mb-1">
-                                <p className="text-xl md:text-3xl font-semibold">
-                                    {data?.name}
-                                </p>
+                            <div className="flex flex-col mb-1 items-center gap-2">
+                                {infoEdit ? (
+                                    <form
+                                        className="flex flex-col gap-2 items-center"
+                                        onSubmit={handleInfoSubmit}
+                                    >
+                                        <input
+                                            className="text-black text-center rounded px-2 py-1 text-xl md:text-2xl font-semibold"
+                                            type="text"
+                                            value={infoForm.name}
+                                            onChange={(e) =>
+                                                setInfoForm({
+                                                    ...infoForm,
+                                                    name: e.target.value,
+                                                })
+                                            }
+                                            placeholder="Name"
+                                            required
+                                        />
+                                        <input
+                                            className="text-black text-center rounded px-2 py-1 text-sm md:text-base"
+                                            type="email"
+                                            value={infoForm.email}
+                                            onChange={(e) =>
+                                                setInfoForm({
+                                                    ...infoForm,
+                                                    email: e.target.value,
+                                                })
+                                            }
+                                            placeholder="Email"
+                                            required
+                                        />
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="submit"
+                                                className="border border-transparent bg-success px-3 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                            >
+                                                Submit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="border border-white/30 bg-white/20 px-3 py-1 rounded-md font-semibold text-center flex items-center text-sm"
+                                                onClick={() => {
+                                                    setInfoEdit(false);
+                                                    setInfoForm({
+                                                        name: userInfo.name,
+                                                        email: userInfo.email,
+                                                    });
+                                                }}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-xl md:text-3xl font-semibold">
+                                            {userInfo.name}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            aria-label="Edit"
+                                            className="p-2 text-sm cursor-pointer border border-white/30 bg-white/10 rounded"
+                                            onClick={() => setInfoEdit(true)}
+                                        >
+                                            <FaPencil />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
@@ -178,7 +276,7 @@ const Profile = ({ data, permissionData, requestList }) => {
                             </div>
                             <div className="flex flex-row justify-center items-center">
                                 <FaEnvelope className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />
-                                <p className="">{data?.email}</p>
+                                <p className="">{userInfo.email}</p>
                             </div>
                             <div className="flex flex-row justify-center items-center">
                                 <FaLock className="bg-white/20 rounded-full p-1.5 md:p-2 text-2xl md:text-3xl mr-3" />

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminNotificationController;
 use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\DailyFieldController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\DailyReportSettingsController;
@@ -73,6 +74,15 @@ Route::controller(DailyReportController::class)->middleware('auth')->group(funct
     Route::get('/api/daily-data', 'getReport')->name('getDataReport');
 });
 
+Route::controller(ContractController::class)->middleware('auth')->group(function () {
+    Route::get('/unit/contract/{unit_position_id}', 'show')->name('contract.get');
+    // Edit dibatasi ke role yang sama dengan yang boleh isi/edit daily report --
+    // konsisten dengan tab lain di halaman Daily yang juga dibatasi role ini.
+    Route::post('/unit/contract', 'store')->name('contract.store')->middleware('roles:super_admin,technician,operator');
+    Route::post('/unit/contract/document', 'uploadDocument')->name('contract.document.upload')->middleware('roles:super_admin,technician,operator');
+    Route::delete('/unit/contract/{unit_position_id}/document', 'destroyDocument')->name('contract.document.destroy')->middleware('roles:super_admin,technician,operator');
+});
+
 Route::middleware('auth:sanctum')->get('/api/my-auth', function () {
     return Auth::user();
 })->name('auth.user');
@@ -111,6 +121,9 @@ Route::controller(DataUnitController::class)->middleware('auth')->group(function
     Route::get('/api/get-selected-unit-data', 'getSelectedUnit')->name('getSelectedUnit');
     Route::get('/api/get-unit-status', 'getUnitStatus')->name('getUnitStatus');
     Route::get('/get/fields', 'getUnitFields')->name('unit.fields.get');
+    Route::get('/unit/movement-log', 'getUnitMovementLog')->name('unit.movement.log');
+    Route::get('/unit/movement-log/page', 'movementLogPage')->name('unit.movement.log.page')->middleware('roles:super_admin');
+    Route::get('/unit/placement', 'getUnitPlacement')->name('unit.placement.get');
     Route::get('/get/reports/{unit_position_id}', 'getUnitReports')->name('unit.position.report.get');
     Route::get('/get/area-reports/{area_id}', 'getAreaReports')->name('area.position.report.get');
 
@@ -159,6 +172,7 @@ Route::controller(ClientController::class)->middleware(['auth', 'roles:super_adm
 
     Route::post('/client/store', 'storeClient')->name('client.store');
     Route::post('/client/update', 'updateClient')->name('client.update');
+    Route::post('/client/update-location', 'updateClientLocation')->name('client.update.location');
     Route::post('/client/delete', 'deleteClient')->name('client.delete');
     Route::post('/client/settings', 'setSettings')->name('client.settings');
     Route::post('/client/settings/duration', 'updateDurationDisable')->name('duration.update.disable');
@@ -190,6 +204,7 @@ Route::controller(AdminNotificationController::class)->group(function () {
 Route::controller(ProfileController::class)->middleware(['auth'])->group(function () {
     Route::get('/profile/{user_id}/', 'index')->name('profile');
     Route::get('/fetch/roles', 'getAllRoles')->name('roles.get');
+    Route::post('/profile/update/info', 'updateInfo')->name('user.info.update');
     Route::post('/profile/update/phone', 'updatePhone')->name('user.phone.update');
     Route::post('/profile/update/password', 'updatePassword')->name('user.password.update');
 });
@@ -219,6 +234,8 @@ Route::controller(WorkshopController::class)->middleware('auth')->group(function
 
 Route::controller(WorkshopController::class)->middleware(['auth', 'roles:super_admin'])->group(function () {
     Route::post('/workshop', 'storeWorkshop')->name('workshop.store');
+    Route::put('/workshop/{workshop}', 'update')->name('workshop.update');
+    Route::delete('/workshop/{workshop}', 'destroy')->name('workshop.destroy');
 });
 
 Route::get('/database', [DatabaseController::class, 'index'])

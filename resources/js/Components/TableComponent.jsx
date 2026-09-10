@@ -48,14 +48,18 @@ const TableComponent = (props) => {
         handleNew,
         isResponsive = false,
         onSearchChange,
+        customFilter,
+        defaultSort,
     } = props;
-    const [sortConfig, setSortConfig] = useState({
-        key:
-            (columns[0]?.name == "id" || columns[0]?.name == "no"
-                ? columns[1]?.name
-                : columns[0]?.name || null) || null,
-        direction: "asc",
-    });
+    const [sortConfig, setSortConfig] = useState(
+        defaultSort || {
+            key:
+                (columns[0]?.name == "id" || columns[0]?.name == "no"
+                    ? columns[1]?.name
+                    : columns[0]?.name || null) || null,
+            direction: "asc",
+        },
+    );
 
     const [filterConfig, setFilterConfig] = useState();
     const [filteredData, setFilteredData] = useState([]);
@@ -150,7 +154,7 @@ const TableComponent = (props) => {
         tempData.sort((a, b) => {
             if (!sortConfig.key) return 0;
 
-            const normalize = (v = "") => v.toString().toLowerCase().trim();
+            const normalize = (v) => (v ?? "").toString().toLowerCase().trim();
             const aVal = normalize(a[sortConfig.key]);
             const bVal = normalize(b[sortConfig.key]);
 
@@ -269,6 +273,13 @@ const TableComponent = (props) => {
                                     }
                                 />
                             </div>
+
+                            {customFilter && (
+                                <div className="relative flex gap-2 justify-end items-center mt-4 md:m-4 bg-white border-2 text-primary rounded-md px-2 md:px-4 cursor-pointer">
+                                    <FaFilter />
+                                    {customFilter}
+                                </div>
+                            )}
                         </div>
                         <div className="flex md:flex-row flex-col gap-4">
                             {addNewItem &&
