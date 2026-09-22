@@ -871,18 +871,25 @@ class DataUnitController extends Controller
 
         $reports = $query->pluck('data');
 
-        // Ambil satuan (unit pengukuran per field) dari client pemilik unit ini -- bisa beda tiap client
-        $unitPosition = UnitPosition::find($unit_position_id);
+        // Ambil satuan (unit pengukuran per field) & interval input dari client
+        // pemilik unit ini -- bisa beda tiap client. input_interval dikirim balik
+        // supaya frontend (DynamicLineChart) bisa hitung rata-rata harian yang
+        // dibagi jumlah pembacaan yang diharapkan, bukan jumlah jam/jumlah data
+        // yang keisi doang.
+        $unitPosition = UnitPosition::with('client')->find($unit_position_id);
         $satuan = [];
+        $inputInterval = 1;
         if ($unitPosition?->client_id) {
             $settings = DailyReportSettings::where('client_id', $unitPosition->client_id)->first();
             $satuan = $settings?->unitSetting ?? [];
+            $inputInterval = $unitPosition->client?->input_interval ?: 1;
         }
 
         return response()->json([
             'success' => true,
             'data' => $reports,
             'satuan' => $satuan,
+            'input_interval' => $inputInterval,
         ]);
     }
 
@@ -917,7 +924,7 @@ class DataUnitController extends Controller
 
         // Ambil nama unit + client_id sekaligus (1 query), bukan N query
         $unitPositions = UnitPosition::whereIn('id', $unitPositionIds)
-            ->with(['unit:unit_id,unit', 'client:client_id'])
+            ->with(['unit:unit_id,unit', 'client:client_id,input_interval'])
             ->get(['id', 'unit_id', 'client_id']);
 
         // Ambil semua unitSetting (satuan) yang relevan sekaligus (1 query), bukan N query
@@ -931,6 +938,7 @@ class DataUnitController extends Controller
                 'unit' => $pos->unit?->unit,
                 'data' => ($reportsByUnit->get($pos->id) ?? collect())->pluck('data')->values(),
                 'satuan' => $satuanByClient->get($pos->client_id) ?? [],
+                'input_interval' => $pos->client?->input_interval ?: 1,
             ];
         })->values();
 

@@ -187,6 +187,7 @@ const DynamicLineChart = () => {
                         unitLabel,
                         reportData: parsed,
                         satuan: resp?.satuan || {},
+                        inputInterval: resp?.input_interval || 1,
                     },
                 ]);
                 setLoading(false);
@@ -204,6 +205,7 @@ const DynamicLineChart = () => {
                     typeof item === "string" ? JSON.parse(item) : item,
                 ),
                 satuan: unit.satuan || {},
+                inputInterval: unit.input_interval || 1,
             }));
             setSeriesSources(results);
             setLoading(false);
@@ -229,7 +231,14 @@ const DynamicLineChart = () => {
     }, [isMonthMode, selectedMonth, isHourlyBucket, rangeStart, rangeEnd]);
 
     // Ubah reportData 1 unit jadi baris-baris chart per bucket waktu, dengan prefix nama seri
-    const buildSeriesRows = (reportData, seriesLabelFn) => {
+    const buildSeriesRows = (reportData, seriesLabelFn, inputInterval = 1) => {
+        // Jumlah pembacaan yang DIHARAPKAN per hari sesuai interval input client --
+        // dipakai sebagai pembagi rata-rata harian di bawah, BUKAN jumlah laporan
+        // yang benar-benar keisi (supaya jam yang belum diisi tetap dihitung
+        // sebagai 0, bukan dilewati/di-skip dari rata-rata).
+        const step = inputInterval > 0 ? inputInterval : 1;
+        const expectedReadingsPerDay = Math.max(Math.floor(24 / step), 1);
+
         if (isHourlyBucket) {
             const fullHours = generateFullHours();
             const dataMap = {};
@@ -261,10 +270,11 @@ const DynamicLineChart = () => {
             const values = {};
             selectedFields.forEach((slug) => {
                 const nums = items.map((item) => Number(item[slug] || 0));
-                values[seriesLabelFn(slug)] =
-                    nums.length > 0
-                        ? nums.reduce((a, b) => a + b, 0) / nums.length
-                        : 0;
+                const sum = nums.reduce((a, b) => a + b, 0);
+                // Bagi dengan jumlah pembacaan yang DIHARAPKAN hari itu (bukan
+                // nums.length) -- jam yang belum diisi ikut dihitung sebagai 0,
+                // bukan dilewati dari rata-rata.
+                values[seriesLabelFn(slug)] = sum / expectedReadingsPerDay;
             });
             return { bucket: dateStr.slice(5), ...values };
         });
@@ -304,7 +314,11 @@ const DynamicLineChart = () => {
                 });
             });
 
-            const rows = buildSeriesRows(source.reportData, labelFn);
+            const rows = buildSeriesRows(
+                source.reportData,
+                labelFn,
+                source.inputInterval,
+            );
 
             if (!merged) {
                 merged = rows;

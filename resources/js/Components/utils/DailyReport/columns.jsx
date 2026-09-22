@@ -838,13 +838,16 @@ const list = ({
                                             onChange={(e) =>
                                                 handleChange(
                                                     [sub.slug],
-                                                    // Biarkan koma tetap koma (bukan dikonversi ke titik
-                                                    // di sini) -- angka Indonesia pakai koma sebagai
-                                                    // pemisah desimal, jadi user harus tetap LIHAT koma
-                                                    // pas ngetik. Normalisasi ke titik cuma pas dibutuhkan
-                                                    // buat itungan/kirim ke backend (lihat handleChange &
-                                                    // handleSetReport di DailyReportForm.jsx).
-                                                    e.target.value,
+                                                    // Sebagian device (kebanyakan iPhone locale Inggris)
+                                                    // keypad desimalnya cuma punya tombol titik, bukan
+                                                    // koma -- normalisasi titik->koma di sini supaya
+                                                    // TAMPILAN tetap konsisten pakai koma apapun device-nya,
+                                                    // bukan ikut-ikutan beda tergantung tombol yang
+                                                    // kebetulan tersedia. Balik ke titik cuma pas
+                                                    // dibutuhkan buat itungan/kirim ke backend (lihat
+                                                    // handleChange & handleSetReport di
+                                                    // DailyReportForm.jsx).
+                                                    e.target.value.replace(".", ","),
                                                     minMaxSetting,
                                                     thresholdValue,
                                                     lastReportData
@@ -909,9 +912,9 @@ const list = ({
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
-                                    // Biarkan koma tetap koma (lihat komentar yang sama di
+                                    // Normalisasi titik -> koma (lihat komentar yang sama di
                                     // input subfield di atas).
-                                    e.target.value,
+                                    e.target.value.replace(".", ","),
                                     minMaxSetting,
                                     thresholdValue,
                                     lastReportData
