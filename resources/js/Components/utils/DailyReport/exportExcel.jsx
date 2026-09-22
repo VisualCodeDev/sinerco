@@ -139,7 +139,13 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
 
             // Isi jam di kolom A dan nilai default 0
             let hour = Number(unitData?.input_interval || 1);
+            // Petakan jam -> nomor baris persis seperti baris ini dibuat (r = hour/interval + 4).
+            // WAJIB dipakai lagi pas nulis data di bawah -- kalau baris data dihitung ulang pakai
+            // `hour + 4` langsung, itu cuma benar pas interval=1; interval lain (3 jam, dst) bakal
+            // salah baris dan nabrak baris Average/Min/Max atau nyasar ke bawahnya.
+            const hourToRow = {};
             for (let r = 5; r < totalRow + 5; r++) {
+                hourToRow[hour] = r;
                 [1, remarksStart].map((cell) => {
                     const timeRowCell = newSheet.getRow(r).getCell(cell);
                     timeRowCell.border = ExcelStyle.borderAll;
@@ -181,26 +187,58 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             }
 
             // Isi data
+            //
+            // Remarks dibangun langsung dari `data.requests` (SEMUA StatusRequest
+            // yang overlap rentang export ini, dikirim backend independen dari
+            // baris DailyReport mana pun) -- BUKAN dari `items.request`. request_id
+            // cuma nyantol (FK) di baris JAM MULAI request-nya (lihat
+            // StatusRequest::saved()), jadi kalau nunggu baris report yang bawa
+            // request, SD/STDBY yang lebih dari 1 hari cuma kelihatan di hari
+            // pertama -- padahal hari-hari sesudahnya (sampai hari terakhir) tetap
+            // harus tampil "00:00 - 24:00" / "00:00 - <end>".
             const requestedData = [];
+            const gridHours = Object.keys(hourToRow).map(Number);
+            const firstHourTime =
+                gridHours.length > 0
+                    ? `${String(Math.min(...gridHours)).padStart(2, "0")}:00`
+                    : null;
+
+            (data.requests || [])
+                .filter(
+                    (req) =>
+                        req.start_date <= date &&
+                        (!req.end_date || req.end_date >= date),
+                )
+                .forEach((request) => {
+                    // Hari pertama: start aslinya, tapi "berakhir" jam 24:00 kalau
+                    // masih lanjut ke hari berikutnya. Hari di tengah: penuh
+                    // 00:00-24:00. Hari terakhir: dari 00:00 sampai end aslinya.
+                    // 1 baris ringkasan per hari (bukan tiap jam yang overlap).
+                    const isStartDay = request.start_date === date;
+                    const isEndDay = request.end_date === date;
+                    const anchorTime = isStartDay
+                        ? request.start_time
+                        : firstHourTime;
+                    if (!anchorTime) return;
+
+                    requestedData.push({
+                        time: anchorTime,
+                        start: isStartDay ? request.start_time || "" : "00:00",
+                        end: isEndDay ? request.end_time || "" : "24:00",
+                        requestType: (request.request_type || "").toUpperCase(),
+                        remarks: request.remarks,
+                    });
+                });
+
             const filtered = data.reports.filter((d) => d.date === date);
             Object.entries(filtered).forEach(([_, items]) => {
-                const request = items?.request;
-                if (items.request) {
-                    const formattedRequest = {
-                        time: items.time,
-                        start: request.start_time || "",
-                        end: request.end_time || "",
-                        requestType: request.request_type.toUpperCase() || "",
-                        remarks: request.remarks,
-                    };
-                    requestedData.push(formattedRequest);
-                }
                 Object.entries(items).forEach(([k, v]) => {
                     const formatted = fieldColumnMap[k];
                     const hour = Number(items.time.split(":")[0]);
-                    if (formatted) {
+                    const row = hourToRow[hour];
+                    if (formatted && row) {
                         const targetCell = newSheet.getCell(
-                            `${formatted}${hour + 4}`,
+                            `${formatted}${row}`,
                         );
                         targetCell.value = Number(v) || 0;
                         targetCell.border = ExcelStyle.borderAll;

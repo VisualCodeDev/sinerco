@@ -148,9 +148,33 @@ class DailyReportController extends Controller
                 ]);
             });
 
+        // Kirim juga SEMUA StatusRequest yang overlap rentang tanggal export ini,
+        // independen dari baris DailyReport mana pun -- request_id cuma nyantol
+        // (FK) di baris JAM MULAI-nya (lihat StatusRequest::saved()), jadi kalau
+        // andalkan `reports[].request` doang, SD/STDBY yang lebih dari 1 hari
+        // cuma kelihatan di hari pertama. Export excel (exportExcel.jsx) yang
+        // hitung sendiri per tanggal request mana yang overlap & klip start/end-nya,
+        // bukan nyari lewat baris report.
+        $overlappingRequests = StatusRequest::where('unit_position_id', $unit_position_id)
+            ->where('start_date', '<=', $end)
+            ->where(function ($q) use ($start) {
+                $q->whereNull('end_date')->orWhere('end_date', '>=', $start);
+            })
+            ->get([
+                'request_id',
+                'start_date',
+                'start_time',
+                'end_date',
+                'end_time',
+                'request_type',
+                'remarks',
+            ]);
 
-
-        return response()->json(['reports' => $reports, 'fields' => $fields]);
+        return response()->json([
+            'reports' => $reports,
+            'fields' => $fields,
+            'requests' => $overlappingRequests,
+        ]);
     }
 
 
@@ -491,8 +515,28 @@ class DailyReportController extends Controller
                 ]);
             });
 
+        // request_id cuma nyantol (FK) di baris DailyReport pada JAM MULAI
+        // request-nya (lihat StatusRequest::saved()) -- dan kalau jam-jam lain
+        // hari ini belum pernah diisi laporan SAMA SEKALI, baris DailyReport-nya
+        // pun tidak ada (frontend baru bikin placeholder kosong buat jam-jam itu
+        // sendiri, tanpa tahu ada request yang overlap). Jadi request yang
+        // overlap tanggal ini dikirim TERPISAH dari baris-baris report -- bukan
+        // ditempel ke baris tertentu -- biar frontend (Daily.jsx) bisa
+        // nempelinnya ke SEMUA baris grid waktu hari ini, termasuk yang cuma
+        // placeholder.
+        $activeRequest = $request->date
+            ? StatusRequest::where('unit_position_id', $request->unit_position_id)
+                ->where('start_date', '<=', $request->date)
+                ->where(function ($q) use ($request) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', $request->date);
+                })
+                ->first()
+            : null;
 
-        return response()->json($data);
+        return response()->json([
+            'reports' => $data->values(),
+            'request' => $activeRequest,
+        ]);
     }
 
     // Mengisi jam-jam laporan yang kosong (missing) dengan nilai 0 secara massal

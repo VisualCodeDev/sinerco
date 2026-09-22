@@ -8,7 +8,6 @@ import {
     getFormattedDate,
     DateInput,
     TimeInput,
-    DateParser,
 } from "../utils/dashboard-util";
 import { useAuth } from "../Auth/auth";
 import { FaPen, FaFileExport } from "react-icons/fa";
@@ -64,13 +63,16 @@ const DailyReport = (props) => {
     };
 
     const handleDateChange = (op) => {
-        let newDate = selectedDate;
-        if (op == "+") {
-            newDate = dayjs(selectedDate).add(1, "day");
-        } else {
-            newDate = dayjs(selectedDate).subtract(1, "day");
-        }
-        setSelectedDate(newDate);
+        // selectedDate dipakai sebagai STRING "YYYY-MM-DD" di seluruh Daily.jsx
+        // (perbandingan `selectedDate === getDDMMYYDate(currDate, ...)`, query
+        // param ke backend, dst) -- kalau di sini di-set jadi object dayjs
+        // mentah, semua itu langsung salah/tidak match lagi begitu tombol
+        // </> diklik, dan datanya "hilang" setelah ganti tanggal.
+        const newDate =
+            op == "+"
+                ? dayjs(selectedDate).add(1, "day")
+                : dayjs(selectedDate).subtract(1, "day");
+        setSelectedDate(newDate.format("YYYY-MM-DD"));
     };
 
     useEffect(() => {
@@ -89,7 +91,15 @@ const DailyReport = (props) => {
                         >
                             <BiLeftArrow />
                         </div>
-                        <span>{DateParser(selectedDate)}</span>
+                        <input
+                            type="date"
+                            // input type="date" selalu kasih value "YYYY-MM-DD" (sama
+                            // format yang dipakai selectedDate di seluruh Daily.jsx),
+                            // jadi bisa langsung di-set tanpa perlu format ulang.
+                            value={selectedDate || ""}
+                            onChange={(e) => setSelectedDate(e.target.value)}
+                            className="border border-gray-300 rounded-full py-2 px-3 text-sm cursor-pointer"
+                        />
                         <div
                             onClick={() => handleDateChange("+")}
                             className="text-sm flex justify-center items-center bg-primary rounded-full p-2 text-center text-white cursor-pointer hover:bg-primary/90 duration-75"
@@ -97,12 +107,6 @@ const DailyReport = (props) => {
                             <BiRightArrow />
                         </div>
                     </div>
-                    {/* <input
-                        className="rounded-full py-1 px-3"
-                        type="date"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                    /> */}
                 </div>
                 <button
                     onClick={() => setClick(true)}
@@ -498,9 +502,20 @@ const EditModal = (props) => {
                             : item?.slug,
                     ),
                 ];
+                // Nilai angka ditampilkan/disimpan pakai koma (format Indonesia),
+                // tapi backend validasi field-nya sebagai `numeric` (titik-desimal)
+                // -- konversi koma -> titik cuma sesaat sebelum dikirim.
+                const dataToSubmit = Object.fromEntries(
+                    Object.entries(formDataState).map(([key, value]) => [
+                        key,
+                        typeof value === "string"
+                            ? value.replace(",", ".")
+                            : value,
+                    ]),
+                );
                 const resp = await axios.post(
                     route("daily.edit", {
-                        data: formDataState,
+                        data: dataToSubmit,
                         fields: normalizedField,
                         unit_position_id: Number(unitData?.unit_position_id),
                     }),

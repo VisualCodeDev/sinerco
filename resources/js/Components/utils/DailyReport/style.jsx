@@ -19,21 +19,21 @@ export const ExcelStyle = {
     },
 
     borderAll: {
-        top: { style: "medium" },
-        left: { style: "medium" },
-        bottom: { style: "medium" },
-        right: { style: "medium" },
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
     },
     borderTop: {
-        top: { style: "medium" },
+        top: { style: "thin" },
     },
     borderBottom: {
-        bottom: { style: "medium" },
+        bottom: { style: "thin" },
     },
     borderLeft: {
-        left: { style: "medium" },
+        left: { style: "thin" },
     },
     borderRight: {
-        right: { style: "medium" },
+        right: { style: "thin" },
     },
 };

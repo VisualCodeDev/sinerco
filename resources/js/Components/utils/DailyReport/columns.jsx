@@ -838,6 +838,12 @@ const list = ({
                                             onChange={(e) =>
                                                 handleChange(
                                                     [sub.slug],
+                                                    // Biarkan koma tetap koma (bukan dikonversi ke titik
+                                                    // di sini) -- angka Indonesia pakai koma sebagai
+                                                    // pemisah desimal, jadi user harus tetap LIHAT koma
+                                                    // pas ngetik. Normalisasi ke titik cuma pas dibutuhkan
+                                                    // buat itungan/kirim ke backend (lihat handleChange &
+                                                    // handleSetReport di DailyReportForm.jsx).
                                                     e.target.value,
                                                     minMaxSetting,
                                                     thresholdValue,
@@ -893,13 +899,18 @@ const list = ({
                             // max={minMaxSetting.max}
                             id={item?.slug}
                             type="text"
-                            inputmode="numeric"
+                            // "numeric" cuma kasih keypad 0-9 tanpa tombol desimal sama
+                            // sekali di iPhone/Android -- ganti ke "decimal" biar ada
+                            // tombol pemisah desimal (titik/koma sesuai locale device).
+                            inputMode="decimal"
                             name={item?.slug}
                             value={formData[item?.slug || ""] || ""}
                             step={decimalSetting}
                             onChange={(e) =>
                                 handleChange(
                                     [e.target.name],
+                                    // Biarkan koma tetap koma (lihat komentar yang sama di
+                                    // input subfield di atas).
                                     e.target.value,
                                     minMaxSetting,
                                     thresholdValue,

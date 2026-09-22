@@ -274,6 +274,19 @@ export const generatePrevHour = async (gmt_offset, interval = 1) => {
     return hours;
 };
 
+// Daftar jam SATU HARI PENUH (bukan cuma sampai "jam sekarang" seperti
+// generatePrevHour) sesuai interval input client -- dipakai buat tanggal
+// selain hari ini (lampau/akan datang), yang seharusnya tetap menampilkan
+// grid waktu sesuai setting interval, bukan 24 baris per jam.
+export const generateFullDayHours = (interval = 1) => {
+    const hours = [];
+    const step = Number(interval) > 0 ? Number(interval) : 1;
+    for (let i = step; i <= 24; i += step) {
+        hours.push(`${String(i).padStart(2, "0")}:00`);
+    }
+    return hours;
+};
+
 export const DateInput = ({
     onChange,
     placeholder = "Enter Date",

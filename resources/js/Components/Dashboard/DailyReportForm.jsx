@@ -55,9 +55,21 @@ const DailyReportForm = (props) => {
                         : item?.slug,
                 ),
             ];
+            // Nilai angka disimpan/ditampilkan pakai koma (format Indonesia),
+            // tapi backend validasi field-nya sebagai `numeric` (titik-desimal) --
+            // konversi koma -> titik di sini, cuma sesaat sebelum dikirim,
+            // supaya yang ditampilkan ke user tidak ikut berubah.
+            const dataToSubmit = Object.fromEntries(
+                Object.entries(data).map(([key, value]) => [
+                    key,
+                    typeof value === "string"
+                        ? value.replace(",", ".")
+                        : value,
+                ]),
+            );
             const resp = await axios.post(
                 route("daily.add", Number(unitData?.unit_position_id)),
-                { data: data, fields: normalizedField },
+                { data: dataToSubmit, fields: normalizedField },
             );
             if (resp.status === 200 || resp.status === 302) {
                 setData({});
@@ -93,17 +105,22 @@ const DailyReportForm = (props) => {
             return;
         }
 
+        // Angka Indonesia pakai koma sebagai pemisah desimal -- `value` yang
+        // DISIMPAN/DITAMPILKAN tetap apa adanya (koma ikut), tapi buat
+        // PERBANDINGAN numerik (min/max/threshold) di bawah ini wajib di-parse
+        // dulu jadi angka beneran (koma -> titik), soalnya JS coercion string
+        // ("12,5" < 10) tidak paham koma sebagai desimal.
+        const numericValue = parseFloat(String(value).replace(",", "."));
+
         if (minMaxSetting) {
-            if (minMaxSetting.min && value < minMaxSetting.min) {
-                // warn = `The value is less than ${minMaxSetting.min}`;
+            if (minMaxSetting.min && numericValue < minMaxSetting.min) {
                 warn = `Value for ${splitCamelCase(field)} is ${value} (less than ${minMaxSetting.min})`;
             }
-            if (minMaxSetting.max && value > minMaxSetting.max) {
-                // warn = `The value is greater than ${minMaxSetting.max}`;
+            if (minMaxSetting.max && numericValue > minMaxSetting.max) {
                 warn = `Value for ${splitCamelCase(field)} is ${value} (greater than ${minMaxSetting.max})`;
             }
         }
-        if (Math.abs(value - lastValue) > thresholdValue) {
+        if (Math.abs(numericValue - lastValue) > thresholdValue) {
             // perbedaan LEBIH BESAR dari threshold
             warn = `${splitCamelCase(field)} value exceeds the threshold (${thresholdValue} from prev data)`;
         }

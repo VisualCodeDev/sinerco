@@ -6,6 +6,7 @@ import LoadingSpinner from "@/Components/Loading";
 import StatusPill from "@/Components/StatusPill";
 import {
     generatePrevHour,
+    generateFullDayHours,
     getCurrDateTime,
     getDDMMYYDate,
 } from "@/Components/utils/dashboard-util";
@@ -95,65 +96,116 @@ export default function Dashboard({ unit_position_id }) {
        
     ];
 
-    const setInitReport = async (reportData, gmt_offset, interval) => {
-        const fullDay = await generatePrevHour(gmt_offset, interval);
-        let finalReportData = reportData;
-        const reportTimes = reportData?.map((r) => r.time) || [];
-        const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
-        if (missingHours.length > 0) {
-            const formattedData = missingHours.map((time) => {
-                return {
-                    time,
-                    unit_position_id,
-                    date: selectedDate,
-                    ...fields.reduce((acc, field) => {
-                        acc[field.slug] = 0;
-                        return acc;
-                    }, {}),
-                };
-            });
-            finalReportData = [...reportData, ...formattedData];
+    const timeToMinutes = (t) => {
+        if (!t) return null;
+        const [h, m] = t.split(":").map(Number);
+        return h * 60 + (m || 0);
+    };
 
-            finalReportData.sort((a, b) => {
-                const timeA = parseInt(a.time.split(":")[0], 10);
-                const timeB = parseInt(b.time.split(":")[0], 10);
-                return timeA - timeB;
-            });
-        }
+    // Tempel `activeRequest` (SD/STDBY yang overlap tanggal ini, dikirim
+    // backend TERPISAH dari baris report -- lihat getDataReportBasedOnDate) ke
+    // SETIAP baris grid waktu hari ini yang JATUH DI DALAM jendela start-end
+    // hari ini -- termasuk baris placeholder (jam yang sama sekali belum
+    // pernah diisi laporan). Bukan blanket ke semua baris tanpa lihat jam:
+    // kalau request-nya cuma 1 hari (atau ini hari mulai/akhirnya) dengan
+    // start/end time yang lebih sempit dari 00:00-24:00 (mis. mulai 18:00
+    // berakhir 22:00), jam SEBELUM start atau SESUDAH end hari itu TIDAK
+    // boleh ikut ditandai.
+    const withActiveRequest = (rows, activeRequest, date) => {
+        if (!activeRequest) return rows;
+
+        const isStartDay = activeRequest.start_date === date;
+        const isEndDay = activeRequest.end_date === date;
+        const dayStart = isStartDay ? activeRequest.start_time || "00:00" : "00:00";
+        const dayEnd = isEndDay ? activeRequest.end_time || "24:00" : "24:00";
+        const startMin = timeToMinutes(dayStart);
+        const endMin = timeToMinutes(dayEnd);
+
+        return rows.map((row) => {
+            if (row.request) return row;
+            const rowMin = timeToMinutes(row.time);
+            if (rowMin === null || rowMin < startMin || rowMin > endMin) {
+                return row;
+            }
+            return { ...row, request: activeRequest };
+        });
+    };
+
+    const setInitReport = async (reportData, gmt_offset, interval, activeRequest) => {
+        // 2 grid berbeda dengan tujuan berbeda:
+        // - fullDayGrid: SEMUA waktu sesuai interval sepanjang hari (dipakai buat
+        //   FILTER data asli -- laporan yang beneran ada isinya, mis. diisi lebih
+        //   awal/backdated ke jam 12:00, harus tetap tampil walau jam
+        //   real-time sekarang belum sampai situ).
+        // - hoursUpToNow: cuma sampai jam sekarang (dipakai buat nentuin jam MANA
+        //   YANG KOSONG perlu di-padding "0" -- jam yang belum lewat sengaja tidak
+        //   ikut di-padding supaya tabel tidak penuh baris "0" duluan sebelum
+        //   waktunya).
+        const fullDayGrid = generateFullDayHours(interval);
+        const hoursUpToNow = await generatePrevHour(gmt_offset, interval);
+
+        // Cuma tampilkan waktu yang sesuai grid interval client -- laporan lama
+        // yang kebetulan tersimpan di jam lain (misal sisa dari sebelum
+        // interval-nya di-set ke 3 jam) sengaja TIDAK ikut ditampilkan, bukan
+        // cuma ditambah gridnya di atasnya.
+        const filteredReportData = (reportData || []).filter((r) =>
+            fullDayGrid.includes(r.time),
+        );
+        const reportTimes = filteredReportData.map((r) => r.time);
+        const missingHours = hoursUpToNow.filter((h) => !reportTimes.includes(h));
+        const formattedData = missingHours.map((time) => ({
+            time,
+            unit_position_id,
+            date: selectedDate,
+            ...fields.reduce((acc, field) => {
+                acc[field.slug] = 0;
+                return acc;
+            }, {}),
+        }));
+        const finalReportData = withActiveRequest(
+            [...filteredReportData, ...formattedData].sort(
+                (a, b) =>
+                    parseInt(a.time.split(":")[0], 10) -
+                    parseInt(b.time.split(":")[0], 10),
+            ),
+            activeRequest,
+            selectedDate,
+        );
 
         setData(finalReportData);
     };
 
-    const setInitPrevReport = async (reportData) => {
-        let fullDay = [];
-        for (let i = 1; i <= 24; i++) {
-            fullDay.push(`${String(i).padStart(2, "0")}:00`);
-        }
-        const reportTimes = reportData?.map((r) => r.time);
+    const setInitPrevReport = async (reportData, interval, activeRequest) => {
+        // Sebelumnya selalu 24 baris per jam tanpa peduli interval client --
+        // jadi tanggal lampau/mendatang selalu nampilin 1:00, 2:00, dst walau
+        // setting client-nya per 3 jam. Samakan dengan setInitReport (hari ini):
+        // cuma tampilkan waktu yang sesuai grid interval, laporan lama di jam
+        // lain sengaja tidak ikut ditampilkan.
+        const fullDay = generateFullDayHours(interval);
+        const filteredReportData = (reportData || []).filter((r) =>
+            fullDay.includes(r.time),
+        );
+        const reportTimes = filteredReportData.map((r) => r.time);
 
         const missingHours = fullDay.filter((h) => !reportTimes.includes(h));
-        let finalReportData = reportData;
-
-        if (missingHours.length > 0) {
-            const formattedData = missingHours.map((time) => {
-                return {
-                    time,
-                    unit_position_id,
-                    date: selectedDate,
-                    ...fields.reduce((acc, field) => {
-                        acc[field.slug] = 0;
-                        return acc;
-                    }, {}),
-                };
-            });
-            finalReportData = [...reportData, ...formattedData];
-
-            finalReportData.sort((a, b) => {
-                const timeA = parseInt(a.time.split(":")[0], 10);
-                const timeB = parseInt(b.time.split(":")[0], 10);
-                return timeA - timeB;
-            });
-        }
+        const formattedData = missingHours.map((time) => ({
+            time,
+            unit_position_id,
+            date: selectedDate,
+            ...fields.reduce((acc, field) => {
+                acc[field.slug] = 0;
+                return acc;
+            }, {}),
+        }));
+        const finalReportData = withActiveRequest(
+            [...filteredReportData, ...formattedData].sort(
+                (a, b) =>
+                    parseInt(a.time.split(":")[0], 10) -
+                    parseInt(b.time.split(":")[0], 10),
+            ),
+            activeRequest,
+            selectedDate,
+        );
         setData(finalReportData);
     };
 
@@ -178,9 +230,10 @@ export default function Dashboard({ unit_position_id }) {
             setClientName(unit?.data?.client || "");
 
             await initCurrDate(
-                reportData?.data,
+                reportData?.data?.reports,
                 unit?.data?.gmt_offset,
                 unit?.data?.input_interval,
+                reportData?.data?.request,
             );
         } catch (e) {
             console.error(e);
@@ -189,13 +242,13 @@ export default function Dashboard({ unit_position_id }) {
         }
     };
 
-    const initCurrDate = async (reportData, gmt_offset, interval) => {
+    const initCurrDate = async (reportData, gmt_offset, interval, activeRequest) => {
         setLoading(true);
         const { date } = await getCurrDateTime(gmt_offset);
         setCurrDate(new Date(date));
         setSelectedDate(date);
 
-        await setInitReport(reportData, gmt_offset, interval);
+        await setInitReport(reportData, gmt_offset, interval, activeRequest);
         setLoading(false);
     };
 
@@ -218,11 +271,14 @@ export default function Dashboard({ unit_position_id }) {
                         date: selectedDate,
                     }),
                 );
-                if (new Date(selectedDate) < currDate) {
-                    await setInitPrevReport(reportData?.data);
-                } else {
-                    setData(reportData?.data);
-                }
+                // Tanggal lampau maupun akan datang: tetap tampilkan grid waktu
+                // penuh sesuai interval client (bukan 24 baris per jam / tabel
+                // kosong total kalau belum ada laporan).
+                await setInitPrevReport(
+                    reportData?.data?.reports,
+                    unitData?.input_interval,
+                    reportData?.data?.request,
+                );
             } catch (e) {
                 console.error(e);
             } finally {

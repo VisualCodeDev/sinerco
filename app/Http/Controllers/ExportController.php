@@ -76,7 +76,12 @@ class ExportController extends Controller
     private function calculateDailyStatus($requests, string $date)
     {
         $dayStart = Carbon::parse($date)->startOfDay();
-        $dayEnd = Carbon::parse($date)->endOfDay();
+        // Batas akhir hari ini yang SEBENARNYA (00:00 hari berikutnya = "24:00"),
+        // BUKAN endOfDay() (23:59:59.999999) -- endOfDay() bikin overlap yang
+        // sampai lewat tengah malam (request multi-hari) kehilangan ~1 detik durasi
+        // down/standby, dan remarks-nya salah nampilin "23:59" padahal seharusnya
+        // "24:00" (masih lanjut sampai akhir hari, bukan berhenti semenit sebelumnya).
+        $dayEnd = Carbon::parse($date)->addDay()->startOfDay();
         $downIntervals = [];
         $standbyIntervals = [];
         $remarksArr = [];
@@ -102,11 +107,15 @@ class ExportController extends Controller
                 $standbyIntervals[] = [$start->timestamp, $end->timestamp];
             }
 
-            // remarks per hari disesuaikan dengan jam overlap
+            // remarks per hari disesuaikan dengan jam overlap -- kalau overlap-nya
+            // berakhir persis di batas hari ini (request lanjut ke hari berikutnya),
+            // tampilkan "24:00", bukan "00:00" (Carbon format H:i wrap ke 00:00
+            // untuk tengah malam).
+            $endLabel = $end->equalTo($dayEnd) ? '24:00' : $end->format('H:i');
             $remarksArr[] = sprintf(
                 '%s - %s %s/ %s',
                 $start->format('H:i'),
-                $end->format('H:i'),
+                $endLabel,
                 strtoupper($req->type),
                 $req->remarks
             );
@@ -179,7 +188,16 @@ class ExportController extends Controller
     }
 
     // Hitung rata-rata nilai $field per jam dalam rentang waktu tertentu
-    private function getAvgByHourRange($reports, string $field, array $range = null)
+    // $intervalHours = jam per pembacaan sesuai input_interval client (1, 2, 3, dst).
+    // PENTING: pembaginya adalah JUMLAH PEMBACAAN YANG DIHARAPKAN (24/interval per
+    // hari x jumlah hari), BUKAN jumlah laporan yang benar-benar ada (supaya jam
+    // yang tidak diisi tetap dihitung sebagai 0, bukan dilewati -- kalau dilewati
+    // rata-ratanya jadi cuma rata-rata dari yang keisi, cenderung lebih tinggi dari
+    // yang sebenarnya) DAN BUKAN jumlah jam yang berlalu (yang cuma benar kalau
+    // interval-nya 1 jam -- client dengan interval 3 jam cuma punya 8 pembacaan/hari,
+    // bukan 24, jadi membagi dengan jam yang berlalu bikin rata-ratanya jadi terlalu
+    // kecil, sekitar sepertiga dari nilai sebenarnya).
+    private function getAvgByHourRange($reports, string $field, array $range = null, float $intervalHours = 1)
     {
         $reports = collect($reports);
         if (empty($range)) {
@@ -211,12 +229,16 @@ class ExportController extends Controller
             ->sum(fn($r) => (float) $r[$field]);
 
         $startDate = Carbon::parse($range['start'])->startOfDay();
-        $endDate = Carbon::parse($range['end'])->endOfDay();
+        $endDate = Carbon::parse($range['end'])->startOfDay();
 
-        $hours = $startDate->diffInHours($endDate);
-        $hours = (int) round($hours);
+        // +1 karena inklusif kedua ujung (1 hari = 0 selisih hari, tapi tetap 1 hari)
+        $days = $startDate->diffInDays($endDate) + 1;
 
-        return $hours > 0 ? $total / $hours : 0;
+        $step = $intervalHours > 0 ? $intervalHours : 1;
+        $expectedReadingsPerDay = (int) floor(24 / $step);
+        $expectedReadings = $days * max($expectedReadingsPerDay, 1);
+
+        return $expectedReadings > 0 ? $total / $expectedReadings : 0;
     }
 
     // Generate dokumen BAP (Berita Acara Pekerjaan) dari template docx sesuai jenis template
@@ -576,7 +598,8 @@ class ExportController extends Controller
                 ];
 
                 // hitung availability & rata-rata flowrate tiap unit untuk isi tabel BAP
-                $transformedUnits = $units->map(function ($item) use ($rangeDate) {
+                $bapIntervalHours = (float) ($client->input_interval ?: 1);
+                $transformedUnits = $units->map(function ($item) use ($rangeDate, $bapIntervalHours) {
                     $reports = $item->reports
                         ->map(function ($report) {
                             $decoded = $report['data'];
@@ -598,7 +621,7 @@ class ExportController extends Controller
                         'engine_sn' => $item->unit->engine_sn || '',
                         'location' => $item->location->location ?? null,
                         'avg_flowrate' => round(
-                            $this->getAvgByHourRange($reports, 'flowrate', $rangeDate),
+                            $this->getAvgByHourRange($reports, 'flowrate', $rangeDate, $bapIntervalHours),
                             2
                         ),
                         'availability' => $availability['average_availability'] . '%'
@@ -875,6 +898,11 @@ class ExportController extends Controller
                         ? DailyReportSettings::where('client_id', $unitPos->client_id)->value('performanceFixedValue')
                         : null;
 
+                    // Dipakai buat getAvgByHourRange() di bawah -- rata-rata harian harus
+                    // dibagi jumlah pembacaan yang diharapkan sesuai interval input client
+                    // ini (bukan jumlah jam berlalu / jumlah laporan yang keisi doang).
+                    $intervalHours = (float) ($unitPos->client->input_interval ?? 1) ?: 1;
+
                     // replace {{unit_sn}}
                     foreach ($sheet->getRowIterator() as $row) {
                         foreach ($row->getCellIterator() as $cell) {
@@ -956,7 +984,7 @@ class ExportController extends Controller
                             $flowrateTotal = 0;
 
                             $formattedReports = $dayReports
-                                ->map(function ($r) {
+                                ->map(function ($r) use ($performanceFixedValue) {
 
                                     $data = is_string($r->data)
                                         ? json_decode($r->data, true)
@@ -979,10 +1007,10 @@ class ExportController extends Controller
                                 ->filter()
                                 ->values();
 
-                            $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
-                            $dischargeTotal = $this->getAvgByHourRange($formattedReports, 'discharge_press');
-                            $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
-                            $curveTotal = $this->getAvgByHourRange($formattedReports, 'curve');
+                            $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours);
+                            $dischargeTotal = $this->getAvgByHourRange($formattedReports, 'discharge_press', null, $intervalHours);
+                            $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours);
+                            $curveTotal = $this->getAvgByHourRange($formattedReports, 'curve', null, $intervalHours);
                             $report = (object) [
                                 'date' => $date->translatedFormat('j M'),
                                 'suction_p' => round($suctionTotal, 2),
@@ -1077,6 +1105,9 @@ class ExportController extends Controller
                     $locationName = $unitPos->location?->location ?? 'UNKNOWN';
                     $location = ">> {$locationName} <<";
                     $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    // Dipakai buat getAvgByHourRange() di bawah (lihat komentar yang sama
+                    // di export invoice bulanan).
+                    $intervalHours = (float) ($unitPos->client->input_interval ?? 1) ?: 1;
 
                     if ($sheetIndex == 0) {
                         $sheet = $baseSheet;
@@ -1236,11 +1267,11 @@ class ExportController extends Controller
 
                             $report = (object) [
                                 'date' => $date->translatedFormat('j M'),
-                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press'), 2),
-                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press'), 2),
-                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate'), 2),
-                                'bef_cooler' => round($this->getAvgByHourRange($formattedReports, 'bef_cooler'), 2),
-                                'aft_cooler' => round($this->getAvgByHourRange($formattedReports, 'aft_cooler'), 2),
+                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours), 2),
+                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press', null, $intervalHours), 2),
+                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours), 2),
+                                'bef_cooler' => round($this->getAvgByHourRange($formattedReports, 'bef_cooler', null, $intervalHours), 2),
+                                'aft_cooler' => round($this->getAvgByHourRange($formattedReports, 'aft_cooler', null, $intervalHours), 2),
                                 'run' => $run,
                                 'stby' => $stdby,
                                 'down' => $sd,
@@ -1344,6 +1375,9 @@ class ExportController extends Controller
                     $number = $matches[0] ?? 'UNKNOWN';
                     $sheetName = "$location-$number";
                     $sheetName = $unitSn;
+                    // Dipakai buat getAvgByHourRange() di bawah (lihat komentar yang sama
+                    // di export invoice bulanan).
+                    $intervalHours = (float) ($unitPos->client->input_interval ?? 1) ?: 1;
 
                     $rekapInvSheet->insertNewRowBefore($templateRow, 1);
 
@@ -1505,9 +1539,9 @@ class ExportController extends Controller
 
                             $report = (object) [
                                 'date' => $date->translatedFormat('j M'),
-                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press'), 2),
-                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press'), 2),
-                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate'), 2),
+                                'suction_p' => round($this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours), 2),
+                                'discharge_p' => round($this->getAvgByHourRange($formattedReports, 'discharge_press', null, $intervalHours), 2),
+                                'flowrate' => round($this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours), 2),
                                 'run' => $run,
                                 'stby' => $stdby,
                                 'down' => $sd,
@@ -1717,6 +1751,9 @@ class ExportController extends Controller
                     $dayIndex = 0;
                     $reports = $unitPos->reports->sortBy('date')->values();
                     $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    // Dipakai buat getAvgByHourRange() di bawah (lihat komentar yang sama
+                    // di export invoice bulanan).
+                    $intervalHours = (float) ($unitPos->client->input_interval ?? 1) ?: 1;
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()
@@ -1935,8 +1972,8 @@ class ExportController extends Controller
                                     ->filter()
                                     ->values();
 
-                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
-                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
+                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours);
+                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours);
 
                                 $report = (object) [
                                     'date' => $formattedDate,
@@ -2027,8 +2064,8 @@ class ExportController extends Controller
                                     ->filter()
                                     ->values();
 
-                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press');
-                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate');
+                                $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours);
+                                $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours);
 
                                 $report = (object) [
                                     'date' => $formattedDate,
@@ -2107,6 +2144,9 @@ class ExportController extends Controller
                 foreach ($clientUnits as $unitPos) {
                     $reports = $unitPos->reports->sortBy('date')->values();
                     $unitSn = $unitPos->unit->unit_sn ?: ($unitPos->unit->unit ?: 'UNKNOWN');
+                    // Dipakai buat getAvgByHourRange() di bawah (lihat komentar yang sama
+                    // di export invoice bulanan).
+                    $intervalHours = (float) ($unitPos->client->input_interval ?? 1) ?: 1;
                     $formattedRequests = $reports
                         ->map(fn($r) => $r->request)
                         ->filter()

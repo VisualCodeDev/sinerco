@@ -88,8 +88,28 @@ const DynamicLineChart = () => {
     // Hasil fetch: kalau mode unit cuma 1 entri, kalau mode area bisa banyak (1 per unit di area itu)
     const [seriesSources, setSeriesSources] = useState([]); // [{ unitPositionId, unitLabel, reportData, satuan }]
 
-    // Area diisi -> tampilkan gabungan unit di area itu. Kalau tidak, pakai unit yang dipilih.
-    const filterMode = selectedArea ? "area" : "unit";
+    // Area cuma buat MENYARING pilihan unit -- bukan otomatis mengunci ke mode
+    // "gabungan semua unit di area itu". Begitu user pilih 1 unit spesifik
+    // (area dipilih atau tidak), mode-nya "unit" (chart 1 unit itu saja).
+    // Area tanpa unit dipilih -> mode "area" (gabungan semua unit di area itu).
+    const filterMode = selectedUnit ? "unit" : selectedArea ? "area" : "unit";
+
+    // Unit dropdown disaring ke unit-unit yang ada di area terpilih (kalau ada
+    // area dipilih) -- tapi tetap BISA dipilih, tidak di-disable lagi.
+    const unitOptionsForArea = selectedArea
+        ? allUnits.filter((u) => String(u.area_id) === String(selectedArea))
+        : allUnits;
+
+    // Ganti area -> lepas unit yang sekarang kepilih kalau ternyata bukan
+    // bagian dari area barunya (supaya tidak nyangkut ke unit dari area lama).
+    useEffect(() => {
+        if (!selectedArea || !selectedUnit) return;
+        const stillValid = unitOptionsForArea.some(
+            (u) => String(u.unit_position_id) === String(selectedUnit),
+        );
+        if (!stillValid) setSelectedUnit("");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedArea]);
     // Bulan dipilih -> pakai bulan itu (1 chart bulanan). Kalau tidak, pakai range date.
     const isMonthMode = Boolean(selectedMonth);
 
@@ -345,24 +365,20 @@ const DynamicLineChart = () => {
 
                 <div className="flex flex-col min-w-[180px]">
                     <label className="mb-1 font-bold">Unit:</label>
-                    {filterMode === "area" ? (
-                        <input
-                            disabled
-                            placeholder="Using Area filter"
-                            className="p-2 border rounded border-gray-300 bg-gray-100 text-gray-400"
-                        />
-                    ) : (
-                        <SelectSuggestion
-                            name="unit"
-                            placeholder="-- Select Unit --"
-                            options={allUnits.map((item) => ({
-                                value: item.unit_position_id,
-                                label: item.unit,
-                            }))}
-                            value={selectedUnit}
-                            onChange={setSelectedUnit}
-                        />
-                    )}
+                    <SelectSuggestion
+                        name="unit"
+                        placeholder={
+                            selectedArea
+                                ? "-- All Units in Area --"
+                                : "-- Select Unit --"
+                        }
+                        options={unitOptionsForArea.map((item) => ({
+                            value: item.unit_position_id,
+                            label: item.unit,
+                        }))}
+                        value={selectedUnit}
+                        onChange={setSelectedUnit}
+                    />
                 </div>
 
                 <div className="flex flex-col min-w-[220px]">
