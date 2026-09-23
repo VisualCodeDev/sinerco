@@ -47,6 +47,7 @@ class UnitMovementLogger
             }
 
             $changed = $prev->client_id !== $pos->client_id
+                || $prev->workshop_id !== $pos->workshop_id
                 || $prev->region_id !== $pos->region_id
                 || $prev->location_id !== $pos->location_id;
 
@@ -59,6 +60,8 @@ class UnitMovementLogger
                 'action' => $action,
                 'from_client_id' => $prev->client_id,
                 'to_client_id' => $pos->client_id,
+                'from_workshop_id' => $prev->workshop_id,
+                'to_workshop_id' => $pos->workshop_id,
                 'from_region_id' => $prev->region_id,
                 'to_region_id' => $pos->region_id,
                 'from_location_id' => $prev->location_id,
@@ -77,6 +80,8 @@ class UnitMovementLogger
             'action' => 'created',
             'from_client_id' => null,
             'to_client_id' => $position->client_id,
+            'from_workshop_id' => null,
+            'to_workshop_id' => $position->workshop_id,
             'from_region_id' => null,
             'to_region_id' => $position->region_id,
             'from_location_id' => null,

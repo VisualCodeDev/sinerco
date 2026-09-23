@@ -21,11 +21,13 @@ const MOVEMENT_ACTION_LABEL = {
 
 const describe = (log, prefix) => {
     const client = log[`${prefix}_client`]?.name;
+    const workshop = log[`${prefix}_workshop`]?.name;
     const region = log[`${prefix}_region`]?.name;
     const location = log[`${prefix}_location`]?.location;
     const area = log[`${prefix}_location`]?.area?.area;
     const parts = [
         client && `Client: ${client}`,
+        workshop && `Workshop: ${workshop}`,
         region && `Region: ${region}`,
         area && `Area: ${area}`,
         location && `Location: ${location}`,

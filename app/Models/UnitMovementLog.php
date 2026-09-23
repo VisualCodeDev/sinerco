@@ -15,6 +15,8 @@ class UnitMovementLog extends Model
         'action',
         'from_client_id',
         'to_client_id',
+        'from_workshop_id',
+        'to_workshop_id',
         'from_region_id',
         'to_region_id',
         'from_location_id',
@@ -36,6 +38,16 @@ class UnitMovementLog extends Model
     public function toClient()
     {
         return $this->belongsTo(Client::class, 'to_client_id', 'client_id');
+    }
+
+    public function fromWorkshop()
+    {
+        return $this->belongsTo(Workshop::class, 'from_workshop_id', 'workshop_id');
+    }
+
+    public function toWorkshop()
+    {
+        return $this->belongsTo(Workshop::class, 'to_workshop_id', 'workshop_id');
     }
 
     public function fromRegion()

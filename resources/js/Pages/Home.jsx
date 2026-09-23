@@ -52,7 +52,13 @@ export default function Home() {
             let down = 0;
             let standby = 0;
             let workshop = 0;
-            response.data.reduce((acc, curr) => {
+            response.data.forEach((curr) => {
+                // Unit yang lagi di workshop dihitung terpisah, tidak ikut masuk
+                // running/standby/down (unit di workshop bukan sedang beroperasi)
+                if (curr.workshop_id) {
+                    workshop += 1;
+                    return;
+                }
                 const status = curr.status;
                 if (status === "running") {
                     running += 1;
@@ -63,11 +69,7 @@ export default function Home() {
                 if (status === "stdby") {
                     standby += 1;
                 }
-                // Unit tanpa client_id berarti unit sedang di workshop
-                if (!curr.client_id) {
-                    workshop += 1;
-                }
-            }, {});
+            });
             setData({
                 running: {
                     label: "Running",
@@ -91,7 +93,8 @@ export default function Home() {
                 },
             });
 
-            setTotal(response.data?.length);
+            // Total unit yang beroperasi = total keseluruhan dikurangi unit yang lagi di workshop
+            setTotal(running + down + standby);
         }
 
         // setData(response.data);

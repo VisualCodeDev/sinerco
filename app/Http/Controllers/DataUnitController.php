@@ -215,6 +215,7 @@ class DataUnitController extends Controller
                 'status' => $unit->status,
                 'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                 'client_id' => $unit->UnitPositions?->client_id,
+                'workshop_id' => $unit->UnitPositions?->workshop_id,
                 'gmt_offset' => $unit->UnitPositions?->client?->gmt_offset ?? $unit->UnitPositions?->workshop?->gmt_offset ?? 7,
                 'location_id' => $unit->UnitPositions?->location_id,
                 'location' => $unit->UnitPositions?->location?->location ?? null,
@@ -499,8 +500,9 @@ class DataUnitController extends Controller
     public function addUnitLocation(Request $request)
     {
         $val = $request->validate([
-            'workshop_id' => 'nullable|exists:workshops,workshop_id|required_without:client_id',
-            'client_id' => 'nullable|exists:clients,client_id|required_without:workshop_id',
+            // prohibits: unit cuma boleh ditempatkan di salah satu, client ATAU workshop, tidak dua-duanya
+            'workshop_id' => 'nullable|exists:workshops,workshop_id|required_without:client_id|prohibits:client_id',
+            'client_id' => 'nullable|exists:clients,client_id|required_without:workshop_id|prohibits:workshop_id',
             'unit_ids' => 'required|array',
             'unit_ids.*' => 'exists:data_units,unit_id',
         ]);
@@ -510,8 +512,9 @@ class DataUnitController extends Controller
         $before = UnitMovementLogger::snapshot($val['unit_ids']);
         UnitPosition::whereIn('unit_id', $val['unit_ids'])
             ->update([
+                // set salah satu, null-kan yang lain -- unit tidak boleh punya client_id & workshop_id sekaligus
                 'workshop_id' => $workshopId,
-                'client_id' => $clientId,
+                'client_id' => $workshopId ? null : $clientId,
                 'position_type' => $workshopId ? 'workshop' : 'client',
                 'updated_at' => now(),
             ]);
@@ -667,6 +670,13 @@ class DataUnitController extends Controller
                 ->filter(fn($value) => $value !== null)
                 ->toArray();
 
+            // Kalau client_id diisi lewat sini, unit ini pindah ke client -- lepas
+            // dulu workshop_id lama-nya (kalau ada) supaya tidak nyantol dua-duanya
+            if (array_key_exists('client_id', $positionData)) {
+                $positionData['workshop_id'] = null;
+                $positionData['position_type'] = 'client';
+            }
+
             if (!empty($positionData)) {
                 $before = UnitMovementLogger::snapshot([$val['unit_id']]);
                 UnitPosition::where('unit_id', $val['unit_id'])->update($positionData);
@@ -748,6 +758,8 @@ class DataUnitController extends Controller
             'unit:unit_id,unit',
             'fromClient:client_id,name',
             'toClient:client_id,name',
+            'fromWorkshop:workshop_id,name',
+            'toWorkshop:workshop_id,name',
             'fromRegion:id,name',
             'toRegion:id,name',
             'fromLocation:id,location,area_id',
