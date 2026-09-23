@@ -42,7 +42,7 @@ const Modal = (props) => {
                                     type="button"
                                     onClick={handleCloseModal}
                                     aria-label="Close modal"
-                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/20 transition"
+                                    className="flex items-center justify-center w-8 h-8 rounded-md border border-danger bg-danger text-white hover:opacity-90 transition"
                                 >
                                     🞩
                                 </button>

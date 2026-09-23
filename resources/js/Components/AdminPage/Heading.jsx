@@ -70,16 +70,6 @@ const Heading = ({ children, alert, setAlert }) => {
             label: "Unit Conf. Setting",
             href: route("input.setting"),
         },
-        workshopList: {
-            icon: <FaWarehouse />,
-            label: "Workshop List",
-            href: route("workshops"),
-        },
-        unitLocationSetting: {
-            icon: <IoMap />,
-            label: "Unit - Client Setting",
-            href: route("unit.position"),
-        },
         inputField: {
             icon: <IoDocumentText />,
             label: "Input Fields",
@@ -176,11 +166,8 @@ const Heading = ({ children, alert, setAlert }) => {
             menu.home,
             menu.database,
             menu.ba,
-            menu.workshopList,
-            menu.clientList,
             menu.eventHistory,
             menu.unitList,
-            menu.unitLocationSetting,
             menu.movementLog,
             menu.accountList,
             menu.profile,
@@ -201,8 +188,8 @@ const Heading = ({ children, alert, setAlert }) => {
     if (user?.role === "management") {
         menuItems = [
             menu.home,
+            menu.database,
             menu.ba,
-            menu.clientList,
             menu.unitList,
             menu.eventHistory,
         ];
@@ -392,7 +379,7 @@ const Heading = ({ children, alert, setAlert }) => {
                         <>
                             <button
                                 onClick={() => setShowModal(true)}
-                                className="hidden md:flex items-center text-white text-lg rounded-md border border-gray-200 bg-gray-50 hover:scale-105 transition ease-in-out delay-75"
+                                className="hidden md:flex items-center text-white text-lg rounded-md hover:scale-105 transition ease-in-out delay-75"
                             >
                                 <span className="bg-red-500 px-4 py-2 rounded-l-full shadow ">
                                     SD

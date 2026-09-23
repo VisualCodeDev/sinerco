@@ -37,7 +37,7 @@ class DataUnitController extends Controller
         if ($user->roleData?->name !== 'super_admin') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting']);
+                    $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue']);
                 },
                 'client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -58,6 +58,8 @@ class DataUnitController extends Controller
                     'old_sn' => $pos->unit->old_sn,
                     'thresholdSetting' => $pos->unit->thresholdSetting,
                     'visibilitySetting' => $pos->unit->visibilitySetting,
+                    'curve_percentage' => $pos->unit->curve_percentage,
+                    'performanceFixedValue' => $pos->unit->performanceFixedValue,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
                     'client_id' => $pos->client_id,
@@ -84,7 +86,7 @@ class DataUnitController extends Controller
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-            ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
+            ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue'])->get();
 
             // Format ulang data unit untuk super_admin ke struktur flat
             $data = $temp->map(function ($unit) {
@@ -95,6 +97,8 @@ class DataUnitController extends Controller
                     'old_sn' => $unit->old_sn,
                     'thresholdSetting' => $unit->thresholdSetting,
                     'visibilitySetting' => $unit->visibilitySetting,
+                    'curve_percentage' => $unit->curve_percentage,
+                    'performanceFixedValue' => $unit->performanceFixedValue,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                     'client_id' => $unit->UnitPositions?->client_id,
@@ -196,7 +200,7 @@ class DataUnitController extends Controller
             'UnitPositions.workshop' => function ($q) {
                 $q->select(['workshop_id', 'name']);
             },
-        ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting'])->get();
+        ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue'])->get();
 
         return $temp->map(function ($unit) {
             return [
@@ -206,6 +210,8 @@ class DataUnitController extends Controller
                 'old_sn' => $unit->old_sn,
                 'thresholdSetting' => $unit->thresholdSetting,
                 'visibilitySetting' => $unit->visibilitySetting,
+                'curve_percentage' => $unit->curve_percentage,
+                'performanceFixedValue' => $unit->performanceFixedValue,
                 'status' => $unit->status,
                 'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                 'client_id' => $unit->UnitPositions?->client_id,
@@ -792,6 +798,13 @@ class DataUnitController extends Controller
     // Mengatur threshold, visibility, required, dan curve_percentage untuk unit-unit terpilih
     public function setUnitSetting(Request $request)
     {
+        // "" (input dikosongkan user, artinya "hitung dari curve seperti biasa")
+        // wajib dianggap null SEBELUM divalidasi -- 'nullable' cuma lolosin null,
+        // bukan auto-convert "" jadi null, jadi "" tetap kena cek 'numeric' & gagal.
+        if ($request->input('performanceFixedValue') === '') {
+            $request->merge(['performanceFixedValue' => null]);
+        }
+
         $rules = [
             'unit_id' => 'required|array',
             'thresholdSetting' => 'required|array',
@@ -799,7 +812,12 @@ class DataUnitController extends Controller
             // requiredSetting di-keyin per field_id (bukan slug), karena disimpan
             // di tabel unit_fields yang PK-nya field_id, bukan di kolom JSON milik unit.
             'requiredSetting' => 'nullable|array',
-            'curve_percentage' => 'nullable|numeric|min:0|max:200'
+            'curve_percentage' => 'nullable|numeric|min:0|max:200',
+            // Kosongkan untuk hitung performance dari curve seperti biasa; isi untuk
+            // pakai nilai tetap sebagai pembagi (lihat calculatePerformance() di
+            // DailyReportController) -- per unit, bukan per client, karena tiap
+            // unit/compressor bisa punya nilai fixed curve fisik yang beda.
+            'performanceFixedValue' => 'nullable|numeric',
         ];
 
         // Bangun rule validasi dinamis untuk tiap key threshold
@@ -832,6 +850,9 @@ class DataUnitController extends Controller
                 'thresholdSetting' => $validated['thresholdSetting'],
                 'visibilitySetting' => $validated['visibilitySetting'],
                 'curve_percentage' => $validated['curve_percentage'] ?? $unit->curve_percentage,
+                'performanceFixedValue' => array_key_exists('performanceFixedValue', $validated)
+                    ? $validated['performanceFixedValue']
+                    : $unit->performanceFixedValue,
             ]);
 
             // Required disimpan per-baris di unit_fields (bukan JSON di data_units),

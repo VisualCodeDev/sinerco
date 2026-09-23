@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Modal from "../Modal";
 import {
     DateTimeInput,
@@ -23,7 +24,31 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
     const [unitData, setUnitData] = useState([]);
     const [remarkList, setRemarkList] = useState([]);
     const [showRemarkSuggestions, setShowRemarkSuggestions] = useState(false);
+    const [remarkBoxRect, setRemarkBoxRect] = useState(null);
+    const remarkWrapperRef = useRef(null);
     const { addToast } = useToast();
+
+    const updateRemarkBoxRect = () => {
+        if (remarkWrapperRef.current) {
+            const rect = remarkWrapperRef.current.getBoundingClientRect();
+            setRemarkBoxRect(rect);
+        }
+    };
+
+    useEffect(() => {
+        if (!showRemarkSuggestions) return;
+
+        updateRemarkBoxRect();
+
+        window.addEventListener("resize", updateRemarkBoxRect);
+        // capture: true supaya scroll di dalam modal (yang tidak bubbling) tetap kedeteksi
+        window.addEventListener("scroll", updateRemarkBoxRect, true);
+
+        return () => {
+            window.removeEventListener("resize", updateRemarkBoxRect);
+            window.removeEventListener("scroll", updateRemarkBoxRect, true);
+        };
+    }, [showRemarkSuggestions]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         const newErrors = {};
@@ -78,8 +103,10 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         setUnitData(response.data);
     };
 
-    const fetchRemarkList = async () => {
-        const response = await axios.get(route("remark.list.get"));
+    const fetchRemarkList = async (type) => {
+        const response = await axios.get(route("remark.list.get"), {
+            params: type ? { request_type: type } : {},
+        });
         setRemarkList(response.data || []);
     };
 
@@ -100,9 +127,16 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
         if (showModal && unitData) {
             fetchTime();
             fetchDataUnit();
-            fetchRemarkList();
+            fetchRemarkList(data.request_type);
         }
     }, [showModal]);
+
+    // Refetch suggestion list tiap kali tipe request berubah, biar sesuai tipe yang dipilih
+    useEffect(() => {
+        if (showModal) {
+            fetchRemarkList(data.request_type);
+        }
+    }, [data.request_type]);
 
     // Saring daftar remark berdasarkan teks yang sedang diketik (case-insensitive)
     const filteredRemarkList = (data.remarks || "").trim() === ""
@@ -260,18 +294,24 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     Remarks
                                 </label>
 
-                                <div className="relative">
+                                <div className="relative" ref={remarkWrapperRef}>
                                     <textarea
-                                        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[120px]"
+                                        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-primary resize-none min-h-[120px] disabled:bg-gray-100 disabled:text-gray-400"
                                         required
+                                        disabled={!data.request_type}
                                         id="remarks"
                                         name="remarks"
-                                        placeholder="Write remarks here..."
+                                        placeholder={
+                                            data.request_type
+                                                ? "Write remarks here..."
+                                                : "Select a request type first..."
+                                        }
                                         autoComplete="off"
                                         value={data.remarks || ""}
-                                        onFocus={() =>
-                                            setShowRemarkSuggestions(true)
-                                        }
+                                        onFocus={() => {
+                                            updateRemarkBoxRect();
+                                            setShowRemarkSuggestions(true);
+                                        }}
                                         onBlur={() =>
                                             // delay supaya klik item suggestion sempat kedaftar sebelum ditutup
                                             setTimeout(
@@ -292,15 +332,62 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                     />
 
                                     {showRemarkSuggestions &&
-                                        filteredRemarkList.length > 0 && (
-                                            <ul className="absolute z-10 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-xl border border-gray-300 bg-white shadow-lg">
-                                                {filteredRemarkList
-                                                    .slice(0, 8)
-                                                    .map((item, index) => (
+                                        filteredRemarkList.length > 0 &&
+                                        remarkBoxRect &&
+                                        (() => {
+                                            const margin = 8;
+                                            const spaceBelow =
+                                                window.innerHeight -
+                                                remarkBoxRect.bottom -
+                                                margin;
+                                            const spaceAbove =
+                                                remarkBoxRect.top - margin;
+                                            // Buka ke atas kalau ruang di bawah kurang dari cukup dan ruang di atas lebih luas
+                                            const openUpward =
+                                                spaceBelow < 150 &&
+                                                spaceAbove > spaceBelow;
+                                            const maxHeight = Math.max(
+                                                Math.min(
+                                                    openUpward
+                                                        ? spaceAbove
+                                                        : spaceBelow,
+                                                    320,
+                                                ),
+                                                100,
+                                            );
+
+                                            return createPortal(
+                                                <ul
+                                                    style={{
+                                                        position: "fixed",
+                                                        ...(openUpward
+                                                            ? {
+                                                                  bottom:
+                                                                      window.innerHeight -
+                                                                      remarkBoxRect.top +
+                                                                      4,
+                                                              }
+                                                            : {
+                                                                  top:
+                                                                      remarkBoxRect.bottom +
+                                                                      4,
+                                                              }),
+                                                        left: remarkBoxRect.left,
+                                                        width: remarkBoxRect.width,
+                                                        maxHeight,
+                                                        zIndex: 3000,
+                                                    }}
+                                                    className="overflow-y-auto rounded-xl border border-gray-300 bg-white shadow-lg"
+                                                >
+                                                {filteredRemarkList.map(
+                                                    (item, index) => (
                                                         <li key={index}>
                                                             <button
                                                                 type="button"
                                                                 className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                                                                onMouseDown={(e) =>
+                                                                    e.preventDefault()
+                                                                }
                                                                 onClick={() => {
                                                                     handleChange(
                                                                         [
@@ -316,9 +403,12 @@ export const RequestModal = ({ handleCloseModal, showModal }) => {
                                                                 {item}
                                                             </button>
                                                         </li>
-                                                    ))}
-                                            </ul>
-                                        )}
+                                                    ),
+                                                )}
+                                            </ul>,
+                                                document.body,
+                                            );
+                                        })()}
                                 </div>
 
                                 {errors.remarks && (

@@ -83,7 +83,6 @@ const InputValidationSetting = (props) => {
             minMaxSetting: data?.minMaxSetting ?? defaultMinMaxSetting,
             unitSetting: data?.unitSetting ?? defaultUnitSetting,
             thresholdSetting: data?.thresholdSetting ?? defaultThresholdSetting,
-            performanceFixedValue: data?.performanceFixedValue ?? "",
         }));
     }, [data]);
 
@@ -119,11 +118,6 @@ const InputValidationSetting = (props) => {
             const resp = await axios.post(route("daily.setting"), {
                 client_id: selectedClients,
                 ...formData,
-                // String kosong bukan angka valid buat rule 'numeric', kirim null biar dianggap "tidak diisi"
-                performanceFixedValue:
-                    formData?.performanceFixedValue === ""
-                        ? null
-                        : formData?.performanceFixedValue,
             });
             if (resp.status === 200 || resp.status === 302) {
                 addToast(resp.data);
@@ -176,25 +170,6 @@ const InputValidationSetting = (props) => {
                         </p>
                     </div>
                 </div>
-            </div>
-
-            <div className="px-6 pt-6 flex flex-col max-w-md">
-                <label className="font-semibold text-[#101828] mb-1">
-                    Fixed Curve Value
-                </label>
-                <input
-                    type="number"
-                    step="any"
-                    placeholder="Leave empty to use the calculated curve (curve_24h)"
-                    className="h-[40px] border border-[#D0D5DD] rounded-lg px-3 text-[#344054] bg-white shadow-sm focus:ring-2 focus:ring-[#2563EB] focus:outline-none transition"
-                    value={formData?.performanceFixedValue ?? ""}
-                    onChange={(e) =>
-                        setFormData((prev) => ({
-                            ...prev,
-                            performanceFixedValue: e.target.value,
-                        }))
-                    }
-                />
             </div>
 
             <div className="overflow-y-auto w-full overflow-x-auto p-6 max-h-[50vh]">

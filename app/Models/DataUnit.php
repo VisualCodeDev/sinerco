@@ -90,7 +90,8 @@ class DataUnit extends Model
         'thresholdSetting',
         'visibilitySetting',
         'valve',
-        'curve_percentage'
+        'curve_percentage',
+        'performanceFixedValue'
     ];
 
     // cast kolom setting menjadi array

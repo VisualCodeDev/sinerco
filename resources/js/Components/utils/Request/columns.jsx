@@ -144,7 +144,7 @@ const columns = ({
         },
         {
             name: "end_date",
-            header: "End Date",
+            header: "End Time",
             headerClassName: "text-center bg-primary text-white",
             cellClassName: "",
             sortable: true,

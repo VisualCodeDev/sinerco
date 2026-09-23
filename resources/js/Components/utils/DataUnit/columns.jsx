@@ -394,6 +394,11 @@ const columns = (
                               title="Movement history"
                               className="border border-gray-300 bg-white text-gray-600 px-2 py-1 rounded-md text-sm"
                               onClick={(e) => {
+                                  // stopPropagation doesn't stop the row's <a href>
+                                  // wrapper (outside edit mode) from navigating --
+                                  // that's a native browser default action, only
+                                  // preventDefault() stops it.
+                                  e.preventDefault();
                                   e.stopPropagation();
                                   onOpenHistory(item);
                               }}

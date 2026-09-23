@@ -186,6 +186,10 @@ export const requestType = [
         name: "SHUTDOWN",
         value: "sd",
     },
+    {
+        name: "NOTE",
+        value: "note",
+    },
 ];
 
 export const requestStatus = [

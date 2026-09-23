@@ -144,6 +144,29 @@ const ClientsTab = () => {
         }
     };
 
+    const handleToggleInvoice = async (client) => {
+        try {
+            await axios.post(route("client.update"), {
+                client_id: client.client_id,
+                updateData: [{ is_invoice: !client.is_invoice }],
+            });
+            addToast({ type: "success", text: "Data Updated" });
+            setClients((prev) =>
+                prev.map((item) =>
+                    item.client_id === client.client_id
+                        ? { ...item, is_invoice: !item.is_invoice }
+                        : item,
+                ),
+            );
+        } catch (err) {
+            console.error(err);
+            addToast({
+                type: "error",
+                text: err?.response?.data?.message || "Failed to update invoice toggle.",
+            });
+        }
+    };
+
     const handleDeleteClient = async () => {
         if (!deleteTarget) return;
         setDeleting(true);
@@ -254,6 +277,49 @@ const ClientsTab = () => {
                 >
                     {client.disable_duration ? "Disabled" : "Enabled"}
                 </button>
+            ),
+        },
+        {
+            name: "is_invoice",
+            header: "Invoice",
+            headerClassName: "bg-primary text-white text-center",
+            cellClassName: "text-center",
+            width: "8%",
+            Cell: (client) => (
+                <div className="flex justify-center">
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleInvoice(client);
+                        }}
+                        className="border-0 p-0"
+                        style={{
+                            width: 38,
+                            height: 20,
+                            borderRadius: 999,
+                            background: Boolean(client.is_invoice)
+                                ? "#22c55e"
+                                : "#e5e7eb",
+                            position: "relative",
+                            transition: "all 0.25s ease",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: 14,
+                                height: 14,
+                                borderRadius: "50%",
+                                background: "#fff",
+                                position: "absolute",
+                                top: 3,
+                                left: Boolean(client.is_invoice) ? 20 : 3,
+                                transition: "all 0.25s ease",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                            }}
+                        />
+                    </button>
+                </div>
             ),
         },
         {

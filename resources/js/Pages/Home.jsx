@@ -153,7 +153,7 @@ export default function Home() {
                                         }}
                                     />
                                     <div>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="uppercase text-xs text-gray-500">
                                             {item?.label}
                                         </p>
                                         <p className="text-lg font-bold">
@@ -191,7 +191,7 @@ export default function Home() {
                                     <p className="text-base md:text-xl text-gray-500">
                                         Total Unit
                                         <br />{" "}
-                                        <span className="font-bold text-lg text-black">
+                                        <span className="font-bold text-lg text-black uppercase">
                                             {data?.workshop?.label}
                                         </span>
                                     </p>
@@ -204,8 +204,8 @@ export default function Home() {
                                         </span>
                                     </p>
                                 </div>
-                                <div className="flex items-center justify-center rounded-full bg-primary text-white w-[120px] h-[120px] shrink-0">
-                                    <FaWarehouse className="text-5xl" />
+                                <div className="flex items-center justify-center rounded-full bg-black text-white w-[120px] h-[120px] shrink-0">
+                                    <FaWarehouse className="text-7xl" />
                                 </div>
                             </div>
                         </div>
@@ -213,7 +213,7 @@ export default function Home() {
                     {/* ADMIN INFO */}
                     <div className="flex items-center md:w-1/5 border border-[#dadee3] bg-white shadow-md p-4 md:p-8 rounded-lg">
                         <div className="flex items-center justify-center gap-5">
-                            <div className="text-6xl md:text-[5rem] text-primary">
+                            <div className="text-6xl md:text-[5rem] text-black">
                                 <FaUserCircle />
                             </div>
                             <div className="flex flex-col justify-center font-semibold">

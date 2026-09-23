@@ -38,7 +38,7 @@ class StatusRequestController extends Controller
             'unit_id' => 'required|string',
             'start_date' => 'required|string',
             'start_time' => 'required|string',
-            'request_type' => 'required|string',
+            'request_type' => 'required|string|in:sd,stdby,note',
             'remarks' => 'required|string',
             'unit_position_id' => 'required',
         ]);
@@ -64,12 +64,18 @@ class StatusRequestController extends Controller
             return response()->json(['type' => 'error', 'text' => 'Unit not found'], 404);
         }
 
+        $isNote = $val['request_type'] === 'note';
+
         // Cegah membuat request baru kalau unit ini masih punya request yang statusnya Ongoing
-        $hasOngoingRequest = StatusRequest::where('unit_position_id', $val['unit_position_id'])
-            ->where('status', 'Ongoing')
-            ->exists();
-        if ($hasOngoingRequest) {
-            return response()->json(['type' => 'error', 'text' => 'This unit already has an ongoing request.'], 422);
+        // Note tidak dianggap sebagai downtime, jadi tidak ikut dicek/diblokir di sini
+        if (!$isNote) {
+            $hasOngoingRequest = StatusRequest::where('unit_position_id', $val['unit_position_id'])
+                ->where('status', 'Ongoing')
+                ->where('request_type', '!=', 'note')
+                ->exists();
+            if ($hasOngoingRequest) {
+                return response()->json(['type' => 'error', 'text' => 'This unit already has an ongoing request.'], 422);
+            }
         }
 
         $user = auth()->user();
@@ -80,18 +86,18 @@ class StatusRequestController extends Controller
         $status->start_time = $val['start_time'];
         $status->request_type = $val['request_type'];
         $status->remarks = $val['remarks'];
-        $status->status = 'Ongoing';
+        // Note bukan downtime, jadi langsung dianggap selesai (tidak perlu di-"End")
+        $status->status = $isNote ? 'End' : 'Ongoing';
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
         $status->save();
-        // Update status unit sesuai tipe request yang diajukan
-        $unitPosition->unit->update(['status' => $val['request_type']]);
-
-        // Simpan remark baru ke daftar suggestion kalau belum ada (auto-learn)
-        $trimmedRemark = trim($val['remarks']);
-        if ($trimmedRemark !== '') {
-            RemarkList::firstOrCreate(['remark' => $trimmedRemark]);
+        // Update status unit sesuai tipe request yang diajukan (note tidak mengubah status unit)
+        if (!$isNote) {
+            $unitPosition->unit->update(['status' => $val['request_type']]);
         }
+
+        // Simpan remark baru ke daftar suggestion kalau belum ada (auto-learn), sekaligus catat tipe-nya
+        $this->learnRemark($val['remarks'], $val['request_type']);
         // if ($unit) {
         //     Log::debug($status);
         //     $unit->update(['request_id' => $status->request_id]);
@@ -324,9 +330,14 @@ class StatusRequestController extends Controller
         $status->end_date = $request->end_date ?? null;
         $status->remarks = $request->remarks ?? $status->remarks;
 
-        // Handle unit status updates if the relationship is loaded
+        // Simpan remark baru ke daftar suggestion kalau belum ada (auto-learn), sekaligus catat tipe-nya
+        if ($status->remarks) {
+            $this->learnRemark($status->remarks, $status->request_type);
+        }
+
+        // Handle unit status updates if the relationship is loaded (note tidak mengubah status unit)
         $unitData = $status->unitPosition->unit;
-        if ($unitData) {
+        if ($unitData && $status->request_type !== 'note') {
             // Tentukan status unit baru berdasarkan status request saat ini
             $newUnitStatus = match ($status->status) {
                 'Ongoing' => $status->request_type,
@@ -339,14 +350,16 @@ class StatusRequestController extends Controller
             }
         }
 
-        // Handle notification
+        // Handle notification (note tidak memicu alarm, jadi tidak dibuatkan notifikasi)
         // Buat atau perbarui notifikasi admin terkait request ini
-        $notification = AdminNotification::firstOrNew(['request_id' => $status->request_id]);
-        $notification->date = $status->start_date;
-        $notification->time = $status->start_time;
-        $notification->request_type = $status->request_type;
-        $notification->status = $status->status;
-        $notification->save();
+        if ($status->request_type !== 'note') {
+            $notification = AdminNotification::firstOrNew(['request_id' => $status->request_id]);
+            $notification->date = $status->start_date;
+            $notification->time = $status->start_time;
+            $notification->request_type = $status->request_type;
+            $notification->status = $status->status;
+            $notification->save();
+        }
 
         // Save status
         $status->save();
@@ -414,9 +427,15 @@ class StatusRequestController extends Controller
             return response()->json(['message' => 'No requests selected'], 400);
         }
 
-        $requests = StatusRequest::whereIn('request_id', $ids)->get();
+        $requests = StatusRequest::with('unitPosition.unit')->whereIn('request_id', $ids)->get();
 
         foreach ($requests as $req) {
+            // Kembalikan status unit ke running kalau request yang dihapus masih Ongoing
+            $unitData = $req->unitPosition->unit ?? null;
+            if ($unitData && $req->status === 'Ongoing') {
+                $unitData->update(['status' => 'running']);
+            }
+
             // Ensure requested_by exists in users table
             // Pastikan user pengaju masih ada, jika tidak set null
             $requestedBy = \DB::table('users')->where('user_id', $req->requested_by)->exists()
@@ -449,11 +468,32 @@ class StatusRequestController extends Controller
         return response()->json(['type' => 'success', 'text' => 'Request trashed!']);
     }
 
-    // Ambil daftar remark untuk suggestion di form SD/STBY
-    public function getRemarkList()
+    // Ambil daftar remark untuk suggestion di form SD/STBY/Note, bisa difilter berdasarkan request_type
+    public function getRemarkList(Request $request)
     {
-        $remarks = RemarkList::orderBy('remark')->pluck('remark');
-        return response()->json($remarks);
+        $query = RemarkList::orderBy('remark');
+
+        $type = $request->query('request_type') ?? $request->query('type');
+        if ($type) {
+            $query->whereJsonContains('request_type', $type);
+        }
+
+        return response()->json($query->pluck('remark'));
+    }
+
+    // Simpan remark baru ke remark_lists kalau belum ada, atau tambahkan tipe request ini ke remark yang sudah ada
+    private function learnRemark(?string $remark, ?string $requestType): void
+    {
+        $trimmedRemark = trim((string) $remark);
+        if ($trimmedRemark === '' || !$requestType) {
+            return;
+        }
+
+        $remarkEntry = RemarkList::firstOrCreate(['remark' => $trimmedRemark]);
+        $existingTypes = $remarkEntry->request_type ?? [];
+        if (!in_array($requestType, $existingTypes)) {
+            $remarkEntry->update(['request_type' => array_values(array_unique([...$existingTypes, $requestType]))]);
+        }
     }
 
 }

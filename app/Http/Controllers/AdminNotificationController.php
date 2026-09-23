@@ -23,6 +23,7 @@ class AdminNotificationController extends Controller
 
         // Ambil notifikasi yang statusnya belum 'End' dan unit-nya termasuk yang diizinkan
         $requestList = AdminNotification::where('status', '!=', 'End')
+            ->where('request_type', '!=', 'note')
             ->whereHas('request', function ($query) use ($unitIds) {
                 $query->whereIn('unit_position_id', $unitIds);
             })

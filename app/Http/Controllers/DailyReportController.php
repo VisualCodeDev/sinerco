@@ -30,14 +30,16 @@ class DailyReportController extends Controller
     }
 
     // Hitung performance & performance_24h.
-    // performance_24h dibagi curve_24h seperti biasa, KECUALI client punya performanceFixedValue
-    // di setting-nya -- kalau diisi, itu yang dipakai sebagai pembagi, bukan curve_24h.
+    // performance_24h dibagi curve_24h seperti biasa, KECUALI unit ini punya
+    // performanceFixedValue di setting-nya (per-unit, bukan per-client -- tiap
+    // unit/compressor bisa punya nilai fixed curve fisik yang beda) -- kalau
+    // diisi, itu yang dipakai sebagai pembagi, bukan curve_24h.
     private function calculatePerformance($unitPosition, ?float $curveValue, ?float $curve24h, float $flowrate): array
     {
         $performance = $curveValue ? $flowrate / $curveValue * 100 : null;
 
-        $performanceFixedValue = $unitPosition?->client_id
-            ? DailyReportSettings::where('client_id', $unitPosition->client_id)->value('performanceFixedValue')
+        $performanceFixedValue = $unitPosition?->unit_id
+            ? DataUnit::where('unit_id', $unitPosition->unit_id)->value('performanceFixedValue')
             : null;
         // 0/null/kosong dianggap "belum di-set" -> tetap pakai curve_24h, bukan dibagi 0
         $performanceDivisor = $performanceFixedValue > 0 ? (float) $performanceFixedValue : $curve24h;

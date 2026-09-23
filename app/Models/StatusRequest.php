@@ -52,8 +52,12 @@ class StatusRequest extends Model
         });
 
 
-        // setelah request dibuat, kirim notifikasi ke admin
+        // setelah request dibuat, kirim notifikasi ke admin (note tidak memicu alarm)
         static::created(function ($statusRequest) {
+            if ($statusRequest->request_type === 'note') {
+                return;
+            }
+
             AdminNotification::create([
                 'request_id' => $statusRequest->request_id,
                 'date' => $statusRequest->start_date,

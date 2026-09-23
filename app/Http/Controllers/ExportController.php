@@ -891,12 +891,10 @@ class ExportController extends Controller
                     $reports = $unitPos->reports->sortBy('date')->values();
 
                     // Sama seperti calculatePerformance() di DailyReportController: kalau
-                    // client punya performanceFixedValue, itu dipakai sebagai pengganti
-                    // curve_24h -- jadi kolom {{curve}} di invoice juga harus konsisten
-                    // pakai nilai itu, bukan curve_24h mentah dari laporan.
-                    $performanceFixedValue = $unitPos->client_id
-                        ? DailyReportSettings::where('client_id', $unitPos->client_id)->value('performanceFixedValue')
-                        : null;
+                    // UNIT ini (bukan client-nya) punya performanceFixedValue, itu dipakai
+                    // sebagai pengganti curve_24h -- jadi kolom {{curve}} di invoice juga
+                    // harus konsisten pakai nilai itu, bukan curve_24h mentah dari laporan.
+                    $performanceFixedValue = $unitPos->unit?->performanceFixedValue;
 
                     // Dipakai buat getAvgByHourRange() di bawah -- rata-rata harian harus
                     // dibagi jumlah pembacaan yang diharapkan sesuai interval input client

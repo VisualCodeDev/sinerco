@@ -27,8 +27,6 @@ class DailyReportSettingsController extends Controller
             'minMaxSetting' => 'required|array',
             'unitSetting' => 'required|array',
             // 'thresholdSetting' => 'required|array'
-            // Kosongkan untuk hitung performance dari curve seperti biasa; isi untuk pakai nilai tetap sebagai pembagi
-            'performanceFixedValue' => 'nullable|numeric',
         ];
 
         // Tambah aturan validasi dinamis untuk tiap key decimalSetting
@@ -65,7 +63,6 @@ class DailyReportSettingsController extends Controller
                     'minMaxSetting' => $validated['minMaxSetting'],
                     'unitSetting' => $validated['unitSetting'],
                     // 'thresholdSetting' => $validated['thresholdSetting']
-                    'performanceFixedValue' => $validated['performanceFixedValue'] ?? null,
                 ]
             );
         }

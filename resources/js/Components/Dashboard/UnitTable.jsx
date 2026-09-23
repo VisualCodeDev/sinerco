@@ -12,6 +12,7 @@ import {
     FaAsterisk,
     FaCube,
     FaPercent,
+    FaEquals,
 } from "react-icons/fa";
 import { Button } from "@headlessui/react";
 import TableComponent from "../TableComponent";
@@ -81,6 +82,7 @@ const UnitTable = (props) => {
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const [visibilitySetting, setVisibilitySetting] = useState(null);
     const [curvePercentage, setCurvePercentage] = useState(null);
+    const [performanceFixedValue, setPerformanceFixedValue] = useState(null);
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
     const [isExportModal, setExportModal] = useState(false);
@@ -333,6 +335,14 @@ const UnitTable = (props) => {
                     ] === item?.unit_id,
             )?.curve_percentage ?? null,
         );
+        setPerformanceFixedValue(
+            safeData.find(
+                (item) =>
+                    formData?.selectedRows[
+                        formData?.selectedRows.length - 1
+                    ] === item?.unit_id,
+            )?.performanceFixedValue ?? null,
+        );
     }, [formData?.selectedRows]);
 
     const handleClick = (item) => {
@@ -474,6 +484,7 @@ const UnitTable = (props) => {
                     thresholdSetting={thresholdSetting}
                     visibilitySetting={visibilitySetting}
                     curvePercentage={curvePercentage}
+                    performanceFixedValue={performanceFixedValue}
                     selectedUnits={formData?.selectedRows}
                 />
                 <ExportModal
@@ -551,6 +562,7 @@ const UnitTable = (props) => {
                 thresholdSetting={thresholdSetting}
                 visibilitySetting={visibilitySetting}
                 curvePercentage={curvePercentage}
+                performanceFixedValue={performanceFixedValue}
                 selectedUnits={formData?.selectedRows}
             />
             <ExportModal
@@ -765,6 +777,7 @@ const SettingModal = ({
     thresholdSetting,
     visibilitySetting,
     curvePercentage,
+    performanceFixedValue,
     unitName,
     selectedUnits,
     addToast,
@@ -774,6 +787,7 @@ const SettingModal = ({
         visibilitySetting: {},
         requiredSetting: {},
         curve_percentage: 0,
+        performanceFixedValue: "",
     });
 
     const [fields, setFields] = useState([]);
@@ -839,8 +853,9 @@ const SettingModal = ({
             thresholdSetting: thresholdSetting ?? defaultThresholdSetting,
             visibilitySetting: visibilitySetting ?? defaultVisibilitySetting,
             curve_percentage: curvePercentage ?? 0,
+            performanceFixedValue: performanceFixedValue ?? "",
         }));
-    }, [thresholdSetting, curvePercentage, selectedUnits]);
+    }, [thresholdSetting, curvePercentage, performanceFixedValue, selectedUnits]);
 
     const handleChange = (section, field, value) => {
         setFormData((prev) => ({
@@ -966,6 +981,34 @@ const SettingModal = ({
                             </div>
                             <p className="text-xs text-white/70 mt-2">
                                 0% = no change &middot; 200% = triple
+                            </p>
+                        </div>
+
+                        <div className="md:w-64 bg-secondary rounded-xl p-4 text-white flex flex-col justify-between">
+                            <div className="flex items-center gap-2 mb-2">
+                                <FaEquals className="text-sm" />
+                                <p className="text-xs font-semibold uppercase tracking-wide">
+                                    Fixed Curve Value
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="—"
+                                    value={formData?.performanceFixedValue ?? ""}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            performanceFixedValue: e.target.value,
+                                        }))
+                                    }
+                                    className="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-lg font-bold placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                />
+                            </div>
+                            <p className="text-xs text-white/70 mt-2">
+                                Leave empty to calculate performance from curve
                             </p>
                         </div>
                     </div>
