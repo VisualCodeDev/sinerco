@@ -709,10 +709,10 @@ const UnitHistoryModal = ({ unit, onClose }) => {
     }, [unit]);
 
     const describe = (log, prefix) => {
-        const client = log[`${prefix}Client`]?.name;
-        const region = log[`${prefix}Region`]?.name;
-        const location = log[`${prefix}Location`]?.location;
-        const area = log[`${prefix}Location`]?.area?.area;
+        const client = log[`${prefix}_client`]?.name;
+        const region = log[`${prefix}_region`]?.name;
+        const location = log[`${prefix}_location`]?.location;
+        const area = log[`${prefix}_location`]?.area?.area;
         const parts = [
             client && `Client: ${client}`,
             region && `Region: ${region}`,
@@ -755,9 +755,9 @@ const UnitHistoryModal = ({ unit, onClose }) => {
                                 <p className="text-xs text-gray-500">
                                     To: {describe(log, "to")}
                                 </p>
-                                {log.changedByUser && (
+                                {log.changed_by_user && (
                                     <p className="text-xs text-gray-400 mt-1">
-                                        By {log.changedByUser.name}
+                                        By {log.changed_by_user.name}
                                     </p>
                                 )}
                             </div>

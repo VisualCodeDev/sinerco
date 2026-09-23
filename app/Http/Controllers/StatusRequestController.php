@@ -86,8 +86,8 @@ class StatusRequestController extends Controller
         $status->start_time = $val['start_time'];
         $status->request_type = $val['request_type'];
         $status->remarks = $val['remarks'];
-        // Note bukan downtime, jadi langsung dianggap selesai (tidak perlu di-"End")
-        $status->status = $isNote ? 'End' : 'Ongoing';
+        // Note tetap muncul di ongoing event seperti sd/stdby, cuma tidak memicu alarm/status unit
+        $status->status = 'Ongoing';
         $status->requested_by = $user->user_id;
         // $status->location_id = $val['location_id'];
         $status->save();
@@ -431,8 +431,9 @@ class StatusRequestController extends Controller
 
         foreach ($requests as $req) {
             // Kembalikan status unit ke running kalau request yang dihapus masih Ongoing
+            // (note tidak pernah mengubah status unit, jadi tidak ikut di-reset di sini)
             $unitData = $req->unitPosition->unit ?? null;
-            if ($unitData && $req->status === 'Ongoing') {
+            if ($unitData && $req->status === 'Ongoing' && $req->request_type !== 'note') {
                 $unitData->update(['status' => 'running']);
             }
 

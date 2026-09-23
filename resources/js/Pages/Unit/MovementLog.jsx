@@ -20,10 +20,10 @@ const MOVEMENT_ACTION_LABEL = {
 };
 
 const describe = (log, prefix) => {
-    const client = log[`${prefix}Client`]?.name;
-    const region = log[`${prefix}Region`]?.name;
-    const location = log[`${prefix}Location`]?.location;
-    const area = log[`${prefix}Location`]?.area?.area;
+    const client = log[`${prefix}_client`]?.name;
+    const region = log[`${prefix}_region`]?.name;
+    const location = log[`${prefix}_location`]?.location;
+    const area = log[`${prefix}_location`]?.area?.area;
     const parts = [
         client && `Client: ${client}`,
         region && `Region: ${region}`,
@@ -123,7 +123,7 @@ const MovementLog = () => {
             header: "By",
             headerClassName: "bg-primary text-white",
             width: "10%",
-            Cell: (log) => log.changedByUser?.name || "-",
+            Cell: (log) => log.changed_by_user?.name || "-",
         },
         {
             name: "created_at",

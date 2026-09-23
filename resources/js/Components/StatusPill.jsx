@@ -10,6 +10,8 @@ const StatusPill = ({ request_type }) => {
                         ? "bg-yellow-500"
                         : request_type === "running"
                         ? "bg-green-500"
+                        : request_type === "note"
+                        ? "bg-gray-500"
                         : "bg-red-500"
                 }
                 `}
