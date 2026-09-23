@@ -307,6 +307,9 @@ const UnitTable = (props) => {
                         merged.region = lookups.regions.find(
                             (r) => String(r.id) === String(edits.region_id)
                         )?.name;
+                    } else if ("region_id" in edits) {
+                        // region_id di-clear (mis. pindah ke workshop) -- kosongkan nama-nya juga
+                        merged.region = null;
                     }
                     if (edits.client_id) {
                         merged.client = lookups.clients.find(
@@ -331,6 +334,11 @@ const UnitTable = (props) => {
                         merged.location = area?.locations?.find(
                             (l) => String(l.id) === String(edits.location_id)
                         )?.location;
+                    } else if ("location_id" in edits) {
+                        // location_id (dan area_id) di-clear (mis. pindah ke workshop) --
+                        // kosongkan nama-namanya juga
+                        merged.area = null;
+                        merged.location = null;
                     }
                     return merged;
                 })

@@ -13,8 +13,17 @@ const columns = (
     isBulk = false,
     onOpenHistory = null
 ) => {
-    const editValue = (item, field) =>
-        formData?.edits?.[item.unit_id]?.[field] ?? item[field] ?? "";
+    // Kalau field-nya sudah pernah disentuh (ada di edits), SELALU pakai nilai itu,
+    // walau isinya null (habis di-clear) -- jangan jatuh balik ke nilai asli item
+    // via `??`, karena null itu sengaja berarti "sudah di-kosongin", bukan "belum
+    // disentuh". Kalau belum ada sama sekali di edits, baru pakai nilai asli item.
+    const editValue = (item, field) => {
+        const edits = formData?.edits?.[item.unit_id];
+        if (edits && Object.prototype.hasOwnProperty.call(edits, field)) {
+            return edits[field] ?? "";
+        }
+        return item[field] ?? "";
+    };
 
     const textInput = (item, field, placeholder) => (
         <input
