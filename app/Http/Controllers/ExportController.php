@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Curve;
 use App\Models\DailyReport;
 use App\Models\DailyReportSettings;
 use Carbon\CarbonPeriod;
@@ -982,7 +983,7 @@ class ExportController extends Controller
                             $flowrateTotal = 0;
 
                             $formattedReports = $dayReports
-                                ->map(function ($r) use ($performanceFixedValue) {
+                                ->map(function ($r) {
 
                                     $data = is_string($r->data)
                                         ? json_decode($r->data, true)
@@ -997,9 +998,6 @@ class ExportController extends Controller
                                         'suction_press' => $data['suction_press'] ?? 0,
                                         'discharge_press' => $data['discharge_press'] ?? 0,
                                         'flowrate' => $data['flowrate'] ?? 0,
-                                        'curve' => $performanceFixedValue > 0
-                                            ? (float) $performanceFixedValue
-                                            : ($data['curve_24h'] ?? 0),
                                     ];
                                 })
                                 ->filter()
@@ -1008,7 +1006,22 @@ class ExportController extends Controller
                             $suctionTotal = $this->getAvgByHourRange($formattedReports, 'suction_press', null, $intervalHours);
                             $dischargeTotal = $this->getAvgByHourRange($formattedReports, 'discharge_press', null, $intervalHours);
                             $flowrateTotal = $this->getAvgByHourRange($formattedReports, 'flowrate', null, $intervalHours);
-                            $curveTotal = $this->getAvgByHourRange($formattedReports, 'curve', null, $intervalHours);
+
+                            // Curve dihitung dari suction/discharge yang SUDAH dirata-rata (bukan rata-rata
+                            // curve per-jam), karena interpolasi curve non-linear -- rata-rata hasil interpolasi
+                            // per jam beda dengan interpolasi dari tekanan yang sudah dirata-rata.
+                            if ($performanceFixedValue > 0) {
+                                $curveTotal = (float) $performanceFixedValue;
+                            } else {
+                                $interpolatedCurve = Curve::interpolate(
+                                    (float) $suctionTotal,
+                                    (float) $dischargeTotal,
+                                    $unitPos->unit?->valve ?? '4/0'
+                                );
+                                $curveTotal = $interpolatedCurve === null
+                                    ? 0
+                                    : $interpolatedCurve * (100 + (float) ($unitPos->unit?->curve_percentage ?? 0)) / 100;
+                            }
                             $report = (object) [
                                 'date' => $date->translatedFormat('j M'),
                                 'suction_p' => round($suctionTotal, 2),
