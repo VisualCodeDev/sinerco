@@ -91,7 +91,7 @@ const UnitTable = (props) => {
     // multi-select mode for bulk Threshold/Visibility settings & Export BA.
     const [edit, setEdit] = useState(false);
     const [bulkEdit, setBulkEdit] = useState(false);
-    const [lookups, setLookups] = useState({ regions: [], clients: [] });
+    const [lookups, setLookups] = useState({ regions: [], clients: [], workshops: [] });
     const [historyUnit, setHistoryUnit] = useState(null);
     const { addToast } = useToast();
 
@@ -136,13 +136,15 @@ const UnitTable = (props) => {
         if (!edit || lookups.regions.length > 0) return;
         const fetchLookups = async () => {
             try {
-                const [regionsResp, clientsResp] = await Promise.all([
+                const [regionsResp, clientsResp, workshopsResp] = await Promise.all([
                     axios.get(route("regions.get")),
                     axios.get(route("client.get")),
+                    axios.get(route("workshop.get")),
                 ]);
                 setLookups({
                     regions: regionsResp.data || [],
                     clients: clientsResp.data || [],
+                    workshops: workshopsResp.data || [],
                 });
             } catch (e) {
                 console.error(e);
@@ -169,6 +171,7 @@ const UnitTable = (props) => {
                 region_id: "",
                 region: "",
                 client_id: "",
+                workshop_id: "",
                 client: "",
                 area_id: "",
                 area: "",
@@ -207,6 +210,14 @@ const UnitTable = (props) => {
                 current.location_id = "";
             } else if (field === "area_id") {
                 current.location_id = "";
+            } else if (field === "client_id" && value) {
+                // Unit cuma boleh ditempatkan di salah satu, client ATAU workshop
+                current.workshop_id = "";
+            } else if (field === "workshop_id" && value) {
+                current.client_id = "";
+                current.region_id = "";
+                current.area_id = "";
+                current.location_id = "";
             }
             return { ...prev, edits: { ...prev.edits, [unit_id]: current } };
         });
@@ -214,10 +225,20 @@ const UnitTable = (props) => {
 
     const handleCreateRow = async () => {
         const edits = formData?.edits?.[NEW_UNIT_ID] || {};
-        if (!edits.unit || !edits.client_id || !edits.area_id || !edits.location_id) {
+        const isWorkshop = !!edits.workshop_id;
+
+        if (!edits.unit || (!edits.client_id && !edits.workshop_id)) {
             addToast({
                 type: "error",
-                text: "Unit name, Client, Area, and Location are required.",
+                text: "Unit name and Client/Workshop are required.",
+            });
+            return;
+        }
+        // Area & Location cuma berlaku buat unit yang ditempatkan di client, workshop tidak punya lokasi
+        if (!isWorkshop && (!edits.area_id || !edits.location_id)) {
+            addToast({
+                type: "error",
+                text: "Area and Location are required for a client-placed unit.",
             });
             return;
         }
@@ -225,10 +246,11 @@ const UnitTable = (props) => {
             const resp = await axios.post(route("unit.add"), {
                 unit: edits.unit,
                 status: edits.status || "running",
-                position_type: "client",
-                client_id: edits.client_id,
-                area_id: edits.area_id,
-                location_id: edits.location_id,
+                position_type: isWorkshop ? "workshop" : "client",
+                client_id: isWorkshop ? null : edits.client_id,
+                workshop_id: isWorkshop ? edits.workshop_id : null,
+                area_id: isWorkshop ? null : edits.area_id,
+                location_id: isWorkshop ? null : edits.location_id,
             });
             addToast(resp?.data);
             handleCancelNewRow();
@@ -271,6 +293,10 @@ const UnitTable = (props) => {
                     if (edits.client_id) {
                         merged.client = lookups.clients.find(
                             (c) => c.client_id === edits.client_id
+                        )?.name;
+                    } else if (edits.workshop_id) {
+                        merged.client = lookups.workshops.find(
+                            (w) => w.workshop_id === edits.workshop_id
                         )?.name;
                     }
                     if (edits.location_id) {

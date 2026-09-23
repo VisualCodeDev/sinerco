@@ -650,7 +650,9 @@ class DataUnitController extends Controller
             'unit' => 'nullable|string|max:255',
             'unit_sn' => 'nullable|string|max:255',
             'old_sn' => 'nullable|string|max:255',
-            'client_id' => 'nullable|exists:clients,client_id',
+            // unit cuma boleh ditempatkan di salah satu, client ATAU workshop
+            'client_id' => 'nullable|exists:clients,client_id|prohibits:workshop_id',
+            'workshop_id' => 'nullable|exists:workshops,workshop_id|prohibits:client_id',
             'location_id' => 'nullable|exists:locations,id',
             'region_id' => 'nullable|exists:regions,id',
         ]);
@@ -666,7 +668,7 @@ class DataUnitController extends Controller
             }
 
             // Ambil field yang termasuk data posisi unit
-            $positionData = collect($val)->only(['client_id', 'location_id', 'region_id'])
+            $positionData = collect($val)->only(['client_id', 'workshop_id', 'location_id', 'region_id'])
                 ->filter(fn($value) => $value !== null)
                 ->toArray();
 
@@ -675,6 +677,15 @@ class DataUnitController extends Controller
             if (array_key_exists('client_id', $positionData)) {
                 $positionData['workshop_id'] = null;
                 $positionData['position_type'] = 'client';
+            }
+
+            // Sebaliknya kalau workshop_id diisi, unit ini pindah ke workshop --
+            // lepas client_id (dan area/location, karena workshop tidak punya lokasi)
+            if (array_key_exists('workshop_id', $positionData)) {
+                $positionData['client_id'] = null;
+                $positionData['position_type'] = 'workshop';
+                $positionData['location_id'] = null;
+                $positionData['region_id'] = null;
             }
 
             if (!empty($positionData)) {

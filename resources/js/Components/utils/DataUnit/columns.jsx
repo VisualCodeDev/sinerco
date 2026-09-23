@@ -275,19 +275,61 @@ const columns = (
         },
         {
             name: "client",
-            header: "Client",
+            header: "Client / Workshop",
             headerClassName: "bg-primary text-white",
             sortable: true,
             width: "13%",
             Cell: (item) => {
-                if (isEdit)
-                    return selectInput(
-                        item,
-                        "client_id",
-                        lookups.clients,
-                        "client_id",
-                        "name"
+                if (isEdit) {
+                    const currentClientId = editValue(item, "client_id");
+                    const currentWorkshopId = editValue(item, "workshop_id");
+                    const selectedValue = currentWorkshopId
+                        ? `workshop:${currentWorkshopId}`
+                        : currentClientId
+                          ? `client:${currentClientId}`
+                          : "";
+
+                    return (
+                        <select
+                            className="w-full border border-gray-300 rounded-md px-2 py-1 bg-white"
+                            value={selectedValue}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                                const [type, id] = e.target.value.split(":");
+                                if (type === "client") {
+                                    onFieldChange(item.unit_id, "client_id", id);
+                                } else if (type === "workshop") {
+                                    onFieldChange(item.unit_id, "workshop_id", id);
+                                } else {
+                                    onFieldChange(item.unit_id, "client_id", "");
+                                    onFieldChange(item.unit_id, "workshop_id", "");
+                                }
+                            }}
+                        >
+                            <option value="">-- Select --</option>
+                            <optgroup label="Client">
+                                {lookups.clients?.map((c) => (
+                                    <option
+                                        key={c.client_id}
+                                        value={`client:${c.client_id}`}
+                                    >
+                                        {c.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="Workshop">
+                                {lookups.workshops?.map((w) => (
+                                    <option
+                                        key={w.workshop_id}
+                                        value={`workshop:${w.workshop_id}`}
+                                    >
+                                        {w.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        </select>
                     );
+                }
                 return <div className="flex flex-col">{item.client}</div>;
             },
         },
