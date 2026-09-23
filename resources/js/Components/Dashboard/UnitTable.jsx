@@ -82,7 +82,7 @@ const UnitTable = (props) => {
     const [thresholdSetting, setThresholdSetting] = useState(null);
     const [visibilitySetting, setVisibilitySetting] = useState(null);
     const [curvePercentage, setCurvePercentage] = useState(null);
-    const [performanceFixedValue, setPerformanceFixedValue] = useState(null);
+    const [curveFixedValue, setCurveFixedValue] = useState(null);
     const { user } = useAuth();
     const [isSettingModal, setIsSettingModal] = useState(false);
     const [isExportModal, setExportModal] = useState(false);
@@ -335,13 +335,13 @@ const UnitTable = (props) => {
                     ] === item?.unit_id,
             )?.curve_percentage ?? null,
         );
-        setPerformanceFixedValue(
+        setCurveFixedValue(
             safeData.find(
                 (item) =>
                     formData?.selectedRows[
                         formData?.selectedRows.length - 1
                     ] === item?.unit_id,
-            )?.performanceFixedValue ?? null,
+            )?.curveFixedValue ?? null,
         );
     }, [formData?.selectedRows]);
 
@@ -484,7 +484,7 @@ const UnitTable = (props) => {
                     thresholdSetting={thresholdSetting}
                     visibilitySetting={visibilitySetting}
                     curvePercentage={curvePercentage}
-                    performanceFixedValue={performanceFixedValue}
+                    curveFixedValue={curveFixedValue}
                     selectedUnits={formData?.selectedRows}
                 />
                 <ExportModal
@@ -562,7 +562,7 @@ const UnitTable = (props) => {
                 thresholdSetting={thresholdSetting}
                 visibilitySetting={visibilitySetting}
                 curvePercentage={curvePercentage}
-                performanceFixedValue={performanceFixedValue}
+                curveFixedValue={curveFixedValue}
                 selectedUnits={formData?.selectedRows}
             />
             <ExportModal
@@ -777,7 +777,7 @@ const SettingModal = ({
     thresholdSetting,
     visibilitySetting,
     curvePercentage,
-    performanceFixedValue,
+    curveFixedValue,
     unitName,
     selectedUnits,
     addToast,
@@ -786,8 +786,8 @@ const SettingModal = ({
         thresholdSetting: {},
         visibilitySetting: {},
         requiredSetting: {},
-        curve_percentage: 0,
-        performanceFixedValue: "",
+        curve_percentage: 100,
+        curveFixedValue: "",
     });
 
     const [fields, setFields] = useState([]);
@@ -852,10 +852,10 @@ const SettingModal = ({
             ...prev,
             thresholdSetting: thresholdSetting ?? defaultThresholdSetting,
             visibilitySetting: visibilitySetting ?? defaultVisibilitySetting,
-            curve_percentage: curvePercentage ?? 0,
-            performanceFixedValue: performanceFixedValue ?? "",
+            curve_percentage: curvePercentage ?? 100,
+            curveFixedValue: curveFixedValue ?? "",
         }));
-    }, [thresholdSetting, curvePercentage, performanceFixedValue, selectedUnits]);
+    }, [thresholdSetting, curvePercentage, curveFixedValue, selectedUnits]);
 
     const handleChange = (section, field, value) => {
         setFormData((prev) => ({
@@ -959,16 +959,16 @@ const SettingModal = ({
                             <div className="flex items-center gap-2 mb-2">
                                 <FaPercent className="text-sm" />
                                 <p className="text-xs font-semibold uppercase tracking-wide">
-                                    Curve Adjustment
+                                    Curve Percentage
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="number"
                                     min="0"
-                                    max="200"
+                                    max="100"
                                     step="0.01"
-                                    value={formData?.curve_percentage ?? 0}
+                                    value={formData?.curve_percentage ?? 100}
                                     onChange={(e) =>
                                         setFormData((prev) => ({
                                             ...prev,
@@ -980,7 +980,7 @@ const SettingModal = ({
                                 <span className="text-lg font-bold">%</span>
                             </div>
                             <p className="text-xs text-white/70 mt-2">
-                                0% = no change &middot; 200% = triple
+                                0% = no reference &middot; 100% = full curve
                             </p>
                         </div>
 
@@ -988,7 +988,7 @@ const SettingModal = ({
                             <div className="flex items-center gap-2 mb-2">
                                 <FaEquals className="text-sm" />
                                 <p className="text-xs font-semibold uppercase tracking-wide">
-                                    Fixed Curve Value
+                                    Curve Fixed Value
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -997,11 +997,11 @@ const SettingModal = ({
                                     min="0"
                                     step="0.01"
                                     placeholder="—"
-                                    value={formData?.performanceFixedValue ?? ""}
+                                    value={formData?.curveFixedValue ?? ""}
                                     onChange={(e) =>
                                         setFormData((prev) => ({
                                             ...prev,
-                                            performanceFixedValue: e.target.value,
+                                            curveFixedValue: e.target.value,
                                         }))
                                     }
                                     className="w-full bg-white/10 border border-white/30 rounded-lg px-3 py-2 text-lg font-bold placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"

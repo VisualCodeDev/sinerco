@@ -91,7 +91,7 @@ class DataUnit extends Model
         'visibilitySetting',
         'valve',
         'curve_percentage',
-        'performanceFixedValue'
+        'curveFixedValue'
     ];
 
     // cast kolom setting menjadi array

@@ -10,6 +10,7 @@ use App\Models\StatusRequest;
 use App\Models\UnitField;
 use App\Models\UnitPosition;
 use App\Models\UserSetting;
+use App\Services\UnitAvailabilityService;
 use App\Services\WhatsAppService;
 use Auth;
 use Illuminate\Http\Request;
@@ -31,19 +32,37 @@ class DailyReportController extends Controller
 
     // Hitung performance & performance_24h.
     // performance_24h dibagi curve_24h seperti biasa, KECUALI unit ini punya
-    // performanceFixedValue di setting-nya (per-unit, bukan per-client -- tiap
+    // curveFixedValue di setting-nya (per-unit, bukan per-client -- tiap
     // unit/compressor bisa punya nilai fixed curve fisik yang beda) -- kalau
     // diisi, itu yang dipakai sebagai pembagi, bukan curve_24h.
-    private function calculatePerformance($unitPosition, ?float $curveValue, ?float $curve24h, float $flowrate): array
+    private function calculatePerformance($unitPosition, ?float $curveValue, ?float $curve24h, float $flowrate, ?string $date = null): array
     {
         $performance = $curveValue ? $flowrate / $curveValue * 100 : null;
 
-        $performanceFixedValue = $unitPosition?->unit_id
-            ? DataUnit::where('unit_id', $unitPosition->unit_id)->value('performanceFixedValue')
+        $curveFixedValue = $unitPosition?->unit_id
+            ? DataUnit::where('unit_id', $unitPosition->unit_id)->value('curveFixedValue')
             : null;
         // 0/null/kosong dianggap "belum di-set" -> tetap pakai curve_24h, bukan dibagi 0
-        $performanceDivisor = $performanceFixedValue > 0 ? (float) $performanceFixedValue : $curve24h;
-        $performance24h = $performanceDivisor ? $flowrate / $performanceDivisor * 100 : null;
+        $performanceDivisor = $curveFixedValue > 0 ? (float) $curveFixedValue : $curve24h;
+
+        // performance_24h itu metrik basis 24 jam, jadi volumenya harus di-prorate ke jam
+        // unit ini BENERAN jalan hari itu (24 - down - stdby), sama kayak perhitungan volume
+        // invoice di ExportController -- kalau tidak, unit yang cuma jalan separuh hari
+        // (karena SD/STBY) keliatan performanya sama kayak yang jalan penuh 24 jam padahal
+        // volume aktualnya cuma separuh.
+        $runHours = 24;
+        if ($date && $unitPosition) {
+            $requests = StatusRequest::where('unit_position_id', $unitPosition->id)
+                ->where('start_date', '<=', $date)
+                ->where(function ($q) use ($date) {
+                    $q->whereNull('end_date')->orWhere('end_date', '>=', $date);
+                })
+                ->get();
+            $runHours = UnitAvailabilityService::dailyStatus($requests, $date)['running'];
+        }
+        $volume24h = $flowrate * ($runHours / 24);
+
+        $performance24h = $performanceDivisor ? $volume24h / $performanceDivisor * 100 : null;
 
         return [$performance, $performance24h];
     }
@@ -266,15 +285,16 @@ class DailyReportController extends Controller
                 $unit?->valve ?? '4/0'
             );
             $validated['curve'] = $curveValue;
-            // curve_24h = curve + persentase tambahan dari setting unit
+            // curve_24h = curve x persentase (0-100%) dari setting unit
             $validated['curve_24h'] = $curveValue === null
                 ? null
-                : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+                : $curveValue * (float) ($unit?->curve_percentage ?? 100) / 100;
             [$validated['performance'], $validated['performance_24h']] = $this->calculatePerformance(
                 $unitPosition,
                 $curveValue,
                 $validated['curve_24h'],
-                (float) ($validated['flowrate'] ?? 0)
+                (float) ($validated['flowrate'] ?? 0),
+                $validated['date'] ?? null
             );
         }
 
@@ -406,14 +426,16 @@ class DailyReportController extends Controller
                 $unit?->valve ?? '4/0'
             );
             $val['curve'] = $curveValue;
+            // curve_24h = curve x persentase (0-100%) dari setting unit
             $val['curve_24h'] = $curveValue === null
                 ? null
-                : $curveValue * (100 + (float) ($unit?->curve_percentage ?? 0)) / 100;
+                : $curveValue * (float) ($unit?->curve_percentage ?? 100) / 100;
             [$val['performance'], $val['performance_24h']] = $this->calculatePerformance(
                 $unitPosition,
                 $curveValue,
                 $val['curve_24h'],
-                (float) ($val['flowrate'] ?? 0)
+                (float) ($val['flowrate'] ?? 0),
+                $val['date'] ?? null
             );
         }
         if ($report) {

@@ -37,7 +37,7 @@ class DataUnitController extends Controller
         if ($user->roleData?->name !== 'super_admin') {
             $temp = $user->UnitPositions()->with([
                 'unit' => function ($q) {
-                    $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue']);
+                    $q->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'curveFixedValue']);
                 },
                 'client' => function ($q) {
                     $q->select(['client_id', 'name', 'gmt_offset']);
@@ -59,7 +59,7 @@ class DataUnitController extends Controller
                     'thresholdSetting' => $pos->unit->thresholdSetting,
                     'visibilitySetting' => $pos->unit->visibilitySetting,
                     'curve_percentage' => $pos->unit->curve_percentage,
-                    'performanceFixedValue' => $pos->unit->performanceFixedValue,
+                    'curveFixedValue' => $pos->unit->curveFixedValue,
                     'status' => $pos->unit->status,
                     'client' => $pos->client?->name ?? $pos->workshop?->name,
                     'client_id' => $pos->client_id,
@@ -86,7 +86,7 @@ class DataUnitController extends Controller
                 'UnitPositions.workshop' => function ($q) {
                     $q->select(['workshop_id', 'name']);
                 },
-            ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue'])->get();
+            ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'curveFixedValue'])->get();
 
             // Format ulang data unit untuk super_admin ke struktur flat
             $data = $temp->map(function ($unit) {
@@ -98,7 +98,7 @@ class DataUnitController extends Controller
                     'thresholdSetting' => $unit->thresholdSetting,
                     'visibilitySetting' => $unit->visibilitySetting,
                     'curve_percentage' => $unit->curve_percentage,
-                    'performanceFixedValue' => $unit->performanceFixedValue,
+                    'curveFixedValue' => $unit->curveFixedValue,
                     'status' => $unit->status,
                     'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                     'client_id' => $unit->UnitPositions?->client_id,
@@ -200,7 +200,7 @@ class DataUnitController extends Controller
             'UnitPositions.workshop' => function ($q) {
                 $q->select(['workshop_id', 'name']);
             },
-        ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'performanceFixedValue'])->get();
+        ])->select(['unit_id', 'unit', 'unit_sn', 'old_sn', 'status', 'thresholdSetting', 'visibilitySetting', 'curve_percentage', 'curveFixedValue'])->get();
 
         return $temp->map(function ($unit) {
             return [
@@ -211,7 +211,7 @@ class DataUnitController extends Controller
                 'thresholdSetting' => $unit->thresholdSetting,
                 'visibilitySetting' => $unit->visibilitySetting,
                 'curve_percentage' => $unit->curve_percentage,
-                'performanceFixedValue' => $unit->performanceFixedValue,
+                'curveFixedValue' => $unit->curveFixedValue,
                 'status' => $unit->status,
                 'client' => $unit->UnitPositions?->client?->name ?? $unit->UnitPositions?->workshop?->name,
                 'client_id' => $unit->UnitPositions?->client_id,
@@ -801,8 +801,8 @@ class DataUnitController extends Controller
         // "" (input dikosongkan user, artinya "hitung dari curve seperti biasa")
         // wajib dianggap null SEBELUM divalidasi -- 'nullable' cuma lolosin null,
         // bukan auto-convert "" jadi null, jadi "" tetap kena cek 'numeric' & gagal.
-        if ($request->input('performanceFixedValue') === '') {
-            $request->merge(['performanceFixedValue' => null]);
+        if ($request->input('curveFixedValue') === '') {
+            $request->merge(['curveFixedValue' => null]);
         }
 
         $rules = [
@@ -812,12 +812,13 @@ class DataUnitController extends Controller
             // requiredSetting di-keyin per field_id (bukan slug), karena disimpan
             // di tabel unit_fields yang PK-nya field_id, bukan di kolom JSON milik unit.
             'requiredSetting' => 'nullable|array',
-            'curve_percentage' => 'nullable|numeric|min:0|max:200',
+            // 0-100%: persentase langsung dari variable curve (0% = referensi 0, 100% = curve penuh)
+            'curve_percentage' => 'nullable|numeric|min:0|max:100',
             // Kosongkan untuk hitung performance dari curve seperti biasa; isi untuk
             // pakai nilai tetap sebagai pembagi (lihat calculatePerformance() di
             // DailyReportController) -- per unit, bukan per client, karena tiap
             // unit/compressor bisa punya nilai fixed curve fisik yang beda.
-            'performanceFixedValue' => 'nullable|numeric',
+            'curveFixedValue' => 'nullable|numeric',
         ];
 
         // Bangun rule validasi dinamis untuk tiap key threshold
@@ -850,9 +851,9 @@ class DataUnitController extends Controller
                 'thresholdSetting' => $validated['thresholdSetting'],
                 'visibilitySetting' => $validated['visibilitySetting'],
                 'curve_percentage' => $validated['curve_percentage'] ?? $unit->curve_percentage,
-                'performanceFixedValue' => array_key_exists('performanceFixedValue', $validated)
-                    ? $validated['performanceFixedValue']
-                    : $unit->performanceFixedValue,
+                'curveFixedValue' => array_key_exists('curveFixedValue', $validated)
+                    ? $validated['curveFixedValue']
+                    : $unit->curveFixedValue,
             ]);
 
             // Required disimpan per-baris di unit_fields (bukan JSON di data_units),
