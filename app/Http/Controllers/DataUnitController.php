@@ -367,6 +367,8 @@ class DataUnitController extends Controller
             'area_name' => 'nullable|string',
             'location_id' => 'nullable|exists:locations,id',
             'location_name' => 'nullable|string',
+            // region/area/location cuma wajib buat unit yang ditempatkan di client (workshop tidak punya lokasi)
+            'region_id' => 'required_if:position_type,client|nullable|exists:regions,id',
         ];
 
         // Rule tambahan tergantung posisi unit (client / workshop)
@@ -384,6 +386,18 @@ class DataUnitController extends Controller
         if ($request->position_type === 'client' && !$request->client_id && !$request->client_name) {
             return response()->json([
                 'errors' => ['client' => ['Either client_id or client_name is required.']]
+            ], 422);
+        }
+
+        // Unit yang ditempatkan di client wajib punya area & location (workshop tidak)
+        if ($request->position_type === 'client' && !$request->area_id && !$request->area_name) {
+            return response()->json([
+                'errors' => ['area' => ['Either area_id or area_name is required.']]
+            ], 422);
+        }
+        if ($request->position_type === 'client' && !$request->location_id && !$request->location_name) {
+            return response()->json([
+                'errors' => ['location' => ['Either location_id or location_name is required.']]
             ], 422);
         }
 
@@ -454,6 +468,7 @@ class DataUnitController extends Controller
             $position = $unit->UnitPositions()->create([
                 'client_id' => $clientId,
                 'location_id' => $locationId,
+                'region_id' => $val['position_type'] === 'client' ? $val['region_id'] : null,
                 'workshop_id' => $workshopId,
                 'position_type' => $val['position_type'],
             ]);
@@ -659,7 +674,47 @@ class DataUnitController extends Controller
             'region_id' => 'nullable|exists:regions,id',
         ]);
 
-        DB::transaction(function () use ($val) {
+        // Ambil field yang termasuk data posisi unit
+        $positionData = collect($val)->only(['client_id', 'workshop_id', 'location_id', 'region_id'])
+            ->filter(fn($value) => $value !== null)
+            ->toArray();
+
+        // Kalau client_id diisi lewat sini, unit ini pindah ke client -- lepas
+        // dulu workshop_id lama-nya (kalau ada) supaya tidak nyantol dua-duanya
+        if (array_key_exists('client_id', $positionData)) {
+            $positionData['workshop_id'] = null;
+            $positionData['position_type'] = 'client';
+        }
+
+        // Sebaliknya kalau workshop_id diisi, unit ini pindah ke workshop --
+        // lepas client_id (dan area/location, karena workshop tidak punya lokasi)
+        if (array_key_exists('workshop_id', $positionData)) {
+            $positionData['client_id'] = null;
+            $positionData['position_type'] = 'workshop';
+            $positionData['location_id'] = null;
+            $positionData['region_id'] = null;
+        }
+
+        // Kalau hasil akhirnya (request ini digabung dengan data posisi yang sudah
+        // ada) unit ini jadi ditempatkan di client, region & location WAJIB ada --
+        // workshop tidak perlu (workshop tidak punya lokasi).
+        if (!empty($positionData)) {
+            $existingPosition = UnitPosition::where('unit_id', $val['unit_id'])->first();
+            $finalClientId = array_key_exists('client_id', $positionData) ? $positionData['client_id'] : $existingPosition?->client_id;
+
+            if ($finalClientId) {
+                $finalLocationId = array_key_exists('location_id', $positionData) ? $positionData['location_id'] : $existingPosition?->location_id;
+                $finalRegionId = array_key_exists('region_id', $positionData) ? $positionData['region_id'] : $existingPosition?->region_id;
+
+                if (!$finalLocationId || !$finalRegionId) {
+                    return response()->json([
+                        'errors' => ['location' => ['A client-placed unit must have a region and location set.']]
+                    ], 422);
+                }
+            }
+        }
+
+        DB::transaction(function () use ($val, $positionData) {
             // Ambil field yang termasuk data unit
             $unitData = collect($val)->only(['unit', 'unit_sn', 'old_sn'])
                 ->filter(fn($value) => $value !== null)
@@ -667,27 +722,6 @@ class DataUnitController extends Controller
 
             if (!empty($unitData)) {
                 DataUnit::where('unit_id', $val['unit_id'])->update($unitData);
-            }
-
-            // Ambil field yang termasuk data posisi unit
-            $positionData = collect($val)->only(['client_id', 'workshop_id', 'location_id', 'region_id'])
-                ->filter(fn($value) => $value !== null)
-                ->toArray();
-
-            // Kalau client_id diisi lewat sini, unit ini pindah ke client -- lepas
-            // dulu workshop_id lama-nya (kalau ada) supaya tidak nyantol dua-duanya
-            if (array_key_exists('client_id', $positionData)) {
-                $positionData['workshop_id'] = null;
-                $positionData['position_type'] = 'client';
-            }
-
-            // Sebaliknya kalau workshop_id diisi, unit ini pindah ke workshop --
-            // lepas client_id (dan area/location, karena workshop tidak punya lokasi)
-            if (array_key_exists('workshop_id', $positionData)) {
-                $positionData['client_id'] = null;
-                $positionData['position_type'] = 'workshop';
-                $positionData['location_id'] = null;
-                $positionData['region_id'] = null;
             }
 
             if (!empty($positionData)) {

@@ -205,19 +205,22 @@ const UnitTable = (props) => {
         setFormData((prev) => {
             const current = { ...(prev.edits?.[unit_id] || {}) };
             current[field] = value;
+            // null (bukan "") supaya lolos rule 'nullable' Laravel -- "" tetap kena
+            // cek 'exists:...' berikutnya dan gagal validasi (lihat gotcha yang sama
+            // di curveFixedValue).
             if (field === "region_id") {
-                current.area_id = "";
-                current.location_id = "";
+                current.area_id = null;
+                current.location_id = null;
             } else if (field === "area_id") {
-                current.location_id = "";
+                current.location_id = null;
             } else if (field === "client_id" && value) {
                 // Unit cuma boleh ditempatkan di salah satu, client ATAU workshop
-                current.workshop_id = "";
+                current.workshop_id = null;
             } else if (field === "workshop_id" && value) {
-                current.client_id = "";
-                current.region_id = "";
-                current.area_id = "";
-                current.location_id = "";
+                current.client_id = null;
+                current.region_id = null;
+                current.area_id = null;
+                current.location_id = null;
             }
             return { ...prev, edits: { ...prev.edits, [unit_id]: current } };
         });
@@ -234,11 +237,11 @@ const UnitTable = (props) => {
             });
             return;
         }
-        // Area & Location cuma berlaku buat unit yang ditempatkan di client, workshop tidak punya lokasi
-        if (!isWorkshop && (!edits.area_id || !edits.location_id)) {
+        // Region/Area/Location cuma berlaku buat unit yang ditempatkan di client, workshop tidak punya lokasi
+        if (!isWorkshop && (!edits.region_id || !edits.area_id || !edits.location_id)) {
             addToast({
                 type: "error",
-                text: "Area and Location are required for a client-placed unit.",
+                text: "Region, Area, and Location are required for a client-placed unit.",
             });
             return;
         }
@@ -249,6 +252,7 @@ const UnitTable = (props) => {
                 position_type: isWorkshop ? "workshop" : "client",
                 client_id: isWorkshop ? null : edits.client_id,
                 workshop_id: isWorkshop ? edits.workshop_id : null,
+                region_id: isWorkshop ? null : edits.region_id,
                 area_id: isWorkshop ? null : edits.area_id,
                 location_id: isWorkshop ? null : edits.location_id,
             });
@@ -274,6 +278,20 @@ const UnitTable = (props) => {
         }
         const edits = formData?.edits?.[unit_id];
         if (!edits) return;
+
+        // Kalau hasil akhirnya (row asli digabung sama edits) unit ini jadi
+        // ditempatkan di client, region & location wajib ada -- workshop tidak
+        // (workshop tidak punya lokasi)
+        const item = (unitData || []).find((u) => u.unit_id === unit_id) || {};
+        const merged = { ...item, ...edits };
+        if (merged.client_id && (!merged.region_id || !merged.location_id)) {
+            addToast({
+                type: "error",
+                text: "A client-placed unit must have a Region and Location set.",
+            });
+            return;
+        }
+
         try {
             const resp = await axios.post(route("unit.update.full"), {
                 unit_id,
