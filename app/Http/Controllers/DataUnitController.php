@@ -685,10 +685,9 @@ class DataUnitController extends Controller
             $positionData['workshop_id'] = null;
             $positionData['position_type'] = 'client';
         }
-
         // Sebaliknya kalau workshop_id diisi, unit ini pindah ke workshop --
         // lepas client_id (dan area/location, karena workshop tidak punya lokasi)
-        if (array_key_exists('workshop_id', $positionData)) {
+        else if (array_key_exists('workshop_id', $positionData)) {
             $positionData['client_id'] = null;
             $positionData['position_type'] = 'workshop';
             $positionData['location_id'] = null;
@@ -725,6 +724,7 @@ class DataUnitController extends Controller
             }
 
             if (!empty($positionData)) {
+                Log::debug("MASUK");
                 $before = UnitMovementLogger::snapshot([$val['unit_id']]);
                 UnitPosition::where('unit_id', $val['unit_id'])->update($positionData);
                 UnitMovementLogger::commit($before, 'relocate');
@@ -748,9 +748,11 @@ class DataUnitController extends Controller
         // jadi select-nya wajib di-qualify (data_units.unit_id) supaya tidak ambiguous.
         $qualifiedUnitSelect = ['data_units.unit_id', 'data_units.unit', 'data_units.status'];
 
-        $clients = Client::with(['unitPositions.unit' => function ($q) use ($unitSelect) {
-            $q->select($unitSelect);
-        }])->get()->map(function ($client) {
+        $clients = Client::with([
+            'unitPositions.unit' => function ($q) use ($unitSelect) {
+                $q->select($unitSelect);
+            }
+        ])->get()->map(function ($client) {
             return [
                 'client_id' => $client->client_id,
                 'name' => $client->name,
@@ -758,9 +760,11 @@ class DataUnitController extends Controller
             ];
         });
 
-        $workshops = Workshop::with(['units' => function ($q) use ($qualifiedUnitSelect) {
-            $q->select($qualifiedUnitSelect);
-        }])->get()->map(function ($workshop) {
+        $workshops = Workshop::with([
+            'units' => function ($q) use ($qualifiedUnitSelect) {
+                $q->select($qualifiedUnitSelect);
+            }
+        ])->get()->map(function ($workshop) {
             return [
                 'workshop_id' => $workshop->workshop_id,
                 'name' => $workshop->name,
