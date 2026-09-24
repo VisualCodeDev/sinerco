@@ -176,8 +176,8 @@ class StatusRequestController extends Controller
                 'start_time' => $req->start_time,
                 'status' => $req->status,
                 'unit' => $req->unitPosition->unit->unit,
-                'area' => $req->unitPosition->location->area->area,
-                'location' => $req->unitPosition->location->location,
+                'area' => $req->unitPosition?->location?->area?->area,
+                'location' => $req->unitPosition?->location?->location,
             ];
         });
 
