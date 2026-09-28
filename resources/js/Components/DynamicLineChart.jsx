@@ -59,9 +59,14 @@ const generateDateRange = (startStr, endStr) => {
     return dates;
 };
 
-const generateFullHours = () => {
+// step = jam per pembacaan sesuai input_interval client (1, 2, 3, dst) --
+// biar bucket X-axis-nya ngikutin jadwal pembacaan yang sebenarnya, bukan
+// selalu tiap jam (kalau client-nya per 2 jam misalnya, jam-jam di antaranya
+// nggak pernah keisi data & selalu jatuh ke 0, bikin grafiknya zigzag/curvy).
+const generateFullHours = (step = 1) => {
     const hours = [];
-    for (let i = 1; i <= 24; i++) {
+    const s = Number(step) > 0 ? Number(step) : 1;
+    for (let i = s; i <= 24; i += s) {
         hours.push(i.toString().padStart(2, "0") + ":00");
     }
     return hours;
@@ -240,7 +245,7 @@ const DynamicLineChart = () => {
         const expectedReadingsPerDay = Math.max(Math.floor(24 / step), 1);
 
         if (isHourlyBucket) {
-            const fullHours = generateFullHours();
+            const fullHours = generateFullHours(step);
             const dataMap = {};
             reportData.forEach((item) => {
                 dataMap[item.time] = item;

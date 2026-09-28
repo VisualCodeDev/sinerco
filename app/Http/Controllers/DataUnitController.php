@@ -674,20 +674,28 @@ class DataUnitController extends Controller
             'region_id' => 'nullable|exists:regions,id',
         ]);
 
-        // Ambil field yang termasuk data posisi unit
-        $positionData = collect($val)->only(['client_id', 'workshop_id', 'location_id', 'region_id'])
-            ->filter(fn($value) => $value !== null)
-            ->toArray();
+        // Ambil field yang termasuk data posisi unit -- pakai array_key_exists,
+        // BUKAN filter(!== null), supaya field yang SENGAJA di-null-kan (mis. user
+        // ngosongin Region-nya) tetap ke-apply ke DB. filter(!== null) sebelumnya
+        // salah mendua-artikan "field ini sengaja di-null-kan" sama dengan "field
+        // ini nggak disentuh sama sekali", jadi field yang di-clear malah tidak
+        // pernah ke-update.
+        $positionData = [];
+        foreach (['client_id', 'workshop_id', 'location_id', 'region_id'] as $field) {
+            if (array_key_exists($field, $val)) {
+                $positionData[$field] = $val[$field];
+            }
+        }
 
         // Kalau client_id diisi lewat sini, unit ini pindah ke client -- lepas
         // dulu workshop_id lama-nya (kalau ada) supaya tidak nyantol dua-duanya
-        if (array_key_exists('client_id', $positionData)) {
+        if (array_key_exists('client_id', $positionData) && $positionData['client_id']) {
             $positionData['workshop_id'] = null;
             $positionData['position_type'] = 'client';
         }
         // Sebaliknya kalau workshop_id diisi, unit ini pindah ke workshop --
         // lepas client_id (dan area/location, karena workshop tidak punya lokasi)
-        else if (array_key_exists('workshop_id', $positionData)) {
+        elseif (array_key_exists('workshop_id', $positionData) && $positionData['workshop_id']) {
             $positionData['client_id'] = null;
             $positionData['position_type'] = 'workshop';
             $positionData['location_id'] = null;
@@ -724,7 +732,6 @@ class DataUnitController extends Controller
             }
 
             if (!empty($positionData)) {
-                Log::debug("MASUK");
                 $before = UnitMovementLogger::snapshot([$val['unit_id']]);
                 UnitPosition::where('unit_id', $val['unit_id'])->update($positionData);
                 UnitMovementLogger::commit($before, 'relocate');
