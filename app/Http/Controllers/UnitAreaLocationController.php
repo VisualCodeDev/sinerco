@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\UnitAreaLocation;
 use Illuminate\Http\Request;
 
+// Resource controller standar (belum ada logic custom, masih stub bawaan
+// `php artisan make:controller --resource`) buat model UnitAreaLocation.
 class UnitAreaLocationController extends Controller
 {
     // Menampilkan daftar lokasi area unit (belum diimplementasikan)

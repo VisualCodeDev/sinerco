@@ -4,6 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// Tabel lookup kurva kompresor per valve config (mis. "4/0", "2/1"): titik-titik
+// (suction_pressure, discharge_pressure) -> flowrate hasil seeding manual (lihat
+// CurveSeeder). interpolate() melakukan interpolasi bilinear dari titik-titik
+// ini -- PENTING: tiap valve config PUNYA RENTANG suction/discharge SENDIRI2
+// (tidak semua valve nyakup semua tekanan). Kalau input di luar rentang seeded
+// valve tsb, bracket() akan CLAMP ke titik terdekat (bukan interpolasi
+// sungguhan) -- jadi hasilnya bisa terlihat valid padahal sebenarnya cuma
+// "tebakan nilai ujung terdekat", bukan hasil hitungan asli untuk tekanan itu.
 class Curve extends Model
 {
     // kolom yang boleh diisi mass-assignment

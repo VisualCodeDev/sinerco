@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// Data form Berita Acara (BA) per unit_position -- lihat BeritaAcaraController.
 class BeritaAcara extends Model
 {
      // kolom yang boleh diisi mass-assignment

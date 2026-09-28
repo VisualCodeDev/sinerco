@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\AdminNotification;
 use Illuminate\Http\Request;
 
+// Notifikasi admin untuk alarm SD/STBY -- 1 baris per StatusRequest (auto-dibuat
+// oleh StatusRequest model, lihat boot() di app/Models/StatusRequest.php).
+// getNotifications() di-poll tiap 10 detik oleh PageLayout.jsx buat nyalain alarm
+// bunyi/popup di semua halaman selama masih ada request yang statusnya bukan 'End'.
+// Request bertipe 'note' sengaja dikecualikan di sini (tidak pernah bikin alarm).
 class AdminNotificationController extends Controller
 {
     /**

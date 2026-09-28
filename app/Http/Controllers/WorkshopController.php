@@ -9,6 +9,13 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
 
+// CRUD Workshop -- "pemilik" unit_position alternatif selain Client (lihat
+// ClientController). Sebuah unit HANYA BOLEH punya client_id ATAU workshop_id,
+// tidak dua-duanya (dijaga di 3 lapis: validasi request di
+// DataUnitController::addUnitLocation()/updateUnitFull(), dan CHECK constraint
+// `chk_client_or_workshop` di tabel unit_positions). destroy() di sini WAJIB
+// lepas workshop_id semua unit-nya dulu sebelum hapus workshop-nya sendiri,
+// supaya tidak ke-cascade-delete posisi unitnya (baca komentarnya di destroy()).
 class WorkshopController extends Controller
 {
     /**

@@ -21,6 +21,9 @@ use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
+// Profil user yang sedang login (ganti nama, HP, password) + halaman admin buat
+// kelola user lain (userList, getAllRoles). Beda dengan UserSettingController
+// yang urus PENUGASAN user ke unit (allocation), bukan data profil user-nya.
 class ProfileController extends Controller
 {
     // Ambil daftar user dengan role technician dan operator untuk halaman UserList

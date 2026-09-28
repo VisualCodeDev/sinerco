@@ -13,6 +13,10 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Log;
 
+// Penugasan (allocation) user ke unit_position -- siapa boleh akses unit mana
+// (dipakai buat filter di DataUnitController::getPermittedUnit()). Juga tempat
+// bikin user baru (addNewUser). Beda dengan ProfileController yang urus data
+// profil user itu sendiri (nama, HP, password), bukan penugasannya.
 class UserSettingController extends Controller
 {
     /**

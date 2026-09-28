@@ -6,6 +6,8 @@ use App\Models\Contract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+// Kontrak per unit_position -- data kontrak (tanggal, nilai, dsb) plus upload
+// dokumen pendukungnya (disimpan di storage, lihat uploadDocument/destroyDocument).
 class ContractController extends Controller
 {
     // Ambil kontrak untuk 1 unit_position (null kalau belum pernah dibuat)

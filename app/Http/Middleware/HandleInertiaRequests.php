@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
+// Setup dasar Inertia.js (bawaan starter kit, belum banyak dikustom -- share()
+// props global-nya masih di-comment-out). Auth user & Ziggy route helper
+// sekarang di-load per-halaman lewat useAuth() (resources/js/Components/Auth/
+// auth.jsx) & bootstrap.js, bukan lewat shared props middleware ini.
 class HandleInertiaRequests extends Middleware
 {
     /**

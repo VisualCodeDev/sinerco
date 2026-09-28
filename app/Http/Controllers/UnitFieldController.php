@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\UnitField;
 use Illuminate\Http\Request;
 
+// Resource controller standar (stub bawaan `php artisan make:controller
+// --resource`) buat model UnitField -- endpoint yang BENERAN dipakai buat urus
+// pivot unit_fields (getUnitFields, dsb) ada di DataUnitController.
 class UnitFieldController extends Controller
 {
     // Menampilkan daftar field unit (belum diimplementasikan)

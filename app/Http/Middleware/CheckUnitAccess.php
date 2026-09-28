@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
 
+// Middleware alias 'unit.access' (didaftarkan di bootstrap/app.php) -- blokir
+// (403) kalau user bukan super_admin DAN tidak ditugaskan (lewat user_settings)
+// ke unit_position dari parameter route `unit_name`. Cek serupa (tapi manual,
+// bukan lewat middleware ini) juga ada di beberapa method
+// DataUnitController/DailyReportController lewat userCanAccessUnitPosition().
 class CheckUnitAccess
 {
     /**

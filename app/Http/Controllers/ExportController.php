@@ -21,6 +21,11 @@ use ZipArchive;
 use PhpOffice\PhpWord\TemplateProcessor;
 
 
+// Generate semua dokumen export: Invoice (.xlsx, termasuk klien tipe CLU yang
+// laporannya tahunan), Denda/Penalty (.xlsx), dan BA/BAPM/BAP (.docx, dibungkus
+// .zip). Sengaja 1 file besar karena banyak logic (availability, rata-rata per
+// jam, proration curve) dipakai bareng antar jenis export -- lihat
+// UnitAvailabilityService buat perhitungan running/standby/down hours-nya.
 class ExportController extends Controller
 {
     // Hitung status running/standby/down (jam) untuk satu tanggal berdasarkan daftar request

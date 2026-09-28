@@ -252,4 +252,20 @@ Route::get('/export-doc', [ExportController::class, 'exportDoc'])->name('export_
 Route::get('/export-inv', [ExportController::class, 'exportInvoice'])->name('export_inv')->middleware('auth');
 Route::get('/export-penalty', [ExportController::class, 'exportPenalty'])->name('export_penalty')->middleware('auth');
 
+// Fallback buat file di disk 'public' (mis. PDF kontrak, lihat ContractController)
+// kalau symlink public/storage tidak kepasang/kepasang di tempat yang salah --
+// ini pernah kejadian di hosting shared (cPanel) yang document root-nya
+// (public_html) BUKAN folder public/ punya Laravel-nya sendiri, jadi symlink
+// hasil `php artisan storage:link` ke-buat di tempat yang tidak ke-serve web
+// server. Kalau symlink-nya BERES, request ini biasanya sudah ke-serve
+// langsung sama web server sebagai file statis & TIDAK PERNAH sampai ke sini
+// -- jadi route ini aman dipasang permanen sebagai jaring pengaman, bukan cuma
+// tambalan sementara.
+Route::get('/storage/{path}', function (string $path) {
+    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+    return \Illuminate\Support\Facades\Storage::disk('public')->response($path);
+})->where('path', '.*')->name('storage.fallback');
+
 require __DIR__ . '/auth.php';

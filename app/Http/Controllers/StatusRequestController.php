@@ -17,6 +17,13 @@ use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Str;
 
+// CRUD request SD (shutdown) / STBY (standby) / Note. 3 tipe request_type ini
+// PENTING dibedakan: 'sd' & 'stdby' mengubah status unit & memicu alarm
+// (AdminNotification, lihat StatusRequest::boot()), 'note' TIDAK -- note cuma
+// catatan yang tetap tampil di daftar ongoing tapi tidak alarm & tidak ubah
+// status unit (lihat pengecekan `$isNote` di setRequest/updateRequest).
+// Remark suggestion (autocomplete) juga di-handle di sini lewat learnRemark()
+// & getRemarkList(), nyimpen ke tabel remark_lists (bisa difilter per tipe).
 class StatusRequestController extends Controller
 {
     /**

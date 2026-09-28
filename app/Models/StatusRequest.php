@@ -6,6 +6,13 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Str;
 
+// SATU baris = SATU event SD/STBY/Note (request_id UUID auto-generate).
+// request_type: 'sd'/'stdby' ubah status unit & bikin alarm (AdminNotification,
+// lihat boot() created di bawah); 'note' TIDAK (dilewatin di created() hook).
+// boot() juga yang jaga sinkronisasi ke DailyReport: nge-bulatin jam mulai ke
+// HH:00 terdekat & nge-set request_id di baris DailyReport JAM MULAINYA SAJA
+// (bukan semua jam yang dicover request ini) -- baca komentar di saving()/
+// saved() kalau mau ngerti detail race-condition-nya (cek slot bentrok, dst).
 class StatusRequest extends Model
 {
     //

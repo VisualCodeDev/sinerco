@@ -5,6 +5,14 @@ namespace App\Models;
 use DB;
 use Illuminate\Database\Eloquent\Model;
 
+// Data fisik unit (compressor/genset) itu sendiri -- unit_id auto-generate
+// format "UNT001", dst. PENTING: dimana unit ini DITEMPATKAN (client/workshop,
+// region, location) BUKAN di sini, tapi di UnitPosition (relasi hasOne
+// unitPositions()) -- 1 DataUnit hanya boleh punya 1 UnitPosition.
+// `curve_percentage` (0-100%, default 100 = curve penuh) & `curveFixedValue`
+// (kalau diisi, jadi pembagi performance TETAP, skip kalkulasi curve dari
+// suction/discharge sama sekali) dipakai di DailyReportController::
+// calculatePerformance() & ExportController's invoice.
 class DataUnit extends Model
 {
     public $incrementing = false; // karena primary key string

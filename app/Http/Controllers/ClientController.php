@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
 
+// CRUD & pengaturan client (nama, gmt_offset, input_interval, auto_send_interval
+// WhatsApp, dsb). Client adalah salah satu dari 2 kemungkinan "pemilik" sebuah
+// unit_position (yang satunya Workshop, lihat WorkshopController) -- lihat juga
+// UnitMovementLogger buat riwayat perpindahan client/workshop suatu unit.
 class ClientController extends Controller
 {
     // Menampilkan halaman daftar client

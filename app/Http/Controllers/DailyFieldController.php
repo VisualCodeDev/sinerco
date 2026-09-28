@@ -12,6 +12,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
+// Master data "field" laporan harian (mis. suction_press, flowrate, dst) beserta
+// subfield-nya. Field di sini cuma daftar globalnya -- required/tidaknya PER UNIT
+// diatur lewat tabel pivot unit_fields (lihat UnitFieldController), bukan di sini.
 class DailyFieldController extends Controller
 {
     /**

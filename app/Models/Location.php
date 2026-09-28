@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// Tingkat ke-3 (paling detail) dari hierarki Region -> Area -> Location. Cuma
+// unit yang ditempatkan di CLIENT yang punya location_id -- workshop tidak.
 class Location extends Model
 {
     // kolom yang boleh diisi mass-assignment

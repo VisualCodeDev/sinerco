@@ -5,6 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+// client_id auto-generate format "CLI001", "CLI002", dst (lihat boot() di bawah).
+// `input_interval` = jam per pembacaan laporan (1, 2, 3, dst) -- dipakai di
+// BANYAK tempat (DailyReportController, ExportController, DynamicLineChart.jsx)
+// buat tau berapa banyak pembacaan yang DIHARAPKAN per hari. `auto_send_interval`
+// = jadwal kirim WhatsApp otomatis, lihat catatan cron-nya di WhatsAppController.
+// `is_invoice`/`is_clu`/`template_inv` nentuin format invoice (bulanan biasa vs
+// CLU yang laporannya tahunan) di ExportController::exportInvoice().
 class Client extends Model
 {
     use SoftDeletes;

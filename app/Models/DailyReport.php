@@ -5,6 +5,13 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+// 1 baris = 1 pembacaan laporan per unit per jam. Kolom `data` (JSON) isinya
+// nilai tiap field (flowrate, suction_press, curve, performance_24h, dst) --
+// field-nya DINAMIS, tergantung field apa saja yang terdaftar buat unit itu
+// (lihat UnitField/DailyField). `request_id` cuma ke-isi di baris JAM MULAI SD/
+// STBY (lihat boot() di StatusRequest), TIDAK di semua jam yang dicover request
+// itu -- jangan salah asumsi kalau mau nampilin remarks di banyak baris
+// sekaligus, query StatusRequest langsung by tanggal overlap, bukan lewat FK ini.
 class DailyReport extends Model
 {
     protected static function boot()

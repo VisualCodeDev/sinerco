@@ -9,6 +9,20 @@ use Date;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
+// Kirim rekap laporan harian unit via WhatsApp otomatis, per client.
+//
+// PENTING buat dev berikutnya -- JADWAL cron-nya BUKAN di sini, tapi di
+// `bootstrap/app.php` (method withSchedule()). Di situ tiap client di-loop, dan
+// jadwalnya dipilih berdasarkan `auto_send_interval` milik client ('1h', '4h',
+// '6h', '12h', '1d', default 'hourly' kalau nilainya tidak dikenali). Kalau mau
+// nambah pilihan interval baru (misal '2h'), edit `match()` di bootstrap/app.php
+// DAN tambahkan opsinya juga di enum/pilihan `auto_send_interval` pada form
+// setting client (lihat ClientController::setSettings()).
+//
+// Server production jalanin cron `* * * * * php artisan schedule:run` tiap
+// menit (lihat scheduler Laravel) -- kalau pesan tidak terkirim, cek dulu cron
+// itu beneran jalan & path `php artisan` di server sudah benar sebelum curiga
+// ke controller ini.
 class WhatsAppController extends Controller
 {
     // Kirim pesan WhatsApp otomatis berisi laporan unit harian untuk sebuah client

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
+// Setting laporan harian PER CLIENT (decimalSetting, minMaxSetting, unitSetting).
+// Jangan bingung sama setUnitSetting() di DataUnitController -- itu setting PER
+// UNIT (threshold, curve_percentage, curveFixedValue), beda tabel & beda scope.
 class DailyReportSettingsController extends Controller
 {
     /**

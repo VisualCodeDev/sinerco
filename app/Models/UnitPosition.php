@@ -4,6 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// MODEL PALING SENTRAL di proyek ini -- "dimana & milik siapa" sebuah unit
+// ditempatkan (bukan data fisik unit-nya, itu di DataUnit). 1 DataUnit HANYA
+// BOLEH punya 1 UnitPosition (unit_id UNIQUE, lihat migration-nya).
+//
+// ATURAN PALING PENTING: client_id & workshop_id SALING EKSKLUSIF -- sebuah
+// unit cuma boleh ditempatkan di client ATAU workshop, TIDAK BOLEH dua-duanya.
+// Dijaga di 3 lapis:
+//   1. Validasi request (DataUnitController::addUnitLocation/updateUnitFull)
+//   2. CHECK constraint `chk_client_or_workshop` di level database
+//   3. Frontend (UnitTable.jsx) otomatis ngosongin yang satu pas yang lain dipilih
+// Kalau ditempatkan di WORKSHOP: location_id & region_id HARUS null (workshop
+// tidak punya lokasi). Kalau di CLIENT: location_id & region_id WAJIB ada.
+//
+// `area` SENGAJA TIDAK ADA kolomnya di sini -- selalu diturunkan lewat
+// location->area (lihat komentar yang sama di UnitMovementLog).
 class UnitPosition extends Model
 {
     // kolom yang boleh diisi mass-assignment

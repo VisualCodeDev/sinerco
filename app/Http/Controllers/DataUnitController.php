@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 use Log;
 
+// Controller PALING BESAR & paling sering dipakai di proyek ini -- CRUD unit
+// (data_units), penempatan unit ke client/workshop (unit_positions), setting
+// per-unit (threshold, curve_percentage, curveFixedValue), sampai status
+// dashboard (getUnitStatus, dipoll Home.jsx tiap 10 detik). Lihat
+// getPermittedUnit()/getAllUnitsFlat() -- 2 fungsi mirip yang MASING-MASING
+// harus di-update kalau nambah field baru ke response unit (gampang kelewatan
+// salah satu, sudah pernah kejadian).
 class DataUnitController extends Controller
 {
     /**

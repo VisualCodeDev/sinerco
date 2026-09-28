@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// Tingkat ke-2 dari hierarki Region -> Area -> Location. Unit_position TIDAK
+// nyimpen area_id langsung -- area selalu diturunkan lewat location->area.
 class Area extends Model
 {
     // kolom yang boleh diisi mass-assignment

@@ -17,6 +17,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Log;
 
+// Laporan harian per-jam per unit (setReport/editReport) beserta perhitungan
+// curve/performance-nya (calculatePerformance() -- lihat CATATAN PENTING.md di
+// root proyek buat penjelasan lengkap rumus Fix vs Variable curve). Juga tempat
+// SD/STBY overlap di-gabung ke baris laporan biar remarks-nya muncul di tabel.
 class DailyReportController extends Controller
 {
     // Cek apakah user yang login boleh mengakses unit_position_id ini (super_admin selalu boleh)

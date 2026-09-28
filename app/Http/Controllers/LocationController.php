@@ -8,6 +8,10 @@ use App\Models\Region;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+// CRUD Region -> Area -> Location (hierarki 3 tingkat; unit_positions nyimpen
+// location_id & region_id langsung, sedangkan "area" SENGAJA tidak disimpan di
+// unit_positions -- selalu diturunkan lewat location->area, lihat komentar yang
+// sama di UnitMovementLog).
 class LocationController extends Controller
 {
     // Menampilkan halaman utama Location beserta data area dan region

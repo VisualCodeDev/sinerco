@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+// User login (operator/technician/super_admin, lihat Role). user_id
+// auto-generate format "USR001", dst. `roleData()` nentuin hak akses (dicek di
+// hampir semua controller lewat `auth()->user()?->roleData?->name`).
+// `UnitPositions()` (lewat pivot user_settings) nentuin unit MANA SAJA yang
+// boleh dilihat/diisi laporannya user ini -- dipakai di
+// DataUnitController::getPermittedUnit() buat filter data non-super_admin.
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */

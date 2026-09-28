@@ -4,6 +4,12 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 
+// Kirim pesan WhatsApp lewat provider pihak ketiga Fonnte (bukan WhatsApp
+// Business API resmi). Token API-nya di config('services.fonnte.token') --> .env
+// key FONNTE_TOKEN. Dipakai oleh WhatsAppController (rekap harian, jadwalnya di
+// bootstrap/app.php) & StatusRequestController (notif teknisi pas ada request
+// baru). Fonnte ini KHUSUS buat kirim pesan keluar, TIDAK berkaitan sama sekali
+// dengan cron/jadwal-nya -- jadwal ada di WhatsAppController & bootstrap/app.php.
 class WhatsAppService
 {
     public static function sendMessage(string $phoneNum, string $message): bool

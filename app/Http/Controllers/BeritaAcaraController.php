@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
+// Berita Acara (BA) -- form catatan serah terima/pemeriksaan per unit yang bisa
+// diisi field custom per client (lihat SetFieldBA). Beda dengan ExportController's
+// exportBap()/exportBapm() yang generate dokumen .docx-nya; controller ini cuma
+// urus data mentahnya (isi form BA-nya sendiri).
 class BeritaAcaraController extends Controller
 {
     /**
