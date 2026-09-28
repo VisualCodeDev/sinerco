@@ -243,7 +243,10 @@ const ContractTab = ({ unitPositionId }) => {
                         <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-md px-4 py-3">
                             <FaFilePdf className="text-danger text-xl shrink-0" />
                             <a
-                                href={`/storage/${contract.document_path}`}
+                                // path literal (bukan lewat route() Ziggy) supaya slash di
+                                // document_path (mis. "contracts/xxx.pdf") tidak ke-encode
+                                // jadi %2F -- lihat catatan di routes/web.php kenapa BUKAN /storage/
+                                href={`/files/${contract.document_path}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm font-medium text-primary hover:underline truncate flex-1"

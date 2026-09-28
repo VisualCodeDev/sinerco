@@ -252,20 +252,24 @@ Route::get('/export-doc', [ExportController::class, 'exportDoc'])->name('export_
 Route::get('/export-inv', [ExportController::class, 'exportInvoice'])->name('export_inv')->middleware('auth');
 Route::get('/export-penalty', [ExportController::class, 'exportPenalty'])->name('export_penalty')->middleware('auth');
 
-// Fallback buat file di disk 'public' (mis. PDF kontrak, lihat ContractController)
-// kalau symlink public/storage tidak kepasang/kepasang di tempat yang salah --
-// ini pernah kejadian di hosting shared (cPanel) yang document root-nya
-// (public_html) BUKAN folder public/ punya Laravel-nya sendiri, jadi symlink
-// hasil `php artisan storage:link` ke-buat di tempat yang tidak ke-serve web
-// server. Kalau symlink-nya BERES, request ini biasanya sudah ke-serve
-// langsung sama web server sebagai file statis & TIDAK PERNAH sampai ke sini
-// -- jadi route ini aman dipasang permanen sebagai jaring pengaman, bukan cuma
-// tambalan sementara.
-Route::get('/storage/{path}', function (string $path) {
+// Serve file dari disk 'public' (mis. PDF kontrak, lihat ContractController)
+// LEWAT LARAVEL, bukan langsung lewat symlink public/storage.
+//
+// PENTING -- kenapa BUKAN pakai path /storage/{path}: sudah dicoba, dan di
+// hosting production (DomaiNesia) prefix /storage/ ke-intercept di level
+// CDN/edge-cache SEBELUM request sampai ke PHP sama sekali (dibuktikan lewat
+// header respons: request ke path lain punya `x-dynamic-cache`/`cache-control`
+// khas Laravel, tapi request ke /storage/* SAMA SEKALI tidak punya header itu
+// -- artinya path ini di-anggap "aset statis" & di-404-in duluan sama hosting,
+// jauh sebelum ke Laravel). Jadi mau symlink-nya beres ataupun tidak, mau
+// route Laravel di-daftarin di /storage/... ataupun tidak, TETAP TIDAK AKAN
+// PERNAH sampai ke kode ini kalau prefix-nya /storage/. Makanya path-nya
+// sengaja /files/{path}, bukan /storage/{path}.
+Route::get('/files/{path}', function (string $path) {
     if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
         abort(404);
     }
     return \Illuminate\Support\Facades\Storage::disk('public')->response($path);
-})->where('path', '.*')->name('storage.fallback');
+})->where('path', '.*')->name('public.file');
 
 require __DIR__ . '/auth.php';
