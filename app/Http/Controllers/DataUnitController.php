@@ -149,12 +149,29 @@ class DataUnitController extends Controller
         $perPage = 10;
         $page = max(1, (int) $request->query('page', 1));
 
+        // Kolom yang boleh disort -- daftar putih, jangan langsung pakai nama
+        // kolom dari request mentah-mentah (sortBy() cuma butuh key yang ada
+        // di array flat-nya, tapi tetap dibatasi biar tidak asal-asalan).
+        $sortableColumns = ['unit', 'region', 'client', 'area', 'location', 'status'];
+        $sort = $request->query('sort');
+        $direction = $request->query('direction') === 'desc' ? 'desc' : 'asc';
+
         $units = self::getPermittedUnit();
 
         if ($status) {
             $units = $units->filter(function ($item) use ($status) {
                 return $item['status'] === $status;
             });
+        }
+
+        // PENTING: sort SELURUH data dulu sebelum di-paginate, bukan cuma
+        // 1 halaman yang sudah ke-slice -- kalau sort-nya dilakuin SETELAH
+        // forPage(), hasilnya cuma keliatan ke-sort dalam 1 halaman itu doang,
+        // padahal harusnya sort ngelewatin semua halaman.
+        if ($sort && in_array($sort, $sortableColumns)) {
+            $units = $direction === 'desc'
+                ? $units->sortByDesc(fn($item) => strtolower((string) ($item[$sort] ?? '')))
+                : $units->sortBy(fn($item) => strtolower((string) ($item[$sort] ?? '')));
         }
 
         $units = $units->values();
@@ -174,6 +191,8 @@ class DataUnitController extends Controller
             'data' => $paginated,
             'filters' => [
                 'status' => $status,
+                'sort' => $sort,
+                'direction' => $direction,
             ],
         ]);
     }

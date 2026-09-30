@@ -27,7 +27,7 @@ import axios from "axios";
 import { useToast } from "../Toast/ToastProvider";
 
 const UnitTable = (props) => {
-    const { data: propsData, pagination } = props;
+    const { data: propsData, pagination, filters } = props;
     const data = propsData;
 
     const handlePageChange = (url) => {
@@ -37,6 +37,19 @@ const UnitTable = (props) => {
             preserveScroll: true,
             replace: true,
         });
+    };
+
+    // Mode server-paginated (dikirim dari DailyList.jsx): `data` cuma isi 1
+    // halaman, jadi sort HARUS lewat request baru ke server (sort SELURUH
+    // data dulu, baru di-paginate), bukan sort di-array yang cuma isi
+    // sepotong halaman ini doang (lihat sort di unitList() DataUnitController).
+    // Reset ke page 1 tiap ganti sort, sama seperti kebiasaan pagination lain.
+    const handleServerSort = ({ key, direction }) => {
+        router.get(
+            window.location.pathname,
+            { ...filters, sort: key, direction, page: 1 },
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
     };
     const [unitData, setUnitData] = useState(data);
     const [formData, setFormData] = useState({
@@ -585,6 +598,16 @@ const UnitTable = (props) => {
                 filterStatus={true}
                 data={searchData}
                 onSearchChange={setSearchQuery}
+                // Saat search aktif, `searchData` sudah dataset penuh (bukan 1
+                // halaman) jadi sort lokal TableComponent sudah benar -- cuma
+                // pas TIDAK search (mode pagination normal) yang perlu sort
+                // lewat server.
+                onSort={!isSearching && pagination ? handleServerSort : undefined}
+                defaultSort={
+                    filters?.sort
+                        ? { key: filters.sort, direction: filters.direction }
+                        : undefined
+                }
                 columns={columns}
                 title={"List of Unit"}
                 route={(item) => route("daily", item.unit)}

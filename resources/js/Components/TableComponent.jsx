@@ -50,6 +50,10 @@ const TableComponent = (props) => {
         onSearchChange,
         customFilter,
         defaultSort,
+        // Optional: kalau diisi, klik header kolom TIDAK cuma sort array lokal
+        // (yang di mode server-paginated cuma isi 1 halaman) tapi juga manggil
+        // ini biar parent bisa minta ulang data yang SUDAH ke-sort dari server.
+        onSort,
     } = props;
     const [sortConfig, setSortConfig] = useState(
         defaultSort || {
@@ -123,6 +127,7 @@ const TableComponent = (props) => {
         }
 
         setSortConfig(config);
+        onSort?.(config);
     };
 
     const containsQuery = (value, query) => {
