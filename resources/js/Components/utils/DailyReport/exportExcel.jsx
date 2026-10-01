@@ -213,7 +213,8 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     // Hari pertama: start aslinya, tapi "berakhir" jam 24:00 kalau
                     // masih lanjut ke hari berikutnya. Hari di tengah: penuh
                     // 00:00-24:00. Hari terakhir: dari 00:00 sampai end aslinya.
-                    // 1 baris ringkasan per hari (bukan tiap jam yang overlap).
+                    // 1 baris ringkasan per hari (bukan tiap jam yang overlap) --
+                    // ditaruh di baris jam PERTAMA hari itu.
                     const isStartDay = request.start_date === date;
                     const isEndDay = request.end_date === date;
                     const anchorTime = isStartDay
