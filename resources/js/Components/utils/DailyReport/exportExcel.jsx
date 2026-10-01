@@ -197,11 +197,26 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
             // pertama -- padahal hari-hari sesudahnya (sampai hari terakhir) tetap
             // harus tampil "00:00 - 24:00" / "00:00 - <end>".
             const requestedData = [];
-            const gridHours = Object.keys(hourToRow).map(Number);
-            const firstHourTime =
-                gridHours.length > 0
-                    ? `${String(Math.min(...gridHours)).padStart(2, "0")}:00`
-                    : null;
+            const sortedGridHours = Object.keys(hourToRow)
+                .map(Number)
+                .sort((a, b) => a - b);
+
+            // Cari baris jam grid PERTAMA yang >= jam yang dikasih -- JANGAN cocokin
+            // string time mentah dari DB (`request.start_time`) ke label grid ("HH:00")
+            // pakai `===`, soalnya format tersimpannya bisa beda (mis. "9:00" tanpa
+            // leading zero, atau ada ":00" detik di belakang) dan bikin cocokannya gagal
+            // diam-diam -- remarks jadi hilang di hari itu tanpa error apa pun. Snap ke
+            // grid row berikutnya juga jaga-jaga kalau jam mulai request kebetulan bukan
+            // kelipatan interval client.
+            const pickAnchorHour = (hourCandidate) => {
+                if (sortedGridHours.length === 0 || Number.isNaN(hourCandidate)) {
+                    return null;
+                }
+                return (
+                    sortedGridHours.find((h) => h >= hourCandidate) ??
+                    sortedGridHours[sortedGridHours.length - 1]
+                );
+            };
 
             (data.requests || [])
                 .filter(
@@ -217,10 +232,13 @@ export default async function ExportXlsm(fileName, data, range, unitData) {
                     // ditaruh di baris jam PERTAMA hari itu.
                     const isStartDay = request.start_date === date;
                     const isEndDay = request.end_date === date;
-                    const anchorTime = isStartDay
-                        ? request.start_time
-                        : firstHourTime;
-                    if (!anchorTime) return;
+                    const anchorHour = isStartDay
+                        ? pickAnchorHour(
+                              parseInt(String(request.start_time).split(":")[0], 10),
+                          )
+                        : sortedGridHours[0] ?? null;
+                    if (anchorHour === null || anchorHour === undefined) return;
+                    const anchorTime = `${String(anchorHour).padStart(2, "0")}:00`;
 
                     requestedData.push({
                         time: anchorTime,
